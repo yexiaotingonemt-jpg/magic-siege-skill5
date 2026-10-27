@@ -752,5 +752,19 @@
     "exports",
     "outputs",
     "test-results"
+  ],
+  "runtimeRecoveredAssets": [
+    {
+      "source": "dist/art/magic-siege-concept.png",
+      "destination": "public/art/magic-siege-concept.png",
+      "sha256": "550144cddc7d843314519ca663ad8e7dce5cb52ac8cb435ed0d5b439d01cd5c7",
+      "reason": "Original dist contained this asset but source public did not; restored unchanged for reproducible builds"
+    },
+    {
+      "source": "dist/art/skill-fx-v20/hero-spells-clean.png",
+      "destination": "public/art/skill-fx-v20/hero-spells-clean.png",
+      "sha256": "5ad487a2fe0b856b261190a89994ae26e7f78a99c24ff2b3b098274e5840a9ab",
+      "reason": "Original dist contained this asset but source public did not; restored unchanged for reproducible builds"
+    }
   ]
 }
