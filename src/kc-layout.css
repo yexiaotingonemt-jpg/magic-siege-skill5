@@ -1,0 +1,111 @@
+/* KC's official surface uses one 640×1136 coordinate system at every viewport. */
+:root{--countdown:#8fc99c;--reward:#ead08b;--penalty:#e28d82}
+body{min-width:280px;background:#111916}
+.layout{max-width:1100px;margin:0 auto;padding:16px;display:grid;grid-template-columns:auto minmax(320px,380px);align-items:start;justify-content:center;gap:28px}
+.game-viewport{position:relative;flex:none;overflow:clip}
+.game{--touch-size:calc(44px / var(--game-scale,1));--skills-height:max(170px,calc(108px / var(--game-scale,1)));width:640px;height:1136px;transform-origin:top left;display:grid;grid-template-rows:72px 40px minmax(0,1fr) 128px var(--skills-height) 32px 54px;border:2px solid #ad9665;box-shadow:0 10px 40px #0007;overflow:hidden;background:#182324;font-size:20px}
+.game:has(.upgrade:not([hidden])){--skills-height:max(214px,calc(154px / var(--game-scale,1)))}
+.game [hidden]{display:none!important}
+.game header{height:auto;padding:8px 18px;gap:16px}
+.game header small{font-size:14px;letter-spacing:2px}
+.game h1{font-size:32px;margin:1px 0}
+.game h1 span{font-size:16px;letter-spacing:1px}
+.game .currency{min-width:82px;padding:4px 10px;border-radius:20px;font-size:24px}
+.game .currency b{font-size:24px}.game .currency small{font-size:14px;letter-spacing:0}
+.game .battle-info{min-height:0;height:40px;padding:3px 12px;gap:12px;font-size:18px}
+.game #wave{color:var(--countdown);white-space:nowrap;font-size:18px}
+.game #locate{font-size:18px;padding:2px 9px;min-height:30px}
+.game .battle-wrap{min-height:0;border-inline:0;overflow:hidden}
+.game #battle{width:100%;height:100%;aspect-ratio:1}
+.game #battle canvas{width:100%!important;height:100%!important;margin:0!important}
+.game .map-jumps{left:10px;top:14px;gap:9px}
+.game .map-jumps button{font-size:18px;padding:7px 10px;min-height:40px;background:#1b2923d9;border-color:#8f825f}
+.game .map-rail{right:8px;top:20px;bottom:20px;width:24px;font-size:16px;gap:8px}
+.game .map-track{width:8px}.game .map-track i{width:12px}
+.game .hero-hud{padding:6px 12px;gap:12px;min-height:0;overflow:hidden}
+.game .portrait{display:block;width:72px;height:82px;flex:0 0 72px}
+.game .hero-copy b,.game.awaiting-contract .hero-copy b{font-size:23px;margin:0 0 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.game .hero-copy>span{top:30px;font-size:17px;line-height:20px}
+.game .bar{display:block;height:20px}.game .xp{display:block;height:5px;margin-top:4px}
+.game .hero-copy small{display:block;font-size:15px;line-height:19px;white-space:nowrap}
+.game.awaiting-contract .hero-hud:before{display:none}
+.game.awaiting-contract .hero-copy>span{display:block;position:static;text-align:left;font-size:18px;line-height:25px;color:#d0d6c8}
+.game.awaiting-contract .bar,.game.awaiting-contract .xp,.game.awaiting-contract #xpLabel{display:none}
+.game.awaiting-contract .portrait{opacity:.65}
+.game .skills{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:7px 12px 5px;gap:12px;min-height:0}
+.game .skills>div{position:relative;display:flex;flex-direction:column;align-items:center;gap:0}
+.game .skill{width:max(78px,var(--touch-size));height:max(78px,var(--touch-size));min-height:max(78px,var(--touch-size));padding:0;margin:0 0 3px;border-width:2px}
+.game .skill em{font-size:max(21px,calc(13px / var(--game-scale,1)))}.game .skill-caption{display:flex;align-items:center;justify-content:center;width:100%;min-height:var(--touch-size)}
+.game .skills b{display:block;margin:0;font-size:max(21px,calc(12px / var(--game-scale,1)));line-height:1.25;white-space:nowrap;font-weight:700}
+.game .skill-info{display:flex;align-items:center;justify-content:center;gap:5px;padding:0;width:100%;min-height:var(--touch-size);height:auto;flex:none;border:0;border-radius:2px;font:inherit;color:#d6d6c6;background:none;box-shadow:none}
+.game .skill-info span{display:flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;border:1px solid #8e927c;border-radius:50%;font:italic 19px Georgia;background:#293734}
+.game .skill-info:focus-visible{outline:2px solid #d4d6b4;outline-offset:-2px}
+.game .skills small{display:block;font-size:max(16px,calc(12px / var(--game-scale,1)));line-height:1.25;margin:0;white-space:nowrap}
+.game .upgrade{position:static;flex:none;z-index:2;width:var(--touch-size);height:var(--touch-size);min-width:var(--touch-size);min-height:var(--touch-size);border:1px solid #adc5bb;border-radius:50%;padding:0;margin:4px 0 0;font-size:max(28px,calc(24px / var(--game-scale,1)));line-height:1;color:#eef6e9;background:linear-gradient(#42685c,#203d35);box-shadow:0 0 8px #b0d2be55}
+.game .skill.ready{border-color:#a5d0c8;box-shadow:0 0 12px #8dcac477,inset 0 0 9px #b1ded755;filter:none}
+.game .skill.ready .skill-art{filter:brightness(1.16);opacity:1}
+.game .skill-lock{position:absolute;z-index:3;left:calc(50% - 11px);top:33px;width:22px;height:19px;border:2px solid #d0d3c6;border-radius:3px;background:#1b2629;box-shadow:0 0 8px #000}
+.game .skill-lock:before{content:'';position:absolute;left:3px;bottom:15px;width:12px;height:12px;border:2px solid #d0d3c6;border-bottom:0;border-radius:8px 8px 0 0}
+.game .hero-copy .hero-attack{color:#d7e1ce;font-size:19px;line-height:24px;margin-top:3px}
+.game .primary{background:linear-gradient(#557180,#2b4959);border-color:#c6cfbf;color:#fff4d9;font-weight:700}
+.game #notice{font-size:17px;line-height:30px;padding:0 12px;height:32px;min-height:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#192521;color:#d0d5c8}
+.game #notice.penalty{color:var(--penalty)}
+.game footer{height:54px;display:grid;grid-template-columns:repeat(4,1fr);align-items:stretch;padding:0;border-top:1px solid #9d8759;background:linear-gradient(#303b32,#182521)}
+.game footer button{display:flex;align-items:center;justify-content:center;gap:8px;font-size:25px;line-height:1;padding:3px;background:none;border:0;border-radius:0;box-shadow:none;border-right:1px solid #9b865033}
+.game footer button span{display:inline;font-size:20px;line-height:1.2}.game footer button:last-child{color:var(--reward);border:0}
+.game .contract-popover{width:430px;padding:18px 20px;max-width:calc(100% - 30px)}
+.game .contract-popover>small{font-size:16px}.game .contract-popover h3{font-size:27px;line-height:1.4;margin:5px 0 7px;padding-right:28px}
+.game .contract-popover p{font-size:19px;line-height:1.6;margin-bottom:12px}.game .popover-close{font-size:32px;line-height:32px;right:8px;top:7px}
+.game .nearby-units{gap:7px;margin-bottom:12px}.game .nearby-units button{font-size:17px;padding:7px}
+.game .popover-actions button{font-size:21px;min-height:50px}.game .selected-health{height:7px;margin-bottom:12px}
+.game-sheet{position:absolute;inset:72px 0 54px;z-index:30;background:#0a1313b8;display:flex;align-items:stretch;padding:30px 18px}
+.sheet-panel{width:100%;display:flex;flex-direction:column;min-height:0;border:2px solid #ac9662;background:linear-gradient(140deg,#28332e,#172322 65%);box-shadow:0 12px 35px #0008,inset 0 0 0 3px #151e1b}
+.sheet-heading{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #92825a;padding:8px 16px;min-height:62px;background:linear-gradient(#364033,#26332d)}
+.sheet-heading h2{font:700 28px 'SimSun',serif;color:#eddbac;margin:0}
+.game #sheetClose{font-size:max(34px,calc(24px / var(--game-scale,1)));line-height:1;min-width:var(--touch-size);height:var(--touch-size);padding:0;background:none;box-shadow:none}
+.sheet-scroll{min-height:0;flex:1;overflow:auto;padding:14px 20px 20px;overscroll-behavior:contain;scrollbar-color:#95825a #172322}
+.hero-sheet-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:3px 0 12px;font-size:26px;color:#f0e1b9}
+.game #respec{font-size:18px;min-height:38px;padding:5px 10px}
+.game .ability-entry{padding:15px 0;border-top:1px solid #82714d77}
+.game .ability-entry h3{font-size:25px;margin:0 0 7px;color:#f0e2bf}
+.game .ability-entry h3 small{font-size:18px;margin-left:8px;color:#bfc9be}
+.game .ability-entry p{font-size:max(22px,calc(14px / var(--game-scale,1)))!important;line-height:1.65!important;margin:0;color:#e4e1d2!important;overflow-wrap:break-word}
+.game .ability-meta{font-size:max(19px,calc(12px / var(--game-scale,1)))!important;line-height:1.7;margin:7px 0;color:var(--countdown)!important}
+.game .ability-entry details{margin-top:5px}
+.game .ability-entry summary{display:flex;align-items:center;width:100%;font-size:max(20px,calc(14px / var(--game-scale,1)));color:#bfcfc8;cursor:pointer;padding:7px 0;min-height:var(--touch-size)}
+.game .ability-entry details[open]{background:#101d1955;padding:0 10px 12px;border-left:2px solid #7b7955}
+.game .ability-context{font-size:19px!important;line-height:1.65!important;margin-top:12px!important;color:#b6c5ba!important}
+.game .rank{font-size:22px;line-height:1.5;padding:15px 0;border-bottom:1px solid #83724b55}
+.game .rank b{color:var(--reward)}.game #reports{font-size:22px;line-height:1.7}.game #reports article{padding:12px 0;border-bottom:1px solid #82714d66}.game #reports small{font-size:19px}
+.dev-tools{width:100%;min-width:0;padding:0;background:none;border:0;max-height:none;overflow:visible}
+.dev-heading{margin:0 0 14px;padding:0 2px}.dev-heading h2{margin:0 0 6px;font-size:20px;color:#e4dbc6}.dev-heading p{font-size:13px;line-height:1.6;color:#a9baae;margin:0}
+.dev-tools .quick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:12px;background:none}.dev-tools .quick button,.dev-tools .quick select{font-size:13px;padding:7px 9px;min-height:36px;white-space:nowrap}
+.dev-tools .population-controls{padding:10px 12px;background:#1b2823}.dev-tools .camera-badge{position:static;background:none;border:0;font-size:12px;padding:10px 12px;color:#9faf9f}
+.dev-tools .feed{font-size:12px;line-height:1.7;min-height:0;padding:10px 12px}
+@media(max-width:1039px){.layout{display:flex;flex-direction:column;align-items:center;gap:24px;padding:0;margin:0 auto;max-width:640px}.dev-tools{padding:0 12px 24px;max-width:640px}.dev-tools .panel{margin-top:10px}}
+
+.dev-tools .player-settings{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:12px;border-bottom:1px solid #746344;font-size:14px}.dev-tools .player-settings select{font-size:14px;padding:6px 9px}.dev-tools .auto-setting{display:flex;align-items:center;gap:5px;margin-left:auto;color:#bdc8bd}.dev-tools .auto-setting input{margin:0;width:17px;height:17px}
+
+/* Restrained enamel labels: warm copper damage, violet control, teal healing. */
+:root{--tag-output:#edb795;--tag-control:#c6b8ee;--tag-healing:#9ed7cc;--tag-protection:#a9cee5;--tag-support:#c0d2b0}
+.game .ability-tags{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 10px}
+.game .ability-tag{display:inline-block;font-size:19px;line-height:26px;padding:1px 9px;border:1px solid #74867b;border-radius:2px;color:#d3dbcf;background:#25342d;white-space:nowrap}
+.game .ability-tag--output{color:var(--tag-output);border-color:#8d6c56;background:#392c25}
+.game .ability-tag--control{color:var(--tag-control);border-color:#73668e;background:#2d293b}
+.game .ability-tag--healing{color:var(--tag-healing);border-color:#597f75;background:#203a33}
+.game .ability-tag--protection{color:var(--tag-protection);border-color:#607d90;background:#243440}
+.game .ability-tag--support{color:var(--tag-support);border-color:#748164;background:#2b3629}
+.game .ability-tag--penalty{color:var(--penalty);border-color:#966158;background:#402b27}
+
+/* Keep the field and footer stable while the uncontracted state replaces both HUD rows. */
+.game .hero-hud{grid-row:4}.game .skills{grid-row:5}.game #notice{grid-row:6}.game footer{grid-row:7}
+.game.awaiting-contract .hero-hud{grid-row:4 / span 2;justify-content:center;padding:30px 24px}
+.game.awaiting-contract .portrait,.game.awaiting-contract .skills{display:none}
+.game.awaiting-contract .hero-copy{flex:0 1 auto;text-align:center}
+.game.awaiting-contract .hero-copy b{font-size:26px;white-space:normal;margin-bottom:12px}
+.game.awaiting-contract .hero-copy>span{font-size:21px;text-align:center;white-space:normal;line-height:1.8}
+.game .uncontracted-skills{font-size:23px;line-height:1.8;margin:20px 0;color:#d0d6c8}
+
+.game .ability-value{display:block;font-size:18px;line-height:1.5;margin:2px 0 7px;color:#b9c8bc}
+.game .hero-copy>.lord-energy{position:absolute;right:0;top:auto;bottom:0;display:flex;align-items:center;gap:4px;font-size:15px;line-height:19px;color:#adcfde}.lord-energy i{display:block;width:12px;height:10px;border:1px solid #637e88;background:#182a2e}.lord-energy i.filled{background:#87d7ee;box-shadow:0 0 4px #80bfdb66}
+.game .hero-copy>.lord-energy{left:auto;width:auto;text-align:right;justify-content:flex-end}

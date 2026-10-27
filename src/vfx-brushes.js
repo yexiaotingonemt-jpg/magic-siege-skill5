@@ -1,0 +1,14 @@
+export const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+export const mix=(a,b,t)=>a+(b-a)*t;
+export const point=(a,b,t)=>({x:mix(a.x,b.x,t),y:mix(a.y,b.y,t)});
+export function line(g,ps,color,width=2,alpha=1){if(ps.length<2||alpha<=0)return;g.lineStyle(width,color,clamp(alpha));g.beginPath();g.moveTo(ps[0].x,ps[0].y);for(const p of ps.slice(1))g.lineTo(p.x,p.y);g.strokePath();}
+export function arc(g,p,r,from,to,color,width=2,alpha=1,flatten=1){const ps=[];for(let i=0;i<=28;i++){const a=mix(from,to,i/28);ps.push({x:p.x+Math.cos(a)*r,y:p.y+Math.sin(a)*r*flatten});}line(g,ps,color,width,alpha);}
+export function glow(g,p,color,r,alpha=.3){for(let i=3;i>0;i--){g.fillStyle(color,alpha*(4-i)/9);g.fillCircle(p.x,p.y,r*i/2);}}
+export function diamond(g,p,r,color,alpha=1,angle=0){const ps=Array.from({length:5},(_,i)=>{const a=angle+i*Math.PI/2;return {x:p.x+Math.cos(a)*r*.6,y:p.y+Math.sin(a)*r};});g.fillStyle(color,alpha);g.beginPath();g.moveTo(ps[0].x,ps[0].y);ps.slice(1).forEach(p=>g.lineTo(p.x,p.y));g.closePath();g.fillPath();}
+export function leaf(g,p,angle,r,color,alpha=1){const dx=Math.cos(angle)*r,dy=Math.sin(angle)*r,nx=-Math.sin(angle)*r*.36,ny=Math.cos(angle)*r*.36;g.fillStyle(color,alpha);g.fillTriangle(p.x-dx,p.y-dy,p.x+nx,p.y+ny,p.x+dx,p.y+dy);g.fillTriangle(p.x-dx,p.y-dy,p.x-nx,p.y-ny,p.x+dx,p.y+dy);}
+export function shield(g,p,color,r=30,alpha=.8){const ps=[[-.7,-.6],[0,-.95],[.7,-.6],[.6,.35],[0,.8],[-.6,.35],[-.7,-.6]].map(([x,y])=>({x:p.x+x*r,y:p.y+y*r}));line(g,ps,color,3,alpha);line(g,ps,0xe3fff2,1,alpha*.45);}
+export function ribbon(g,a,b,time,color,width=3,alpha=.8,bend=30,twist=0){const ps=[];for(let i=0;i<=20;i++){const t=i/20,wave=Math.sin(t*Math.PI),dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1;ps.push({x:mix(a.x,b.x,t)-dy/len*Math.sin(t*Math.PI*3+time*3+twist)*5*wave,y:mix(a.y,b.y,t)-bend*wave+dx/len*Math.sin(t*Math.PI*3+time*3+twist)*5*wave});}line(g,ps,color,width+5,alpha*.11);line(g,ps,color,width,alpha);return ps;}
+export function pathPoint(a,b,k,bend=0){return {x:mix(a.x,b.x,k),y:mix(a.y,b.y,k)-Math.sin(k*Math.PI)*bend};}
+export function burst(g,p,k,color,amount=8,r=45,alpha=1,seed=0){const fade=(1-k)**1.6;for(let i=0;i<amount;i++){const a=i*Math.PI*2/amount+seed,d=(8+r*k)*(1+(i%3)*.12),q={x:p.x+Math.cos(a)*d,y:p.y+Math.sin(a)*d*.7};line(g,[{x:q.x-Math.cos(a)*8*(1-k),y:q.y-Math.sin(a)*6*(1-k)},q],color,2,fade*alpha);}}
+export function sigil(g,p,r,color,time,alpha=.6,points=6,flat=.5){arc(g,p,r,0,Math.PI*2,color,1,alpha,flat);for(let i=0;i<points;i++){const a=time*.25+i*Math.PI*2/points,q={x:p.x+Math.cos(a)*r,y:p.y+Math.sin(a)*r*flat};diamond(g,q,3,color,alpha,a);}}
+export function crack(g,p,k,color,r=50,alpha=1,angle=0){for(let i=0;i<5;i++){const a=angle+(i-2)*.35,ps=[p];for(let j=1;j<=3;j++)ps.push({x:p.x+Math.cos(a+.08*Math.sin(i*9+j))*r*j/3*k,y:p.y+Math.sin(a+.08*Math.sin(i*9+j))*r*j/3*k});line(g,ps,0x20202a,5,(1-k*.7)*alpha);line(g,ps,color,1.5,(1-k)*alpha);}}

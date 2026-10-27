@@ -1,0 +1,24 @@
+# Dependencies and builds
+node_modules/
+dist/
+# Local accounts, sessions and environment
+data/
+.env
+.env.*
+*.pem
+*.key
+# Generated verification, media and exports
+evidence/
+outputs/
+exports/
+test-results/
+playwright-report/
+blob-report/
+coverage/
+*.log
+*.pid
+*.tmp
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

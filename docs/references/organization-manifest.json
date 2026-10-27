@@ -1,0 +1,756 @@
+{
+  "date": "2026-10-27",
+  "sourceDocument": "docs/玩法规则.md",
+  "sourceSha256": "ed4f4a30b72cbaa0d8eb43f162611ce882c1533279f64fecf970426c88d5c9d1",
+  "chapters": [
+    {
+      "chapter": 1,
+      "title": "玩法概述",
+      "path": "docs/rules/01-overview.md",
+      "originalSectionSha256": "28146e082e72bfba40aa24cba0b28aa947894e5b2c1a7032c3d313e54f108555"
+    },
+    {
+      "chapter": 2,
+      "title": "账号、阵营与同局",
+      "path": "docs/rules/02-accounts-and-multiplayer.md",
+      "originalSectionSha256": "b192c6ebaa70928187eab727144db18abe306fd4136c05e75f6bc2b5f19b375e"
+    },
+    {
+      "chapter": 3,
+      "title": "战场与阶段",
+      "path": "docs/rules/03-battlefield-and-stages.md",
+      "originalSectionSha256": "a353064a9e0b4b97ecd30188b11c0220452b52dd040c6acc8b858c1edb1aa4c5"
+    },
+    {
+      "chapter": 4,
+      "title": "单位、建筑与兵线",
+      "path": "docs/rules/04-units-waves-and-towers.md",
+      "originalSectionSha256": "7efc1a37859262c710d4f87d9b4b255330bfd472097dc94e4897911c5a729f22"
+    },
+    {
+      "chapter": 5,
+      "title": "单位契约与职业",
+      "path": "docs/rules/05-contracts-and-classes.md",
+      "originalSectionSha256": "7d3878078d03d25c51cd36ace6523eba47ebf99cf547d58119b5194c6882d8dd"
+    },
+    {
+      "chapter": 6,
+      "title": "自动寻路与索敌流程",
+      "path": "docs/rules/06-navigation-and-targeting.md",
+      "originalSectionSha256": "1b11d44eab7fdaea3174dbe8d880dccd2b1051ab282b81f1e6aacda1bcef0e06"
+    },
+    {
+      "chapter": 7,
+      "title": "普通攻击流程",
+      "path": "docs/rules/07-basic-attacks.md",
+      "originalSectionSha256": "01827e679296a2b40a6d57c0309ca204041b1592d22b24043b11ff9bc9b2c891"
+    },
+    {
+      "chapter": 8,
+      "title": "手动目标",
+      "path": "docs/rules/08-manual-targets.md",
+      "originalSectionSha256": "e42ae59dc4faf21f800f9720d9565d4c882d16f0e046a77e8ad22d46e7b75851"
+    },
+    {
+      "chapter": 9,
+      "title": "技能释放公共流程",
+      "path": "docs/rules/09-skill-casting.md",
+      "originalSectionSha256": "734da5916e7f07c44ed4cba8ef72e4005849637b2fa88672b573010e8e43110b"
+    },
+    {
+      "chapter": 10,
+      "title": "职业与技能",
+      "path": "docs/rules/10-classes-and-skills.md",
+      "originalSectionSha256": "91088c246784ba9adbf19544e54408d62c31da2ccaef178c8f9c3168072064aa"
+    },
+    {
+      "chapter": 11,
+      "title": "体力、经验与技能构筑",
+      "path": "docs/rules/11-stamina-and-progression.md",
+      "originalSectionSha256": "54a0da746ab1aefa27de78d79d4c34ee8d115cfe15e56a404ea4638ec9179e60"
+    },
+    {
+      "chapter": 12,
+      "title": "贡献评价、积分与排行",
+      "path": "docs/rules/12-ratings-and-scores.md",
+      "originalSectionSha256": "45625ad6a1ed17a2add79d650f318fc313285691bbf2a62054d944c216c520cf"
+    },
+    {
+      "chapter": 13,
+      "title": "伤害、治疗与状态",
+      "path": "docs/rules/13-damage-healing-and-status.md",
+      "originalSectionSha256": "7897c91fe599ba95bc7baed27b40b6917696ef909a89442115221cb5b4b86b5d"
+    },
+    {
+      "chapter": 14,
+      "title": "界面、视角与反馈",
+      "path": "docs/rules/14-interface-and-feedback.md",
+      "originalSectionSha256": "c3c7e130e6b2152095863dc4ba53478ca369518a8c2db33a0a43ffba7cf4d520"
+    }
+  ],
+  "classes": [
+    {
+      "chapter": "10.1",
+      "title": "兽人战士",
+      "classId": 0,
+      "path": "docs/rules/classes/orc-warrior.md",
+      "originalSectionSha256": "389377b451a44df72fd4faf2ca6e1ff409d7459a55788c990036bc20a0a87d56"
+    },
+    {
+      "chapter": "10.2",
+      "title": "符文战车",
+      "classId": 2,
+      "path": "docs/rules/classes/rune-chariot.md",
+      "originalSectionSha256": "cc70a830847e1ef892cb6443e58c0d93c3b5c44caaa0cab2630a08655090f253"
+    },
+    {
+      "chapter": "10.3",
+      "title": "黑暗领主",
+      "classId": 3,
+      "path": "docs/rules/classes/dark-lord.md",
+      "originalSectionSha256": "e14318071e7bc1aaafd8b3056aa873f65eb223a9134bfe3776383e45e7877ee3"
+    },
+    {
+      "chapter": "10.4",
+      "title": "火焰法师",
+      "classId": 4,
+      "path": "docs/rules/classes/fire-mage.md",
+      "originalSectionSha256": "3d4cd45e0e2a3f8fb02fd8617420e24041d4af7756f813d4fa6b2e14e9a151bc"
+    },
+    {
+      "chapter": "10.5",
+      "title": "森林精灵",
+      "classId": 5,
+      "path": "docs/rules/classes/forest-elf.md",
+      "originalSectionSha256": "a73be32510b094e884adb57de4f394924bc376c545b62fe600888be27e4044ce"
+    }
+  ],
+  "copiedFiles": [
+    {
+      "path": "default-config.json",
+      "sha256": "31a4ed50f52e9fb58c10adeab80479b809e968bdb470715902cadb942ff935a5"
+    },
+    {
+      "path": "docs/开发协作指南.md",
+      "sha256": "e035472e2d0d0f90cf96eb419e684ff81f9eec6e6ad9f4c036458056012c1879"
+    },
+    {
+      "path": "docs/数值配置表.md",
+      "sha256": "5d6f70567927a2e42eb8b05cf4f61fd2b46ec0886af0da5e2bcb0519b9a2ee51"
+    },
+    {
+      "path": "index.html",
+      "sha256": "f415b83e04395619852afe557cbaa207e1797821ea5ba6b53c812a31eaea1b42"
+    },
+    {
+      "path": "KC视觉与交互约束.md",
+      "sha256": "5e641cb67e4b110bbc8358ef66c9f1d4d458a3694951eb2f9b69a251b7e31e67"
+    },
+    {
+      "path": "LAN-Start.cmd",
+      "sha256": "8d71ffa66d2a295adcae6ff658ee3c53fddd5430bcad2f439a20ba18a68c41b6"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "815703e87cbf1cc5e60a58e34e04dec1b254d5f12857548c99849c701304fcc8"
+    },
+    {
+      "path": "package.json",
+      "sha256": "bca857593899fe0b8d01e12896b71fc9ecb947add67459959e7f7e90b78117db"
+    },
+    {
+      "path": "playwright.config.js",
+      "sha256": "bc81003aae94d07f04dc76cac6c5d1fad88e3ac32ee30875b083477403963bcb"
+    },
+    {
+      "path": "public/art/ground-court-v3.png",
+      "sha256": "09a2a6ea395189f18012c5f2e133d8c035aad31b4e974c56ffae159e24e5b83d"
+    },
+    {
+      "path": "public/art/ground.png",
+      "sha256": "2c9ba10c34680a9f2a110bb2591baeff873baf049cacaee2393808a55071a508"
+    },
+    {
+      "path": "public/art/hero-actions-v5.png",
+      "sha256": "6fc64395022f2c2f9e4d2eb640667d7f6b7a256fcbb6ac11017b3e97c4632ad6"
+    },
+    {
+      "path": "public/art/hero-actions-v5b.png",
+      "sha256": "6bad89b71f705834c0e8492f12a94f071026d2f2ef26918806394ccc68f9a501"
+    },
+    {
+      "path": "public/art/magic-v12/ground.png",
+      "sha256": "77c6f5efe295413dc87b0dcfdf6e69c9e834aca7c1ef70d7cd6abaabfa021c96"
+    },
+    {
+      "path": "public/art/magic-v12/hero-actions.png",
+      "sha256": "cbdee7fbb9cc38842395d1089c018fa9a0d54b29b8c1baaf1e760c16ddf35ce8"
+    },
+    {
+      "path": "public/art/magic-v12/heroes.png",
+      "sha256": "b7b4eb2a5079c176434d2a4b0e1baca3512841b635c62865ca31da47d315c09d"
+    },
+    {
+      "path": "public/art/magic-v12/minions.png",
+      "sha256": "bc8a02a0c73a95858a2bd45c0ad0d52e614e9c968671d78bee2cf8522ea79811"
+    },
+    {
+      "path": "public/art/magic-v12/towers.png",
+      "sha256": "85023c11169158f65e0ecfaef613c90ddb3fc1e1e778632d53c6bf1136d4d787"
+    },
+    {
+      "path": "public/art/magic-v13/ground.png",
+      "sha256": "a64772b3945aaa3b94232c77e0cf0d86ea637f83e9cb5c13fccea1d37f5f8bdd"
+    },
+    {
+      "path": "public/art/magic-v13/towers.png",
+      "sha256": "e441808c1316755f61880af8415962e48a67e46b449d1d58151b8a85ea5b768b"
+    },
+    {
+      "path": "public/art/magic-v15/hero-actions.png",
+      "sha256": "2e366fec758817b6c4e28cc234fdc67ba46febbd6d05fe62002f08f5975b4e6c"
+    },
+    {
+      "path": "public/art/magic-v15/heroes.png",
+      "sha256": "f00baeb33a8ae899bde997e930c170d58a33e513cc09085122d99ecb62e2f2c9"
+    },
+    {
+      "path": "public/art/magic-v15/minions.png",
+      "sha256": "dd4c297b01bb6a76ae819d8cf02d70ade90ce765d32c75be9e7ff4e6413509ec"
+    },
+    {
+      "path": "public/art/minions-v4.png",
+      "sha256": "0cd5a3398daaef87f158ac5b28b0064e85fc6c6478b6f90041b13e3ecb4dd992"
+    },
+    {
+      "path": "public/art/skill-fx-v16/spell-bursts.png",
+      "sha256": "ad559f0a420e508e7cc351c4e47bec50b9e2e10b42577c2a8e26f434efd08d01"
+    },
+    {
+      "path": "public/art/skill-fx-v20/generation-prompt.txt",
+      "sha256": "5f2724aabe9a7f85e78f342fd4ddffcc1b0b4f6ee15561c5d21bfa2305e63ce6"
+    },
+    {
+      "path": "public/art/skill-fx-v20/hero-spells.png",
+      "sha256": "bc3052159917ce906ef866db57e9513715046d1f8cae38aded926c9f8430e774"
+    },
+    {
+      "path": "public/art/skill-medallions.png",
+      "sha256": "bcd5bdf99c3a6606c5d8b8d554e2eaf0928716757e02b757a2f81b042120349c"
+    },
+    {
+      "path": "public/art/skill5/assassin-actions.png",
+      "sha256": "8061c5176b23bfebb872af3f53bd66e7e78dccbbefefea427f72fdeed96fd9fc"
+    },
+    {
+      "path": "public/art/skill5/assassin-idle.png",
+      "sha256": "789935d6df3d09b3957ea84b70e4e1f3eff5b09b5910876f87436ef55fc78a57"
+    },
+    {
+      "path": "public/art/skill5/assassin-layout.json",
+      "sha256": "42adaf4b3386529a8885023a472047e28522a0991ecc4cc90914809a5d3777c8"
+    },
+    {
+      "path": "public/art/skill5/assassin-source.png",
+      "sha256": "8a7f24e5ec7bf82cf15a0ebbcc4fb2580b650c599f481277fc1f8989472655d1"
+    },
+    {
+      "path": "public/art/units-adult-v3.png",
+      "sha256": "d77c39345f1341eacd08171b3570a0ab98e305be4ff457b59fe636002339f607"
+    },
+    {
+      "path": "public/art/units-atlas.png",
+      "sha256": "522aebc82ca95fbab2b851f77017da76e247850be1ab4553b5e590812263efe8"
+    },
+    {
+      "path": "public/art/units.png",
+      "sha256": "bbe2c5fb6a2739f37e76e0391b10743ad8a27e0e21d5454c7eed83c7d6148795"
+    },
+    {
+      "path": "scripts/audit-browser-20261026.mjs",
+      "sha256": "f332383049ac35fcc83ad507d72d4a9eade4afbe5a18e90844ec496d9181f9e4"
+    },
+    {
+      "path": "scripts/audit-edges-20261026.mjs",
+      "sha256": "d81b8bb5dd5ea169568f177867f4529c78d19fe016c66a1f04ce54455dfc5a02"
+    },
+    {
+      "path": "scripts/audit-model-20261026.mjs",
+      "sha256": "a969fc1f490ff951ef46f3743a4784e03bc881bf0dfe1884fe91f1c773387045"
+    },
+    {
+      "path": "scripts/audit-runtime-20261026.mjs",
+      "sha256": "2837cdfbfddfefacd16dfe86ddc90a033ece3fa7662940bdc3cfd589ef01457e"
+    },
+    {
+      "path": "scripts/audit-visual-20261026.mjs",
+      "sha256": "3aa81981f442737c5bc2bafe0143779dd47fc15e5eecd1855304bb6bd3671dbc"
+    },
+    {
+      "path": "scripts/check_fx_visibility_v16.py",
+      "sha256": "8b1901e5373b8d538975a5ada9a2b37c49719db2e4c9ace6684a705f2492eadc"
+    },
+    {
+      "path": "scripts/normalize-assassin.py",
+      "sha256": "4c4bf5a38cb42c31a0f6e02ea6b14409e6b9fab68f7b5e96599c21ff835928d7"
+    },
+    {
+      "path": "scripts/playtest-server.mjs",
+      "sha256": "9f813a5a058656b819acaa01a968a0fe4713ddd3c39d0bc4a85b682fd561d373"
+    },
+    {
+      "path": "scripts/prepare_court_v13.py",
+      "sha256": "b6f3bdb031651a4f962df28ef93cbd316a62e10dff0f2f2c96a8d036d6fb5eeb"
+    },
+    {
+      "path": "scripts/prepare_magic_assets.py",
+      "sha256": "9ab5fcb50e6cc750b4b20c468c882f86a96a83c26f00595428e36ec68064ed08"
+    },
+    {
+      "path": "scripts/prepare_painted_units_v15.py",
+      "sha256": "4d1f3dcb94ff6838a6ba19b8e61a8fcffc3e9d0eb17750c69757ff02517a7eb3"
+    },
+    {
+      "path": "scripts/prepare_skill_fx_v16.py",
+      "sha256": "bf1555d2bd433ef6574ee5dde1fba895334ec0e3d0611e5a128e911a4a4cb1db"
+    },
+    {
+      "path": "scripts/prepare_unit_concept_review.py",
+      "sha256": "43cdf349609d5453a980b0694c8096f311093088d3778617772d1cebef36f675"
+    },
+    {
+      "path": "scripts/qa-followup-browser-20261026.mjs",
+      "sha256": "9451b774edebd540b9553a377a8840c87d3b150d70ee54de2bf6594e065c0b5d"
+    },
+    {
+      "path": "scripts/qa-followup-minimal-20261026.mjs",
+      "sha256": "52cfa6caab349ab84ed44b3879aec7997c4281849292784ac3d2dd2be7f21989"
+    },
+    {
+      "path": "scripts/qa-followup-model-20261026.mjs",
+      "sha256": "941aae8a2702a653e36dc69a54270b87f9a86b42b5c614fc0a63653b12f8d6db"
+    },
+    {
+      "path": "scripts/render_fx_review_v16.py",
+      "sha256": "5e98914eca7728771bda70b3a368b8d6cf3f051e4a62662af236dff19a56b36d"
+    },
+    {
+      "path": "scripts/verify-ally-target.mjs",
+      "sha256": "6e426efab7b6865d94b8bb3a27ae34373837afefe10780acfacc9b600f039665"
+    },
+    {
+      "path": "scripts/verify-attack-arrival.mjs",
+      "sha256": "3d2d235a16ce35229dd530d432ab575ec622facb0c0f858de922c825c93fe75f"
+    },
+    {
+      "path": "scripts/verify-damage-numbers.mjs",
+      "sha256": "fe21514bdf6841546da5d8ddd1244dc390e75aa03d3bd3b5a506ad866d1e3a56"
+    },
+    {
+      "path": "scripts/verify-dash-bounce.mjs",
+      "sha256": "220ec5f70f56ffac34c10b582190564ddc90d5b5d71780a96e61326b46b68e8e"
+    },
+    {
+      "path": "scripts/verify-fixes-20261026.mjs",
+      "sha256": "b6d33ed79fdd78fde46f737f028de3ebbc14dd11d462dd681220a660e85c7839"
+    },
+    {
+      "path": "scripts/verify-lord-scorch.mjs",
+      "sha256": "930ae667e9f9fc7d3e1d65cce7bc3157944d97e197397da5c32e39e78bed5ce8"
+    },
+    {
+      "path": "scripts/verify-manual-target.mjs",
+      "sha256": "312b644efa23c26049f76fd5fb2f99f474663b10a36193a092dc9071ec87cab7"
+    },
+    {
+      "path": "scripts/verify-premium-vfx.mjs",
+      "sha256": "376ddf76d33d8b70f9151ebac1309eb5c05e4468bd7f2e015688749bb2b2f2c7"
+    },
+    {
+      "path": "scripts/verify-range-names.mjs",
+      "sha256": "9b3fe67f627a47fb526cbcafb09df501511f44dc6b8e620e8300c8f761fcb6e6"
+    },
+    {
+      "path": "scripts/verify-skill-double.mjs",
+      "sha256": "194c9570abe33ca07cb7c5dd9ae711a20a4f0cbdacfdb88619194bb45bee4962"
+    },
+    {
+      "path": "scripts/verify-stamina-ui.mjs",
+      "sha256": "9e5757d6b870c222b0e8ecb38246e06f9b47a2a9ba2e5cc51376da9a4b35482e"
+    },
+    {
+      "path": "scripts/verify-status-icons.mjs",
+      "sha256": "5e9b90b9c2c314446f9f6a60b73e7cd59df7e9ef47e9ae16fde7de9995e5575a"
+    },
+    {
+      "path": "scripts/verify-unit-motion.mjs",
+      "sha256": "9d81e3c2ba84bef60d2b7b9831ceb511ff3b7c6da26c6528bc913675636a7125"
+    },
+    {
+      "path": "server/accounts.mjs",
+      "sha256": "4a0682cf55ca7d8fcbb8d3bcf6bd178d14c23a34757ad5b63fadcfded63c8955"
+    },
+    {
+      "path": "server/room.mjs",
+      "sha256": "29074378e14afe48c62ec74d27b10ebc08f092317ebab1ad6b522388246a5669"
+    },
+    {
+      "path": "server.mjs",
+      "sha256": "dabe5578bb7ebb40e9ea8b6d432d6566302e6bdc996ac5a46ac8797b3fd23917"
+    },
+    {
+      "path": "src/ability-descriptions.js",
+      "sha256": "a71b054ff611ff9e320c57e20e5de8ab319788818c22bc057da12c0c80605454"
+    },
+    {
+      "path": "src/ability-summaries.js",
+      "sha256": "62048b511fee4d4af39b75f1c48e853df99b61e9dec139fe448943e7a7b68998"
+    },
+    {
+      "path": "src/ability-tags.js",
+      "sha256": "edc011b763ef56fc1b392844eb5555c94c9bd476eceb338215ce287b7cd526af"
+    },
+    {
+      "path": "src/attack-cooldown.js",
+      "sha256": "e811e4b7ce3bf90723b57ff2b4f6e3ffa30545f9ac0799cb319817c121a1bf1f"
+    },
+    {
+      "path": "src/attack-range.js",
+      "sha256": "fec52b01125d3cb6c51583d3d3d15442ec9e4d1ee7b7c7deb6ffab64d1a0a055"
+    },
+    {
+      "path": "src/backline-ai.js",
+      "sha256": "26f8d21d00fbb80e0c1b479a657bec33d22e8d34aa427966f0eca00aa3e76f15"
+    },
+    {
+      "path": "src/base-config.js",
+      "sha256": "413d69eb13816bffa7a407dc26d8b236858cbf11ff68a7aaa74865fdf0686ef9"
+    },
+    {
+      "path": "src/battlefield.js",
+      "sha256": "f3e24e26b82e1d47b54ce0bc7d44eea3af59535f8e6efac82b9fb97944ef03ee"
+    },
+    {
+      "path": "src/bot-population.js",
+      "sha256": "af4c59b295bbaa40bac77af8624d507d3f3f2990dbe6162b6b83991162bab5a9"
+    },
+    {
+      "path": "src/combat-numbers.js",
+      "sha256": "5b8d9c2499e8ca3e947840e53b381fd01a2643869ca329823b4893cb2897913e"
+    },
+    {
+      "path": "src/config-migrations.js",
+      "sha256": "42ea0c47a09780061a0820f1c0bd01f1afce6b4eb8e319d87d3cdbd6002b8e05"
+    },
+    {
+      "path": "src/config.js",
+      "sha256": "3c04756fbcb8160321f37d15c6c40f3e19a1fd579fb21428a074d2ecfdf6aa0e"
+    },
+    {
+      "path": "src/formation-ranges.js",
+      "sha256": "0db7b51ee7cf72ea2fd20ac720b8d86a34a516d930528e309b52f0d1d44ca7be"
+    },
+    {
+      "path": "src/game-layout.js",
+      "sha256": "e426e3f9e6b107bab44393b9cf4a788d663e737a673666e894c487556f72cc73"
+    },
+    {
+      "path": "src/game-shell.js",
+      "sha256": "3c21332c628a5da86671edf27f0b2dac0bf33f050681169cb9c7cbbc69ac13bb"
+    },
+    {
+      "path": "src/hero-action-layout.js",
+      "sha256": "44c3f46e5937a4cd3fd304f5c41bb6f782d567c534442ba372f161e868caaa7f"
+    },
+    {
+      "path": "src/hero-names.js",
+      "sha256": "2876b4c5494e20a23295086dc9dc2b90b37fcad1bd9bce6f1060525812e88489"
+    },
+    {
+      "path": "src/hero-rules.js",
+      "sha256": "2a8e594f669895350feb4dd9ab200db3103d4d58679ed84f6636ffd3a0ac0cd9"
+    },
+    {
+      "path": "src/kc-layout.css",
+      "sha256": "cded09bd3be375a53de6338fff3b9754b9bb3a00685dc3c66df8fbf4a9f0d497"
+    },
+    {
+      "path": "src/legacy-descriptions.js",
+      "sha256": "e2b4b0f30e620201f020b8cb46a2913f628cee66aef39514a9da392f3d5c513c"
+    },
+    {
+      "path": "src/legacy-match3.css",
+      "sha256": "5c249211a4dcb7d0d4824e4efac8af0de2fbf25dc8ad3974e26fa375dbd1016b"
+    },
+    {
+      "path": "src/legacy-match3.js",
+      "sha256": "773236e35b3985068138e84b9371ff027e019acf83015d86cdedab1509df9a39"
+    },
+    {
+      "path": "src/lord-flame-shield.js",
+      "sha256": "bc5321b68de70c4d9533bfe81d7db7f91d0fd056be5beaae6b67053eef8f5078"
+    },
+    {
+      "path": "src/main.js",
+      "sha256": "869fdfc52d30834c9b824b80cff7dfcbbe1c851393149997d4b53b9fee2d8730"
+    },
+    {
+      "path": "src/manual-target.js",
+      "sha256": "741d0269c3b376824022f587f43b85308553242c95eaedcb35618cb106f7ef31"
+    },
+    {
+      "path": "src/multiplayer.css",
+      "sha256": "6a4819a626e1b0d5a69c9879546f8b648c4580572df728c8f6b5a507a16f0c20"
+    },
+    {
+      "path": "src/navigation.js",
+      "sha256": "3d9e1c084a55b9fb9182f4c86ccbab421035d4a17286c66175754f6574679781"
+    },
+    {
+      "path": "src/network.js",
+      "sha256": "94a915ab71f375a1776a010ea3f61bbd021efc35018c701c70a1e774532a6b15"
+    },
+    {
+      "path": "src/premium-vfx.js",
+      "sha256": "d698f86731a1c87c23a680422ece1863fbe2815c4ebfa74fdadc0c57db55579a"
+    },
+    {
+      "path": "src/renderer.js",
+      "sha256": "baaed74e925b7d2b19cfb3e52d2fe7d6f8e5a21be1eea049bcdf8b4fe72be090"
+    },
+    {
+      "path": "src/selection.js",
+      "sha256": "a9f99100865750814abba54a71f246b956cda94db3338609fec9c88a3040b996"
+    },
+    {
+      "path": "src/simulation.js",
+      "sha256": "de9ae4b85b1b114d73fbdd7a0ccde44129fb749b50c5582d81f4824a763fa4b2"
+    },
+    {
+      "path": "src/skill-animation.js",
+      "sha256": "5a6ffb53d3f76fc409ff5a66afa481bcf7e90eaea1eb090833b97e908b737301"
+    },
+    {
+      "path": "src/skill-hud.js",
+      "sha256": "ea136b157fd0babf3497bbaa06f1daadbde0fe4c4b39c54a96bf411dfeb49afa"
+    },
+    {
+      "path": "src/skill-progression.js",
+      "sha256": "ba4022539464b9720b53e3739f7e2465232d9d0f0d9c445cdce6fb2371d1c36d"
+    },
+    {
+      "path": "src/skill-range-upgrade.js",
+      "sha256": "f9bb41e2d3659a5ea2164b9db79b26bb30e1ce910e81f085b0a7585f3dfaa9c4"
+    },
+    {
+      "path": "src/skill-value.js",
+      "sha256": "c8d99a1caf92d0dfe599db7fb47330d9327ba7384ec297e8ef0cf2f35ffe2d6a"
+    },
+    {
+      "path": "src/skill3-visuals.js",
+      "sha256": "6730c7ba2cc0ba99f620e9d176621d97ba6f62df2eb75b1ee591ea3ab5fea67d"
+    },
+    {
+      "path": "src/skill4-mechanics.js",
+      "sha256": "02cae4beba7894179f9c2e7fe42992c25ef1dd5b18c98cc5641d78f644ab629a"
+    },
+    {
+      "path": "src/skill5-mechanics.js",
+      "sha256": "24225d2c818f2a4e2dfa4b01589fa957061599ac90c0eb2bf62419b96507f705"
+    },
+    {
+      "path": "src/status-icons.js",
+      "sha256": "1f9b99c2cfdaaad5e1596b46b1e0947d6e2ab98f7c2c9594df5d9d21fabd1835"
+    },
+    {
+      "path": "src/style.css",
+      "sha256": "4fc90114269844e916df0082e7aa254beea0a597ecbd560db14c7cda310d930e"
+    },
+    {
+      "path": "src/target-halos.js",
+      "sha256": "69b54e4aaa1d86ad4e06d672e23848d1cde7e9f3687664815406b30d5f438330"
+    },
+    {
+      "path": "src/tower-guard-visual.js",
+      "sha256": "9ddd7749f2b42d228badc30bc25996aad854cc45c3306a566b518d0718428fb3"
+    },
+    {
+      "path": "src/tower-guard.js",
+      "sha256": "06e0a660cab9246b06c0a8c180bd50d3bf66f04f52bc7becf0be6cd660864698"
+    },
+    {
+      "path": "src/troop-population.js",
+      "sha256": "a942f3036b2b93c2918b4e3e4fb2126c43ae5fb6eaeadba467da1188e93ee1fc"
+    },
+    {
+      "path": "src/unit-hit.js",
+      "sha256": "a2012292f3d17e707ce96b42a0d7b170b0b3c2311fcd4d1e891c03e7ebd1bbf6"
+    },
+    {
+      "path": "src/unit-motion-view.js",
+      "sha256": "91026007c3e5ab3d321775168395d4f177b5be7769cb064d89dee787c8ba60ae"
+    },
+    {
+      "path": "src/unit-motion.js",
+      "sha256": "7d05a54c314d4bbbc32f022372e3b18ade0770e47fc593eda7bbb208f78697c0"
+    },
+    {
+      "path": "src/unit-status.js",
+      "sha256": "3b61422ab7991760b01e822d617a83277bd075cc6513b60a9022d690cefb5324"
+    },
+    {
+      "path": "src/vfx-brushes.js",
+      "sha256": "a448cf2ccf526fa6f81b43268ed0639299a824181af4eac8a4d32409f8489832"
+    },
+    {
+      "path": "src/vfx-profiles.js",
+      "sha256": "ba55da6b7f172158d3f3bd9e46fc3a2f064ce280dfe698b3b0b2b3db124073bf"
+    },
+    {
+      "path": "src/visual-theme.js",
+      "sha256": "dcc8b6eb535af985e6c64613c047825b44a35ed4b884e0628ed25140855f1cf4"
+    },
+    {
+      "path": "Start.cmd",
+      "sha256": "b46cde76fa223ea82b2c7508b4c557974b4b1f82a37d4dc560521331382afe3a"
+    },
+    {
+      "path": "start.mjs",
+      "sha256": "8a72d83b2de7d69771b2d18558c73301bd87f72fe5e2171ae0bde43e1caae6bd"
+    },
+    {
+      "path": "tests/ally-target.test.js",
+      "sha256": "4e250f6cd09144febb5c5bf12889db56e78a306497013a9190436121cd847ba7"
+    },
+    {
+      "path": "tests/attack-arrival.test.js",
+      "sha256": "de81fabfdf144e8a38f7f479af54a562dd3ae90d582d063a6173bce887473fb2"
+    },
+    {
+      "path": "tests/damage-numbers.test.js",
+      "sha256": "1a8e392bc53d33dcd8605ee2e2da1d8f20f229de85e5047115b068d5e253dce5"
+    },
+    {
+      "path": "tests/dash-bounce.test.js",
+      "sha256": "d51fed2accc92b75a7957b8df139f049fa6051b267cfbf90c1811340b7d8bac7"
+    },
+    {
+      "path": "tests/frost-cooldown.test.js",
+      "sha256": "1b17d1ea1aff89ef02b1944242291badc3280329405811d7753f7b183b173b0a"
+    },
+    {
+      "path": "tests/hero-names.test.js",
+      "sha256": "41e44c032d35fae4ac4af4ac4a575baa369a1d5b4ee09913141e5b1ead10cd88"
+    },
+    {
+      "path": "tests/lord-flame.test.js",
+      "sha256": "1305d2b7317eba0fb34e78c3f35cf07d54182fd44e8079e0e32d0e04eb6f29db"
+    },
+    {
+      "path": "tests/manual-target.test.js",
+      "sha256": "2975bc58690ad7820c3cdd95f3feb546da2982a246b26ba3ccb1fdd29e768f35"
+    },
+    {
+      "path": "tests/model.test.js",
+      "sha256": "0330f99fee96a39779d5a505e577345f795293d442ce98763f884c2ba7196b33"
+    },
+    {
+      "path": "tests/multiplayer.test.js",
+      "sha256": "fe9f5a6eb7999c31ae0666e180f506371747c3d5ac62b5afdadcf12fafcb5308"
+    },
+    {
+      "path": "tests/skill-double.test.js",
+      "sha256": "1560159d93c0da1c9dc04e4df35a89e64e7979465c8c6f3933f76baf4dfb235d"
+    },
+    {
+      "path": "tests/smoke.spec.js",
+      "sha256": "febb6b121a3c8b264375269a3f2443b939f49e184b44e40dc603b8a16786e552"
+    },
+    {
+      "path": "tests/stamina.test.js",
+      "sha256": "90a80b936545fb75af727d535fb7685f4771f85f43606779ff3c07cf1543329e"
+    },
+    {
+      "path": "tests/unit-hit.test.js",
+      "sha256": "d3c9216c6912a39b0605d5944f21ffa0eaf9dcfea60d89fdcfa605751243b288"
+    },
+    {
+      "path": "tests/unit-motion.test.js",
+      "sha256": "b538df3317fd2089cfbe03c64cbb3128516e361d7c38301be5f02fbcf0b158a6"
+    },
+    {
+      "path": "vite.config.js",
+      "sha256": "939fceadb32e02736d35dc46ba1c2f65210a206234d2d48f8d28c5f86a583430"
+    }
+  ],
+  "staticImportReachable": [
+    "server.mjs",
+    "server/accounts.mjs",
+    "server/room.mjs",
+    "src/ability-descriptions.js",
+    "src/ability-tags.js",
+    "src/attack-cooldown.js",
+    "src/attack-range.js",
+    "src/base-config.js",
+    "src/battlefield.js",
+    "src/combat-numbers.js",
+    "src/config.js",
+    "src/game-layout.js",
+    "src/game-shell.js",
+    "src/hero-action-layout.js",
+    "src/hero-names.js",
+    "src/hero-rules.js",
+    "src/kc-layout.css",
+    "src/lord-flame-shield.js",
+    "src/main.js",
+    "src/manual-target.js",
+    "src/multiplayer.css",
+    "src/navigation.js",
+    "src/network.js",
+    "src/premium-vfx.js",
+    "src/renderer.js",
+    "src/selection.js",
+    "src/simulation.js",
+    "src/skill-hud.js",
+    "src/skill-progression.js",
+    "src/skill-value.js",
+    "src/skill4-mechanics.js",
+    "src/skill5-mechanics.js",
+    "src/status-icons.js",
+    "src/style.css",
+    "src/target-halos.js",
+    "src/tower-guard-visual.js",
+    "src/tower-guard.js",
+    "src/troop-population.js",
+    "src/unit-hit.js",
+    "src/unit-motion-view.js",
+    "src/unit-motion.js",
+    "src/unit-status.js",
+    "src/vfx-brushes.js",
+    "src/vfx-profiles.js",
+    "src/visual-theme.js"
+  ],
+  "staticImportUnreferenced": [
+    "src/ability-summaries.js",
+    "src/backline-ai.js",
+    "src/bot-population.js",
+    "src/config-migrations.js",
+    "src/formation-ranges.js",
+    "src/legacy-descriptions.js",
+    "src/legacy-match3.css",
+    "src/legacy-match3.js",
+    "src/skill-animation.js",
+    "src/skill-range-upgrade.js",
+    "src/skill3-visuals.js"
+  ],
+  "sourceFileCount": 56,
+  "excludedDirectories": [
+    "data",
+    "node_modules",
+    "dist",
+    "evidence",
+    "exports",
+    "outputs",
+    "test-results"
+  ]
+}

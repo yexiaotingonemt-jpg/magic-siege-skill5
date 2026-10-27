@@ -1,0 +1,20 @@
+{
+  "name": "magic-siege-skill5",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "test": "node --test tests/model.test.js tests/multiplayer.test.js tests/lord-flame.test.js tests/stamina.test.js tests/skill-double.test.js tests/damage-numbers.test.js tests/manual-target.test.js tests/unit-hit.test.js tests/unit-motion.test.js tests/hero-names.test.js tests/ally-target.test.js tests/attack-arrival.test.js tests/frost-cooldown.test.js tests/dash-bounce.test.js",
+    "test:browser": "playwright test",
+    "start": "node server.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "vite": "^7.1.7"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0"
+  },
+  "type": "module"
+}

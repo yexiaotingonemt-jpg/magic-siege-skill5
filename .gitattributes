@@ -1,0 +1,12 @@
+# Preserve the original bytes and hashes of imported source and archives.
+* -text
+.gitattributes text eol=lf
+.gitignore text eol=lf
+/README.md text eol=lf
+docs/README.md text eol=lf
+docs/玩法规则.md text eol=lf
+docs/上传整理说明.md text eol=lf
+docs/rules/** text eol=lf
+docs/architecture/** text eol=lf
+docs/references/** text eol=lf
+docs/archive/2026-10-27/** -text

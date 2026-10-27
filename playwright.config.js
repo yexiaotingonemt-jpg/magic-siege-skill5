@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'./tests',testMatch:'*.spec.js',workers:1,reporter:[['list'],['json',{outputFile:'evidence/skill5-browser-results.json'}]],webServer:{command:'node scripts/playtest-server.mjs',url:'http://127.0.0.1:5194/api/health',reuseExistingServer:false},use:{baseURL:'http://127.0.0.1:5194',headless:true,launchOptions:{executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'},viewport:{width:1440,height:1100}},timeout:45000});

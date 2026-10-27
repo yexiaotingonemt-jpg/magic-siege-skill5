@@ -1,0 +1,672 @@
+{
+  "world": {
+    "waveInterval": 30,
+    "attackWaveSize": 10,
+    "defenseWaveSize": 8,
+    "botMode": 4,
+    "attackBots": 0,
+    "defenseBots": 0,
+    "botCastInterval": 3,
+    "expPerStamina": 1,
+    "contractCost": 3,
+    "initialStamina": 100,
+    "castScore": 10,
+    "scoreCap": 300,
+    "assistWindow": 10,
+    "projectileSpeed": 12,
+    "expBase": 5,
+    "expGrowth": 1.35,
+    "expCostMultiplier": 0.5,
+    "maxLevel": 30,
+    "attackSpawnY": -56,
+    "defenseSpawnOffset": 36,
+    "defenseLimitY": -38,
+    "mapMinY": -64,
+    "mapMaxY": 76,
+    "defenseRallyOffset": -10,
+    "attackHpMultiplier": 1,
+    "defenseHpMultiplier": 1,
+    "spawnHalfWidth": 10.5,
+    "spawnMinSpacing": 2.6,
+    "retargetRadius": 12,
+    "spawnRowSpacing": 3.2,
+    "targetRecheckInterval": 0.6,
+    "troopHpMultiplier": 1,
+    "heroHpMultiplier": 1,
+    "heroHpGrowth": 0.04,
+    "heroAttackGrowth": 0.03,
+    "towerDamageExpRate": 0.0002,
+    "towerBreakXp": 2,
+    "retaliationMemory": 3,
+    "retaliationLeash": 14,
+    "heroPriorityDistance": 1.5,
+    "skillDesignVersion": 5,
+    "stageDuration": 3600,
+    "stageRequiredLayers": 1,
+    "stageContribution": 100,
+    "heroKillXp": 1,
+    "minionKillXp": 0.25
+  },
+  "troops": {
+    "melee": {
+      "durability": 1,
+      "hp": 4000,
+      "attack": 100,
+      "interval": 1.5,
+      "range": 1.5,
+      "speed": 2,
+      "aggro": 5,
+      "armor": 0,
+      "buildingBonus": 1
+    },
+    "ranged": {
+      "durability": 1,
+      "hp": 4000,
+      "attack": 80,
+      "interval": 1.7,
+      "range": 6.5,
+      "speed": 2,
+      "aggro": 9,
+      "armor": 0,
+      "buildingBonus": 1
+    },
+    "siege": {
+      "durability": 1,
+      "hp": 5000,
+      "attack": 100,
+      "interval": 2.8,
+      "range": 10.5,
+      "speed": 1.5,
+      "aggro": 12,
+      "armor": 0,
+      "buildingBonus": 2.5
+    }
+  },
+  "waves": {
+    "attackMelee": 5,
+    "attackRanged": 3,
+    "attackSiege": 2,
+    "defenseMelee": 5,
+    "defenseRanged": 3,
+    "defenseSiege": 0
+  },
+  "tower": {
+    "hp": 150000,
+    "attack": 273.7777777777778,
+    "interval": 1,
+    "range": 11,
+    "spacing": 3.6,
+    "layerSpacing": 14,
+    "middleMultiplier": 1,
+    "rearMultiplier": 1,
+    "columns": 6
+  },
+  "heroes": [
+    {
+      "hp": 16000,
+      "interval": 1.5,
+      "range": 1.5,
+      "speed": 2,
+      "aggro": 5,
+      "attack": 200,
+      "armor": 0,
+      "buildingBonus": 1,
+      "strength": 8,
+      "skills": [
+        {
+          "power": 1200,
+          "cd": 5,
+          "targetRange": 6.5,
+          "radius": 0,
+          "duration": 4,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "vulnerability": 0.25
+        },
+        {
+          "power": 0,
+          "cd": 10,
+          "targetRange": 6,
+          "radius": 6,
+          "duration": 5,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "targets": 3,
+          "damageReduction": 0.4
+        },
+        {
+          "power": 0,
+          "cd": 15,
+          "targetRange": 14,
+          "radius": 0,
+          "duration": 4,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "damageReduction": 0.5,
+          "utilityPower": 400
+        },
+        {
+          "power": 0,
+          "cd": 30,
+          "targetRange": 0,
+          "radius": 0,
+          "duration": 5,
+          "cost": 3,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "shieldDuration": 8,
+          "conversionRatio": 2
+        }
+      ]
+    },
+    {
+      "hp": 8000,
+      "interval": 1.7,
+      "range": 6.5,
+      "speed": 2,
+      "aggro": 9,
+      "attack": 362.6666666666667,
+      "armor": 0,
+      "buildingBonus": 1,
+      "strength": 8,
+      "skills": [
+        {
+          "power": 400,
+          "cd": 5,
+          "targetRange": 10,
+          "radius": 0,
+          "duration": 0,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "bounces": 3,
+          "conductDuration": 8
+        },
+        {
+          "power": 1600,
+          "cd": 10,
+          "targetRange": 19,
+          "radius": 4,
+          "duration": 0,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "targets": 5,
+          "conductDuration": 8
+        },
+        {
+          "power": 1200,
+          "cd": 15,
+          "targetRange": 19,
+          "radius": 6,
+          "duration": 0,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "targets": 5,
+          "pullDistance": 2,
+          "pullStopDistance": 1.5,
+          "utilityPower": 400
+        },
+        {
+          "power": 400,
+          "cd": 30,
+          "targetRange": 19,
+          "radius": 5,
+          "duration": 4,
+          "cost": 3,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "targets": 3,
+          "healingReduction": 0.5,
+          "debuffDuration": 5
+        }
+      ]
+    },
+    {
+      "hp": 10000,
+      "interval": 2.8,
+      "range": 10.5,
+      "speed": 1.5,
+      "aggro": 12,
+      "attack": 426.66666666666663,
+      "armor": 0,
+      "buildingBonus": 2.5,
+      "strength": 8,
+      "skills": [
+        {
+          "power": 0,
+          "cd": 5,
+          "targetRange": 12,
+          "radius": 0,
+          "duration": 0,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "percentMaxHp": 0.08
+        },
+        {
+          "power": 1200,
+          "cd": 10,
+          "targetRange": 12,
+          "radius": 0,
+          "duration": 4,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "attackSpeedDown": 0.4
+        },
+        {
+          "power": 340,
+          "cd": 15,
+          "targetRange": 12,
+          "radius": 3,
+          "duration": 3,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "shots": 4,
+          "targets": 3,
+          "slowPerStack": 0.15,
+          "slowCap": 3,
+          "slowDuration": 4,
+          "utilityPower": 160
+        },
+        {
+          "power": 3600,
+          "cd": 30,
+          "targetRange": 12,
+          "radius": 4,
+          "duration": 0,
+          "cost": 3,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "targets": 5,
+          "knockback": 2,
+          "utilityPower": 1200
+        }
+      ]
+    },
+    {
+      "hp": 36000,
+      "interval": 1.5,
+      "range": 1.5,
+      "speed": 2,
+      "aggro": 5,
+      "attack": 266.6666666666667,
+      "armor": 0,
+      "buildingBonus": 1,
+      "strength": 24,
+      "skills": [
+        {
+          "power": 320,
+          "cd": 5,
+          "targetRange": 10,
+          "radius": 0,
+          "duration": 0,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "targets": 5
+        },
+        {
+          "power": 240,
+          "cd": 10,
+          "targetRange": 18,
+          "radius": 3,
+          "duration": 0,
+          "cost": 1,
+          "castTime": 0.7,
+          "levelGrowth": 0.2,
+          "targets": 5,
+          "dashSpeed": 12,
+          "knockback": 5,
+          "utilityPower": 400
+        },
+        {
+          "power": 40,
+          "cd": 15,
+          "targetRange": 0,
+          "radius": 5,
+          "duration": 6,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "targets": 5,
+          "damageReduction": 0.35
+        },
+        {
+          "power": 1200,
+          "cd": 30,
+          "targetRange": 0,
+          "radius": 4,
+          "duration": 15,
+          "cost": 3,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "targets": 4,
+          "utilityPower": 1200
+        }
+      ],
+      "passiveHealRatio": 0.04,
+      "passiveMinionKills": 4
+    },
+    {
+      "hp": 12000,
+      "interval": 1.7,
+      "range": 6.5,
+      "speed": 2,
+      "aggro": 9,
+      "attack": 226.66666666666666,
+      "armor": 0,
+      "buildingBonus": 1,
+      "strength": 8,
+      "skills": [
+        {
+          "power": 1600,
+          "cd": 5,
+          "targetRange": 9,
+          "radius": 0,
+          "duration": 0,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "targets": 1,
+          "heatCap": 5,
+          "heatDuration": 15
+        },
+        {
+          "power": 1600,
+          "cd": 10,
+          "targetRange": 12,
+          "radius": 3,
+          "duration": 0,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "targets": 4,
+          "heatThreshold": 3,
+          "splashPower": 400
+        },
+        {
+          "power": 1600,
+          "cd": 15,
+          "targetRange": 9,
+          "radius": 0,
+          "duration": 5,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "targets": 1,
+          "heatOnDeath": 2
+        },
+        {
+          "power": 1600,
+          "cd": 30,
+          "targetRange": 19,
+          "radius": 0,
+          "duration": 0,
+          "cost": 3,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "targets": 1,
+          "heatStep": 2,
+          "heatCap": 5
+        }
+      ]
+    },
+    {
+      "hp": 14000,
+      "interval": 1.7,
+      "range": 6.5,
+      "speed": 2,
+      "aggro": 9,
+      "attack": 181.33333333333334,
+      "armor": 0,
+      "buildingBonus": 1,
+      "strength": 8,
+      "skills": [
+        {
+          "power": 600,
+          "cd": 5,
+          "targetRange": 12,
+          "radius": 5,
+          "duration": 0,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "targets": 3,
+          "healPower": 1000
+        },
+        {
+          "power": 0,
+          "cd": 10,
+          "targetRange": 12,
+          "radius": 0,
+          "duration": 6,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "shareRatio": 2
+        },
+        {
+          "power": 0,
+          "cd": 15,
+          "targetRange": 12,
+          "radius": 0,
+          "duration": 0,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "targets": 3,
+          "hpCost": 0.1,
+          "utilityPower": 400
+        },
+        {
+          "power": 960,
+          "cd": 30,
+          "targetRange": 12,
+          "radius": 0,
+          "duration": 0,
+          "cost": 3,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "targets": 4
+        }
+      ]
+    },
+    {
+      "hp": 11000,
+      "attack": 232.72727272727272,
+      "interval": 1.2,
+      "range": 1.5,
+      "speed": 2.5,
+      "aggro": 5,
+      "armor": 0,
+      "buildingBonus": 1,
+      "strength": 8,
+      "skills": [
+        {
+          "power": 1200,
+          "cd": 5,
+          "targetRange": 12,
+          "radius": 0,
+          "duration": 4,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "attackSpeedDown": 0.4
+        },
+        {
+          "power": 0,
+          "cd": 10,
+          "targetRange": 12,
+          "radius": 0,
+          "duration": 5,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "attackSpeedUp": 1,
+          "utilityPower": 200
+        },
+        {
+          "power": 0,
+          "cd": 15,
+          "targetRange": 0,
+          "radius": 0,
+          "duration": 6,
+          "cost": 1,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "hpCost": 0.15,
+          "utilityPower": 200
+        },
+        {
+          "power": 80,
+          "cd": 30,
+          "targetRange": 0,
+          "radius": 3,
+          "duration": 6,
+          "cost": 3,
+          "castTime": 0.35,
+          "levelGrowth": 0.2,
+          "tick": 0.5,
+          "daggers": 4,
+          "targets": 5
+        }
+      ]
+    }
+  ],
+  "rating": [
+    {
+      "damageTaken": 6000,
+      "heroDamage": 5000,
+      "minionDamage": 8000,
+      "buildingDamage": 6000,
+      "unitDamage": 7000,
+      "kills": 16,
+      "healing": 6000,
+      "shielding": 3000,
+      "assists": 10,
+      "heroKills": 3,
+      "survival": 60
+    },
+    {
+      "damageTaken": 6000,
+      "heroDamage": 5000,
+      "minionDamage": 8000,
+      "buildingDamage": 6000,
+      "unitDamage": 7000,
+      "kills": 16,
+      "healing": 6000,
+      "shielding": 3000,
+      "assists": 10,
+      "heroKills": 3,
+      "survival": 60
+    },
+    {
+      "damageTaken": 6000,
+      "heroDamage": 5000,
+      "minionDamage": 8000,
+      "buildingDamage": 6000,
+      "unitDamage": 7000,
+      "kills": 16,
+      "healing": 6000,
+      "shielding": 3000,
+      "assists": 10,
+      "heroKills": 3,
+      "survival": 60
+    },
+    {
+      "damageTaken": 6000,
+      "heroDamage": 5000,
+      "minionDamage": 8000,
+      "buildingDamage": 6000,
+      "unitDamage": 7000,
+      "kills": 16,
+      "healing": 6000,
+      "shielding": 3000,
+      "assists": 10,
+      "heroKills": 3,
+      "survival": 60
+    },
+    {
+      "damageTaken": 6000,
+      "heroDamage": 5000,
+      "minionDamage": 8000,
+      "buildingDamage": 6000,
+      "unitDamage": 7000,
+      "kills": 16,
+      "healing": 6000,
+      "shielding": 3000,
+      "assists": 10,
+      "heroKills": 3,
+      "survival": 60
+    },
+    {
+      "damageTaken": 6000,
+      "heroDamage": 5000,
+      "minionDamage": 8000,
+      "buildingDamage": 6000,
+      "unitDamage": 7000,
+      "kills": 16,
+      "healing": 6000,
+      "shielding": 3000,
+      "assists": 10,
+      "heroKills": 3,
+      "survival": 60
+    },
+    {
+      "damageTaken": 6000,
+      "heroDamage": 5000,
+      "minionDamage": 8000,
+      "buildingDamage": 6000,
+      "unitDamage": 7000,
+      "kills": 16,
+      "healing": 6000,
+      "shielding": 3000,
+      "assists": 10,
+      "heroKills": 3,
+      "survival": 60
+    }
+  ],
+  "ratingWeights": [
+    {
+      "damageTaken": 35,
+      "heroDamage": 35,
+      "assists": 30
+    },
+    {
+      "heroDamage": 50,
+      "minionDamage": 20,
+      "kills": 30
+    },
+    {
+      "buildingDamage": 65,
+      "unitDamage": 20,
+      "kills": 15
+    },
+    {
+      "survival": 40,
+      "kills": 40,
+      "heroDamage": 20
+    },
+    {
+      "minionDamage": 55,
+      "heroDamage": 25,
+      "kills": 20
+    },
+    {
+      "healing": 70,
+      "assists": 30
+    },
+    {
+      "heroDamage": 40,
+      "heroKills": 40,
+      "assists": 20
+    }
+  ]
+}
