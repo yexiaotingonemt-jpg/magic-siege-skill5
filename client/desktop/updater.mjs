@@ -67,7 +67,7 @@ export function createUpdater({app,serverUrl,window,getVersion}){
   const shell=path.join(process.env.SystemRoot||'C:\\Windows','System32','WindowsPowerShell','v1.0','powershell.exe');
   // PowerShell needs its own hidden console to survive the old Electron console.
   // CREATE_DETACHED_PROCESS alone silently exits on Windows PowerShell 5.
-  const helperEnv={...process.env,MAGIC_UPDATE_HELPER:helper,MAGIC_UPDATE_PLAN:planFile,MAGIC_UPDATE_TRANSACTION:transaction,MAGIC_UPDATE_SHELL:shell};delete helperEnv.PSModulePath;delete helperEnv.MAGIC_REPOSITORY_ROOT;
+  const helperEnv={...process.env,MAGIC_UPDATE_HELPER:helper,MAGIC_UPDATE_PLAN:planFile,MAGIC_UPDATE_TRANSACTION:transaction,MAGIC_UPDATE_SHELL:shell};delete helperEnv.PSModulePath;
   const command=`$ErrorActionPreference='Stop'; Start-Process -FilePath $env:MAGIC_UPDATE_SHELL -ArgumentList @('-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',('"'+$env:MAGIC_UPDATE_HELPER+'"'),'-PlanFile',('"'+$env:MAGIC_UPDATE_PLAN+'"')) -WindowStyle Hidden -WorkingDirectory $env:MAGIC_UPDATE_TRANSACTION -RedirectStandardOutput (Join-Path $env:MAGIC_UPDATE_TRANSACTION 'installer.log') -RedirectStandardError (Join-Path $env:MAGIC_UPDATE_TRANSACTION 'installer-error.log')`;
   const child=spawn(shell,['-NoProfile','-NonInteractive','-EncodedCommand',Buffer.from(command,'utf16le').toString('base64')],{cwd:transaction,env:helperEnv,stdio:['ignore',log.fd,log.fd],windowsHide:true});
   child.once('exit',(code,signal)=>{writeFile(path.join(transaction,'helper-exit.json'),JSON.stringify({code,signal})).catch(()=>{});});
