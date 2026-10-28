@@ -1,29 +1,31 @@
 import http from 'node:http';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {serveUpdate} from './update-feed.mjs';
 import {Accounts} from './accounts.mjs';
 import {Room} from './room.mjs';
 import {createEventStream} from './event-stream.mjs';
-import {GAME_VERSION,PROTOCOL_VERSION,RULESET_REVISION,UPDATE_REQUIRED_CODE} from '../shared/protocol.js';
+import {CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION,RULESET_REVISION,UPDATE_REQUIRED_CODE} from '../shared/protocol.js';
 const base=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-export function createGameServer({dataDir=process.env.KC_DATA_DIR||path.join(base,'data'),gameVersion=GAME_VERSION,sseGzip=process.env.MAGIC_SSE_GZIP!=='0'}={}){
+export function createGameServer({dataDir=process.env.KC_DATA_DIR||path.join(base,'data'),gameVersion=GAME_VERSION,clientVersion=CLIENT_VERSION,updateDir=process.env.MAGIC_UPDATE_DIR||path.join(base,'updates'),sseGzip=process.env.MAGIC_SSE_GZIP!=='0'}={}){
  const accounts=new Accounts(dataDir),room=new Room(),limits=new Map();
  const json=(res,status,value,headers={})=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...headers});res.end(JSON.stringify(value));};
  const body=async req=>{let raw='';for await(const chunk of req){raw+=chunk;if(raw.length>131072)throw Error('请求过大');}return JSON.parse(raw||'{}');};
  const server=http.createServer(async(req,res)=>{
   try{const url=new URL(req.url,'http://localhost');
-   if(url.pathname==='/api/health')return json(res,200,{ok:true,version:5,gameVersion,protocolVersion:PROTOCOL_VERSION,revision:RULESET_REVISION,matchId:room.matchId,sequence:room.sequence,clients:room.clients.size});
-   if(url.pathname==='/api/version')return json(res,200,{gameVersion,protocolVersion:PROTOCOL_VERSION});
+   if(url.pathname==='/api/health')return json(res,200,{ok:true,version:5,gameVersion,clientVersion,protocolVersion:PROTOCOL_VERSION,revision:RULESET_REVISION,matchId:room.matchId,sequence:room.sequence,clients:room.clients.size});
+   if(url.pathname==='/api/version')return json(res,200,{gameVersion,clientVersion,protocolVersion:PROTOCOL_VERSION});
+   if(url.pathname.startsWith('/api/updates/')&&await serveUpdate(req,res,url,{directory:updateDir,version:clientVersion,gameVersion,protocolVersion:PROTOCOL_VERSION}))return;
    if(url.pathname.startsWith('/api/')){
-    const clientVersion=req.headers['x-magic-version'],clientProtocol=req.headers['x-magic-protocol'];
-    const versions=[clientVersion],protocols=[clientProtocol];
+    const clientGameVersion=req.headers['x-magic-version'],clientProtocol=req.headers['x-magic-protocol'];
+    const versions=[clientGameVersion],protocols=[clientProtocol];
     // EventSource cannot set custom headers; its URL carries the compiled client version.
     if(url.pathname==='/api/events'){
      if(url.searchParams.has('clientVersion'))versions.push(url.searchParams.get('clientVersion'));
      if(url.searchParams.has('protocolVersion'))protocols.push(url.searchParams.get('protocolVersion'));
-     if(!clientVersion)versions.shift();if(!clientProtocol)protocols.shift();
+     if(!clientGameVersion)versions.shift();if(!clientProtocol)protocols.shift();
     }
-    if(!versions.length||versions.some(v=>v!==gameVersion)||!protocols.length||protocols.some(v=>v!==String(PROTOCOL_VERSION)))return json(res,409,{code:UPDATE_REQUIRED_CODE,error:'客户端版本与服务器不一致，请更新客户端后重新启动游戏。',clientVersion:clientVersion||url.searchParams.get('clientVersion')||null,requiredVersion:gameVersion,protocolVersion:PROTOCOL_VERSION});
+    if(!versions.length||versions.some(v=>v!==gameVersion)||!protocols.length||protocols.some(v=>v!==String(PROTOCOL_VERSION)))return json(res,409,{code:UPDATE_REQUIRED_CODE,error:'战斗兼容版本与服务器不一致，正在更新客户端。',clientVersion:clientGameVersion||url.searchParams.get('clientVersion')||null,requiredVersion:gameVersion,requiredClientVersion:clientVersion,protocolVersion:PROTOCOL_VERSION});
     if(req.method==='POST'&&req.headers.origin&&req.headers.origin!==`http://${req.headers.host}`&&req.headers.origin!==`https://${req.headers.host}`)return json(res,403,{error:'请求来源不允许'});
     if(['/api/register','/api/login'].includes(url.pathname)&&req.method==='POST'){
      const key=req.socket.remoteAddress,now=Date.now(),entry=limits.get(key)||{count:0,until:now+60000};if(now>entry.until){entry.count=0;entry.until=now+60000;}if(++entry.count>30)return json(res,429,{error:'登录尝试过于频繁，请稍后重试'});limits.set(key,entry);

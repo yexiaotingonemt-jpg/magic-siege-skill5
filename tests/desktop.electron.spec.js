@@ -6,10 +6,10 @@ import path from 'node:path';
 import {tmpdir} from 'node:os';
 import {fileURLToPath} from 'node:url';
 import {createGameServer} from '../server/index.mjs';
-import {GAME_VERSION} from '../shared/protocol.js';
+import {CLIENT_VERSION,GAME_VERSION} from '../shared/protocol.js';
 const root=fileURLToPath(new URL('..',import.meta.url)),require=createRequire(import.meta.url);
-async function service(gameVersion=GAME_VERSION){
- const dataDir=await mkdtemp(path.join(tmpdir(),'magic-desktop-server-')),game=createGameServer({dataDir,gameVersion});
+async function service(gameVersion=GAME_VERSION,clientVersion=CLIENT_VERSION){
+ const dataDir=await mkdtemp(path.join(tmpdir(),'magic-desktop-server-')),game=createGameServer({dataDir,gameVersion,clientVersion});
  await new Promise(resolve=>game.server.listen(0,'127.0.0.1',resolve));
  return {...game,base:`http://127.0.0.1:${game.server.address().port}`,async close(){for(const c of game.room.clients)c.res.end();game.server.closeAllConnections();await new Promise(resolve=>game.server.close(resolve));}};
 }
@@ -36,7 +36,7 @@ test('桌面EXE独立窗口：本机资源、登录契约、关闭退出、重�
  try{
   client=await launch(server.base);const {app,page}=client;
   await expect(page).toHaveTitle(/魔法王座/);
-  expect(await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].getTitle())).toBe(`魔法王座 v${GAME_VERSION}`);
+  expect(await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].getTitle())).toBe(`魔法王座 v${CLIENT_VERSION}`);
   const prefs=await app.evaluate(({BrowserWindow})=>{const p=BrowserWindow.getAllWindows()[0].webContents.getLastWebPreferences();return {node:p.nodeIntegration,context:p.contextIsolation,sandbox:p.sandbox};});expect(prefs).toEqual({node:false,context:true,sandbox:true});
   expect(await page.evaluate(()=>({node:typeof window.require,process:typeof window.process,settings:typeof window.magicSettings}))).toEqual({node:'undefined',process:'undefined',settings:'undefined'});
   await register(page);await page.locator('#pause').click();await page.waitForFunction(()=>__game.sim.paused);
@@ -66,4 +66,17 @@ test('默认直连正式服，无服务器选择入口，忽略旧版保存地�
 test('桌面版本不符：直接显示强制更新页',async()=>{
  const required=GAME_VERSION.replace(/\d+$/,n=>String(Number(n)+1)),server=await service(required);let client;
  try{client=await launch(server.base);await expect(client.page.locator('#updateRequired')).toBeVisible();await expect(client.page.locator('#requiredVersion')).toHaveText(required);await expect(client.page.locator('#authForm')).toHaveCount(0);await capture(client.app,client.page,path.join(process.env.MAGIC_QA_DIR,'desktop-update-required.png'));expect(client.errors).toEqual([]);}finally{await client?.app.close();await server.close();}
+});
+
+test('只有客户端发布版本变化也自动进入更新，不混用战斗版本',async()=>{
+ const required=CLIENT_VERSION.replace(/\d+$/,n=>String(Number(n)+1)),server=await service(GAME_VERSION,required);let client;
+ try{
+  client=await launch(server.base);
+  await expect(client.page.locator('#updateRequired')).toBeVisible();
+  await expect(client.page.locator('#requiredVersion')).toHaveText(GAME_VERSION);
+  await expect(client.page.locator('#requiredClientVersion')).toHaveText(required);
+  await expect(client.page.locator('#authForm')).toHaveCount(0);
+  await expect(client.page.locator('#retryUpdate')).toBeVisible();
+  expect(client.errors).toEqual([]);
+ }finally{await client?.app.close();await server.close();}
 });

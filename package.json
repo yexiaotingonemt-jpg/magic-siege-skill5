@@ -1,7 +1,7 @@
 {
   "name": "magic-siege-skill5",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "scripts": {
     "dev": "vite --config client/vite.config.js",
     "build": "vite build --config client/vite.config.js",
@@ -16,6 +16,7 @@
     "package:browser": "npm run build && node scripts/package-release.mjs client",
     "package:desktop": "npm run build && node scripts/package-desktop.mjs",
     "test:desktop": "playwright test --config playwright.desktop.config.js",
+    "test:update": "node scripts/verify-desktop-update.mjs",
     "setup:desktop": "node node_modules/electron/install.js"
   },
   "devDependencies": {

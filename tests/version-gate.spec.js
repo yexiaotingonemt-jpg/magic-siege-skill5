@@ -35,7 +35,7 @@ test('启动版本不一致：桌面与窄屏展示强制更新页，不提供�
   expect(service.game.accounts.rows).toHaveLength(0);expect(service.game.room.clients.size).toBe(0);expect(errors).toEqual([]);
  }finally{for(const c of contexts)await c.close();await service.close();}
 });
-test('在线升级服务器：客户端重连后转更新页并停止重试与操作',async({browser})=>{
+test('服务器提升战斗兼容版本：客户端重连后转更新页并停止重试与操作',async({browser})=>{
  const service=await setup(),context=await browser.newContext(),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  try{
   await login(page,service.base);await service.upgrade();
@@ -43,6 +43,24 @@ test('在线升级服务器：客户端重连后转更新页并停止重试与�
   const checked=[];service.game.server.on('request',req=>checked.push(req.url));
   await page.waitForTimeout(3500);expect(checked).toEqual([]);expect(service.game.room.clients.size).toBe(0);expect(await page.evaluate(()=>window.__game.network.connected)).toBe(false);
   await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,'version-required-after-upgrade.png'),fullPage:true});expect(errors).toEqual([]);
+ }finally{await context.close();await service.close();}
+});
+
+test('兼容版本不变：发布与诊断标识变化后可重连并继续操作，不显示更新页',async({browser})=>{
+ const service=await setup(),context=await browser.newContext(),page=await context.newPage();
+ try{
+  let revision='original-build';
+  await page.route('**/api/version',route=>route.fulfill({json:{gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION,revision,buildId:revision}}));
+  await login(page,service.base);
+  const previous=[...service.game.room.clients];expect(previous).toHaveLength(1);
+  revision='ui-art-and-server-maintenance';
+  for(const client of previous)client.res.end();
+  await expect.poll(()=>[...service.game.room.clients].some(client=>!previous.includes(client)),{timeout:15000}).toBe(true);
+  await page.waitForFunction(()=>window.__game?.network.connected);
+  await expect(page.locator('#updateRequired')).toHaveCount(0);
+  const stamina=service.game.room.sim.players.find(p=>p.accountId).stamina;
+  await page.locator('#addStamina').click();
+  await expect.poll(()=>service.game.room.sim.players.find(p=>p.accountId).stamina).toBe(stamina+100);
  }finally{await context.close();await service.close();}
 });
 test('操作收到版本拒绝：显示更新页，不继续操作或出现界面异常',async({browser})=>{

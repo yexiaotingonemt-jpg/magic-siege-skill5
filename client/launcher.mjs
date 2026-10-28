@@ -5,7 +5,7 @@ import {readFile,stat,realpath} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
-import {GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
+import {CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
 
 const clientRoot=path.dirname(fileURLToPath(import.meta.url));
 const mime={'.html':'text/html; charset=utf-8','.js':'application/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png','.webp':'image/webp','.jpg':'image/jpeg','.svg':'image/svg+xml','.ico':'image/x-icon','.woff2':'font/woff2','.mp3':'audio/mpeg','.ogg':'audio/ogg'};
@@ -30,7 +30,7 @@ export function createLocalClient({serverUrl,distDir=path.join(clientRoot,'dist'
    if(!['127.0.0.1','localhost'].includes(local.hostname))return json(res,403,{error:'本地客户端仅允许本机访问'});
    if(req.headers.origin&&req.headers.origin!==local.origin)return json(res,403,{error:'请求来源不允许'});
    const url=new URL(req.url,local);
-   if(url.pathname==='/client-info')return json(res,200,{app:'magic-siege-local-client',serverUrl:remote.origin,gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION});
+   if(url.pathname==='/client-info')return json(res,200,{app:'magic-siege-local-client',serverUrl:remote.origin,clientVersion:CLIENT_VERSION,gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION});
    if(url.pathname.startsWith('/api/')){
     const headers=cleanHeaders(req.headers);
     headers.host=remote.host;headers['x-magic-protocol']??=String(PROTOCOL_VERSION);
@@ -85,10 +85,10 @@ export async function startLocalClient({configPath=path.join(clientRoot,'client-
   if(error.code!=='EADDRINUSE')throw error;
   const response=await fetch(url+'client-info',{signal:AbortSignal.timeout(2000)}).catch(()=>null);
   const info=response?await response.json().catch(()=>null):null;
-  if(info?.app!=='magic-siege-local-client'||info.serverUrl!==local.serverUrl||info.gameVersion!==GAME_VERSION||info.protocolVersion!==PROTOCOL_VERSION)throw Error(`本地端口 ${port} 已被占用或仍在运行旧版本，请关闭旧客户端后重新启动；也可修改 client-config.json 中的 port`);
+  if(info?.app!=='magic-siege-local-client'||info.serverUrl!==local.serverUrl||info.clientVersion!==CLIENT_VERSION||info.gameVersion!==GAME_VERSION||info.protocolVersion!==PROTOCOL_VERSION)throw Error(`本地端口 ${port} 已被占用或仍在运行旧版本，请关闭旧客户端后重新启动；也可修改 client-config.json 中的 port`);
   console.log('客户端已启动：'+url);if(config.openBrowser!==false)openBrowser(url);return local;
  }
- console.log(`本地客户端 v${GAME_VERSION}：${url}\n战斗服务器：${local.serverUrl}\n关闭此窗口将断开游戏连接。`);
+ console.log(`本地客户端 v${CLIENT_VERSION}：${url}\n战斗服务器：${local.serverUrl}\n关闭此窗口将断开游戏连接。`);
  if(config.openBrowser!==false)openBrowser(url);
  return local;
 }

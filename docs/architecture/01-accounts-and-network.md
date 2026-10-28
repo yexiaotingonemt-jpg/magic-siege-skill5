@@ -34,8 +34,8 @@
 
 本地客户端配置、启动和分发见[客户端说明](../../client/README.md)。服务端只提供API，不再提供静态页面或美术。
 
-## 发布版本限制
+## 兼容版本限制
 
-发布版本源为[shared/protocol.js](../../shared/protocol.js)的GAME_VERSION，精确匹配后才可注册、登录或进入战场。协议版本另外检查。/api/version为公开版本探测；不匹配返回409及CLIENT_UPDATE_REQUIRED。客户端停止连接与自动重试，清除战场界面并展示强制更新页。
+版本源为[shared/protocol.js](../../shared/protocol.js)。`CLIENT_VERSION` 控制桌面包自动更新，`GAME_VERSION` 控制两端战斗规则兼容检查；结构不兼容时另外提升 `PROTOCOL_VERSION`。`/api/version` 公开返回全部标记。客户端发布版本不一致触发签名包自动下载、安装与重启；核心兼容版本不一致则游戏接口返回409，停止操作与SSE并转入更新页。游戏鉴权不以界面发布版本拒绝兼容请求。`RULESET_REVISION` 仅用于诊断。完整规则见[版本说明](../../README.md#版本限制)。
 
-对应验证：[接口校验](../../tests/version-gate.test.js)、[更新界面及在线升级](../../tests/version-gate.spec.js)。
+对应验证：[接口校验](../../tests/version-gate.test.js)、[更新界面及在线升级](../../tests/version-gate.spec.js)、[桌面自动更新完整验收](../../scripts/verify-desktop-update.mjs)。

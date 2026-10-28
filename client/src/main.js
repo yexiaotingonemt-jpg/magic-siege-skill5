@@ -13,16 +13,25 @@ import {troopTitle} from './visual-theme.js';
 import {createSkillHud} from './skill-hud.js';
 import {describeAbilities,abilityGuideHTML} from './ability-descriptions.js';
 import {connectRoom,request,checkServerVersion,isUpdateRequired} from './network.js';
-import {GAME_VERSION} from '../../shared/protocol.js';
+import {CLIENT_VERSION,GAME_VERSION} from '../../shared/protocol.js';
 import {available} from '../../shared/skill-value.js';
 const $=s=>document.querySelector(s);
 let account=null,network=null,renderer=null,selection=null,sheets=null,sim=null,skillHud=null,abilityHTML='',ready=false;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function setToolNotice(message){const element=$('#toolNotice');if(element)element.textContent=message;}
+let stopUpdateListener;
 function showUpdateRequired(error){
  network?.close();renderer?.game.destroy(true);network=null;renderer=null;selection=null;ready=false;
  document.body.classList.add('auth-mode');
- $('#app').innerHTML=`<main class="auth-stage"><section id="updateRequired" class="auth-card" role="alert"><div class="auth-crest">${uiIcon('crest')}</div><p class="auth-eyebrow">魔法王座 · 版本更新</p><h1>请更新客户端</h1><p class="auth-intro">客户端版本与服务器不一致，更新后才能进入战场。</p><p>当前客户端：<strong id="currentVersion">${esc(GAME_VERSION)}</strong></p><p>服务器要求：<strong id="requiredVersion">${esc(error.requiredVersion||'未知')}</strong></p><p class="auth-note">请退出旧版客户端，向管理员获取对应版本的完整客户端，解压后重新启动。</p></section></main>`;
+ const automatic=!!window.magicDesktop;
+ $('#app').innerHTML=`<main class="auth-stage"><section id="updateRequired" class="auth-card" role="alert"><div class="auth-crest">${uiIcon('crest')}</div><p class="auth-eyebrow">魔法王座 · 版本更新</p><h1>${automatic?'正在自动更新':'请更新客户端'}</h1><p>本机战斗兼容版本：<strong id="currentVersion">${esc(GAME_VERSION)}</strong></p><p>服务器战斗兼容版本：<strong id="requiredVersion">${esc(error.requiredVersion||'未知')}</strong></p>${automatic?`<p>客户端更新：${esc(error.currentClientVersion||CLIENT_VERSION)} → <strong id="requiredClientVersion">${esc(error.requiredClientVersion||'正在获取')}</strong></p>`:''}<p id="updateStatus">${automatic?'正在检查更新，完成后将自动重新启动游戏。':'请使用带自动更新功能的桌面客户端。'}</p><progress id="updateProgress" max="100" value="0" style="width:100%" hidden></progress><button id="retryUpdate" class="auth-primary" hidden>重试更新</button></section></main>`;
+ if(automatic){
+  const render=status=>{const el=$('#updateStatus');if(!el)return;el.textContent=status.message||'正在更新…';const progress=$('#updateProgress');progress.hidden=status.phase!=='downloading';if(status.percent!=null)progress.value=status.percent;$('#retryUpdate').hidden=status.phase!=='error';};
+  stopUpdateListener?.();stopUpdateListener=window.magicDesktop.onUpdate(render);
+  $('#retryUpdate').onclick=()=>window.magicDesktop.retryUpdate().then(render);
+  window.magicDesktop.update().then(render).catch(e=>render({phase:'error',message:e.message}));
+ }
+
 }
 function login(message=''){
  document.body.classList.add('auth-mode');$('#app').innerHTML=`<main class="auth-stage"><section class="auth-card"><div class="auth-crest">${uiIcon('crest')}</div><p class="auth-eyebrow">魔法王座 · 英雄攻防</p><h1>立下你的战誓</h1><p class="auth-intro">加入同一片战场，与其他契约者并肩作战。</p><div class="auth-tabs" role="tablist" aria-label="账号入口"><button id="tabRegister" role="tab" aria-selected="true" aria-controls="authForm" class="active">创建账号</button><button id="tabLogin" role="tab" aria-selected="false" aria-controls="authForm" tabindex="-1">账号登录</button></div><form id="authForm" role="tabpanel" aria-labelledby="tabRegister"><label>账号<input id="accountName" name="username" aria-describedby="authError" autocomplete="username" required minlength="2" maxlength="20" placeholder="输入你的契约者名号"></label><label>密码<input id="accountPassword" name="password" aria-describedby="authError" type="password" autocomplete="new-password" required minlength="6" maxlength="128" placeholder="至少6位"></label><fieldset id="sideChoices"><legend>选择阵营 · 创建后本次不可更改</legend><div class="side-cards"><label class="side-card"><input type="radio" name="side" value="0" checked><b>进攻军团</b><span>兽人 · 火焰 · 精灵 · 战车</span><small>协作破阵，攻下王座</small></label><label class="side-card defense"><input type="radio" name="side" value="1"><b>黑暗王庭</b><span>黑暗领主</span><small>孤身冲阵，守住防线</small></label></div></fieldset><p id="authError" class="auth-error" role="alert">${esc(message)}</p><button id="authSubmit" class="auth-primary" type="submit">创建账号并加入战场</button></form><p class="auth-note">所有玩家进入同一局。已有账号请登录，阵营与成长保留在该账号。</p></section></main>`;

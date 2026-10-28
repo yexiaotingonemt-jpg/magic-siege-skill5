@@ -1,10 +1,11 @@
 import {Simulation} from '../../shared/simulation.js';
-import {GAME_VERSION,PROTOCOL_VERSION,UPDATE_REQUIRED_CODE} from '../../shared/protocol.js';
+import {CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION,UPDATE_REQUIRED_CODE} from '../../shared/protocol.js';
 export const isUpdateRequired=error=>error?.code===UPDATE_REQUIRED_CODE;
 export async function request(path,body){const r=await fetch(path,{method:body?'POST':'GET',headers:{'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});const data=await r.json();if(!r.ok)throw Object.assign(Error(data.error||data.message||'连接失败'),data,{status:r.status});return data;}
-export async function checkServerVersion(){
+export async function checkServerVersion({desktop=typeof window!=='undefined'&&!!window.magicDesktop}={}){
  const data=await request('/api/version');
- if(data.gameVersion!==GAME_VERSION||data.protocolVersion!==PROTOCOL_VERSION)throw Object.assign(Error('客户端版本与服务器不一致，请更新客户端后重新启动游戏。'),{code:UPDATE_REQUIRED_CODE,clientVersion:GAME_VERSION,requiredVersion:data.gameVersion||'未知'});
+ const incompatible=data.gameVersion!==GAME_VERSION||data.protocolVersion!==PROTOCOL_VERSION;
+ if(incompatible||(desktop&&data.clientVersion&&data.clientVersion!==CLIENT_VERSION))throw Object.assign(Error(incompatible?'战斗兼容版本不一致，正在更新客户端。':'发现新客户端，正在自动更新。'),{code:UPDATE_REQUIRED_CODE,clientVersion:GAME_VERSION,requiredVersion:data.gameVersion||'未知',currentClientVersion:CLIENT_VERSION,requiredClientVersion:data.clientVersion});
  return data;
 }
 const renderedPosition=(u,now)=>{if(!Number.isFinite(u?._renderFromX))return {x:u.x,y:u.y};const t=Math.max(0,Math.min(1,(now-u._renderStarted)/u._renderDuration));return {x:u._renderFromX+(u._renderToX-u._renderFromX)*t,y:u._renderFromY+(u._renderToY-u._renderFromY)*t};};

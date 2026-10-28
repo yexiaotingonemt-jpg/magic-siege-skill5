@@ -8,12 +8,14 @@ import {createGameServer} from '../server/index.mjs';
 import {createLocalClient,parseServerUrl} from '../client/launcher.mjs';
 import {GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
 const listen=async server=>{await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));return `http://127.0.0.1:${server.address().port}`;};
-async function setup(t){
+async function setup(t,{differentAssets=false}={}){
  const dir=await mkdtemp(path.join(tmpdir(),'magic-local-')),distDir=path.join(dir,'dist');
  await mkdir(distDir);await writeFile(path.join(distDir,'index.html'),'<html>local assets</html>');await writeFile(path.join(distDir,'sprite.webp'),'test-image');
  const game=createGameServer({dataDir:path.join(dir,'data')}),remote=await listen(game.server),seen=[];
  game.server.on('request',req=>seen.push(req.url));
- const clients=[createLocalClient({serverUrl:remote,distDir}),createLocalClient({serverUrl:remote,distDir})];
+ const updatedDist=path.join(dir,'updated-dist');
+ if(differentAssets){await mkdir(updatedDist);await writeFile(path.join(updatedDist,'index.html'),'<html>updated interface</html>');await writeFile(path.join(updatedDist,'sprite.webp'),'updated-art');}
+ const clients=[createLocalClient({serverUrl:remote,distDir}),createLocalClient({serverUrl:remote,distDir:differentAssets?updatedDist:distDir})];
  const bases=await Promise.all(clients.map(c=>listen(c.server)));
  t.after(async()=>{for(const c of game.room.clients)c.res.end();for(const server of [...clients.map(c=>c.server),game.server]){server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}await rm(dir,{recursive:true,force:true});});
  return {game,remote,seen,bases};
@@ -22,6 +24,31 @@ async function request(base,route,body,cookie,headers={}){
  const response=await fetch(base+route,{method:body?'POST':'GET',headers:{'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),...headers,...(body?{'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},body:body?JSON.stringify(body):undefined});
  return {status:response.status,body:await response.json(),cookie:response.headers.get('set-cookie')?.split(';')[0]};
 }
+
+test('仅界面与美术不同的客户端包沿用兼容版本，可登录同一服务器并操作与订阅战局',async t=>{
+ const {bases:[oldClient,newClient]}=await setup(t,{differentAssets:true});
+ assert.match(await (await fetch(oldClient)).text(),/local assets/);
+ assert.match(await (await fetch(newClient)).text(),/updated interface/);
+ assert.equal(await (await fetch(oldClient+'/sprite.webp')).text(),'test-image');
+ assert.equal(await (await fetch(newClient+'/sprite.webp')).text(),'updated-art');
+ const oldInfo=await (await fetch(oldClient+'/client-info')).json(),newInfo=await (await fetch(newClient+'/client-info')).json();
+ assert.equal(oldInfo.gameVersion,GAME_VERSION);assert.deepEqual(newInfo,oldInfo);
+ const account={name:'同版不同资源',password:'compatible-assets-password',side:0};
+ assert.equal((await request(oldClient,'/api/register',account)).status,200);
+ let matchId;
+ for(const base of [oldClient,newClient]){
+  const login=await request(base,'/api/login',account);assert.equal(login.status,200);
+  const state=await request(base,'/api/state',null,login.cookie);assert.equal(state.status,200);
+  matchId??=state.body.matchId;assert.equal(state.body.matchId,matchId);
+  assert.equal((await request(base,'/api/action',{type:'stamina'},login.cookie)).status,200);
+  const controller=new AbortController();
+  try{
+   const stream=await fetch(base+`/api/events?clientVersion=${GAME_VERSION}&protocolVersion=${PROTOCOL_VERSION}`,{headers:{Cookie:login.cookie},signal:controller.signal});
+   assert.equal(stream.status,200);const reader=stream.body.getReader();let text='';
+   while(!text.includes('event: identity')){const {done,value}=await reader.read();assert.equal(done,false);text+=new TextDecoder().decode(value);}
+  }finally{controller.abort();}
+ }
+});
 test('两个本地客户端登录同一远端，独立身份、命令与SSE实时同步',async t=>{
  const {game,bases:[a,b]}=await setup(t),password='local-client-password';
  const alice=await request(a,'/api/register',{name:'本地甲',password,side:0},null,{Origin:a});assert.equal(alice.status,200);assert.ok(alice.cookie);
