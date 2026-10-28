@@ -1,0 +1,22 @@
+{
+  "version": "45.1.0-win32-x64",
+  "sha256": "59c46862c1072e125b00266c0ba106427c14145953147bb2d0897372c1983f00",
+  "parts": [
+    {
+      "file": "desktop-runtime/45.1.0-win32-x64/runtime.zip.001",
+      "sha256": "c6047ab62bd92246276592497a8e6fb6102fbac6111a48017f3736dd863b2285"
+    },
+    {
+      "file": "desktop-runtime/45.1.0-win32-x64/runtime.zip.002",
+      "sha256": "961b055f7c7e74c7f2259487744ead36430cbb833d1a3f1db0f14f7948022f2f"
+    },
+    {
+      "file": "desktop-runtime/45.1.0-win32-x64/runtime.zip.003",
+      "sha256": "bc2760e53dadb1a602684ff8ff01a7423c961e0983808b2295488749adc1d59a"
+    },
+    {
+      "file": "desktop-runtime/45.1.0-win32-x64/runtime.zip.004",
+      "sha256": "4cc77d4f70294421d112f0f09e694f2250ae9c392e545261b60a7b9f80615627"
+    }
+  ]
+}

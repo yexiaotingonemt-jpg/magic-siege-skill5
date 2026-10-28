@@ -115,7 +115,7 @@ func prepare(root,cache,profile string)(Manifest,error){
 }
 func run()error{
  exe,_:=os.Executable();rootArg:=flag.String("root",filepath.Dir(exe),"");cacheArg:=flag.String("cache","","");profileArg:=flag.String("profile","","");only:=flag.Bool("prepare-only",false,"");waitPID:=flag.Uint("wait-pid",0,"");flag.Parse()
- root,e:=filepath.Abs(*rootArg);if e!=nil{return e};cache:=*cacheArg;if cache==""{cache=filepath.Join(os.Getenv("LOCALAPPDATA"),"MagicSiege","repository-client")};cache,e=filepath.Abs(cache);if e!=nil{return e}
+ root,e:=filepath.Abs(*rootArg);if e!=nil{return e};cache:=*cacheArg;if cache==""{cache=filepath.Join(root,".desktop-cache","repository-client")};cache,e=filepath.Abs(cache);if e!=nil{return e}
  if filepath.Base(cache)!="repository-client"{return errors.New("本机缓存目录无效")}
  profile:=*profileArg;if profile==""{profile=os.Getenv("MAGIC_DESKTOP_USER_DATA")};if profile==""{profile=filepath.Join(os.Getenv("APPDATA"),"Magic Siege")}
  if *waitPID>0{if e=waitForPID(uintptr(*waitPID));e!=nil{return e}}
