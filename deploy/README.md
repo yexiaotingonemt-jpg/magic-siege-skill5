@@ -105,11 +105,13 @@ location / {
 
 把桌面客户端ZIP发给玩家，完整解压后双击根目录`魔法王座.exe`。Windows包附带完整桌面运行环境，玩家无需安装Node.js或浏览器，也无需运行CMD。图片和脚本留在玩家电脑上；服务器只接收API请求。不要把服务端包或账号文件发给玩家。
 
-桌面客户端自动下载签名包、校验、安装并重新启动。`CLIENT_VERSION`（当前0.4.0）独立维护，客户端界面、资源或启动器发布时提升；`GAME_VERSION`（当前0.3.0）只在战斗规则或核心共享行为不兼容时提升；API/命令/快照结构不兼容另外提升 `PROTOCOL_VERSION`。游戏接口只校验战斗兼容版本和协议标记，客户端版本用于更新。旧0.3.0包不含更新器，需要首次换用新包。当前战局服务仍为单实例。
+正式发布遵守[客户端与服务器统一版本发布约定](../docs/版本发布约定.md)：`SERVER_VERSION` 必须与 `CLIENT_VERSION` 相等。数值或服务端代码调整也同步提升两端发布号，生成配套客户端签名包并部署同版本服务器。
+
+桌面客户端自动下载签名包、校验、安装并重新启动。两端发布号统一递增；`GAME_VERSION` 作为两端共用的战斗兼容标记，在旧客户端不兼容时提升；API/命令/快照结构不兼容时提升 `PROTOCOL_VERSION`。游戏接口校验战斗兼容标记和协议标记，客户端发布号控制自动更新。
 
 ## 桌面自动更新发布
 
-1. 修改 `shared/protocol.js` 的客户端版本；核心战斗不兼容时同时修改战斗兼容版本。同步根 `package.json` 与 lockfile 的客户端发布版本，执行测试及 `npm run package:client`。
+1. 同步提升 `shared/protocol.js` 的 `SERVER_VERSION` 与 `CLIENT_VERSION`，使用相同的新发布号；核心战斗不兼容时同时修改两端共用的战斗兼容标记。同步根 `package.json` 与 lockfile，执行测试并生成同版本的服务端包和客户端签名包。
 2. 使用仓库外的Ed25519私钥签名：设置 `MAGIC_UPDATE_SIGNING_KEY` 为私钥文件路径，运行 `node scripts/sign-desktop-update.mjs <桌面ZIP路径>`。私钥必须备份在独立的安全位置，禁止提交或上传服务器；公钥已内置于客户端与服务端。
 3. 将ZIP重命名为 `package.zip`，与生成的清单（重命名 `manifest.json`）一起上传到临时目录。核对大小、SHA-256与签名后，原子发布为 `<MAGIC_UPDATE_DIR>/<CLIENT_VERSION>/win32-x64/`。同一个客户端版本的清单和包保持不可变，新包提升客户端版本。
 4. 先发布完整更新目录，再部署服务端的目标客户端版本。`deploy/run-user-service.sh` 默认将更新目录指向 `$APP_ROOT/shared/updates`。验证公开版本、清单、Range下载与旧包自动安装。没有有效签名包时接口返回503，客户端保留当前安装并允许重试。
@@ -132,6 +134,6 @@ Windows辅助进程在本机用户目录记录更新日志，暂存目录与旧�
 
 `GET /api/version` 返回 `clientVersion`（目标客户端发布版）、`gameVersion`（战斗兼容版）和 `protocolVersion`，无需登录。`GET /api/health` 也包含这些信息。游戏API的 `X-Magic-Version` 必须为战斗兼容版本，`X-Magic-Protocol` 为协议标记；浏览器EventSource沿用 `clientVersion` 查询参数传递战斗兼容版本、`protocolVersion` 传递协议标记，以兼容旧包。头与参数同时存在时必须全部匹配。版本不符返回409及 `CLIENT_UPDATE_REQUIRED`，包含 `requiredVersion`（战斗）和 `requiredClientVersion`（客户端）。监控、版本探测与更新下载不受旧版请求头限制。
 
-客户端打包检查 `client/dist/client-version.json` 的客户端发布版本、战斗兼容版本与协议标记是否对应源码，不匹配则重新构建。构建和打包不自动加版本；客户端新发布需手动提升 `CLIENT_VERSION`，兼容性变化才提升 `GAME_VERSION`。`RULESET_REVISION` 不参与检查。
+客户端打包检查 `client/dist/client-version.json` 的客户端发布版本、战斗兼容版本与协议标记是否对应源码，不匹配则重新构建。构建和打包不自动加版本；正式发布需手动同步提升 `SERVER_VERSION` 与 `CLIENT_VERSION`，兼容性变化才提升 `GAME_VERSION`。`RULESET_REVISION` 不参与检查。
 
-桌面客户端默认自动连接 `http://124.222.216.66:5183`，不向玩家提供服务器设置入口，不读取旧个人地址或EXE旁的地址配置。客户端发布版本0.4.0，服务器战斗兼容版本0.3.0。
+桌面客户端默认自动连接 `http://124.222.216.66:5183`，不向玩家提供服务器设置入口，不读取旧个人地址或EXE旁的地址配置。两端发布版本以 `shared/protocol.js`、正式服版本接口及签名更新清单为准。

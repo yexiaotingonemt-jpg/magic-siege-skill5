@@ -14,4 +14,6 @@
 
 运维步骤见 [部署说明](../deploy/README.md)。
 
-版本限制由 `../shared/protocol.js` 的 `GAME_VERSION` 定义。所有游戏接口严格检查客户端发布版本和协议版本，缺失或不匹配时返回HTTP 409，错误码为`CLIENT_UPDATE_REQUIRED`。`GET /api/version`与健康检查保持公开，以便客户端展示更新要求与运维探测。
+版本限制由 `../shared/protocol.js` 的 `GAME_VERSION` 定义。所有游戏接口严格检查战斗兼容版本和协议版本，缺失或不匹配时返回HTTP 409，错误码为`CLIENT_UPDATE_REQUIRED`。`GET /api/version`与健康检查保持公开，以便客户端展示更新要求与运维探测。
+
+服务端发布版本 `SERVER_VERSION` 必须与客户端 `CLIENT_VERSION` 保持一致；数值调整和服务端代码发布也同步提升两端发布号并发布配套客户端更新。公开 `/api/version` 与 `/api/health` 的 `serverVersion`、`clientVersion` 应等于同一个发布号。完整约定见[统一版本发布约定](../docs/版本发布约定.md)。
