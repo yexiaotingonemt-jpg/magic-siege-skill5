@@ -37,7 +37,7 @@ npm run start:server
 npm run start:client
 ```
 
-启动独立桌面游戏窗口。通过菜单“游戏 → 服务器设置”修改远端地址；源码默认地址配置在 [client/client-config.json](client/client-config.json)。Windows源码目录的 `Start.cmd` / `LAN-Start.cmd` 也会启动桌面窗口。玩家直接使用打包后的 `魔法王座.exe`。
+启动独立桌面游戏窗口，自动连接 `http://124.222.216.66:5183`，玩家无需填写或选择服务器，旧版保存的个人地址也不会覆盖内置地址。源码默认地址位于 [client/client-config.json](client/client-config.json)。Windows源码目录的 `Start.cmd` / `LAN-Start.cmd` 也会启动桌面窗口。玩家直接使用打包后的 `魔法王座.exe`。
 
 开发时可用 `npm run dev` 启动Vite热更新界面，默认转发API到 `http://127.0.0.1:5183`；通过环境变量 `MAGIC_SERVER_URL` 改用远端服务。必须另行运行一个战斗服务器。
 

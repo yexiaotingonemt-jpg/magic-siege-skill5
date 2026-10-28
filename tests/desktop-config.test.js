@@ -1,24 +1,19 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
-import {readDesktopSettings,saveDesktopSettings} from '../client/desktop/config.mjs';
-test('桌面服务器地址：默认、分发包、个人设置与环境覆盖，保存后跨版本保留',async()=>{
+import {readDesktopSettings} from '../client/desktop/config.mjs';
+test('桌面自动连接内置服务器，忽略旧个人地址和外部地址文件',async()=>{
  const root=await mkdtemp(path.join(tmpdir(),'magic-desktop-config-'));
  const clientRoot=path.join(root,'client'),portableRoot=path.join(root,'portable'),userData=path.join(root,'profile');
  try{
-  for(const dir of [clientRoot,portableRoot])await mkdir(dir);
+  for(const dir of [clientRoot,portableRoot,userData])await mkdir(dir);
+  await writeFile(path.join(clientRoot,'client-config.json'),JSON.stringify({serverUrl:'http://124.222.216.66:5183'}));
+  await writeFile(path.join(portableRoot,'client-config.json'),JSON.stringify({serverUrl:'http://127.0.0.1:9999'}));
+  await writeFile(path.join(userData,'client-config.json'),'invalid legacy settings');
   const paths={clientRoot,portableRoot,userData};
-  await writeFile(path.join(clientRoot,'client-config.json'),JSON.stringify({serverUrl:'http://127.0.0.1:5183'}));
-  assert.equal((await readDesktopSettings(paths)).serverUrl,'http://127.0.0.1:5183');
-  await writeFile(path.join(portableRoot,'client-config.json'),JSON.stringify({serverUrl:'https://game.example.com/'}));
-  assert.equal((await readDesktopSettings(paths)).serverUrl,'https://game.example.com');
-  await saveDesktopSettings(userData,'http://192.168.1.10:5183');
-  assert.equal((await readDesktopSettings(paths)).serverUrl,'http://192.168.1.10:5183');
-  assert.equal((await readDesktopSettings({...paths,serverOverride:'https://override.example.com'})).serverUrl,'https://override.example.com');
-  const previous=await readFile(path.join(userData,'client-config.json'),'utf8');
-  await assert.rejects(saveDesktopSettings(userData,'file:///C:/test'));await assert.rejects(saveDesktopSettings(userData,'https://example.com/api'));
-  assert.equal(await readFile(path.join(userData,'client-config.json'),'utf8'),previous);
+  assert.equal((await readDesktopSettings(paths)).serverUrl,'http://124.222.216.66:5183');
+  assert.equal((await readDesktopSettings({...paths,serverOverride:'http://127.0.0.1:5000'})).serverUrl,'http://127.0.0.1:5000');
  }finally{await rm(root,{recursive:true,force:true});}
 });

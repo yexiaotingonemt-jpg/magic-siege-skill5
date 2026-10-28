@@ -51,20 +51,18 @@ test('桌面EXE独立窗口：本机资源、登录契约、关闭退出、重�
   client=await launch(server.base,profile);await client.page.waitForFunction(()=>window.__game?.sim.hero());expect(await client.page.evaluate(()=>({match:__game.sim.matchId,hero:__game.sim.hero().id}))).toEqual(identity);expect(client.errors).toEqual([]);
  }finally{await client?.app.close();await server.close();}
 });
-test('桌面服务器设置：拒绝非法地址、保存切换、重启仍使用个人设置',async()=>{
- const first=await service(),second=await service();let client;
+test('默认直连正式服，无服务器选择入口，忽略旧版保存地址',async()=>{
+ const profile=await mkdtemp(path.join(tmpdir(),'magic-default-profile-'));let client;
  try{
-  client=await launch(first.base);await expect(client.page.locator('#authForm')).toBeVisible();
-  const event=client.app.waitForEvent('window');await client.app.evaluate(({Menu})=>Menu.getApplicationMenu().getMenuItemById('server-settings').click());const settings=await event;
-  await expect(settings.locator('#serverUrl')).toHaveValue(first.base);await settings.locator('#serverUrl').fill('https://game.example.com/invalid/path');await settings.locator('#saveSettings').click();await expect(settings.locator('#settingsError')).toContainText('不带路径');
-  await capture(client.app,settings,path.join(process.env.MAGIC_QA_DIR,'desktop-settings.png'));
-  await settings.locator('#serverUrl').fill(second.base);await settings.locator('#saveSettings').click();await expect(client.page.locator('#authForm')).toBeVisible();
-  await expect.poll(async()=>{try{return (await (await client.page.request.get(new URL(client.page.url()).origin+'/client-info')).json()).serverUrl;}catch{return '';}}).toBe(second.base);
-  const saved=JSON.parse(await readFile(path.join(client.profile,'client-config.json'),'utf8'));expect(saved.serverUrl).toBe(second.base);
-  const profile=client.profile;await client.app.close();client=await launch(null,profile);await expect(client.page.locator('#authForm')).toBeVisible();
-  expect((await (await client.page.request.get(new URL(client.page.url()).origin+'/client-info')).json()).serverUrl).toBe(second.base);expect(client.errors).toEqual([]);
- }finally{await client?.app.close();await first.close();await second.close();}
+  await writeFile(path.join(profile,'client-config.json'),JSON.stringify({serverUrl:'http://127.0.0.1:1'}));
+  client=await launch(null,profile);await expect(client.page.locator('#authForm')).toBeVisible();
+  const info=await (await client.page.request.get(new URL(client.page.url()).origin+'/client-info')).json();
+  expect(info.serverUrl).toBe('http://124.222.216.66:5183');
+  expect(await client.app.evaluate(({Menu})=>Menu.getApplicationMenu().getMenuItemById('server-settings')===null)).toBe(true);
+  await expect(client.page.locator('#serverUrl')).toHaveCount(0);expect(client.errors).toEqual([]);
+ }finally{await client?.app.close();}
 });
+
 test('桌面版本不符：直接显示强制更新页',async()=>{
  const required=GAME_VERSION.replace(/\d+$/,n=>String(Number(n)+1)),server=await service(required);let client;
  try{client=await launch(server.base);await expect(client.page.locator('#updateRequired')).toBeVisible();await expect(client.page.locator('#requiredVersion')).toHaveText(required);await expect(client.page.locator('#authForm')).toHaveCount(0);await capture(client.app,client.page,path.join(process.env.MAGIC_QA_DIR,'desktop-update-required.png'));expect(client.errors).toEqual([]);}finally{await client?.app.close();await server.close();}

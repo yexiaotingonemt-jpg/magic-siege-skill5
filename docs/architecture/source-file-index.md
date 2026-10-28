@@ -77,7 +77,6 @@
 
 ## 桌面应用入口
 
-- [client/desktop/main.mjs](../../client/desktop/main.mjs)：原生窗口、菜单、单实例、本地服务生命周期与设置IPC。
-- [client/desktop/config.mjs](../../client/desktop/config.mjs)：分发默认地址、个人设置与持久化。
-- [client/desktop/settings-preload.cjs](../../client/desktop/settings-preload.cjs)、[settings.html](../../client/desktop/settings.html)、[settings.js](../../client/desktop/settings.js)：隔离的设置窗口。
+- [client/desktop/main.mjs](../../client/desktop/main.mjs)：原生窗口、菜单、单实例与本地服务生命周期。
+- [client/desktop/config.mjs](../../client/desktop/config.mjs)：内置正式服务器地址；忽略旧个人设置。
 - [scripts/package-desktop.mjs](../../scripts/package-desktop.mjs)：独立Windows EXE与ZIP打包。
