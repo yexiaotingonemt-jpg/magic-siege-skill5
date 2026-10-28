@@ -4,11 +4,11 @@ export const PROTOCOL_VERSION=1;
 // Bump only when combat rules, shared data or other server-facing behavior would
 // become inconsistent with existing clients. UI, art, launcher, deployment and
 // documentation-only changes keep this version; builds/packages never bump it.
-export const GAME_VERSION='0.3.1';
+export const GAME_VERSION='0.3.2';
 // Server and desktop releases share one version; publish both together.
-export const SERVER_VERSION='0.4.4';
+export const SERVER_VERSION='0.4.5';
 // Desktop release version must match SERVER_VERSION.
-export const CLIENT_VERSION='0.4.4';
+export const CLIENT_VERSION='0.4.5';
 // Diagnostic ruleset label; changing this alone does not require a client update.
-export const RULESET_REVISION='skill5-target-balance-20261028';
+export const RULESET_REVISION='skill5-support-targets-20261028';
 export const UPDATE_REQUIRED_CODE='CLIENT_UPDATE_REQUIRED';

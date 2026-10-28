@@ -58,7 +58,7 @@ test('火焰盾每秒独立跳伤生成新事件，离场灼烧继续归属原�
  for(const e of events){near(e.amount,h.attack*.4);assert.equal(e.sourceId,h.id);assert.equal(e.targetId,enemy.id);assert.equal(e.skill,2);}
 });
 test('冲锋沿途伤害产生飘字且同一目标不重复记录',()=>{
- const {s,p,h,enemy,target}=arena(3);enemy.y=-10;const wing=target(3,-7);s.cast(1,p);advance(s,1.7);
+ const {s,p,h,enemy,target}=arena(3);enemy.y=-10;const wing=target(3,-7);assert.ok(s.setManualTarget(enemy.id,p));s.cast(1,p);advance(s,1.7);
  const events=numbers(s);assert.equal(events.filter(e=>e.targetId===wing.id).length,1);assert.ok(events.some(e=>e.targetId===enemy.id));for(const e of events){assert.equal(e.skill,1);near(e.amount,h.attack*2.4);}
 });
 test('领主大招的附加伤害飘字与普通攻击主目标分开，额度耗尽无零伤害事件',()=>{

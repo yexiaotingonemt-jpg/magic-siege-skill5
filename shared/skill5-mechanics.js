@@ -1,16 +1,38 @@
 import {scaleSkill4,impactSkill4 as legacyImpact,chooseRandomTarget,updateSkill4Unit} from './skill4-mechanics.js';
 import {available,spend} from './skill-value.js';
 import {applyFlameShield,applyMovingFlameShield,tickLordScorch,segmentDistance} from './lord-flame-shield.js';
-import {manualTarget} from './manual-target.js';
+import {manualTarget,enemyTarget,friendlyTarget} from './manual-target.js';
 export {scaleSkill4,chooseRandomTarget};
 const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const near=(h,es)=>es.sort((a,b)=>d(h,a)-d(h,b)||a.id-b.id);
 const priority=(h,es)=>es.sort((a,b)=>(a.hero?0:a.tower?2:1)-(b.hero?0:b.tower?2:1)||d(h,a)-d(h,b)||a.id-b.id);
 const alive=(sim,ids)=>ids.map(id=>sim.get(id)).filter(Boolean);
 const prefer=(target,targets)=>target?[target,...targets.filter(u=>u.id!==target.id)]:targets;
+const directedEnemy=(h,i)=>h.classId===0&&i===0||h.classId===2||h.classId===3&&i<2||h.classId===4||h.classId===5&&i===0;
+// Resolve support from the current selection, never from an older friendly lock.
+// Automatic fallback only considers recipients valid for this support skill.
+const supportTarget=(sim,h,i,s)=>{
+ const chosen=manualTarget(sim,h)||enemyTarget(sim,h);
+ if(chosen?.side===h.side)return chosen;
+ const victim=chosen&&sim.get(chosen.targetId);
+ if(victim?.side===h.side)return victim;
+ return sim.allies(h,s.targetRange).filter(u=>i!==1||u.id!==h.id).filter(u=>i!==2||sim.hasNegative(u)).sort((a,b)=>a.hp-b.hp||d(h,a)-d(h,b)||a.id-b.id)[0]||null;
+};
+const skillTarget=(sim,h,i,s)=>h.classId===5&&i>=1?supportTarget(sim,h,i,s):directedEnemy(h,i)?enemyTarget(sim,h):manualTarget(sim,h);
 // Keep applicable explicit selections locked even when a nearer target exists.
 export function skill5RangeFailure(sim,h,i,s){
- const chosen=manualTarget(sim,h);if(!chosen)return null;
+ const support=h.classId===5&&i>=1;
+ const chosen=skillTarget(sim,h,i,s);
+ if(directedEnemy(h,i)&&!chosen)return {ok:false,code:'target',reason:'请选择敌方目标'};
+ if(support){
+  const bad=reason=>({ok:false,code:'wrong-target',reason});
+  if(!chosen)return bad('范围内没有符合条件的己方目标');
+  if(chosen.tower)return bad('该技能不能对建筑释放');
+  if(i===1&&chosen.id===h.id)return bad('共生链接不能选择自己');
+  if(d(h,chosen)>s.targetRange+1e-7)return {ok:false,code:'range',reason:'目标太远'};
+  if(i===2&&!sim.hasNegative(chosen))return bad('选中的友方目标没有可净化的负面状态');
+ }
+ if(!chosen)return null;
  const enemy=chosen.side!==h.side,other=chosen.id!==h.id&&!chosen.tower;
  const applies=enemy?(h.classId===0?(i===0||i===2&&chosen.hero):h.classId===2||h.classId===4||h.classId===3&&i<2||h.classId===5&&i===0)
   :!chosen.tower&&(h.classId===0?(i===1||i===2&&other):h.classId===5&&(i===1?other:i===2||i===3));
@@ -18,7 +40,7 @@ export function skill5RangeFailure(sim,h,i,s){
 }
 export function selectSkill5(h,i,s){
  const es=priority(h,this.enemies(h,s.targetRange)),all=this.allies(h,s.targetRange),current=this.get(h.targetId);
- const chosen=manualTarget(this,h),inRange=chosen&&d(h,chosen)<=s.targetRange+1e-7?chosen:null;
+ const chosen=skillTarget(this,h,i,s),inRange=chosen&&d(h,chosen)<=s.targetRange+1e-7?chosen:null;
  const selected=inRange?.side!==h.side?inRange:null,friend=inRange?.side===h.side&&!inRange.tower?inRange:null;
  const currentEnemy=current&&current.side!==h.side&&d(h,current)<=s.targetRange&&(current.id!==h.manualTargetId||selected)?current:null;
  const bad=reason=>({ok:false,code:'target',reason});let t=es[0],targets=[],selectedId=null;
@@ -42,7 +64,7 @@ export function selectSkill5(h,i,s){
   selectedId=selected?.id;
   if(!t)return bad('范围内没有可攻击目标');
  }else if(h.classId===5){
-  if(i===0){t=selected||currentEnemy||t;if(!t)return bad('范围内没有灵息冲击目标');selectedId=chosen?.side===h.side&&!chosen.tower&&d(t,chosen)<=s.radius+1e-7?chosen.id:selected?.id;}
+  if(i===0){t=selected||currentEnemy||t;if(!t)return bad('范围内没有灵息冲击目标');const ally=friendlyTarget(this,h);selectedId=ally&&!ally.tower&&d(t,ally)<=s.radius+1e-7?ally.id:selected?.id;}
   if(i===1){t=friend&&friend.id!==h.id?friend:all.filter(u=>u.id!==h.id).sort((a,b)=>a.hp-b.hp||d(h,a)-d(h,b)||a.id-b.id)[0];if(!t)return bad('范围内没有其他友军可链接');selectedId=t.id===friend?.id?friend.id:null;}
   if(i===2){const candidates=near(h,all.filter(u=>this.hasNegative(u)));targets=prefer(candidates.find(u=>u.id===friend?.id),candidates).slice(0,s.targets);t=h;if(!targets.length)return bad('没有需要净化的友军');selectedId=targets.find(u=>u.id===friend?.id)?.id;}
   if(i===3){targets=[h,...prefer(friend?.id!==h.id?friend:null,all.filter(u=>u.id!==h.id).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp||d(h,a)-d(h,b)||a.id-b.id)).slice(0,s.targets)];t=h;if(!targets.some(u=>u.hp<u.maxHp))return bad('没有需要治疗的友军');selectedId=friend?.id;}

@@ -15,6 +15,8 @@ npm run package:client -- --server https://game.example.com
 
 将示例域名替换成实际服务器地址。发布目录位于`release/`；Windows还会生成ZIP和SHA-256文件。校验上传包SHA-256后，将服务端包解压到新建的版本目录，保留`server/`和`shared/`的相对层级：
 
+开发机空间不足时，可用 `MAGIC_RELEASE_DIR` 指定其他磁盘的发布目录；打包临时目录跟随进程 `TEMP`/`TMP`。这些选项不改变发布版本及签名校验。
+
 ```text
 server/index.mjs
 server/accounts.mjs
@@ -138,4 +140,4 @@ Windows辅助进程在本机用户目录记录更新日志，暂存目录与旧�
 
 客户端打包检查 `client/dist/client-version.json` 的客户端发布版本、战斗兼容版本与协议标记是否对应源码，不匹配则重新构建。构建和打包不自动加版本；正式发布需手动同步提升 `SERVER_VERSION` 与 `CLIENT_VERSION`，兼容性变化才提升 `GAME_VERSION`。`RULESET_REVISION` 不参与检查。
 
-桌面客户端默认自动连接 `http://124.222.216.66:5183`，不向玩家提供服务器设置入口，不读取旧个人地址或EXE旁的地址配置。客户端与服务器发布版本均为0.4.3，战斗兼容版本为0.3.1。
+桌面客户端默认自动连接 `http://124.222.216.66:5183`，不向玩家提供服务器设置入口，不读取旧个人地址或EXE旁的地址配置。客户端与服务器发布版本均为0.4.5，战斗兼容版本为0.3.2。
