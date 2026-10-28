@@ -17,15 +17,15 @@ export const gameShell=`
    </div>
    <section class="hero-hud" aria-label="英雄状态">
     <div class="portrait" id="portrait"></div>
-    <div class="hero-copy"><b id="heroName"></b><span id="hpLabel"></span><div class="bar"><i id="hpbar"></i></div><div class="xp"><i id="xpbar"></i></div><small id="xpLabel"></small><small id="attackLabel" class="hero-attack" hidden></small><span id="lordEnergy" class="lord-energy" aria-label="能量 0/4" hidden></span></div>
+    <div class="hero-copy"><b id="heroName"></b><span id="hpLabel"></span><div class="bar"><i id="hpbar"></i></div><div class="xp"><i id="xpbar"></i></div><small id="xpLabel"></small><small id="attackLabel" class="hero-attack" hidden></small><button id="traitPending" class="trait-pending" hidden>选择强化</button><span id="eliteBuffs" class="elite-buffs"></span></div>
     <div class="contract-guide" aria-hidden="true"><span><i>1</i>点选士兵</span>${uiIcon('chevron')}<span><i>2</i>确认契约</span>${uiIcon('chevron')}<span><i>3</i>释放技能</span></div>
    </section>
    <div id="skills" class="skills" aria-label="英雄技能" hidden></div>
-   <div id="notice" role="status"></div>
+   <div id="notice" role="status"></div><div id="eliteBroadcast" class="elite-broadcast" role="status" aria-live="polite" hidden></div><div id="traitDraft" class="trait-draft" role="dialog" aria-modal="true" aria-labelledby="draftTitle" hidden></div>
    <footer aria-label="游戏导航">${[['battle','战场'],['hero','技能'],['reports','战报'],['ranking','排行']].map(([name,label])=>`<button type="button" data-nav="${name}" ${name==='battle'?'aria-current="page"':''}>${uiIcon(name)}<span>${label}</span></button>`).join('')}</footer>
    <div id="gameSheet" class="game-sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
     <section class="sheet-panel"><div class="sheet-heading"><h2 id="sheetTitle">职业技能</h2><button id="sheetClose" aria-label="关闭面板">×</button></div>
-     <div id="sheetScroll" class="sheet-scroll"><section data-sheet-section="hero"><div class="hero-sheet-heading"><b id="abilityClassName"></b><button id="respec">重分技能点</button></div><div id="heroAbilityBody"></div></section><section data-sheet-section="reports" hidden><div id="reports"></div></section><section data-sheet-section="ranking" hidden><div id="ranking"></div></section></div>
+     <div id="sheetScroll" class="sheet-scroll"><section data-sheet-section="hero"><div class="hero-sheet-heading"><b id="abilityClassName"></b><span>升级选择强化</span></div><div id="heroAbilityBody"></div></section><section data-sheet-section="reports" hidden><div id="reports"></div></section><section data-sheet-section="ranking" hidden><div id="ranking"></div></section></div>
     </section>
    </div>
   </section>

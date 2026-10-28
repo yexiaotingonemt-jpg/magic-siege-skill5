@@ -63,15 +63,15 @@
 | [shared/config.js](../../shared/config.js) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 入口可达 | [shared/base-config.js](../../shared/base-config.js) |
 | [shared/formation-ranges.js](../../shared/formation-ranges.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 未静态引用 | [shared/config.js](../../shared/config.js) |
 | [shared/hero-rules.js](../../shared/hero-rules.js) | [伤害、治疗、状态与归属统计](06-combat-and-statistics.md) | 入口可达 | [shared/tower-guard.js](../../shared/tower-guard.js)、[shared/config.js](../../shared/config.js)、[shared/skill-progression.js](../../shared/skill-progression.js)、[shared/attack-cooldown.js](../../shared/attack-cooldown.js)、[shared/skill-value.js](../../shared/skill-value.js)、[shared/skill5-mechanics.js](../../shared/skill5-mechanics.js) |
-| [shared/lord-flame-shield.js](../../shared/lord-flame-shield.js) | [五职业技能、共享额度与持续效果](05-skills-and-budget.md) | 入口可达 | [shared/skill-value.js](../../shared/skill-value.js)、[shared/manual-target.js](../../shared/manual-target.js) |
+| [shared/lord-flame-shield.js](../../shared/lord-flame-shield.js) | [五职业技能、词条与持续效果](05-skills-and-budget.md) | 入口可达 | [shared/skill-value.js](../../shared/skill-value.js)、[shared/manual-target.js](../../shared/manual-target.js) |
 | [shared/manual-target.js](../../shared/manual-target.js) | [自动行动、普攻与手动目标](04-navigation-and-attacks.md) | 入口可达 | — |
 | [shared/navigation.js](../../shared/navigation.js) | [自动行动、普攻与手动目标](04-navigation-and-attacks.md) | 入口可达 | [shared/manual-target.js](../../shared/manual-target.js)、[shared/attack-range.js](../../shared/attack-range.js) |
 | [shared/protocol.js](../../shared/protocol.js) | 共享规则 | 入口可达 | — |
 | [shared/simulation.js](../../shared/simulation.js) | [契约、体力、职业成长与评价](03-contracts-and-progression.md) | 入口可达 | [shared/hero-rules.js](../../shared/hero-rules.js)、[shared/config.js](../../shared/config.js)、[shared/tower-guard.js](../../shared/tower-guard.js)、[shared/skill-progression.js](../../shared/skill-progression.js)、[shared/navigation.js](../../shared/navigation.js)、[shared/manual-target.js](../../shared/manual-target.js)、[shared/attack-range.js](../../shared/attack-range.js)、[shared/troop-population.js](../../shared/troop-population.js) |
 | [shared/skill-progression.js](../../shared/skill-progression.js) | [契约、体力、职业成长与评价](03-contracts-and-progression.md) | 入口可达 | — |
-| [shared/skill-value.js](../../shared/skill-value.js) | [五职业技能、共享额度与持续效果](05-skills-and-budget.md) | 入口可达 | — |
-| [shared/skill4-mechanics.js](../../shared/skill4-mechanics.js) | [五职业技能、共享额度与持续效果](05-skills-and-budget.md) | 入口可达 | [shared/skill-value.js](../../shared/skill-value.js) |
-| [shared/skill5-mechanics.js](../../shared/skill5-mechanics.js) | [五职业技能、共享额度与持续效果](05-skills-and-budget.md) | 入口可达 | [shared/skill4-mechanics.js](../../shared/skill4-mechanics.js)、[shared/skill-value.js](../../shared/skill-value.js)、[shared/lord-flame-shield.js](../../shared/lord-flame-shield.js)、[shared/manual-target.js](../../shared/manual-target.js) |
+| [shared/skill-value.js](../../shared/skill-value.js) | [五职业技能、词条与持续效果](05-skills-and-budget.md) | 入口可达 | — |
+| [shared/skill4-mechanics.js](../../shared/skill4-mechanics.js) | [五职业技能、词条与持续效果](05-skills-and-budget.md) | 入口可达 | [shared/skill-value.js](../../shared/skill-value.js) |
+| [shared/skill5-mechanics.js](../../shared/skill5-mechanics.js) | [五职业技能、词条与持续效果](05-skills-and-budget.md) | 入口可达 | [shared/skill4-mechanics.js](../../shared/skill4-mechanics.js)、[shared/skill-value.js](../../shared/skill-value.js)、[shared/lord-flame-shield.js](../../shared/lord-flame-shield.js)、[shared/manual-target.js](../../shared/manual-target.js) |
 | [shared/tower-guard.js](../../shared/tower-guard.js) | [战场、兵线、阶段与建筑](02-battlefield-and-waves.md) | 入口可达 | — |
 | [shared/troop-population.js](../../shared/troop-population.js) | [战场、兵线、阶段与建筑](02-battlefield-and-waves.md) | 入口可达 | — |
 

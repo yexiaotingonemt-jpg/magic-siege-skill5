@@ -1,40 +1,7 @@
-# 五职业技能、共享额度与持续效果
+# 技能、词条与效果结算
 
-[模块总览](README.md) · [全文件索引](source-file-index.md)
+shared/hero-rules.js处理施法验证、费用、快照、伤害、治疗与状态。shared/skill5-mechanics.js实现五职业20技能及持续效果；shared/traits.js提供90类词条目录、库存与候选、运行参数；shared/trait-effects.js处理派生、击杀与精英奖励。
 
-技能计划、目标选择、前摇锁定、20技能释放、共享收益额度、领主光环与灼烧。
+shared/skill-value.js是诊断账本，新施法limit为null，不截断公共收益。明确的目标数、跳数、时长与护盾/蓄伤上限仍在各技能局部执行。shared/skill4-mechanics.js保留历史辅助函数，不作为本轮技能的权威规则。
 
-## 当前调用链
-
-```text
-HeroRules.plan / cast → selectSkill5 → scaleSkill4 → resolveSkill5 → 弹道 / 场地 / 位移 / 状态 → spend
-```
-
-skill4-mechanics.js仍被设计5复用，不能按文件名删除。一次施法所有目标与后续收益共用额度；前摇后改选不重定向已锁定效果。
-
-## 主要文件
-
-| 文件 | 当前加载状态 |
-|---|---|
-| [shared/skill5-mechanics.js](../../shared/skill5-mechanics.js) | 启动入口可达 |
-| [shared/skill4-mechanics.js](../../shared/skill4-mechanics.js) | 启动入口可达 |
-| [shared/skill-value.js](../../shared/skill-value.js) | 启动入口可达 |
-| [shared/lord-flame-shield.js](../../shared/lord-flame-shield.js) | 启动入口可达 |
-
-共享入口：[shared/hero-rules.js](../../shared/hero-rules.js)、[shared/skill-progression.js](../../shared/skill-progression.js)、[shared/config.js](../../shared/config.js)、[shared/simulation.js](../../shared/simulation.js)。
-
-## 对应规则
-
-- [第9章 技能释放公共流程](../rules/09-skill-casting.md)
-- [第10章 职业与技能](../rules/10-classes-and-skills.md)
-- [第13章 伤害、治疗与状态](../rules/13-damage-healing-and-status.md)
-
-## 验证入口
-
-- [tests/model.test.js](../../tests/model.test.js)
-- [tests/skill-double.test.js](../../tests/skill-double.test.js)
-- [tests/lord-flame.test.js](../../tests/lord-flame.test.js)
-- [tests/manual-target.test.js](../../tests/manual-target.test.js)
-- [tests/ally-target.test.js](../../tests/ally-target.test.js)
-
-专项浏览器脚本见[scripts目录](../../scripts)，脚本定位见[验证与工具指南](testing-and-tools.md)。
+server/room.mjs仅为当前认证玩家处理chooseTrait指令，并通过SSE同步队列、已选次数与精英奖励。客户端选卡界面不决定候选和结算。具体规则见[升级词条与精英兵](../rules/15-traits-and-elites.md)，专项回归为tests/traits.test.js及tests/traits.spec.js。

@@ -14,7 +14,7 @@ export function createSkillHud(container){
   slots.forEach((slot,i)=>{
    const plan=sim.castPlan(i),upgrade=sim.upgradePlan(i),cd=Math.max(0,p.cd[i]-sim.time),unlock=SKILL_PROGRESSION[i].unlock,s=sim.config.heroes[id].skills[i];
    const casting=(h?.castUntil>sim.time||h?.channelUntil>sim.time)&&h.skillAnimation?.skill===i;
-   const status=casting?'施法中':plan.ok?'可释放':plan.code==='locked'?(p.level<unlock?`Lv.${unlock}解锁`:'待加点'):shortStatus[plan.code]||plan.reason;
+   const status=casting?'施法中':plan.ok?'可释放':plan.code==='locked'?(p.level<unlock?`Lv.${unlock}解锁`:'已解锁'):shortStatus[plan.code]||plan.reason;
    slot.button.classList.toggle('unready',!plan.ok);slot.button.classList.toggle('ready',plan.ok);slot.button.classList.toggle('casting',!!casting);slot.button.dataset.state=casting?'casting':plan.code;
    slot.button.classList.toggle('out-of-range',plan.code==='range'||plan.code==='wrong-target');
    slot.button.setAttribute('aria-label',names[id][i]+' · '+status);
@@ -22,7 +22,7 @@ export function createSkillHud(container){
    const art=HERO_ART[id];const frame=art?art.row*4+i:frames[id][i];slot.art.style.backgroundImage=art?`url('${ART_ROOT}/skill-icons.webp')`:'';slot.art.style.backgroundSize=art?'400% 500%':'';slot.art.style.backgroundPosition=`${frame%4/3*100}% ${Math.floor(frame/4)/(art?4:1)*100}%`;
    slot.count.className=casting?'casting-count':cd?'cooldown-count':!b[i]?'locked-count':'';
    slot.lock.hidden=!!b[i];slot.count.textContent=casting?'◌':!b[i]?'':cd?cd.toFixed(1)+'s':'';
-   slot.name.textContent=names[id][i];slot.cost.textContent=`ϟ ${s.cost} · Lv.${b[i]}`;
+   slot.name.textContent=names[id][i];slot.cost.textContent=`ϟ ${s.cost} · ${b[i]?'已解锁':'5级解锁'}`;
    slot.upgrade.hidden=!upgrade.ok;slot.upgrade.disabled=!upgrade.ok;slot.upgrade.dataset.state=upgrade.code;
    slot.upgrade.title=upgrade.reason;slot.upgrade.setAttribute('aria-label',`${names[id][i]} · ${upgrade.reason}`);
   });

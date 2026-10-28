@@ -1,14 +1,14 @@
 {
-  "version": "0.4.5",
-  "serverVersion": "0.4.5",
-  "gameVersion": "0.3.2",
-  "protocolVersion": 1,
+  "version": "0.5.0",
+  "serverVersion": "0.5.0",
+  "gameVersion": "0.5.0",
+  "protocolVersion": 2,
   "files": {
-    "client/prebuilt/assets/index-BEGkLaw-.js": "95928642ce7af46e0962374a63f1bd6e0017d4558b4f61d1b346514341e6ee98",
-    "client/prebuilt/assets/index-CvEohElf.css": "ec684553b24b8f4e3ce364ca3f4e3fc96c351df3f64483a9ae8607c05471688b",
+    "client/prebuilt/assets/index-DVbRNJra.css": "d02b12173369b0546e24e8e568a3c6c479073bbf9ab810683f443917f9e70643",
+    "client/prebuilt/assets/index-DyPT3kE7.js": "d94ccf940e12672c95c12e826c3d60273bb9b241d1063bf68d6e238f21e08d99",
     "client/prebuilt/assets/phaser-DFK5Ua9d.js": "f9025c1a29bc3ae097dd886ce07717b297466da1ce8f032c8294252ce6cf5cdb",
-    "client/prebuilt/client-version.json": "452068eac28e728df560eb9d3b2fc9af2d7720ec03619e00cfc93f92afddec89",
-    "client/prebuilt/index.html": "f5b03ff28ee5aa84528bc5551d51ab673d4ca275c9fd6781652b9fc3a45b3417",
+    "client/prebuilt/client-version.json": "91e537c0122b399fa4488db58be83f13de850e5e3daaf60940aaccc700ad3056",
+    "client/prebuilt/index.html": "0658715704163cfcc37c03773025d748d2ce916c57b2189eb9705ab5feab45fe",
     "client/desktop/config.mjs": "af3a2c715c7ea9d1af042edd7f12e4dc04cbcca1579801499c5ed02b4b4a27ef",
     "client/desktop/install-update.ps1": "993b8e4ae209523136505d07cb4596c06cf7043ce11a38848e9a9b2dadd9b4d7",
     "client/desktop/login-credentials.mjs": "1a6d02bf5b94b7db6b357fb68a43056f7b3b7b3159dec864a83446540d5fd358",
@@ -19,7 +19,7 @@
     "魔法王座.exe": "58d5a83b776bbafe4e71698e16ca171de5d3156bba6de833fb9f2083be97c1cb",
     "client/launcher.mjs": "c2923024bfbf7051368f9ef51a6c608c01dfe3b0f219cbbd2f62033bf28e38b9",
     "client/client-config.json": "6b27adca4af8dbc3bd561c1af85471d8561026bd3c449b26a3d60d6f071937c5",
-    "shared/protocol.js": "cdb92af41e2e807ec2686fdb2fff18f56adc5e052e659a562df048120668636e",
+    "shared/protocol.js": "7ef5a79c5ac43ca556b33b6e42a5aa8555d8e1b3a776750693f131ff8a904411",
     "shared/update-protocol.js": "f01a394a0bf840a71800de09e2b4022a21d7ac329f032d5babac72135fe95527"
   },
   "runtime": {

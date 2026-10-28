@@ -20,17 +20,17 @@ function stepContinuously(s,h,duration=.5){
 }
 
 test('领主撞人后在守方推进线外结束冲锋，普通追击不会瞬间弹回边界',()=>{
- const {s,h,enemy}=arena(),end=finishDash(s,h);assert.ok(end.y<s.config.world.defenseLimitY);assert.equal(end.y,-48);assert.equal(enemy.x,5);assert.ok(enemy.hp<enemy.maxHp);
- stepContinuously(s,h,.5);assert.ok(h.y<-47.9);assert.ok(h.x>0);assert.equal(h.targetId,enemy.id);
+ const {s,h,enemy}=arena(),end=finishDash(s,h);assert.ok(end.y<s.config.world.defenseLimitY);assert.equal(end.y,-48);assert.equal(enemy.x,0);assert.ok(enemy.hp<enemy.maxHp);
+ stepContinuously(s,h,.5);assert.ok(h.y<-47.9);assert.equal(h.x,0);assert.equal(h.targetId,enemy.id);
 });
-test('斜向冲锋撞击后仍连续移动，侧向击退不会把领主硬拉回推进线',()=>{
- const {s,h,enemy}=arena({from:{x:-2,y:-36},to:{x:2,y:-48}}),end=finishDash(s,h);assert.ok(end.y<-47.9);assert.ok(Math.hypot(enemy.x-2,enemy.y+48)>4.9);stepContinuously(s,h,.5);assert.ok(h.y<-45);
+test('斜向冲锋撞击后仍连续移动，无基础击退也不会把领主硬拉回推进线',()=>{
+ const {s,h,enemy}=arena({from:{x:-2,y:-36},to:{x:2,y:-48}}),end=finishDash(s,h);assert.ok(end.y<-47.9);assert.ok(Math.hypot(enemy.x-2,enemy.y+48)<1e-6);stepContinuously(s,h,.5);assert.ok(h.y<-45);
 });
 test('冲锋击杀终点目标后，无目标返向推进线也按移速移动而不是瞬移',()=>{
  const {s,h,enemy}=arena({targetHp:1}),end=finishDash(s,h);assert.equal(s.get(enemy.id),undefined);assert.ok(end.y<s.config.world.defenseLimitY);stepContinuously(s,h,.5);assert.ok(h.y>end.y);assert.ok(h.y<=end.y+1+1e-7);
 });
-test('普通推进线内的冲锋沿途伤害和5格侧向击退保持，结束后继续普攻',()=>{
- const {s,h,enemy}=arena({from:{x:0,y:0},to:{x:0,y:-12}});finishDash(s,h);const hp=enemy.hp;stepContinuously(s,h,2);assert.ok(h.lastAttackAt>1.7);assert.ok(enemy.hp<hp);assert.equal(enemy.x,5);
+test('普通推进线内的冲锋沿途伤害和无基础击退，结束后继续普攻',()=>{
+ const {s,h,enemy}=arena({from:{x:0,y:0},to:{x:0,y:-12}});finishDash(s,h);const hp=enemy.hp;stepContinuously(s,h,2);assert.ok(h.lastAttackAt>1.7);assert.ok(enemy.hp<hp);assert.equal(enemy.x,0);
 });
 test('原普通防守推进仍停在配置边界，不因为修复允许普通走出推进线',()=>{
  const {s,h,enemy}=arena({from:{x:0,y:-37},to:{x:0,y:-48}});s.jobs=[];h.castUntil=0;h.skillAnimation=null;h.manualTargetId=null;h.manualAttackTargetId=null;h.targetId=null;enemy.hp=0;
