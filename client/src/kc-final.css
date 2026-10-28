@@ -71,6 +71,20 @@ input::placeholder {color:#81958a;opacity:1}
 .game .skill.ready {border-color:#b6d6a8;box-shadow:0 0 0 3px #1c3f2d,0 0 0 4px #668365,0 0 14px #92c7ad33}
 .game .skill.ready .skill-art {filter:none}
 .game .skill.unready {filter:saturate(.5) brightness(.75)}
+.game .skill.out-of-range {filter:none;border-color:#ff8585;box-shadow:0 0 0 3px #622628,0 0 0 4px #c75c5c,0 0 12px #d637374d}
+.game .skill.out-of-range:after {background:#a4151570}
+.game .skill.out-of-range .skill-art {filter:sepia(.7) saturate(2) hue-rotate(315deg)}
+.game .skill.out-of-range em {color:#ffd6d6;border-color:#c75c5c}
+.game .target-info {position:absolute;z-index:20;top:12px;right:44px;width:320px;max-width:calc(100% - 160px);padding:10px 14px;border:1px solid #aa716b;border-radius:6px;background:#172b25ed;box-shadow:0 3px 12px #0005;pointer-events:none;color:#e8e5d8;font-size:max(17px,calc(11px / var(--game-scale,1)));line-height:1.55;font-variant-numeric:tabular-nums}
+.game .target-info[hidden] {display:none}
+.game .target-info[data-side="ally"] {border-color:#719e82}
+.game .target-heading {display:flex;align-items:baseline;gap:10px}
+.game .target-heading small {flex-shrink:0;color:#f2a39b;font-size:inherit}
+.game .target-info[data-side="ally"] small {color:#a4e1c0}
+.game .target-heading b {overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:inherit}
+.game .target-health {height:5px;margin:4px 0;background:#0a1510}
+.game .target-health i {display:block;height:100%;background:#da8178}
+.game .target-info[data-side="ally"] .target-health i {background:#88bba0}
 .game .skill em {bottom:5px;background:#0e1b15ef;border:1px solid #b3a78350;border-radius:4px;color:#fff4d9;font-variant-numeric:tabular-nums}
 .game .skill-info {color:var(--ui-text);border-radius:5px;gap:6px}
 .game .skill-info:hover {background:#5d81551c}

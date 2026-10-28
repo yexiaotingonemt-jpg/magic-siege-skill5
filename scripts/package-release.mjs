@@ -4,12 +4,13 @@ import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 // Client releases and combat compatibility are versioned independently.
-import {CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
+import {SERVER_VERSION,CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
+if(SERVER_VERSION!==CLIENT_VERSION)throw Error('客户端与服务器发布版本必须一致');
 const root=fileURLToPath(new URL('..',import.meta.url));
 const kind=process.argv[2];
 if(!['client','server'].includes(kind))throw Error('Usage: node scripts/package-release.mjs client|server [--server URL] [--no-runtime]');
 const stamp=new Date().toISOString().replace(/[-:.TZ]/g,'');
-const name=`magic-siege-${kind}-v${kind==='client'?CLIENT_VERSION:GAME_VERSION}-${stamp}`,output=path.join(root,'release',name);
+const name=`magic-siege-${kind}-v${kind==='client'?CLIENT_VERSION:SERVER_VERSION}-${stamp}`,output=path.join(root,'release',name);
 await mkdir(output,{recursive:true});
 const copy=(source,dest=source)=>cp(path.join(root,source),path.join(output,dest),{recursive:true});
 if(kind==='client'){
@@ -38,8 +39,8 @@ if(kind==='client'){
  for(const f of ['server','shared','deploy'])await copy(f);
  await copy('deploy/README.md','README.md');
 }
-await writeFile(path.join(output,'package.json'),JSON.stringify({name:'magic-siege-'+kind,version:kind==='client'?CLIENT_VERSION:GAME_VERSION,private:true,type:'module',scripts:{start:kind==='server'?'node server/index.mjs':'node client/launcher.mjs'}},null,2)+'\n');
-await writeFile(path.join(output,'VERSION.json'),JSON.stringify({clientVersion:CLIENT_VERSION,gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION},null,2)+'\n');
+await writeFile(path.join(output,'package.json'),JSON.stringify({name:'magic-siege-'+kind,version:kind==='client'?CLIENT_VERSION:SERVER_VERSION,private:true,type:'module',scripts:{start:kind==='server'?'node server/index.mjs':'node client/launcher.mjs'}},null,2)+'\n');
+await writeFile(path.join(output,'VERSION.json'),JSON.stringify({serverVersion:SERVER_VERSION,clientVersion:CLIENT_VERSION,gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION},null,2)+'\n');
 // Ship the licenses for the bundled browser libraries with the player package.
 if(kind==='client')for(const [source,dest]of [['node_modules/phaser/LICENSE.md','PHASER-LICENSE.md'],['node_modules/eventemitter3/LICENSE','EVENTEMITTER3-LICENSE.txt']])await copy(source,dest);
 console.log('Release directory: '+output);

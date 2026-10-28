@@ -1,13 +1,19 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,rm} from 'node:fs/promises';
+import {mkdtemp,rm,readFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {createGameServer} from '../server/index.mjs';
 import {createLocalClient} from '../client/launcher.mjs';
-import {CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION,UPDATE_REQUIRED_CODE} from '../shared/protocol.js';
+import {SERVER_VERSION,CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION,UPDATE_REQUIRED_CODE} from '../shared/protocol.js';
 import {checkServerVersion} from '../client/src/network.js';
 const current={'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION)};
+test('正式发布号在客户端、服务端、package与lockfile之间保持一致',async()=>{
+ const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));
+ const lock=JSON.parse(await readFile(new URL('../package-lock.json',import.meta.url),'utf8'));
+ assert.equal(SERVER_VERSION,CLIENT_VERSION);assert.equal(pkg.version,CLIENT_VERSION);
+ assert.equal(lock.version,CLIENT_VERSION);assert.equal(lock.packages[''].version,CLIENT_VERSION);
+});
 async function setup(t){
  const dataDir=await mkdtemp(path.join(tmpdir(),'magic-version-')),game=createGameServer({dataDir});
  await new Promise(resolve=>game.server.listen(0,'127.0.0.1',resolve));
@@ -18,8 +24,8 @@ async function setup(t){
 }
 test('健康与版本信息公开；缺失或不匹配的战斗兼容版本均拒绝注册、登录、状态、命令及SSE',async t=>{
  const {game,remote}=await setup(t);
- assert.equal((await (await fetch(remote+'/api/health')).json()).gameVersion,GAME_VERSION);
- assert.deepEqual(await (await fetch(remote+'/api/version')).json(),{gameVersion:GAME_VERSION,clientVersion:CLIENT_VERSION,protocolVersion:PROTOCOL_VERSION});
+ const health=await (await fetch(remote+'/api/health')).json();assert.equal(health.gameVersion,GAME_VERSION);assert.equal(health.serverVersion,SERVER_VERSION);
+ assert.deepEqual(await (await fetch(remote+'/api/version')).json(),{serverVersion:SERVER_VERSION,gameVersion:GAME_VERSION,clientVersion:CLIENT_VERSION,protocolVersion:PROTOCOL_VERSION});
  for(const version of [undefined,'','0.1.0','999.0.0',GAME_VERSION+'+other'])for(const route of ['register','login','me','state','action','events']){
   const isPost=['register','login','action'].includes(route);
   const response=await fetch(remote+'/api/'+route,{method:isPost?'POST':'GET',headers:{'X-Magic-Protocol':String(PROTOCOL_VERSION),...(version!==undefined?{'X-Magic-Version':version}:{}),'Content-Type':'application/json'},body:isPost?JSON.stringify({name:'拒绝旧版',password:'test-password',side:0,type:'stamina'}):undefined});
@@ -33,8 +39,9 @@ test('客户端只检查战斗兼容版本与协议；发布批次或诊断修�
  t.mock.method(globalThis,'fetch',async()=>new Response(JSON.stringify(version),{headers:{'Content-Type':'application/json'}}));
  await checkServerVersion();
  for(const revision of ['ui-art-refresh','server-performance-fix']){
-  version={...version,revision,buildId:revision};
+  version={...version,serverVersion:'0.3.99',revision,buildId:revision};
   assert.deepEqual(await checkServerVersion(),version);
+  await checkServerVersion({desktop:true});
  }
  version={gameVersion:GAME_VERSION+'-incompatible-combat',protocolVersion:PROTOCOL_VERSION};
  await assert.rejects(checkServerVersion(),error=>error.code===UPDATE_REQUIRED_CODE&&error.requiredVersion===version.gameVersion);

@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {_electron as electron} from 'playwright';
 import {createRequire} from 'node:module';
-import {mkdtemp,mkdir,readFile,writeFile} from 'node:fs/promises';
+import {mkdtemp,mkdir,readFile,writeFile,readdir} from 'node:fs/promises';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
 import {fileURLToPath} from 'node:url';
@@ -29,7 +29,7 @@ async function capture(app,page,file){
  await writeFile(file,Buffer.from(png,'base64'));
 }
 async function register(page,label='桌面'){
- await expect(page.locator('#authForm')).toBeVisible();await page.locator('#accountName').fill(label+Date.now());await page.locator('#accountPassword').fill('desktop-test-password');await page.locator('#authSubmit').click();await page.waitForFunction(()=>window.__game?.network.connected&&__game.renderer.getCamera());
+ await expect(page.locator('#authForm')).toBeVisible();await page.locator('#tabRegister').click();await page.locator('#accountName').fill(label+Date.now());await page.locator('#accountPassword').fill('desktop-test-password');await page.locator('#authSubmit').click();await page.waitForFunction(()=>window.__game?.network.connected&&__game.renderer.getCamera());
 }
 test('桌面EXE独立窗口：本机资源、登录契约、关闭退出、重启保留会话',async()=>{
  const server=await service();let client;const remoteRequests=[];server.server.on('request',r=>remoteRequests.push(r.url));
@@ -51,6 +51,34 @@ test('桌面EXE独立窗口：本机资源、登录契约、关闭退出、重�
   client=await launch(server.base,profile);await client.page.waitForFunction(()=>window.__game?.sim.hero());expect(await client.page.evaluate(()=>({match:__game.sim.matchId,hero:__game.sim.hero().id}))).toEqual(identity);expect(client.errors).toEqual([]);
  }finally{await client?.app.close();await server.close();}
 });
+test('记住上次成功登录的账号密码：退出、失败、重启、过期和切换账号',async()=>{
+ const server=await service();let client;
+ const first='记住账号'+Date.now(),second='切换账号'+Date.now(),password='remember-credentials-test';
+ try{
+  client=await launch(server.base);let page=client.page;
+  await expect(page.locator('#accountName')).toHaveValue('');await expect(page.locator('#accountPassword')).toHaveValue('');
+  await page.locator('#tabRegister').click();await page.locator('#accountName').fill(first);await page.locator('#accountPassword').fill(password);await page.locator('#authSubmit').click();await page.waitForFunction(()=>window.__game?.network.connected);
+  await page.locator('#logout').click();await expect(page.locator('#accountName')).toHaveValue(first);await expect(page.locator('#accountPassword')).toHaveValue(password);
+  await page.locator('#tabLogin').focus();await page.keyboard.press('ArrowLeft');await expect(page.locator('#accountName')).toHaveValue('');await expect(page.locator('#accountPassword')).toHaveValue('');
+  await page.keyboard.press('ArrowRight');await expect(page.locator('#accountName')).toHaveValue(first);await expect(page.locator('#accountPassword')).toHaveValue(password);
+  await page.locator('#accountName').fill('不存在的账号');await page.locator('#accountPassword').fill('incorrect-password');await page.locator('#authSubmit').click();await expect(page.locator('#authError')).toHaveText('账号或密码错误');
+  await page.reload();await expect(page.locator('#accountName')).toHaveValue(first);await expect(page.locator('#accountPassword')).toHaveValue(password);
+  const profile=client.profile,previousOrigin=new URL(page.url()).origin;
+  const files=(await readdir(profile)).filter(name=>name.startsWith('login-credentials-')&&name.endsWith('.bin'));expect(files).toHaveLength(1);
+  const encrypted=await readFile(path.join(profile,files[0]));expect(encrypted.includes(Buffer.from(password))).toBe(false);expect(encrypted.includes(Buffer.from(first))).toBe(false);
+  expect(client.errors).toEqual([]);await client.app.close();client=await launch(server.base,profile);page=client.page;
+  expect(new URL(page.url()).origin).not.toBe(previousOrigin);
+  await expect(page.locator('#accountName')).toHaveValue(first);await expect(page.locator('#accountPassword')).toHaveValue(password);
+  await expect(page).toHaveTitle(/魔法王座/);await expect(page.locator('vite-error-overlay')).toHaveCount(0);
+  await capture(client.app,page,path.join(process.env.MAGIC_QA_DIR,'desktop-remember-login.png'));
+  await page.locator('#authSubmit').click();await page.waitForFunction(()=>window.__game?.network.connected);await expect(page.locator('.account-heading h2')).toHaveText(first);
+  await page.locator('#logout').click();await page.locator('#tabRegister').click();await page.locator('#accountName').fill(second);await page.locator('#accountPassword').fill(password+'-second');await page.locator('#authSubmit').click();await page.waitForFunction(()=>window.__game?.network.connected);
+  server.accounts.sessions.clear();expect(client.errors).toEqual([]);await client.app.close();client=await launch(server.base,profile);page=client.page;
+  await expect(page.locator('#accountName')).toHaveValue(second);await expect(page.locator('#accountPassword')).toHaveValue(password+'-second');await page.locator('#authSubmit').click();await page.waitForFunction(()=>window.__game?.network.connected);await expect(page.locator('.account-heading h2')).toHaveText(second);
+  expect(client.errors).toEqual([]);
+ }finally{await client?.app.close();await server.close();}
+});
+
 test('默认直连正式服，无服务器选择入口，忽略旧版保存地址',async()=>{
  const profile=await mkdtemp(path.join(tmpdir(),'magic-default-profile-'));let client;
  try{

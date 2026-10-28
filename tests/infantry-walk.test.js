@@ -24,5 +24,5 @@ test('两军近战兵的八方向、八时间帧使用透明图集，契约英�
     const png=readFileSync(new URL('../client/public/art/kc-final/infantry-walk-'+side+'.png',import.meta.url));
     assert.equal(png.readUInt32BE(16),1024);assert.equal(png.readUInt32BE(20),1280);assert.equal(png[25],6);
   }
-  assert.equal(directionalUnitArt({hero:true,classId:0,type:'melee',side:0},{action:'move',phase:1},4).texture,'kc-orc');
+  assert.equal(directionalUnitArt({hero:true,classId:0,type:'melee',side:0},{action:'move',phase:1},4).texture,'kc-orc-walk');
 });

@@ -12,8 +12,8 @@ const panels=[
  [8000,362.6666666666667,1.7,6.5,9,2],
  [10000,426.66666666666663,2.8,10.5,12,1.5],
  [36000,266.6666666666667,1.5,1.5,5,2],
- [12000,226.66666666666666,1.7,6.5,9,2],
- [14000,181.33333333333334,1.7,6.5,9,2],
+ [12000,340,1.7,6.5,9,2],
+ [14000,272,1.7,6.5,9,2],
  [11000,232.72727272727272,1.2,1.5,5,2.5]
 ];
 function arena(id,level=6,rank=1){
@@ -25,14 +25,14 @@ function arena(id,level=6,rank=1){
  return {s,p,h,enemy,helper,target};
 }
 
-test('全部英雄基础生命、攻击、攻速、射程、警戒与移速均保持原值',()=>{
+test('法师基础攻击提高50%，成长减半，其余基础属性保留',()=>{
  defaults.heroes.forEach((h,id)=>assert.deepEqual([h.hp,h.attack,h.interval,h.range,h.aggro,h.speed],panels[id]));
- assert.deepEqual([defaults.world.heroAttackGrowth,defaults.world.heroHpGrowth],[.03,.04]);
+ assert.deepEqual([defaults.world.heroAttackGrowth,defaults.world.heroHpGrowth],[.015,.02]);
  assert.deepEqual(Object.values(defaults.troops).map(u=>[u.hp,u.attack,u.interval]),[[4000,100,1.5],[4000,80,1.7],[5000,100,2.8]]);
 });
-for(const id of ids)for(const level of [1,12])test(`职业${id}·英雄${level}级：实际普通攻击伤害与间隔保持原值`,()=>{
+for(const id of ids)for(const level of [1,12])test(`职业${id}·英雄${level}级：实际普通攻击采用新基础攻击与成长，间隔保持`,()=>{
  const {s,h,enemy,helper}=arena(id,level);s.units=s.units.filter(u=>u!==helper);Object.assign(h,{hp:h.maxHp,cd:0});enemy.y=1;const hp=enemy.hp;
- const expected=panels[id][1]*(1+.03*(level-1));near(h.attack,expected);advance(s,.3);near(hp-enemy.hp,expected);
+ const expected=panels[id][1]*(1+.015*(level-1));near(h.attack,expected);advance(s,.3);near(hp-enemy.hp,expected);
  advance(s,panels[id][2]);near(hp-enemy.hp,expected*2);
 });
 

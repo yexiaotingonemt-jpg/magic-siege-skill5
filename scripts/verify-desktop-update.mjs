@@ -4,7 +4,8 @@ import {pathToFileURL,fileURLToPath} from 'node:url';
 import {tmpdir} from 'node:os';
 import {createHash,sign} from 'node:crypto';
 import {createReadStream} from 'node:fs';
-import {execFileSync,spawn} from 'node:child_process';
+import {execFileSync} from 'node:child_process';
+import {_electron} from 'playwright';
 const repo=fileURLToPath(new URL('..',import.meta.url));
 if(process.platform!=='win32'||!process.env.MAGIC_UPDATE_SIGNING_KEY)throw Error('Windows test requires MAGIC_UPDATE_SIGNING_KEY and a desktop bundle argument');
 const {CLIENT_VERSION,GAME_VERSION}=await import(pathToFileURL(path.join(repo,'shared/protocol.js')));
@@ -33,24 +34,28 @@ for(const broken of [false,true]){
  execFileSync('powershell.exe',['-NoProfile','-Command','Add-Type -AssemblyName System.IO.Compression.FileSystem; [IO.Compression.ZipFile]::CreateFromDirectory($env:FIXTURE_SOURCE,$env:FIXTURE_ZIP,[IO.Compression.CompressionLevel]::Optimal,$true)'],{env:{...process.env,FIXTURE_SOURCE:target,FIXTURE_ZIP:zip},windowsHide:true});
  const hash=createHash('sha256');for await(const chunk of createReadStream(zip))hash.update(chunk);
  const release={version:nextVersion,gameVersion:GAME_VERSION,protocolVersion:1,platform:'win32',arch:'x64',sha256:hash.digest('hex'),size:(await stat(zip)).size,file:'package.zip',folder:'target'};
- const feed=path.join(scenario,'feed/0.4.1/win32-x64');await mkdir(feed,{recursive:true});await cp(zip,path.join(feed,'package.zip'));
+ const feed=path.join(scenario,'feed',nextVersion,'win32-x64');await mkdir(feed,{recursive:true});await cp(zip,path.join(feed,'package.zip'));
  await writeFile(path.join(feed,'manifest.json'),JSON.stringify({release,signature:sign(null,Buffer.from(canonicalRelease(release)),key).toString('base64')}));
  const server=createGameServer({dataDir:path.join(scenario,'data'),gameVersion:GAME_VERSION,clientVersion:nextVersion,updateDir:path.join(scenario,'feed')});await new Promise(r=>server.server.listen(0,'127.0.0.1',r));
  const install=path.join(scenario,'install'),profile=path.join(scenario,'profile');await cp(source,install,{recursive:true});await mkdir(profile);await writeFile(path.join(profile,'preserved.txt'),'keep user profile');
  const env={...process.env,MAGIC_DESKTOP_TEST:'1',MAGIC_DESKTOP_USER_DATA:profile,MAGIC_SERVER_URL:`http://127.0.0.1:${server.server.address().port}`};delete env.ELECTRON_RUN_AS_NODE;
 
+ let application;
  try{
-  const logfile=await import('node:fs').then(fs=>fs.openSync(path.join(scenario,'game.log'),'a'));
-  const child=spawn(path.join(install,'魔法王座.exe'),[],{env,stdio:['ignore',logfile,logfile],windowsHide:true});
-  child.on('error',error=>console.error(error));
+  application=await _electron.launch({executablePath:path.join(install,'魔法王座.exe'),args:[],env,timeout:30000});
+  const page=await application.firstWindow();
+  await page.waitForSelector('#updateRequired');
+  let lastStatus='';
   let receipt,transaction;
   for(let i=0;i<900;i++){
    for(const name of await readdir(path.join(profile,'updates')).catch(()=>[]))if(/^[a-f0-9]{32}$/.test(name)){
     transaction=path.join(profile,'updates',name);try{receipt=JSON.parse((await readFile(path.join(transaction,'result.json'),'utf8')).replace(/^\uFEFF/,''));}catch{}
    }
-   if(receipt)break;await new Promise(r=>setTimeout(r,200));
+   if(receipt)break;
+   if(i%25===0)lastStatus=await page.locator('#updateStatus').textContent({timeout:500}).catch(()=>lastStatus);
+   await new Promise(r=>setTimeout(r,200));
   }
-  if(!receipt)throw Error('No update result. Inspect '+scenario);
+  if(!receipt)throw Error('No update result ('+lastStatus+'). Inspect '+scenario);
   if(receipt.ok===broken)throw Error('Unexpected receipt: '+JSON.stringify(receipt));
   const installed=JSON.parse(await readFile(path.join(install,'VERSION.json'),'utf8'));if(installed.clientVersion!==(broken?CLIENT_VERSION:nextVersion))throw Error('Wrong installed version');
   if(await readFile(path.join(profile,'preserved.txt'),'utf8')!=='keep user profile')throw Error('Lost profile');
@@ -58,6 +63,7 @@ for(const broken of [false,true]){
   results.push({scenario:broken?'rollback':'success',receipt,installedVersion:installed.clientVersion,profilePreserved:true,transaction});
   console.log(JSON.stringify(results.at(-1)));
  }finally{
+  await application?.close().catch(()=>{});
   // Only stop processes whose executable is this isolated QA installation.
   execFileSync('powershell.exe',['-NoProfile','-Command','$target=[IO.Path]::GetFullPath($env:FIXTURE_EXE); Get-Process | Where-Object { $_.Path -eq $target } | Stop-Process'],{env:{...process.env,FIXTURE_EXE:path.join(install,'魔法王座.exe')},windowsHide:true});
   server.server.closeAllConnections();await new Promise(r=>server.server.close(r));

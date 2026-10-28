@@ -29,4 +29,4 @@ export function heroPortrait(classId){
   return art?`${ART_ROOT}/portrait-${art.key}.webp`:null;
 }
 
-export const unitBarOffset=u=>u.tower?44:u.hero?(HERO_ART[u.classId]?46:39):27;
+export const unitBarOffset=u=>u.tower?44:u.hero?(u.classId===3?86:HERO_ART[u.classId]?46:39):27;

@@ -1,10 +1,11 @@
-import {app,BrowserWindow,Menu,dialog,session,ipcMain} from 'electron';
+import {app,BrowserWindow,Menu,dialog,session,ipcMain,safeStorage} from 'electron';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {readFile,writeFile} from 'node:fs/promises';
 import {createUpdater} from './updater.mjs';
 import {createLocalClient} from '../launcher.mjs';
 import {readDesktopSettings} from './config.mjs';
+import {createLoginCredentials} from './login-credentials.mjs';
 import {CLIENT_VERSION,GAME_VERSION} from '../../shared/protocol.js';
 
 const here=path.dirname(fileURLToPath(import.meta.url)),clientRoot=path.resolve(here,'..');
@@ -58,6 +59,10 @@ async function boot(){
  buildMenu();
  const updater=createUpdater({app,serverUrl:settings.serverUrl,window:mainWindow,getVersion:()=>CLIENT_VERSION});
  ipcMain.handle('magic:update',(event,manual)=>{if(event.sender!==mainWindow.webContents||event.senderFrame!==mainWindow.webContents.mainFrame)throw Error('Invalid update request');updater.start(manual===true);return updater.status;});
+ const credentials=createLoginCredentials({directory:app.getPath('userData'),serverUrl:settings.serverUrl,safeStorage});
+ const checkCredentialsSender=event=>{if(event.sender!==mainWindow.webContents||event.senderFrame!==mainWindow.webContents.mainFrame||new URL(event.senderFrame.url).origin!==origin)throw Error('Invalid credentials request');};
+ ipcMain.handle('magic:login-credentials:read',event=>{checkCredentialsSender(event);return credentials.read();});
+ ipcMain.handle('magic:login-credentials:save',(event,value)=>{checkCredentialsSender(event);return credentials.save(value);});
  await mainWindow.loadURL(origin+'/');
  const ackIndex=process.argv.indexOf('--update-ack');
  if(ackIndex>=0){

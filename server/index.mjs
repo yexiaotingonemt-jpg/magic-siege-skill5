@@ -5,7 +5,7 @@ import {serveUpdate} from './update-feed.mjs';
 import {Accounts} from './accounts.mjs';
 import {Room} from './room.mjs';
 import {createEventStream} from './event-stream.mjs';
-import {CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION,RULESET_REVISION,UPDATE_REQUIRED_CODE} from '../shared/protocol.js';
+import {SERVER_VERSION,CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION,RULESET_REVISION,UPDATE_REQUIRED_CODE} from '../shared/protocol.js';
 const base=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 export function createGameServer({dataDir=process.env.KC_DATA_DIR||path.join(base,'data'),gameVersion=GAME_VERSION,clientVersion=CLIENT_VERSION,updateDir=process.env.MAGIC_UPDATE_DIR||path.join(base,'updates'),sseGzip=process.env.MAGIC_SSE_GZIP!=='0'}={}){
  const accounts=new Accounts(dataDir),room=new Room(),limits=new Map();
@@ -13,8 +13,8 @@ export function createGameServer({dataDir=process.env.KC_DATA_DIR||path.join(bas
  const body=async req=>{let raw='';for await(const chunk of req){raw+=chunk;if(raw.length>131072)throw Error('请求过大');}return JSON.parse(raw||'{}');};
  const server=http.createServer(async(req,res)=>{
   try{const url=new URL(req.url,'http://localhost');
-   if(url.pathname==='/api/health')return json(res,200,{ok:true,version:5,gameVersion,clientVersion,protocolVersion:PROTOCOL_VERSION,revision:RULESET_REVISION,matchId:room.matchId,sequence:room.sequence,clients:room.clients.size});
-   if(url.pathname==='/api/version')return json(res,200,{gameVersion,clientVersion,protocolVersion:PROTOCOL_VERSION});
+   if(url.pathname==='/api/health')return json(res,200,{ok:true,version:5,serverVersion:SERVER_VERSION,gameVersion,clientVersion,protocolVersion:PROTOCOL_VERSION,revision:RULESET_REVISION,matchId:room.matchId,sequence:room.sequence,clients:room.clients.size});
+   if(url.pathname==='/api/version')return json(res,200,{serverVersion:SERVER_VERSION,gameVersion,clientVersion,protocolVersion:PROTOCOL_VERSION});
    if(url.pathname.startsWith('/api/updates/')&&await serveUpdate(req,res,url,{directory:updateDir,version:clientVersion,gameVersion,protocolVersion:PROTOCOL_VERSION}))return;
    if(url.pathname.startsWith('/api/')){
     const clientGameVersion=req.headers['x-magic-version'],clientProtocol=req.headers['x-magic-protocol'];

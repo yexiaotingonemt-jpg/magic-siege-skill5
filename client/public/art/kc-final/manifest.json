@@ -2818,5 +2818,30 @@
     "timeColumns": 8,
     "cycleHz": 0.9,
     "method": "Eight drawn gait frames per facing; five drawn facings and three mirrored; simulation clock advances frames only during move; no additional procedural leg deformation."
+  },
+  "heroWalk": {
+    "files": [
+      "orc-walk.png",
+      "chariot-walk.png",
+      "lord-walk.png",
+      "mage-walk.png",
+      "elf-walk.png"
+    ],
+    "cell": [
+      192,
+      256
+    ],
+    "directionRows": [
+      "S",
+      "SE",
+      "E",
+      "NE",
+      "N",
+      "NW",
+      "W",
+      "SW"
+    ],
+    "timeColumns": 8,
+    "method": "Generated whole-cycle sheets; one shared scale per hero; shipped idle registration; five drawn views plus three mirrored views. Simulation clock only during movement; no extra mesh deformation or global bob."
   }
 }

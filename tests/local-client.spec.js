@@ -23,7 +23,7 @@ test('两个独立本地客户端：本地美术、远端同局、契约、刷�
    page.on('response',r=>{if(new URL(r.url()).pathname==='/api/events'&&r.status()===200)sseEncodings.push(r.headers()['content-encoding']);if(r.status()>=400&&!r.url().endsWith('/api/me'))badResponses.push({url:r.url(),status:r.status()});});
    const base=`http://127.0.0.1:${local.server.address().port}`;
    await page.goto(base);await expect(page).toHaveTitle(/魔法王座/);await expect(page.locator('#authForm')).toBeVisible();
-   await page.locator('#accountName').fill('独立客户端'+side+Date.now());await page.locator('#accountPassword').fill('local-client-password');
+   await page.locator('#tabRegister').click();await page.locator('#accountName').fill('独立客户端'+side+Date.now());await page.locator('#accountPassword').fill('local-client-password');
    await page.locator(`[name="side"][value="${side}"]`).check();await page.locator('#authSubmit').click();
    await page.waitForFunction(()=>window.__game?.renderer.getCamera());await expect(page.locator('#connection')).toHaveText('已同步');
    await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`local-client-${side?'mobile':'desktop'}.png`),fullPage:true});

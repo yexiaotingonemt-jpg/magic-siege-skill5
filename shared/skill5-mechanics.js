@@ -8,6 +8,14 @@ const near=(h,es)=>es.sort((a,b)=>d(h,a)-d(h,b)||a.id-b.id);
 const priority=(h,es)=>es.sort((a,b)=>(a.hero?0:a.tower?2:1)-(b.hero?0:b.tower?2:1)||d(h,a)-d(h,b)||a.id-b.id);
 const alive=(sim,ids)=>ids.map(id=>sim.get(id)).filter(Boolean);
 const prefer=(target,targets)=>target?[target,...targets.filter(u=>u.id!==target.id)]:targets;
+// Keep applicable explicit selections locked even when a nearer target exists.
+export function skill5RangeFailure(sim,h,i,s){
+ const chosen=manualTarget(sim,h);if(!chosen)return null;
+ const enemy=chosen.side!==h.side,other=chosen.id!==h.id&&!chosen.tower;
+ const applies=enemy?(h.classId===0?(i===0||i===2&&chosen.hero):h.classId===2||h.classId===4||h.classId===3&&i<2||h.classId===5&&i===0)
+  :!chosen.tower&&(h.classId===0?(i===1||i===2&&other):h.classId===5&&(i===1?other:i===2||i===3));
+ return applies&&d(h,chosen)>s.targetRange+1e-7?{ok:false,code:'range',reason:'目标太远'}:null;
+}
 export function selectSkill5(h,i,s){
  const es=priority(h,this.enemies(h,s.targetRange)),all=this.allies(h,s.targetRange),current=this.get(h.targetId);
  const chosen=manualTarget(this,h),inRange=chosen&&d(h,chosen)<=s.targetRange+1e-7?chosen:null;

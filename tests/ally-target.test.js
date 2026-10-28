@@ -37,6 +37,16 @@ test('战车、领主和火法不能选择友方或自己，自身增益不授�
 test('友方超出20格或阵亡后拒选并保留之前的友方与敌方普攻目标',()=>{
  const {s,p,h,make,troop}=arena(),enemy=make(3,0,2).h,ally=troop(0,4),outside=troop(0,20.001),dead=troop(2,2);dead.hp=0;h.targetId=enemy.id;assert.ok(s.setManualTarget(ally.id,p));for(const u of [outside,dead]){assert.equal(s.setManualTarget(u.id,p),false);assert.equal(h.manualTargetId,ally.id);assert.equal(h.targetId,enemy.id);}
 });
+
+for(const [id,skills]of [[0,[1,2]],[5,[1,2,3]]])test(`职业${id}手选友军超出对应支援范围时提示太远，不自动改选其他友军`,()=>{
+ const {s,p,h,make,troop}=arena(id),enemy=make(3,0,1).h,chosen=troop(0,15);
+ enemy.targetId=chosen.id;s.debuff(chosen,enemy,'moveSlow',.3,10,null,true);
+ assert.ok(s.setManualTarget(chosen.id,p));
+ for(const i of skills){const skill=s.config.heroes[id].skills[i];chosen.y=skill.targetRange+.001;
+  assert.equal(s.castPlan(i,p).code,'range');const stamina=p.stamina;assert.equal(s.cast(i,p),false);near(p.stamina,stamina);assert.equal(p.cd[i],0);
+  chosen.y=skill.targetRange;assert.ok(s.castPlan(i,p).ok,s.castPlan(i,p).reason);
+ }
+});
 test('手选友方不追击或普攻友军，继续原敌方普攻，并保留友方手选',()=>{
  const {s,p,h,make,troop}=arena(),enemy=make(3,0,1).h,ally=troop(8,0);h.targetId=enemy.id;h.speed=2;h.cd=0;const before=ally.hp,enemyBefore=enemy.hp;assert.ok(s.setManualTarget(ally.id,p));assert.equal(s.choose(h).id,enemy.id);advance(s,1);near(h.x,0);near(h.y,0);near(ally.hp,before);assert.ok(enemy.hp<enemyBefore);assert.equal(h.manualTargetId,ally.id);assert.equal(h.targetId,enemy.id);
 });
@@ -53,13 +63,13 @@ test('兽人和精灵的敌方技能在手选友方时仍选择敌人，不产�
  for(const id of [0,5]){const {s,p,h,make,troop}=arena(id),enemy=make(3,0,2).h,ally=troop(1,2);h.targetId=enemy.id;assert.ok(s.setManualTarget(ally.id,p));const plan=s.castPlan(0,p);assert.equal(plan.t.id,enemy.id);assert.ok(s.cast(0,p));const before=ally.hp,hp=enemy.hp;advance(s,.4);assert.ok(enemy.hp<hp);assert.ok(ally.hp>=before);}
 });
 test('兽人群守优先手选友军但仍以自身为中心，保留自己与原人数上限',()=>{
- const {s,p,h,troop}=arena(0),nearby=Array.from({length:5},(_,i)=>troop(.1*i,1)),chosen=troop(0,6),outside=troop(0,6.01);assert.ok(s.setManualTarget(chosen.id,p));let plan=s.castPlan(1,p);assert.equal(plan.t.id,h.id);assert.equal(plan.targets[0].id,h.id);assert.equal(plan.targets[1].id,chosen.id);assert.equal(plan.targets.length,plan.s.targets+1);assert.ok(s.cast(1,p));advance(s,.4);assert.ok(chosen.guards?.length);assert.equal(nearby.filter(u=>u.guards?.length).length,2);assert.ok(!outside.guards?.length);p.cd[1]=0;assert.ok(s.setManualTarget(outside.id,p));plan=s.castPlan(1,p);assert.ok(!plan.targets.some(u=>u.id===outside.id));
+ const {s,p,h,troop}=arena(0),nearby=Array.from({length:5},(_,i)=>troop(.1*i,1)),chosen=troop(0,6),outside=troop(0,6.01);assert.ok(s.setManualTarget(chosen.id,p));let plan=s.castPlan(1,p);assert.equal(plan.t.id,h.id);assert.equal(plan.targets[0].id,h.id);assert.equal(plan.targets[1].id,chosen.id);assert.equal(plan.targets.length,plan.s.targets+1);assert.ok(s.cast(1,p));advance(s,.4);assert.ok(chosen.guards?.length);assert.equal(nearby.filter(u=>u.guards?.length).length,2);assert.ok(!outside.guards?.length);p.cd[1]=0;assert.ok(s.setManualTarget(outside.id,p));plan=s.castPlan(1,p);assert.equal(plan.code,'range');
 });
 test('兽人手选救援友军仍要求范围内敌英雄正攻击该友军，合法时实际换位',()=>{
  const {s,p,h,make,troop}=arena(0),nearEnemy=make(3,0,2).h,other=troop(1,2),chosen=troop(4,3);nearEnemy.targetId=other.id;assert.ok(s.setManualTarget(chosen.id,p));assert.equal(s.castPlan(2,p).ok,false);nearEnemy.targetId=chosen.id;let plan=s.castPlan(2,p);assert.ok(plan.ok,plan.reason);assert.equal(plan.t.id,chosen.id);assert.ok(s.cast(2,p));advance(s,.4);near(h.x,4);near(h.y,3);near(chosen.x,0);near(chosen.y,0);
 });
 test('精灵链接手选友军优于最低血量，技能距离仍为12格，禁止链接自己与塔',()=>{
- const {s,p,h,troop}=arena(),low=troop(0,2),chosen=troop(0,12);low.hp=1;assert.ok(s.setManualTarget(chosen.id,p));assert.equal(s.castPlan(1,p).t.id,chosen.id);assert.ok(s.cast(1,p));advance(s,.4);assert.equal(h.linkId,chosen.id);p.cd[1]=0;chosen.y=12.01;assert.equal(s.castPlan(1,p).t.id,low.id);assert.ok(s.setManualTarget(h.id,p));assert.equal(s.castPlan(1,p).t.id,low.id);const tower=s.towers[0];Object.assign(tower,{side:h.side,x:0,y:2});assert.ok(s.setManualTarget(tower.id,p));assert.equal(s.castPlan(1,p).t.id,low.id);
+ const {s,p,h,troop}=arena(),low=troop(0,2),chosen=troop(0,12);low.hp=1;assert.ok(s.setManualTarget(chosen.id,p));assert.equal(s.castPlan(1,p).t.id,chosen.id);assert.ok(s.cast(1,p));advance(s,.4);assert.equal(h.linkId,chosen.id);p.cd[1]=0;chosen.y=12.01;assert.equal(s.castPlan(1,p).code,'range');assert.ok(s.setManualTarget(h.id,p));assert.equal(s.castPlan(1,p).t.id,low.id);const tower=s.towers[0];Object.assign(tower,{side:h.side,x:0,y:2});assert.ok(s.setManualTarget(tower.id,p));assert.equal(s.castPlan(1,p).t.id,low.id);
 });
 test('精灵净化优先手选有负面友军，健康者不占名额且不扩大人数',()=>{
  const {s,p,h,make,troop}=arena(),enemy=make(3,0,3).h,nearby=Array.from({length:4},(_,i)=>troop(i*.2,1)),chosen=troop(0,12);for(const u of [...nearby,chosen])s.debuff(u,enemy,'moveSlow',.3,10,null,true);assert.ok(s.setManualTarget(chosen.id,p));let plan=s.castPlan(2,p);assert.equal(plan.targets[0].id,chosen.id);assert.equal(plan.targets.length,3);assert.ok(s.cast(2,p));advance(s,.4);assert.equal(s.hasNegative(chosen),false);assert.equal(nearby.filter(u=>!s.hasNegative(u)).length,2);p.cd[2]=0;assert.ok(s.setManualTarget(troop(0,.2).id,p));plan=s.castPlan(2,p);assert.ok(plan.targets.every(u=>s.hasNegative(u)));

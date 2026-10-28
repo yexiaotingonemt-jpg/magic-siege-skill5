@@ -19,7 +19,7 @@ async function setup(version=GAME_VERSION){
  };
 }
 async function login(page,base){
- await page.goto(base);await page.locator('#accountName').fill('版本验收'+Date.now());await page.locator('#accountPassword').fill('version-test-password');await page.locator('#authSubmit').click();await page.waitForFunction(()=>window.__game?.network.connected&&__game.sim.player);
+ await page.goto(base);await page.locator('#tabRegister').click();await page.locator('#accountName').fill('版本验收'+Date.now());await page.locator('#accountPassword').fill('version-test-password');await page.locator('#authSubmit').click();await page.waitForFunction(()=>window.__game?.network.connected&&__game.sim.player);
 }
 test('启动版本不一致：桌面与窄屏展示强制更新页，不提供注册或战场入口',async({browser})=>{
  const service=await setup(nextVersion),contexts=[],errors=[];

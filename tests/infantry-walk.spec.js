@@ -11,7 +11,7 @@ test('重甲兵实机步态：八帧换脚时网格和体型稳定，暂停与�
   page.on('pageerror',error=>errors.push(error.message));
   try{
     await page.goto('http://127.0.0.1:'+server.address().port);
-    await page.locator('#accountName').fill('重甲步态'+Date.now());await page.locator('#accountPassword').fill('test-password-5');await page.locator('#authSubmit').click();
+    await page.locator('#tabRegister').click();await page.locator('#accountName').fill('重甲步态'+Date.now());await page.locator('#accountPassword').fill('test-password-5');await page.locator('#authSubmit').click();
     await page.waitForFunction(()=>window.__game?.renderer.game.scene.scenes[0]?.unitMotion?.report.some(r=>r.texture==='kc-infantry-walk-attack'));
     const samples=await page.evaluate(async()=>{
       const scene=__game.renderer.game.scene.scenes[0],s=__game.sim,id=s.units.find(u=>u.side===0&&u.type==='melee').id;

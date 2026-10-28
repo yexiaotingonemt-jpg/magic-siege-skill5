@@ -1,10 +1,10 @@
 // 职业技能设计4：DingTalk st-3dff1c63-55938, rows20–43.
-import {triggerTowerGuard,towerGuardActive,TOWER_GUARD} from './tower-guard.js';
+import {triggerTowerGuard,towerGuardActive,towerAllyProtection,TOWER_GUARD} from './tower-guard.js';
 import {names} from './config.js';
 import {SKILL_PROGRESSION} from './skill-progression.js';
 import {adjustAttackCooldown} from './attack-cooldown.js';
 import {available,spend,createSkillValue} from './skill-value.js';
-import {selectSkill5 as selectSkill4,chooseRandomTarget,scaleSkill4,resolveSkill5 as resolveSkill4,impactSkill4,processSkill5Effects as processSkill4Effects,updateSkill5Unit as updateSkill4Unit,chooseSkill5 as chooseSkill4} from './skill5-mechanics.js';
+import {selectSkill5 as selectSkill4,skill5RangeFailure,chooseRandomTarget,scaleSkill4,resolveSkill5 as resolveSkill4,impactSkill4,processSkill5Effects as processSkill4Effects,updateSkill5Unit as updateSkill4Unit,chooseSkill5 as chooseSkill4} from './skill5-mechanics.js';
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y),factor=(s,rank)=>1+s.levelGrowth*(Math.max(1,rank)-1);
 const nearest=(o,es)=>es.sort((a,b)=>dist(o,a)-dist(o,b)||a.id-b.id);
 export class HeroRules{
@@ -50,6 +50,8 @@ export class HeroRules{
   if(t.tauntReductionUntil>this.time)guards.push({ratio:t.tauntReduction,value:t.tauntValue});
   if(!basic&&!reflected&&t.skillGuardUntil>this.time)guards.push({ratio:t.skillGuardRatio,value:t.skillGuardValue});
   const rawDamage=Math.max(0,n);n=rawDamage*100/(100+(t.armor||0));const before=n;let reduced=0;for(const guard of guards){const prevented=spend(guard.value,Math.min(before*guard.ratio,before*.8-reduced),'减伤');reduced+=prevented;}n-=reduced;if(towerGuardActive(t,this.time))n*=1-TOWER_GUARD.damageReduction;
+  // Final damage modifier, including max/current-HP damage, before shield absorption.
+  if(t.tower)n*=1-towerAllyProtection(t,this.units).reduction;
   const absorbed=spend(t.shieldValue,Math.min(t.shield||0,n),'护盾吸收');t.shield=Math.max(0,(t.shield||0)-absorbed);if(available(t.shieldValue)<=1e-7)t.shield=0;if(absorbed)this.stat(t.shieldSource,'shielding',absorbed);
   const actual=Math.min(t.hp,Math.max(0,n-absorbed)),sum=actual+absorbed;t.hp-=actual;
   if(sum>0){t.lastHitAt=this.time;if(a&&a.side!==t.side){t.combatAt??=this.time;a.combatAt??=this.time;}this.stat(a,t.tower?'buildingDamage':t.hero?'heroDamage':'minionDamage',sum);if(!t.tower)this.stat(a,'unitDamage',sum);this.stat(t,'damageTaken',rawDamage);if(a?.hero){t.contributors??={};t.contributors[a.playerId]=this.time;}}
@@ -70,6 +72,7 @@ export class HeroRules{
  castPlan(i,p=this.player){
   const blocked=(code,reason)=>({ok:false,code,reason});if(!Number.isInteger(i)||i<0||i>3)return blocked('invalid','无效技能');const h=this.hero(p);if(!h)return blocked('no-hero','请先点选己方单位确认契约');
   const id=h.classId,c=this.config.heroes[id],s=c.skills[i],lv=p.builds[id][i];if(!lv||p.level<SKILL_PROGRESSION[i].unlock)return blocked('locked','技能未解锁或尚未加点');
+  const rangeFailure=skill5RangeFailure(this,h,i,s);if(rangeFailure)return rangeFailure;
   if(h.stunUntil>this.time)return blocked('stunned','眩晕中，无法施法');if(h.dash)return blocked('channel','冲锋中，无法施法');if(h.classId===6&&i===2&&h.echo?.until>this.time)return {ok:true,code:'ready',reason:'回到残影',h,id:h.classId,c,s,lv,t:h,targets:[],randomChoices:[],recast:true};if(h.channelUntil>this.time)return blocked('channel','正在引导连续炮击');if(h.castUntil>this.time)return blocked('casting','正在施放其他技能');if(p.cd[i]>this.time)return blocked('cooldown','技能冷却中');if(p.stamina<s.cost)return blocked('stamina','体力不足');
   const selection=selectSkill4.call(this,h,i,s);if(!selection.ok)return selection;
   return {code:'ready',reason:'可释放',h,c,s,lv,id,...selection};

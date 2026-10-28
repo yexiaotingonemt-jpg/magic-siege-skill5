@@ -7,7 +7,7 @@ export const availableClasses=(side,config=defaults)=>side?[3]:[0,4,5,2];
 export const contractClasses=(u,config=defaults)=>availableClasses(u.side,config).filter(id=>contractType(id)===u.type);
 const skill=(power,cd,targetRange,radius=0,extra={})=>({power,cd,targetRange,radius,duration:0,cost:1,castTime:.35,levelGrowth:.2,...extra});
 export const defaults=clone(base);
-Object.assign(defaults.world,{attackBots:6,defenseBots:2,attackHpMultiplier:1,defenseHpMultiplier:1,troopHpMultiplier:1,heroHpMultiplier:1,heroHpGrowth:.04,heroAttackGrowth:.03,towerDamageExpRate:.0002,towerBreakXp:2});
+Object.assign(defaults.world,{attackBots:6,defenseBots:2,attackHpMultiplier:1,defenseHpMultiplier:1,troopHpMultiplier:1,heroHpMultiplier:1,heroHpGrowth:.02,heroAttackGrowth:.015,towerDamageExpRate:.0002,towerBreakXp:2});
 Object.assign(defaults.world,{retaliationMemory:3,retaliationLeash:14,heroPriorityDistance:1.5});
 defaults.world.skillDesignVersion=5;
 Object.assign(defaults.troops.melee,{hp:4000});Object.assign(defaults.troops.ranged,{hp:4000});Object.assign(defaults.troops.siege,{hp:5000});
@@ -85,6 +85,10 @@ defaults.heroes[5].skills=[
 for(const hero of defaults.heroes)for(const s of hero.skills){
  for(const key of ['power','shieldPower','healPower','tickCapPower','utilityPower','splashPower','percentMaxHp','percentCurrentHp','flatDamage','directPower','burnPower'])if(typeof s[key]==='number')s[key]*=2;
 }
+
+// Ranged contracts need more immediate damage/healing. Raising base attack
+// also raises their shared skill allowance, so multi-target effects aren't clipped.
+for(const id of [4,5])defaults.heroes[id].attack*=1.5;
 
 export const labels={...baseLabels,heroHpGrowth:'每级英雄生命成长比例',heroAttackGrowth:'每级英雄攻击成长比例',towerDamageExpRate:'每点有效塔伤经验',towerBreakXp:'推倒防御塔经验',columns:'每排防御塔数量',strength:'1级基础强度目标',vulnerability:'受到伤害加深比例',shieldBurstPower:'破盾攻击力系数（%）',pullStopDistance:'勾取后距自身格数',bounces:'额外弹射次数',threshold:'生命比例判断阈值',bonusDamage:'条件额外伤害比例',damageReduction:'伤害降低比例',healingReduction:'受到治疗降低比例',buildingBonus:'对建筑额外伤害比例 / 普攻倍率',percentCurrentHp:'每跳当前生命伤害比例',directPower:'首段直接攻击力系数（%）',burnPower:'燃烧每跳攻击力系数（%）',burnDuration:'燃烧持续秒',extensionHits:'旋风每次延时承伤次数',extensionSeconds:'旋风延长秒',attackDown:'攻击力降低比例',remoteReflect:'远程承伤反弹比例',flatDamage:'每跳固定伤害',percentMaxHp:'每跳最大生命伤害比例',stun:'眩晕秒',healPower:'治疗攻击力系数（%）',cleanseBoost:'成功净化后增攻比例',targets:'最多目标数'};
 Object.assign(labels,{conversionRatio:'累计承伤转化护盾倍率',shareRatio:'链接共享有效治疗倍率'});

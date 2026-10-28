@@ -13,7 +13,7 @@ test('普通兵真实渲染：双方视角均为己方背向前进、敌方正�
     for(const side of [0,1]){
       const context=await browser.newContext(),page=await context.newPage();contexts.push(context);pages.push(page);
       page.on('pageerror',error=>errors.push(error.message));
-      await page.goto(url);await page.locator('#accountName').fill('朝向'+side+Date.now());
+      await page.goto(url);await page.locator('#tabRegister').click();await page.locator('#accountName').fill('朝向'+side+Date.now());
       await page.locator('#accountPassword').fill('test-password-5');await page.locator(`[name="side"][value="${side}"]`).check();await page.locator('#authSubmit').click();
       await page.waitForFunction(()=>window.__game?.renderer.game.scene.scenes[0]?.unitMotion?.report.filter(r=>r.action==='move').length>=10);
     }

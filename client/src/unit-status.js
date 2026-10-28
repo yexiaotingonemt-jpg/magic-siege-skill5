@@ -1,5 +1,5 @@
 import {available} from '../../shared/skill-value.js';
-import {towerGuardActive} from '../../shared/tower-guard.js';
+import {towerGuardActive,towerAllyProtection} from '../../shared/tower-guard.js';
 
 const usable=v=>available(v)>1e-7;
 const percent=n=>Math.round(n*100)+'%';
@@ -44,6 +44,7 @@ export function unitStatuses(sim,u,fields=indexStatusFields(sim)){
  const marks=(u.soulMarks||[]).filter(m=>m.until>=now&&sim.get(m.ownerId));
  if(marks.length)add('soulMark','焚魂烙印','mark',Math.max(...marks.map(m=>m.until)),'阵亡时为标记者提供炙热；此击杀记录不受净化影响',0,4);
  if(towerGuardActive(u,now))add('towerGuard','三重守护','positive',u.towerGuardUntil,'攻击3个目标，受到伤害降低50%',0,0);
+ if(u.tower){const protection=towerAllyProtection(u,sim.units);if(protection.count)add('towerAllies','友军护塔','positive',Infinity,`${u.range}格内${protection.count}名友军，最终受到伤害降低${percent(protection.reduction)}`,protection.count,1);}
  for(const [id,name,until,value,detail]of [
   ['reflect','远程反伤',u.reflectUntil,u.reflectValue,'反弹远程伤害'],
   ['guard','减伤',u.tauntReductionUntil,u.tauntValue,'受到伤害降低'+percent(u.tauntReduction||0)],

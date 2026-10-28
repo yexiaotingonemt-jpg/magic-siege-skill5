@@ -36,8 +36,8 @@ test('警戒外20格内的手动小兵优先于自动英雄，死亡或离开20�
 
 test('20格锁定不扩大普通警戒、普攻或技能范围；可追击警戒外的手动目标',()=>{
  const {s,p,h,make,soldier}=arena(4),close=make(3,0,1).h,chosen=soldier(0,10),far=soldier(0,15),aggro=h.aggro,range=h.range;
- assert.ok(s.setManualTarget(chosen.id,p));assert.equal(s.castPlan(1,p).t.id,chosen.id);assert.equal(s.castPlan(0,p).t.id,close.id);
- assert.ok(s.setManualTarget(far.id,p));assert.equal(manualTarget(s,h,12),null);assert.equal(s.castPlan(1,p).t.id,close.id);
+ assert.ok(s.setManualTarget(chosen.id,p));assert.equal(s.castPlan(1,p).t.id,chosen.id);assert.equal(s.castPlan(0,p).code,'range');
+ assert.ok(s.setManualTarget(far.id,p));assert.equal(manualTarget(s,h,12),null);assert.equal(s.castPlan(1,p).code,'range');
  h.speed=2;const hp=far.hp,cd=h.cd;advance(s,.1);assert.ok(h.y>0);assert.equal(h.targetId,far.id);near(far.hp,hp);near(h.cd,cd);assert.equal(h.aggro,aggro);assert.equal(h.range,range);
  h.manualTargetId=null;h.manualAttackTargetId=null;h.targetId=null;close.hp=0;chosen.hp=0;assert.equal(s.choose(h),null);
 });
@@ -47,11 +47,32 @@ test('有效嘲讽优先于手动目标，拒绝切换；结束后恢复原自�
 test('眩晕中选择目标不绕过无法行动状态，不清空眩晕或冷却',()=>{
  const {s,p,h,soldier}=arena(),chosen=soldier(0,3);h.speed=2;h.cd=0;h.stunUntil=2;assert.ok(s.setManualTarget(chosen.id,p));const pos={x:h.x,y:h.y},hp=chosen.hp;advance(s,.5);near(h.x,pos.x);near(h.y,pos.y);near(chosen.hp,hp);assert.equal(h.stunUntil,2);
 });
+
+for(const [id,skills]of [[0,[0,2]],[2,[0,1,2,3]],[3,[0,1]],[4,[0,1,2,3]],[5,[0]]])test(`职业${id}手选敌人超距时不改选近敌、不扣费，边界内恢复施法`,()=>{
+ const {s,p,h,make}=arena(id),chosen=make(id===3?0:3,0,19).h;
+ make(id===3?0:3,0,1);assert.ok(s.setManualTarget(chosen.id,p));
+ for(const i of skills){
+  const skill=s.config.heroes[id].skills[i],before={stamina:p.stamina,cd:p.cd[i],score:p.score,xp:p.xp,casts:s.metrics.casts};
+  chosen.y=skill.targetRange+.001;
+  const plan=s.castPlan(i,p);assert.equal(plan.ok,false);assert.equal(plan.code,'range');assert.equal(plan.reason,'目标太远');
+  assert.equal(s.cast(i,p),false);assert.equal(s.notice,'目标太远');
+  assert.deepEqual({stamina:p.stamina,cd:p.cd[i],score:p.score,xp:p.xp,casts:s.metrics.casts},before);
+  chosen.y=skill.targetRange;
+  if(id===0&&i===2){const ally=s.units.find(u=>u.side===h.side&&u.id!==h.id);if(ally)chosen.targetId=ally.id;else{const u=s.spawn(h.side,'melee',0,1,0);Object.assign(u,{x:0,y:1});chosen.targetId=u.id;}}
+  assert.ok(s.castPlan(i,p).ok,s.castPlan(i,p).reason);
+ }
+});
+
+test('超距提示覆盖已解锁技能的冷却和体力状态，未加点仍显示锁定',()=>{
+ const {s,p,soldier}=arena(),chosen=soldier(0,15);assert.ok(s.setManualTarget(chosen.id,p));
+ p.cd[0]=99;p.stamina=0;assert.equal(s.castPlan(0,p).code,'range');
+ p.builds[p.classId][0]=0;assert.equal(s.castPlan(0,p).code,'locked');
+});
 for(const id of [0,2,3,4,5])test(`职业${id}可定向敌方技能使用手动目标并保持原技能范围`,()=>{
  const {s,p,h,make,soldier}=arena(id),closer=make(id===3?0:3,0,1).h,chosen=soldier(0,Math.min(4,h.aggro));assert.ok(s.setManualTarget(chosen.id,p));
  const skills=id===0?[0]:id===2?[0,1,2,3]:id===3?[0,1]:id===4?[0,1,2,3]:[0];
  for(const i of skills){const plan=s.castPlan(i,p);assert.ok(plan.ok,plan.reason);assert.equal(plan.t.id,chosen.id,`skill ${i}`);if(plan.targets.length)assert.equal(plan.targets[0].id,chosen.id,`first recipient skill ${i}`);}
- if(id===4){chosen.y=6;s.config.heroes[id].skills[0].targetRange=2;assert.ok(s.setManualTarget(chosen.id,p));assert.equal(s.castPlan(0,p).t.id,closer.id);}
+ if(id===4){chosen.y=6;s.config.heroes[id].skills[0].targetRange=2;assert.ok(s.setManualTarget(chosen.id,p));assert.equal(s.castPlan(0,p).code,'range');}
 });
 test('范围多目标技能保留手动目标，其他目标遵守原数量上限与选择规则',()=>{
  const {s,p,h,soldier}=arena(4),chosen=soldier(0,4);chosen.hp=9e6;h.heat=4;const enemies=Array.from({length:8},(_,i)=>soldier((i-3.5)*.1,2));enemies.forEach((u,i)=>u.hp=100+i);assert.ok(s.setManualTarget(chosen.id,p));const plan=s.castPlan(3,p);assert.equal(plan.targets[0].id,chosen.id);assert.equal(plan.targets.length,plan.s.targets+Math.floor(h.heat/plan.s.heatStep));assert.equal(new Set(plan.targets.map(u=>u.id)).size,plan.targets.length);assert.equal(plan.targets[1].id,enemies[0].id);

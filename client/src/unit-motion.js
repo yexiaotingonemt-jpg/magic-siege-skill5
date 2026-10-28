@@ -1,4 +1,5 @@
 import {inAttackRange} from '../../shared/attack-range.js';
+import {HERO_WALK_ART} from './walk-animation.js';
 const tau=Math.PI*2,clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 export const motionStyle=u=>u.tower?'tower':u.hero?({0:'orc',1:'storm',2:'rune',3:'lord',4:'flame',5:'forest',6:'assassin'}[u.classId]||'orc'):({melee:'golem',ranged:'arbalest',siege:'cannon'}[u.type]||'golem');
 const floating=style=>['rune','cannon','forest'].includes(style);
@@ -28,7 +29,8 @@ export function unitMotionPose(u,time,{moving=false,targetInRange=false,side=0}=
   result.angle=(style==='golem'||style==='orc'||style==='lord')?strike*(dx<0?-1:1)*3:0;
  }else if(moving&&!u.tower){
   result.action='move';c.stride=Math.sin(phase);c.bodyLean=Math.sin(phase)*.2;c.bodyLift=Math.abs(Math.sin(phase))*.5;c.cloth=Math.sin(phase-.6);c.fin=Math.sin(phase);c.core=.18+.07*Math.sin(phase);
-  result.dy=['arbalest','golem'].includes(style)?0:floating(style)?Math.sin(phase*.6)*.7:-Math.abs(Math.sin(phase))*1.1;
+  // Drawn cycles already include weight transfer and secondary motion.
+  result.dy=(u.hero&&HERO_WALK_ART[u.classId])||['arbalest','golem'].includes(style)?0:floating(style)?Math.sin(phase*.6)*.7:-Math.abs(Math.sin(phase))*1.1;
  }else if(floating(style)){
   c.cloth=Math.sin(phase*.35)*.12;c.fin=Math.sin(phase*.35)*.12;c.core=.12;
  }

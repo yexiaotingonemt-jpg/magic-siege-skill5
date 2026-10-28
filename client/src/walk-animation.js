@@ -1,4 +1,12 @@
 export const WALK_FRAMES=8;
+// Time runs across columns; facing runs down rows, as with the troop cycles.
+export const HERO_WALK_ART={
+  0:{texture:'kc-orc-walk',file:'orc-walk.png'},
+  2:{texture:'kc-chariot-walk',file:'chariot-walk.png'},
+  3:{texture:'kc-lord-walk',file:'lord-walk.png'},
+  4:{texture:'kc-mage-walk',file:'mage-walk.png'},
+  5:{texture:'kc-elf-walk',file:'elf-walk.png'},
+};
 export const RANGED_WALK_FILES=['arbalest-walk-attack.png','arbalest-walk-defense.png'];
 export const RANGED_WALK_TEXTURES=['kc-arbalest-walk-attack','kc-arbalest-walk-defense'];
 export const MELEE_WALK_FILES=['infantry-walk-attack.png','infantry-walk-defense.png'];

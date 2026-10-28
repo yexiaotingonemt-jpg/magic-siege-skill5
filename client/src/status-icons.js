@@ -1,7 +1,7 @@
 import {unitBarOffset} from './art-catalog.js';
 import {indexStatusFields,unitStatuses} from './unit-status.js';
 
-const types=['stun','taunt','moveSlow','attackSpeedDown','vulnerable','attackDown','healingDown','scar','conduct','dot','guard','shield','damageStore','immune','lordUlt','heat','link','burnAura','soulMark','towerGuard','reflect','skillGuard','boost','healingBoost','haste'];
+const types=['stun','taunt','moveSlow','attackSpeedDown','vulnerable','attackDown','healingDown','scar','conduct','dot','guard','shield','damageStore','immune','lordUlt','heat','link','burnAura','soulMark','towerGuard','towerAllies','reflect','skillGuard','boost','healingBoost','haste'];
 const tones={positive:0x83bfa6,negative:0xde9795,mark:0xbfa4da};
 const line=(g,points)=>{g.beginPath();g.moveTo(...points[0]);for(const p of points.slice(1))g.lineTo(...p);g.strokePath();};
 function shield(g){line(g,[[6,6],[12,4],[18,6],[17,14],[12,19],[7,14],[6,6]]);}
@@ -22,7 +22,7 @@ function glyph(g,id){
  if(id==='scar'){for(let i=0;i<3;i++)line(g,[[6+i*5,6],[4+i*5,18]]);return;}
  if(id==='conduct'){line(g,[[14,4],[6,13],[12,13],[10,20],[19,10],[13,10],[14,4]]);return;}
  if(id==='soulMark'){line(g,[[4,12],[8,8],[16,8],[20,12],[16,16],[8,16],[4,12]]);g.strokeCircle(12,12,3);return;}
- if(id==='towerGuard'){line(g,[[5,19],[5,6],[9,6],[9,9],[15,9],[15,6],[19,6],[19,19],[5,19]]);for(const x of [8,12,16])line(g,[[x,12],[x,16]]);}
+ if(id==='towerGuard'||id==='towerAllies'){line(g,[[5,19],[5,6],[9,6],[9,9],[15,9],[15,6],[19,6],[19,19],[5,19]]);for(const x of [8,12,16])line(g,[[x,12],[x,16]]);}
 }
 export function createStatusIcons(scene){
  for(const id of types){const key='unit-status-'+id;if(scene.textures.exists(key))continue;const g=scene.add.graphics();const tone=['stun','taunt','moveSlow','attackSpeedDown','vulnerable','attackDown','healingDown','scar','conduct','dot'].includes(id)?'negative':id==='soulMark'?'mark':'positive';
@@ -41,13 +41,13 @@ export function createStatusIcons(scene){
     const row=Math.floor(i/3),rowCount=Math.min(3,statuses.length-row*3),x=left+(columns-rowCount)*(size+gap)/2+(i%3)*(size+gap),y=barY-5-size-row*(size+gap),key=u.id+':'+status.id;active.add(key);
     let sp=sprites[used],count=counts[used];if(!sp){sp=scene.add.image(0,0,'unit-status-'+status.id).setOrigin(0).setDepth(12010);sprites.push(sp);count=scene.add.text(0,0,'',{fontFamily:'Arial',fontSize:'11px',fontStyle:'bold',color:'#fff6de',backgroundColor:'#18201ff2',padding:{x:1,y:0},stroke:'#101917',strokeThickness:2}).setOrigin(1,1).setDepth(12020);counts.push(count);}used++;
     sp.setVisible(true).setTexture('unit-status-'+status.id).setPosition(x,y).setDisplaySize(size,size);count.setVisible(status.stacks>1);if(status.stacks>1)count.setFontSize(Math.max(11,9/cssScale)).setText(String(status.stacks)).setPosition(x+size+1,y+size-1);
-    const remaining=status.until-sim.time;let duration=durations.get(key)||remaining;if(remaining>duration)duration=remaining;durations.set(key,duration);bars.fillStyle(0x91c99c,.95);bars.fillRect(x+2,y+size-3,(size-4)*Math.max(0,Math.min(1,remaining/duration)),1.5);
+    const remaining=status.until-sim.time;let duration=durations.get(key)||remaining;if(remaining>duration)duration=remaining;durations.set(key,duration);if(Number.isFinite(remaining)){bars.fillStyle(0x91c99c,.95);bars.fillRect(x+2,y+size-3,(size-4)*Math.max(0,Math.min(1,remaining/duration)),1.5);}
     records.push({unitId:u.id,key,...status,remaining,x,y,size});
    });
   }
   for(let i=used;i<sprites.length;i++){sprites[i].setVisible(false);counts[i].setVisible(false);}for(const key of durations.keys())if(!active.has(key))durations.delete(key);
   if(pinnedUntil&&performance.now()>pinnedUntil){detailKey=null;pinnedUntil=0;}const selected=records.find(r=>r.key===detailKey);tip.setVisible(!!selected);
-  if(selected){tip.setFontSize(Math.max(12,12/cssScale)).setText(`${selected.name}${selected.stacks>1?' ×'+selected.stacks:''} · ${Math.max(0,selected.remaining).toFixed(1)}秒\n${selected.detail}`);const x=Math.max(tip.width/2+6,Math.min(494-tip.width/2,selected.x+selected.size/2)),y=Math.max(camera.scrollY+tip.height+6,(tops.get(selected.unitId)||selected.y)-5);tip.setPosition(x,y);}
+  if(selected){const duration=Number.isFinite(selected.remaining)?`${Math.max(0,selected.remaining).toFixed(1)}秒`:'友军在范围内时生效';tip.setFontSize(Math.max(12,12/cssScale)).setText(`${selected.name}${selected.stacks>1?' ×'+selected.stacks:''} · ${duration}\n${selected.detail}`);const x=Math.max(tip.width/2+6,Math.min(494-tip.width/2,selected.x+selected.size/2)),y=Math.max(camera.scrollY+tip.height+6,(tops.get(selected.unitId)||selected.y)-5);tip.setPosition(x,y);}
   return records;
  },destroy(){bars.destroy();tip.destroy();sprites.forEach(s=>s.destroy());counts.forEach(t=>t.destroy());}};
 }
