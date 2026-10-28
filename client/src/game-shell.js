@@ -7,11 +7,15 @@ export const gameShell=`
    <header>
     <div><small>多人同局 · 实时攻防</small><h1>魔法王座 <span>英雄攻防</span></h1></div>
     <div class="currency">${uiIcon('stamina')}<b id="stamina"></b><small>体力</small></div>
-    <div class="currency">${uiIcon('ranking')}<b id="score"></b><small>积分</small></div>
+    <div class="currency">${uiIcon('ranking')}<b id="score"></b><small>总积分</small></div>
    </header>
    <div class="battle-info"><b id="front"></b><span id="wave"></span><button id="locate" aria-label="定位英雄">${uiIcon('locate')} 定位</button></div>
    <div class="battle-wrap">
     <div id="battle"></div>
+    <details class="battle-ranking" open>
+     <summary>实时排行 <span>总积分 ↓ · KDA</span></summary>
+     <div id="battleRanking" class="battle-ranking-scroll" tabindex="0" aria-label="战斗贡献排行榜"></div>
+    </details>
     <div class="map-rail"><span id="mapTop">王城</span><div class="map-track"><i id="mapWindow"></i></div><span id="mapBottom">营地</span></div>
     <div class="map-jumps" aria-label="战场视角"><button id="viewDefense">王城</button><button id="viewFront">交锋</button><button id="viewCamp">营地</button></div>
    </div>
@@ -25,7 +29,7 @@ export const gameShell=`
    <footer aria-label="游戏导航">${[['battle','战场'],['hero','技能'],['reports','战报'],['ranking','排行']].map(([name,label])=>`<button type="button" data-nav="${name}" ${name==='battle'?'aria-current="page"':''}>${uiIcon(name)}<span>${label}</span></button>`).join('')}</footer>
    <div id="gameSheet" class="game-sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
     <section class="sheet-panel"><div class="sheet-heading"><h2 id="sheetTitle">职业技能</h2><button id="sheetClose" aria-label="关闭面板">×</button></div>
-     <div id="sheetScroll" class="sheet-scroll"><section data-sheet-section="hero"><div class="hero-sheet-heading"><b id="abilityClassName"></b><button id="respec">重分技能点</button></div><div id="heroAbilityBody"></div></section><section data-sheet-section="reports" hidden><div id="reports"></div></section><section data-sheet-section="ranking" hidden><div id="ranking"></div></section></div>
+     <div id="sheetScroll" class="sheet-scroll"><section data-sheet-section="hero"><div class="hero-sheet-heading"><b id="abilityClassName"></b><button id="respec">重分技能点</button></div><div id="heroAbilityBody"></div></section><section data-sheet-section="reports" hidden><div id="reports"></div></section><section data-sheet-section="ranking" hidden><p class="ranking-rule">总积分：历次英雄评价累计，含当前英雄实时贡献。各职业沿用评价权重，每次契约最高100分。<br>KDA = 总积分 ÷ 累计消耗体力（契约＋施法）；未消耗时显示 —。</p><div id="ranking"></div></section></div>
     </section>
    </div>
   </section>

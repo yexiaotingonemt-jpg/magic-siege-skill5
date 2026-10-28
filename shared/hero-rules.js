@@ -79,7 +79,7 @@ export class HeroRules{
  }
  cast(i,p=this.player){
   const plan=this.castPlan(i,p);if(!plan.ok)return this.fail(p,plan.reason);if(plan.recast){const h=plan.h,e=h.echo;this.moveUnit(h,e.x,e.y);const wanted=Math.max(0,h.maxHp*e.ratio-h.hp);this.heal(h,wanted,h);if(h.hp/h.maxHp>e.ratio)h.hp=h.maxHp*e.ratio;h.echo=null;this.visual('echoReturn',h,h,{skill:2,until:this.time+.8});return true;}chooseRandomTarget(this,plan);const {h,s,lv,t}=plan,k=factor(s,lv),token=(h.castToken||0)+1;h.castToken=token;
-  p.stamina-=s.cost;p.score+=this.config.world.castScore;this.addXp(p,s.cost*this.config.world.expPerStamina);p.cd[i]=this.time+s.cd;h.castUntil=this.time+s.castTime;this.metrics.casts++;
+  p.stamina-=s.cost;p.staminaSpent+=s.cost;p.score+=this.config.world.castScore;this.addXp(p,s.cost*this.config.world.expPerStamina);p.cd[i]=this.time+s.cd;h.castUntil=this.time+s.castTime;this.metrics.casts++;
   const locked=t?{id:t.id,x:t.x,y:t.y}:null;h.skillAnimation={skill:i,start:this.time,release:h.castUntil,end:h.castUntil+.42,from:{x:h.x,y:h.y},to:locked||{x:h.x,y:h.y}};
   this.visual('cast',h,locked||h,{skill:i,until:h.castUntil,release:h.castUntil});
   const value=createSkillValue(h,s,lv,this.time);value.skill=i;this.skillValues??=[];this.skillValues.push(value);if(this.skillValues.length>1000)this.skillValues.shift();

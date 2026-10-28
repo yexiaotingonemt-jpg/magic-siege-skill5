@@ -3,6 +3,7 @@ import './kc-layout.css';
 import './multiplayer.css';
 import './kc-final.css';
 import {heroPortrait} from './art-catalog.js';
+import {rankingHTML} from './ranking.js';
 import {gameShell} from './game-shell.js';
 import {uiIcon} from './ui-icons.js';
 import {mountGameLayout,createGameSheets} from './game-layout.js';
@@ -59,7 +60,7 @@ async function boot(){
 }
 function castSkill(i){if(!network?.connected)return;if(!sim.castPlan(i).ok){sim.notice=sim.castPlan(i).reason;update();return;}sim.notice='';network.send('cast',{skill:i});}
 window.addEventListener('keydown',e=>{if(!ready||sheets.active||['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)||document.activeElement.closest('#contractPopover'))return;if(['1','2','3','4'].includes(e.key)&&!e.repeat)castSkill(Number(e.key)-1);});
-function update(){if(!ready||!sim?.player)return;selection?.sync();const p=sim.player,h=sim.hero(),guide=describeAbilities(sim);$('#stamina').textContent=p.stamina.toFixed(0);$('#toolStamina').textContent=p.stamina.toFixed(0);$('#score').textContent=Math.floor(p.score);$('#front').textContent=`第 ${sim.layer+1}/3 层 · 剩余 ${sim.towers.filter(t=>t.hp>0).length} 塔`;$('#wave').textContent=`第 ${sim.metrics.waves} 波 · ${Math.max(0,sim.waveAt-sim.time).toFixed(0)}s`;
+function update(){if(!ready||!sim?.player)return;selection?.sync();const p=sim.player,h=sim.hero(),guide=describeAbilities(sim);$('#stamina').textContent=p.stamina.toFixed(0);$('#toolStamina').textContent=p.stamina.toFixed(0);$('#score').textContent=(p.totalPoints??0).toFixed(1);$('#front').textContent=`第 ${sim.layer+1}/3 层 · 剩余 ${sim.towers.filter(t=>t.hp>0).length} 塔`;$('#wave').textContent=`第 ${sim.metrics.waves} 波 · ${Math.max(0,sim.waveAt-sim.time).toFixed(0)}s`;
  document.querySelector('.game').classList.toggle('awaiting-contract',!h);$('#respec').disabled=!h;$('#skills').hidden=!h;$('#heroName').textContent=h?`${classes[p.classId]} Lv.${p.level} · ${account.name}`:selection?.unit?troopTitle(selection.unit)+' · 待契约':'请选择 1 个己方单位进行契约';$('#hpLabel').textContent=h?`${Math.ceil(h.hp)} / ${Math.ceil(h.maxHp)} HP`:selection?.unit?'点击弹窗中的“契约”按钮完成契约':'点选场上己方士兵并确认';$('#hpbar').style.width=h?100*h.hp/h.maxHp+'%':'0%';$('#xpbar').style.width=100*p.xp/sim.expNeeded(p)+'%';$('#xpLabel').textContent=`EXP ${Number(p.xp.toFixed(2))} / ${sim.expNeeded(p)} · 技能点 ${p.points}`+(h&&p.classId===4?` · 炙热 ${h.heat||0}/5`:'');const portrait=heroPortrait(p.classId);$('#portrait').style.backgroundImage=portrait?`url('${portrait}')`:p.classId===6?"url('/art/skill5/assassin-idle.png')":'';$('#portrait').style.backgroundSize=portrait?'cover':p.classId===6?'contain':'';$('#portrait').style.backgroundRepeat='no-repeat';$('#portrait').style.backgroundPosition=portrait?'center 18%':['0% 100%','33.333% 100%','66.666% 0%','66.666% 100%','33.333% 0%','100% 100%','0% 0%'][p.classId];
  const energy=$('#lordEnergy');energy.hidden=!h||p.classId!==3;if(!energy.hidden){const cap=sim.config.heroes[3].passiveMinionKills;energy.innerHTML='能量 '+Array.from({length:cap},(_,i)=>`<i class="${i<(h.energy||0)?'filled':''}"></i>`).join('');energy.setAttribute('aria-label',`能量 ${h.energy||0}/${cap}`);}
  if(h?.damageStore)$('#xpLabel').textContent+=` · 蓄盾 ${Math.floor(Math.min(h.damageStore.total*(h.damageStore.conversionRatio??1),available(h.damageStore.value)))}`;
@@ -70,7 +71,7 @@ function update(){if(!ready||!sim?.player)return;selection?.sync();const p=sim.p
  $('#onlinePlayers').innerHTML=active.filter(p=>!p.bot).map(p=>`<div class="online-player"><i class="${p.online?'online':''}"></i><span>${esc(p.name)}</span><small>${p.side?'防守':'进攻'} · ${classes[p.classId]}</small></div>`).join('');
  $('#roomInfo').innerHTML=`<p>同局 ${sim.matchId.slice(0,8)} · 已同步 ${active.filter(p=>p.online).length} 人</p><p>阶段 ${sim.stage.number} · <span class="countdown">${Math.max(0,sim.stage.end-sim.time).toFixed(0)}秒</span> · 胜场 攻${sim.stage.wins[0]} / 守${sim.stage.wins[1]}</p>`;
  const units=sim.units.filter(u=>u.hp>0);$('#stats').textContent=`战斗${sim.time.toFixed(1)}秒 · 进攻${units.filter(u=>u.side===0).length}单位 / 防守${units.filter(u=>u.side===1).length}单位`;
- $('#feed').innerHTML=sim.logs.slice(0,4).map(t=>`<p>${esc(t)}</p>`).join('');$('#ranking').innerHTML=active.sort((a,b)=>b.score-a.score).map((p,i)=>`<div class="rank"><span>${i+1}. ${esc(p.name)} · ${classes[p.classId]}</span><b>${Math.floor(p.score)}</b></div>`).join('');
+ $('#feed').innerHTML=sim.logs.slice(0,4).map(t=>`<p>${esc(t)}</p>`).join('');const ranks=rankingHTML(active,p.id);$('#ranking').innerHTML=ranks;$('#battleRanking').innerHTML=ranks;
  $('#reports').innerHTML=sim.reports.length?sim.reports.slice(0,15).map(r=>`<article><b>${esc(r.name)} · ${classes[r.classId]} · ${r.reason}</b><p>评价${r.rating.toFixed(1)} /100 · <span class="reward">+${r.reward.toFixed(1)}积分</span></p>${r.parts.map(x=>`<small>${labels[x.key]||x.key} ${x.value.toFixed(0)} → ${x.normalized.toFixed(1)} × ${x.weight}%</small>`).join('<br>')}</article>`).join(''):'英雄阵亡或战区结束后生成评价。';
  $('#configReadout').textContent='可契约职业：'+[...availableClasses(0),...availableClasses(1)].map(id=>classes[id]).join('、');
 }
