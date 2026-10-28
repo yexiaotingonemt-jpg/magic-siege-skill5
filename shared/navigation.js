@@ -1,4 +1,4 @@
-import {activeTaunter,manualTarget,manualAttackTarget} from './manual-target.js';
+import {activeTaunter,manualTarget,manualAttackTarget,friendlyTarget} from './manual-target.js';
 import {inAttackRange} from './attack-range.js';
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const category=u=>u.hero?0:u.tower?2:1;
@@ -7,8 +7,13 @@ export const cannotAct=(u,time)=>u.stunUntil>time||u.castUntil>time||u.channelUn
 // 普通索敌只在当前目标丢失、嘲讽结束或没有目标时执行。
 export function chooseTarget(sim,u){
  const radius=u.aggro??u.range;
+ // Losing the actively selected elf ally returns selection to local enemies.
+ if(u.classId===5&&u.friendlyTargetId!=null&&u.manualTargetId===u.friendlyTargetId&&!sim.get(u.friendlyTargetId)){
+  u.manualTargetId=null;u.manualAttackTargetId=null;u.retaliationTargetId=null;
+ }
+ if(u.friendlyTargetId!=null&&!friendlyTarget(sim,u))u.friendlyTargetId=null;
  const taunter=activeTaunter(sim,u);
- if(taunter){u.manualTargetId=null;u.manualAttackTargetId=null;u.wasTaunted=true;u.retaliationTargetId=null;return taunter;}
+ if(taunter){u.manualTargetId=null;u.manualAttackTargetId=null;u.friendlyTargetId=null;u.wasTaunted=true;u.retaliationTargetId=null;return taunter;}
  if(u.wasTaunted){u.wasTaunted=false;u.manualTargetId=null;u.manualAttackTargetId=null;u.targetId=null;u.retaliationTargetId=null;}
  const selected=manualTarget(sim,u);
  const attackSelected=manualAttackTarget(sim,u);

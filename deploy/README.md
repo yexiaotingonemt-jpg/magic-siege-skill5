@@ -15,6 +15,8 @@ npm run package:client -- --server https://game.example.com
 
 将示例域名替换成实际服务器地址。发布目录位于`release/`；Windows还会生成ZIP和SHA-256文件。校验上传包SHA-256后，将服务端包解压到新建的版本目录，保留`server/`和`shared/`的相对层级：
 
+开发机空间不足时，可用 `MAGIC_RELEASE_DIR` 指定其他磁盘的发布目录；打包临时目录跟随进程 `TEMP`/`TMP`。这些选项不改变发布版本及签名校验。
+
 ```text
 server/index.mjs
 server/accounts.mjs

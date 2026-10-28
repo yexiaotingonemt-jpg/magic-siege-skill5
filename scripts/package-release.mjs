@@ -10,7 +10,7 @@ const root=fileURLToPath(new URL('..',import.meta.url));
 const kind=process.argv[2];
 if(!['client','server'].includes(kind))throw Error('Usage: node scripts/package-release.mjs client|server [--server URL] [--no-runtime]');
 const stamp=new Date().toISOString().replace(/[-:.TZ]/g,'');
-const name=`magic-siege-${kind}-v${kind==='client'?CLIENT_VERSION:SERVER_VERSION}-${stamp}`,output=path.join(root,'release',name);
+const name=`magic-siege-${kind}-v${kind==='client'?CLIENT_VERSION:SERVER_VERSION}-${stamp}`,output=path.join(process.env.MAGIC_RELEASE_DIR?path.resolve(process.env.MAGIC_RELEASE_DIR):path.join(root,'release'),name);
 await mkdir(output,{recursive:true});
 const copy=(source,dest=source)=>cp(path.join(root,source),path.join(output,dest),{recursive:true});
 if(kind==='client'){

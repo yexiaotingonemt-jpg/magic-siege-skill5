@@ -1,10 +1,10 @@
-import {manualTarget} from '../../shared/manual-target.js';
+import {manualTarget,enemyTarget,friendlyTarget} from '../../shared/manual-target.js';
 // Ground markers read the same selected IDs and resolved skill recipients as combat.
 export function createTargetHalos(scene){
  const ink=scene.add.graphics().setDepth(85),report=[];
  return {ink,get report(){return report;},draw(s,map){
   ink.clear();report.length=0;
-  const hero=s.hero(),locked=hero?manualTarget(s,hero):null,selected=hero||s.get(s.player.reservedUnitId);
+  const hero=s.hero(),locked=hero?(hero.classId===5?enemyTarget(s,hero):manualTarget(s,hero)||enemyTarget(s,hero)):null,friend=hero?.classId===5?friendlyTarget(s,hero):null,selected=hero||s.get(s.player.reservedUnitId);
   const add=(kind,u,until=null)=>{
    if(!u||u.hp<=0)return;
    const p=map.point(u),width=(u.tower?80:u.hero?56:42)+(kind==='skill'?14:0),height=width*.36,y=p.y+(u.tower?45:u.hero?31:24);
@@ -28,6 +28,7 @@ export function createTargetHalos(scene){
   if(hero){
    const target=s.get(hero.targetId);if(target&&target.side!==hero.side&&target.id!==locked?.id)add('basic',target);
    add('manual',locked);
+   if(friend?.id!==locked?.id)add('manual',friend);
    const marked=new Set();
    for(const e of [...s.animations].reverse()){
     if(e.kind!=='release'||e.sourceId!==hero.id||e.start>s.time||s.time>=e.start+1)continue;

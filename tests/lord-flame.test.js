@@ -18,7 +18,7 @@ function arena(){
 const burns=(s,u)=>s.fields.filter(f=>f.type==='lordScorch'&&f.host===u.id);
 
 test('领主冲锋范围18格包含边界，范围外不选取',()=>{
- const {s,p,make}=arena(),enemy=make(0,-18);assert.equal(s.castPlan(1,p).t.id,enemy.id);
+ const {s,p,make}=arena(),enemy=make(0,-18);assert.ok(s.setManualTarget(enemy.id,p));assert.equal(s.castPlan(1,p).t.id,enemy.id);
  enemy.y=-18.001;assert.equal(s.castPlan(1,p).ok,false);enemy.y=-17;assert.equal(s.castPlan(1,p).t.id,enemy.id);
  assert.match(describeAbilities(s).skills[1].summary,/18格/);
 });
@@ -36,7 +36,7 @@ test('连续接触只刷新期限、不叠层、不推迟每秒跳伤',()=>{
 });
 test('先火焰盾再18格突进：沿途与终点挂灼烧，离开后继续跳伤',()=>{
  const {s,p,h,make}=arena(),first=make(0,-4),middle=make(0,-9),far=make(0,-17),hp=first.hp;
- s.cast(2,p);advance(s,.4);assert.ok(s.cast(1,p));advance(s,2.3);near(h.y,-17);assert.equal(h.dash,null);
+ s.cast(2,p);advance(s,.4);assert.ok(s.setManualTarget(far.id,p));assert.ok(s.cast(1,p));advance(s,2.3);near(h.y,-17);assert.equal(h.dash,null);
  for(const u of [first,middle,far])assert.equal(burns(s,u).length,1,`missing route target ${u.id}`);
  assert.ok(Math.hypot(h.x-first.x,h.y-first.y)>5);const before=first.hp;advance(s,1.1);assert.ok(first.hp<before);assert.ok(first.hp<hp);
 });

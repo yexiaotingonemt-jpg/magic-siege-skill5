@@ -22,7 +22,7 @@ function arena(id,level=6,rank=1){
  const {p,h}=make(id,0,0),enemy=make(id===3?0:3,0,3).h,helper=make(id===3?3:0,2,0).h;s.localPlayerId=p.id;
  enemy.hp=enemy.maxHp=1e7;helper.hp=1000;helper.maxHp=1e6;h.hp=h.maxHp*.5;enemy.targetId=helper.id;
  const target=(x,y,side=enemy.side)=>{const u=s.spawn(side,'melee',0,1,x);Object.assign(u,{x,y,hp:1e7,maxHp:1e7,speed:0,cd:1e9});return u;};
- return {s,p,h,enemy,helper,target};
+ if(id===5)s.setManualTarget(helper.id,p);return {s,p,h,enemy,helper,target};
 }
 
 test('法师基础攻击提高50%，成长减半，其余基础属性保留',()=>{
@@ -84,7 +84,7 @@ test('领主1技能10格扇形包含边界、排除更远与侧后方单位',()=
  const hp=inside.hp;s.cast(0,p);advance(s,.4);assert.ok(inside.hp<hp);assert.equal(outside.hp,outside.maxHp);assert.match(describeAbilities(s).skills[0].effect,/10格/);
 });
 test('领主冲锋3格接触边界生效、边界外不命中，实际侧向击退5格',()=>{
- const {s,p,h,enemy,target}=arena(3);enemy.y=-17;const inside=target(3,-7.8),outside=target(3.01,-7.8),hp=inside.hp;
+ const {s,p,h,enemy,target}=arena(3);enemy.y=-17;s.setManualTarget(enemy.id,p);const inside=target(3,-7.8),outside=target(3.01,-7.8),hp=inside.hp;
  assert.ok(s.cast(1,p));advance(s,2.2);assert.ok(!h.dash);near(h.y,-17);near(inside.x,8);near(outside.x,3.01);near(hp-inside.hp,h.attack*2.4);near(outside.hp,outside.maxHp);
 });
 test('领主火焰盾5格半径包含边界，范围外不会附加灼烧',()=>{
@@ -93,7 +93,7 @@ test('领主火焰盾5格半径包含边界，范围外不会附加灼烧',()=>{
 });
 
 test('领主冲锋整段扫掠覆盖20Hz采样点之间的3格切线，无越界与重复命中',()=>{
- const {s,p,h,enemy,target}=arena(3);enemy.y=-17;const tangent=target(3,-7),outside=target(3.001,-7),hp=tangent.hp;
+ const {s,p,h,enemy,target}=arena(3);enemy.y=-17;s.setManualTarget(enemy.id,p);const tangent=target(3,-7),outside=target(3.001,-7),hp=tangent.hp;
  assert.ok(s.cast(1,p));advance(s,2.2);near(tangent.x,8);near(hp-tangent.hp,h.attack*2.4);near(outside.x,3.001);near(outside.hp,outside.maxHp);
  advance(s,.2);near(hp-tangent.hp,h.attack*2.4);
 });

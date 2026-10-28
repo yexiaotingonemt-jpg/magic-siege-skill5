@@ -16,7 +16,7 @@ export function createSkillHud(container){
    const casting=(h?.castUntil>sim.time||h?.channelUntil>sim.time)&&h.skillAnimation?.skill===i;
    const status=casting?'施法中':plan.ok?'可释放':plan.code==='locked'?(p.level<unlock?`Lv.${unlock}解锁`:'待加点'):shortStatus[plan.code]||plan.reason;
    slot.button.classList.toggle('unready',!plan.ok);slot.button.classList.toggle('ready',plan.ok);slot.button.classList.toggle('casting',!!casting);slot.button.dataset.state=casting?'casting':plan.code;
-   slot.button.classList.toggle('out-of-range',plan.code==='range');
+   slot.button.classList.toggle('out-of-range',plan.code==='range'||plan.code==='wrong-target');
    slot.button.setAttribute('aria-label',names[id][i]+' · '+status);
    slot.button.title=`${guide.skills[i].summary}\n${guide.skills[i].compactMeta}\n${casting?'正在施法':plan.reason}${cd?` · 剩余${cd.toFixed(1)}秒`:''}`;
    const art=HERO_ART[id];const frame=art?art.row*4+i:frames[id][i];slot.art.style.backgroundImage=art?`url('${ART_ROOT}/skill-icons.webp')`:'';slot.art.style.backgroundSize=art?'400% 500%':'';slot.art.style.backgroundPosition=`${frame%4/3*100}% ${Math.floor(frame/4)/(art?4:1)*100}%`;

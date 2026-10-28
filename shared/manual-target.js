@@ -15,6 +15,21 @@ export function manualTarget(sim,h,range=Infinity){
  return target&&(target.side!==h.side||canSelectAllies(h))&&distance(h,target)<=Math.min(MANUAL_TARGET_RANGE,range)+epsilon?target:null;
 }
 
+export function friendlyTarget(sim,h){
+ const target=h&&sim.get(h.friendlyTargetId);
+ return target&&target.side===h.side&&distance(h,target)<=MANUAL_TARGET_RANGE+epsilon?target:null;
+}
+
+// The selected enemy is shared by attacks, directed skills and the ground marker.
+export function enemyTarget(sim,h){
+ if(!h||h.hp<=0)return null;
+ const taunter=activeTaunter(sim,h);if(taunter)return taunter;
+ const explicit=manualAttackTarget(sim,h);if(explicit)return explicit;
+ const current=sim.get(h.targetId);
+ if(current&&current.side!==h.side&&(distance(h,current)<=(h.aggro??h.range)+epsilon||h.retaliationTargetId===current.id&&(h.attackerMemory?.[current.id]||0)>sim.time&&distance(h,current)<=sim.config.world.retaliationLeash))return current;
+ return sim.enemies(h,h.aggro??h.range).sort((a,b)=>(a.hero?0:a.tower?2:1)-(b.hero?0:b.tower?2:1)||distance(h,a)-distance(h,b)||a.id-b.id)[0]||null;
+}
+
 // Support targeting is independent from an already chosen attack target.
 export function manualAttackTarget(sim,h){
  if(!h||h.hp<=0||activeTaunter(sim,h))return null;
@@ -31,6 +46,7 @@ export function setManualTarget(sim,targetId,p=sim.player){
  if(target.side===h.side&&!canSelectAllies(h))return fail('该职业没有可作用友方的技能');
  if(distance(h,target)>MANUAL_TARGET_RANGE+epsilon)return fail('目标超出手动锁定范围（20格）');
  h.manualTargetId=target.id;
+ if(h.classId===5&&target.side===h.side)h.friendlyTargetId=target.id;
  if(target.side!==h.side){h.manualAttackTargetId=target.id;h.targetId=target.id;h.retaliationTargetId=null;h.deploying=false;}
  sim.notice='';return true;
 }

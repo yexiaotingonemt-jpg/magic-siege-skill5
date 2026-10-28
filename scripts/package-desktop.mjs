@@ -21,7 +21,7 @@ const arg=process.argv.indexOf('--server');
 const settings={serverUrl:parseServerUrl(process.env.MAGIC_SERVER_URL||(arg>=0?process.argv[arg+1]:defaults.serverUrl)).origin};
 const stamp=new Date().toISOString().replace(/[-:.TZ]/g,'');
 const name=`magic-siege-desktop-v${CLIENT_VERSION}-win-${process.arch}-${stamp}`;
-const output=path.join(root,'release',name),staging=await mkdtemp(path.join(tmpdir(),'magic-desktop-package-'));
+const output=path.join(process.env.MAGIC_RELEASE_DIR?path.resolve(process.env.MAGIC_RELEASE_DIR):path.join(root,'release'),name),staging=await mkdtemp(path.join(tmpdir(),'magic-desktop-package-'));
 try{
  const source=path.join(staging,'app');await mkdir(source);
  const copy=(from,to=from)=>cp(path.join(root,from),path.join(source,to),{recursive:true});
