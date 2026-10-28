@@ -1,3 +1,2 @@
 @echo off
-cd /d "%~dp0"
-node start.mjs
+start "" "%~dp0魔法王座.exe"

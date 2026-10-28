@@ -21,7 +21,7 @@ function cleanHeaders(headers){
  for(const name of hopHeaders)delete result[name];
  return result;
 }
-export function createLocalClient({serverUrl,distDir=path.join(clientRoot,'dist')}={}){
+export function createLocalClient({serverUrl,distDir=path.join(clientRoot,'dist'),artDir}={}){
  const remote=parseServerUrl(serverUrl),root=path.resolve(distDir);
  const json=(res,status,value)=>{if(res.destroyed)return;if(res.headersSent){res.destroy();return;}res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
  const server=http.createServer(async(req,res)=>{
@@ -52,10 +52,10 @@ export function createLocalClient({serverUrl,distDir=path.join(clientRoot,'dist'
     req.pipe(upstream);return;
    }
    if(!['GET','HEAD'].includes(req.method))return json(res,405,{error:'不支持的请求方法'});
-   const pathname=decodeURIComponent(url.pathname),target=path.resolve(root,'.'+pathname);
-   if(target!==root&&!target.startsWith(root+path.sep))return json(res,403,{error:'路径不允许'});
+   const pathname=decodeURIComponent(url.pathname),activeRoot=artDir&&pathname.startsWith('/art/')?path.resolve(artDir):root,target=path.resolve(activeRoot,'.'+(activeRoot===root?pathname:pathname.slice(4)));
+   if(target!==activeRoot&&!target.startsWith(activeRoot+path.sep))return json(res,403,{error:'路径不允许'});
    let file=target;if((await stat(file)).isDirectory())file=path.join(file,'index.html');
-   const canonical=await realpath(file),canonicalRoot=await realpath(root);
+   const canonical=await realpath(file),canonicalRoot=await realpath(activeRoot);
    if(!canonical.startsWith(canonicalRoot+path.sep))return json(res,403,{error:'路径不允许'});
    const info=await stat(canonical);
    if(!info.isFile())return json(res,404,{error:'资源不存在'});

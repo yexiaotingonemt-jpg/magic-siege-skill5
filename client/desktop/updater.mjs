@@ -8,6 +8,7 @@ import {spawn} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {UPDATE_PUBLIC_KEY,canonicalRelease,validateRelease} from '../../shared/update-protocol.js';
 import {GAME_VERSION,PROTOCOL_VERSION} from '../../shared/protocol.js';
+import {findRepositoryUpdate} from './repository-client.mjs';
 export function verifyUpdate(manifest,version,arch,publicKey=UPDATE_PUBLIC_KEY){
  const release=validateRelease(manifest.release,version,arch);
  if(!verify(null,Buffer.from(canonicalRelease(release)),publicKey,Buffer.from(manifest.signature||'','base64')))throw Error('更新签名校验失败，请稍后重试');
@@ -36,6 +37,12 @@ export function createUpdater({app,serverUrl,window,getVersion}){
   const versionResponse=await fetch(serverUrl+'/api/version',{redirect:'error',signal:AbortSignal.timeout(10000)});if(!versionResponse.ok)throw Error('无法获取服务器更新版本');
   const required=await versionResponse.json();if(required.clientVersion===getVersion()&&required.gameVersion===GAME_VERSION&&required.protocolVersion===PROTOCOL_VERSION){publish({phase:'current',message:'客户端已是当前版本'});window.reload();return;}
   if(!app.isPackaged)throw Error('开发运行模式不替换源码，请使用桌面发布包验证更新');
+  const repository=await findRepositoryUpdate(required,app.getPath('userData'));
+  if(repository){
+   publish({phase:'installing',message:'已找到本机最新版本，正在重新启动…'});
+   const child=spawn(repository.launcher,['--wait-pid',String(process.pid)],{cwd:repository.root,detached:true,stdio:'ignore',windowsHide:true});
+   await new Promise((resolve,reject)=>{child.once('spawn',resolve);child.once('error',reject);});child.unref();setTimeout(()=>app.quit(),150);return;
+  }
   publish({phase:'checking',message:'正在获取更新…'});
   const feed=serverUrl+'/api/updates/win32-'+process.arch;
   const response=await fetch(feed,{redirect:'error',signal:AbortSignal.timeout(10000)});if(!response.ok)throw Error('服务器更新正在准备，请稍后重试');

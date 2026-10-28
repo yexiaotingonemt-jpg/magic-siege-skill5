@@ -24,7 +24,8 @@ function lockWindow(window,allowed){
  window.webContents.on('will-attach-webview',event=>event.preventDefault());
 }
 async function startLocal(serverUrl){
- const next=createLocalClient({serverUrl,distDir:path.join(clientRoot,'dist')});
+ const repository=process.env.MAGIC_REPOSITORY_ROOT&&path.resolve(clientRoot)===path.resolve(process.env.MAGIC_REPOSITORY_ROOT,'client');
+ const next=createLocalClient({serverUrl,distDir:path.join(clientRoot,repository?'prebuilt':'dist'),...(repository?{artDir:path.join(clientRoot,'public/art')}:{})});
  await new Promise((resolve,reject)=>{next.server.once('error',reject);next.server.listen(0,'127.0.0.1',resolve);});
  return next;
 }
