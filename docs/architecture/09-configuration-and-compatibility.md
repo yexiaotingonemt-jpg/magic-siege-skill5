@@ -7,7 +7,7 @@
 ## 当前调用链
 
 ```text
-base-config.js → config.js多轮覆盖和主动技能倍乘 → defaults → Room / Simulation；default-config.json为展开快照
+base-config.js → config.js多轮覆盖和主动技能倍乘 → defaults → Room / Simulation；shared/default-config.json为展开快照
 ```
 
 配置数组存在未开放职业。后排旧AI、旧描述或旧界面不能直接作为设计5规则；是否实际加载以依赖索引为准。
@@ -16,16 +16,16 @@ base-config.js → config.js多轮覆盖和主动技能倍乘 → defaults → R
 
 | 文件 | 当前加载状态 |
 |---|---|
-| [src/config.js](../../src/config.js) | 启动入口可达 |
-| [src/base-config.js](../../src/base-config.js) | 启动入口可达 |
-| [src/config-migrations.js](../../src/config-migrations.js) | 当前入口未静态引用；保留兼容/工具 |
-| [src/skill-range-upgrade.js](../../src/skill-range-upgrade.js) | 当前入口未静态引用；保留兼容/工具 |
-| [src/legacy-descriptions.js](../../src/legacy-descriptions.js) | 当前入口未静态引用；保留兼容/工具 |
-| [src/legacy-match3.js](../../src/legacy-match3.js) | 当前入口未静态引用；保留兼容/工具 |
-| [src/legacy-match3.css](../../src/legacy-match3.css) | 当前入口未静态引用；保留兼容/工具 |
-| [src/backline-ai.js](../../src/backline-ai.js) | 当前入口未静态引用；保留兼容/工具 |
+| [shared/config.js](../../shared/config.js) | 启动入口可达 |
+| [shared/base-config.js](../../shared/base-config.js) | 启动入口可达 |
+| [shared/config-migrations.js](../../shared/config-migrations.js) | 当前入口未静态引用；保留兼容/工具 |
+| [client/src/skill-range-upgrade.js](../../client/src/skill-range-upgrade.js) | 当前入口未静态引用；保留兼容/工具 |
+| [client/src/legacy-descriptions.js](../../client/src/legacy-descriptions.js) | 当前入口未静态引用；保留兼容/工具 |
+| [client/src/legacy-match3.js](../../client/src/legacy-match3.js) | 当前入口未静态引用；保留兼容/工具 |
+| [client/src/legacy-match3.css](../../client/src/legacy-match3.css) | 当前入口未静态引用；保留兼容/工具 |
+| [shared/backline-ai.js](../../shared/backline-ai.js) | 当前入口未静态引用；保留兼容/工具 |
 
-共享入口：[default-config.json](../../default-config.json)。
+共享入口：[shared/default-config.json](../../shared/default-config.json)。
 
 ## 对应规则
 

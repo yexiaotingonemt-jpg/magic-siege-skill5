@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Simulation} from '../src/simulation.js';
-import {createSkillValue} from '../src/skill-value.js';
+import {Simulation} from '../shared/simulation.js';
+import {createSkillValue} from '../shared/skill-value.js';
 
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
 function arena(count=3){

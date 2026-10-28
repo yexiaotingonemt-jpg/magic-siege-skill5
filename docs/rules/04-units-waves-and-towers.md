@@ -74,6 +74,6 @@
 
 模块范围：单位属性、30秒出兵、出生分布、塔守护。
 
-代码入口：[src/config.js](../../src/config.js)、[src/troop-population.js](../../src/troop-population.js)、[src/simulation.js](../../src/simulation.js)、[src/tower-guard.js](../../src/tower-guard.js)。
+代码入口：[shared/config.js](../../shared/config.js)、[shared/troop-population.js](../../shared/troop-population.js)、[shared/simulation.js](../../shared/simulation.js)、[shared/tower-guard.js](../../shared/tower-guard.js)。
 
 验证入口：[tests/model.test.js](../../tests/model.test.js)。

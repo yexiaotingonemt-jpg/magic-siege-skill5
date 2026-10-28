@@ -11,4 +11,4 @@ export HOST="${HOST:-0.0.0.0}"
 export PORT="${PORT:-5183}"
 export KC_DATA_DIR="$APP_ROOT/shared/data"
 printf '%s\n' "$$" > "$APP_ROOT/shared/runtime/service.pid"
-exec /usr/bin/node server.mjs >> "$APP_ROOT/shared/logs/server.log" 2>&1
+exec "${NODE_BIN:-/usr/bin/node}" server/index.mjs >> "$APP_ROOT/shared/logs/server.log" 2>&1

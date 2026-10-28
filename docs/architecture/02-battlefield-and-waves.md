@@ -16,13 +16,13 @@ Room.step / checkStage → Simulation.tick / resetMap / spawnWave → distribute
 
 | 文件 | 当前加载状态 |
 |---|---|
-| [src/battlefield.js](../../src/battlefield.js) | 启动入口可达 |
-| [src/troop-population.js](../../src/troop-population.js) | 启动入口可达 |
-| [src/bot-population.js](../../src/bot-population.js) | 当前入口未静态引用；保留兼容/工具 |
-| [src/tower-guard.js](../../src/tower-guard.js) | 启动入口可达 |
-| [src/tower-guard-visual.js](../../src/tower-guard-visual.js) | 启动入口可达 |
+| [client/src/battlefield.js](../../client/src/battlefield.js) | 启动入口可达 |
+| [shared/troop-population.js](../../shared/troop-population.js) | 启动入口可达 |
+| [shared/bot-population.js](../../shared/bot-population.js) | 当前入口未静态引用；保留兼容/工具 |
+| [shared/tower-guard.js](../../shared/tower-guard.js) | 启动入口可达 |
+| [client/src/tower-guard-visual.js](../../client/src/tower-guard-visual.js) | 启动入口可达 |
 
-共享入口：[src/simulation.js](../../src/simulation.js)、[server/room.mjs](../../server/room.mjs)、[src/config.js](../../src/config.js)。
+共享入口：[shared/simulation.js](../../shared/simulation.js)、[server/room.mjs](../../server/room.mjs)、[shared/config.js](../../shared/config.js)。
 
 ## 对应规则
 

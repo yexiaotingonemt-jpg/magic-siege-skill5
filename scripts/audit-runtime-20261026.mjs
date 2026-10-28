@@ -1,7 +1,7 @@
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import assert from 'node:assert/strict';
-import {chromium} from '@playwright/test';import {createGameServer} from '../server.mjs';import {contractType,clone} from '../src/config.js';
+import {chromium} from '@playwright/test';import {createBrowserGame as createGameServer} from './browser-game-server.mjs';import {contractType,clone} from '../shared/config.js';
 const dir='evidence/audit-20261026',result={created:new Date().toISOString(),checks:[],errors:[],samples:[]};
-const game=createGameServer({dataDir:fs.mkdtempSync(path.join(os.tmpdir(),'kc5-runtime-audit-'))}),r=game.room,s=r.sim;r.paused=true;
+const game=await createGameServer({dataDir:fs.mkdtempSync(path.join(os.tmpdir(),'kc5-runtime-audit-'))}),r=game.room,s=r.sim;r.paused=true;
 await new Promise(resolve=>game.server.listen(0,'127.0.0.1',resolve));const base=`http://127.0.0.1:${game.server.address().port}`;result.base=base;
 const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}),actors=[];
 async function check(name,fn){try{result.checks.push({name,status:'PASS',evidence:structuredClone(await fn())});}catch(e){result.checks.push({name,status:'FAIL',error:e.message,stack:e.stack});}}

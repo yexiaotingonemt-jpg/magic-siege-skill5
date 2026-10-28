@@ -6,7 +6,7 @@ import sys
 from PIL import Image
 
 root = Path(__file__).resolve().parents[1]
-out = root / 'public/art/magic-v13'
+out = root / 'client/public/art/magic-v13'
 raw = root / 'evidence/magic-v13/raw'
 out.mkdir(parents=True, exist_ok=True)
 raw.mkdir(parents=True, exist_ok=True)

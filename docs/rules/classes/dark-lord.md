@@ -28,6 +28,6 @@
 
 ---
 
-代码入口：[src/config.js](../../../src/config.js)、[src/skill5-mechanics.js](../../../src/skill5-mechanics.js)、[src/lord-flame-shield.js](../../../src/lord-flame-shield.js)、[src/hero-rules.js](../../../src/hero-rules.js)。
+代码入口：[shared/config.js](../../../shared/config.js)、[shared/skill5-mechanics.js](../../../shared/skill5-mechanics.js)、[shared/lord-flame-shield.js](../../../shared/lord-flame-shield.js)、[shared/hero-rules.js](../../../shared/hero-rules.js)。
 
 验证入口：[tests/lord-flame.test.js](../../../tests/lord-flame.test.js)、[tests/dash-bounce.test.js](../../../tests/dash-bounce.test.js)、[tests/skill-double.test.js](../../../tests/skill-double.test.js)。

@@ -7,28 +7,32 @@
 ## 当前调用链
 
 ```text
-index.html → main.js → gameShell / mountGameLayout → selection / skill-hud → 网络命令
+client/index.html → main.js → gameShell / mountGameLayout → selection / skill-hud → 网络命令
 ```
 
 施法、详情、加点独立触控；外侧辅助工具与游戏区分离。文案以当前五职业配置为准。
+
+统一皮肤由 `kc-final.css` 管理：深绿面板、古铜边框、语义色及一致的控件间距；`ui-icons.js` 提供导航和资源图标。导航通过 `aria-current` 标记当前面板，关闭弹层恢复战场选中态；账号入口支持方向键切换。技能区和底部导航按实际缩放比例预留触控高度，避免消耗文字、加点按钮与状态栏重叠。
 
 ## 主要文件
 
 | 文件 | 当前加载状态 |
 |---|---|
-| [src/main.js](../../src/main.js) | 启动入口可达 |
-| [src/game-shell.js](../../src/game-shell.js) | 启动入口可达 |
-| [src/game-layout.js](../../src/game-layout.js) | 启动入口可达 |
-| [src/skill-hud.js](../../src/skill-hud.js) | 启动入口可达 |
-| [src/ability-descriptions.js](../../src/ability-descriptions.js) | 启动入口可达 |
-| [src/ability-tags.js](../../src/ability-tags.js) | 启动入口可达 |
-| [src/ability-summaries.js](../../src/ability-summaries.js) | 当前入口未静态引用；保留兼容/工具 |
-| [src/style.css](../../src/style.css) | 启动入口可达 |
-| [src/kc-layout.css](../../src/kc-layout.css) | 启动入口可达 |
-| [src/multiplayer.css](../../src/multiplayer.css) | 启动入口可达 |
-| [src/visual-theme.js](../../src/visual-theme.js) | 启动入口可达 |
+| [client/src/main.js](../../client/src/main.js) | 启动入口可达 |
+| [client/src/game-shell.js](../../client/src/game-shell.js) | 启动入口可达 |
+| [client/src/game-layout.js](../../client/src/game-layout.js) | 启动入口可达 |
+| [client/src/skill-hud.js](../../client/src/skill-hud.js) | 启动入口可达 |
+| [client/src/ability-descriptions.js](../../client/src/ability-descriptions.js) | 启动入口可达 |
+| [client/src/ability-tags.js](../../client/src/ability-tags.js) | 启动入口可达 |
+| [client/src/ability-summaries.js](../../client/src/ability-summaries.js) | 当前入口未静态引用；保留兼容/工具 |
+| [client/src/style.css](../../client/src/style.css) | 启动入口可达 |
+| [client/src/kc-layout.css](../../client/src/kc-layout.css) | 启动入口可达 |
+| [client/src/multiplayer.css](../../client/src/multiplayer.css) | 启动入口可达 |
+| [client/src/kc-final.css](../../client/src/kc-final.css) | 统一主题与响应式控件样式 |
+| [client/src/ui-icons.js](../../client/src/ui-icons.js) | 导航、资源与账号图标 |
+| [client/src/visual-theme.js](../../client/src/visual-theme.js) | 启动入口可达 |
 
-共享入口：[src/selection.js](../../src/selection.js)、[src/network.js](../../src/network.js)。
+共享入口：[client/src/selection.js](../../client/src/selection.js)、[client/src/network.js](../../client/src/network.js)。
 
 ## 对应规则
 

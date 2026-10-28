@@ -54,6 +54,6 @@
 
 模块范围：伤害顺序、护盾、治疗共享、净化、免疫和死亡。
 
-代码入口：[src/hero-rules.js](../../src/hero-rules.js)、[src/skill-value.js](../../src/skill-value.js)、[src/lord-flame-shield.js](../../src/lord-flame-shield.js)、[src/tower-guard.js](../../src/tower-guard.js)。
+代码入口：[shared/hero-rules.js](../../shared/hero-rules.js)、[shared/skill-value.js](../../shared/skill-value.js)、[shared/lord-flame-shield.js](../../shared/lord-flame-shield.js)、[shared/tower-guard.js](../../shared/tower-guard.js)。
 
 验证入口：[tests/model.test.js](../../tests/model.test.js)、[tests/skill-double.test.js](../../tests/skill-double.test.js)、[tests/frost-cooldown.test.js](../../tests/frost-cooldown.test.js)、[tests/lord-flame.test.js](../../tests/lord-flame.test.js)。

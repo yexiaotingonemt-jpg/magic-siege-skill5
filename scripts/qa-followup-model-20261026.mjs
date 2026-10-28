@@ -1,7 +1,7 @@
 import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import {pathToFileURL} from 'node:url';import assert from 'node:assert/strict';
 const outDir='evidence/audit-followup-20261026',label=['live','final'].includes(process.argv[2])?process.argv[2]:'snapshot',source=label==='live'?'.':outDir+(label==='final'?'/snapshot-final':'/snapshot');
-const {Simulation}=await import(pathToFileURL(path.resolve(source,'src/simulation.js'))),{defaults,contractType,clone}=await import(pathToFileURL(path.resolve(source,'src/config.js')));
-const out={at:new Date().toISOString(),source:label,checks:[],attacks:[],observations:[],sourceHashes:Object.fromEntries(['src/navigation.js','src/simulation.js','src/skill5-mechanics.js','src/manual-target.js','src/hero-rules.js'].map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(path.join(source,f))).digest('hex')]))};
+const {Simulation}=await import(pathToFileURL(path.resolve(source,'shared/simulation.js'))),{defaults,contractType,clone}=await import(pathToFileURL(path.resolve(source,'shared/config.js')));
+const out={at:new Date().toISOString(),source:label,checks:[],attacks:[],observations:[],sourceHashes:Object.fromEntries(['shared/navigation.js','shared/simulation.js','shared/skill5-mechanics.js','shared/manual-target.js','shared/hero-rules.js'].map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(path.join(source,f))).digest('hex')]))};
 const near=(a,b,m='')=>assert.ok(Math.abs(a-b)<1e-5,`${m}: ${a} != ${b}`),advance=(s,t)=>{const end=s.time+t;while(s.time<end-1e-8)s.tick(Math.min(.05,end-s.time));};
 function check(name,fn){try{out.checks.push({name,status:'PASS',evidence:structuredClone(fn())});}catch(e){out.checks.push({name,status:'FAIL',error:e.message,stack:e.stack});}}
 function arena(id=0){const s=new Simulation();s.units=[];s.player.retired=true;s.waveAt=1e9;for(const t of s.towers){t.x=100;t.cd=1e9;}

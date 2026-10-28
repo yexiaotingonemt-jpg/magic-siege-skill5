@@ -3,12 +3,12 @@ import os from 'node:os';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import {chromium} from '@playwright/test';
-import {createGameServer} from '../server.mjs';
-import {contractType} from '../src/config.js';
+import {createBrowserGame as createGameServer} from './browser-game-server.mjs';
+import {contractType} from '../shared/config.js';
 
 const dir='evidence/fixes-20261026';fs.mkdirSync(dir,{recursive:true});
 const result={at:new Date().toISOString(),checks:[],errors:[],viewports:[]};
-const game=createGameServer({dataDir:fs.mkdtempSync(path.join(os.tmpdir(),'kc5-fixes-'))}),room=game.room,sim=room.sim,actors=[];
+const game=await createGameServer({dataDir:fs.mkdtempSync(path.join(os.tmpdir(),'kc5-fixes-'))}),room=game.room,sim=room.sim,actors=[];
 room.paused=true;
 await new Promise(resolve=>game.server.listen(0,'127.0.0.1',resolve));
 const base=`http://127.0.0.1:${game.server.address().port}`;

@@ -63,6 +63,6 @@
 
 模块范围：嘲讽、手动锁、自动目标、反击、推进边界。
 
-代码入口：[src/navigation.js](../../src/navigation.js)、[src/manual-target.js](../../src/manual-target.js)、[src/simulation.js](../../src/simulation.js)。
+代码入口：[shared/navigation.js](../../shared/navigation.js)、[shared/manual-target.js](../../shared/manual-target.js)、[shared/simulation.js](../../shared/simulation.js)。
 
 验证入口：[tests/model.test.js](../../tests/model.test.js)、[tests/attack-arrival.test.js](../../tests/attack-arrival.test.js)、[tests/dash-bounce.test.js](../../tests/dash-bounce.test.js)。

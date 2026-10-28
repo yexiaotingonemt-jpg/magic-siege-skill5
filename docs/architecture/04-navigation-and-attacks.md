@@ -16,12 +16,12 @@ Simulation.tick → chooseTarget / navigate → inAttackRange → 普攻出手 /
 
 | 文件 | 当前加载状态 |
 |---|---|
-| [src/navigation.js](../../src/navigation.js) | 启动入口可达 |
-| [src/manual-target.js](../../src/manual-target.js) | 启动入口可达 |
-| [src/attack-range.js](../../src/attack-range.js) | 启动入口可达 |
-| [src/attack-cooldown.js](../../src/attack-cooldown.js) | 启动入口可达 |
+| [shared/navigation.js](../../shared/navigation.js) | 启动入口可达 |
+| [shared/manual-target.js](../../shared/manual-target.js) | 启动入口可达 |
+| [shared/attack-range.js](../../shared/attack-range.js) | 启动入口可达 |
+| [shared/attack-cooldown.js](../../shared/attack-cooldown.js) | 启动入口可达 |
 
-共享入口：[src/simulation.js](../../src/simulation.js)、[src/hero-rules.js](../../src/hero-rules.js)、[src/selection.js](../../src/selection.js)。
+共享入口：[shared/simulation.js](../../shared/simulation.js)、[shared/hero-rules.js](../../shared/hero-rules.js)、[client/src/selection.js](../../client/src/selection.js)。
 
 ## 对应规则
 

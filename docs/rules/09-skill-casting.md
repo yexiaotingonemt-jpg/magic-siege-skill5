@@ -71,6 +71,6 @@
 
 模块范围：施法验证、扣费、前摇锁定、成长及共享额度。
 
-代码入口：[src/hero-rules.js](../../src/hero-rules.js)、[src/skill5-mechanics.js](../../src/skill5-mechanics.js)、[src/skill-value.js](../../src/skill-value.js)、[src/skill-progression.js](../../src/skill-progression.js)。
+代码入口：[shared/hero-rules.js](../../shared/hero-rules.js)、[shared/skill5-mechanics.js](../../shared/skill5-mechanics.js)、[shared/skill-value.js](../../shared/skill-value.js)、[shared/skill-progression.js](../../shared/skill-progression.js)。
 
 验证入口：[tests/model.test.js](../../tests/model.test.js)、[tests/skill-double.test.js](../../tests/skill-double.test.js)、[tests/manual-target.test.js](../../tests/manual-target.test.js)。

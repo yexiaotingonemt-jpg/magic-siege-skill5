@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Simulation} from '../src/simulation.js';
-import {contractType} from '../src/config.js';
+import {Simulation} from '../shared/simulation.js';
+import {contractType} from '../shared/config.js';
 
 function arena({classId=0,type='melee',side=classId===3?1:0,angle=1.1,mode='manual',hero=true}={}){
  const s=new Simulation();s.units=[];s.waveAt=s.populationAt=1e9;

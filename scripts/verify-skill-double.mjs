@@ -3,12 +3,12 @@ import os from 'node:os';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import {chromium} from '@playwright/test';
-import {createGameServer} from '../server.mjs';
-import {contractType,classes,names,defaults} from '../src/config.js';
+import {createBrowserGame as createGameServer} from './browser-game-server.mjs';
+import {contractType,classes,names,defaults} from '../shared/config.js';
 
 const dir='evidence/skill-double';fs.mkdirSync(dir,{recursive:true});
 const result={at:new Date().toISOString(),checks:[],skills:[],errors:[]},actors=[];
-const game=createGameServer({dataDir:fs.mkdtempSync(path.join(os.tmpdir(),'kc5-skill-double-'))}),room=game.room,sim=room.sim;room.paused=true;
+const game=await createGameServer({dataDir:fs.mkdtempSync(path.join(os.tmpdir(),'kc5-skill-double-'))}),room=game.room,sim=room.sim;room.paused=true;
 await new Promise(r=>game.server.listen(0,'127.0.0.1',r));const base=`http://127.0.0.1:${game.server.address().port}`;
 const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);

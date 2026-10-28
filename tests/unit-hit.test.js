@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {pickRenderedUnits} from '../src/unit-hit.js';
+import {pickRenderedUnits} from '../client/src/unit-hit.js';
 
 const make=()=>{
  const alpha=new Uint8ClampedArray(4*4*4);for(let y=0;y<4;y++)for(let x=2;x<4;x++)alpha[(y*4+x)*4+3]=255;

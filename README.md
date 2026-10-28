@@ -12,19 +12,55 @@
 - [开发协作指南](docs/开发协作指南.md)
 - [文档总导航](docs/README.md)
 
-## 安装与启动
+## 客户端、服务端与共享代码
 
-使用Node.js 20.19+或22.12+及npm：
+- `client/`：Electron桌面窗口、游戏界面、Phaser、美术资源及服务器设置。
+- `server/`：HTTP/SSE、账号与房间编排，只提供API，不提供网页和美术。
+- `shared/`：两端复用的战斗规则、技能、数值配置及协议版本；不依赖界面或Node.js专用API。
+
+每位玩家运行自己的本地客户端。页面、脚本、图片从本机读取，只有登录、操作、战局状态经过网络。所有客户端的 `serverUrl` 必须指向同一个战斗服务。客户端不推进权威战斗。
+
+## 开发与启动
+
+桌面开发与打包使用Node.js 22.12+（本机验证为24.16.0）及npm，在项目根目录执行：
 
 ```sh
 npm ci
+npm run setup:desktop
 npm run build
-npm start
+npm run start:server
 ```
 
-打开`http://127.0.0.1:5183/`。同内网玩家连接服务主机的内网IP与5183端口；首个注册账号取得房主身份。Windows在安装并构建后也可双击`LAN-Start.cmd`。
+另开一个终端执行：
 
-环境变量：`PORT`（默认5183）、`HOST`（默认0.0.0.0）、`KC_DATA_DIR`（默认项目内data目录）。服务自动创建账号数据；账号和阵营保留，服务重启后战局重新开始。
+```sh
+npm run start:client
+```
+
+启动独立桌面游戏窗口。通过菜单“游戏 → 服务器设置”修改远端地址；源码默认地址配置在 [client/client-config.json](client/client-config.json)。Windows源码目录的 `Start.cmd` / `LAN-Start.cmd` 也会启动桌面窗口。玩家直接使用打包后的 `魔法王座.exe`。
+
+开发时可用 `npm run dev` 启动Vite热更新界面，默认转发API到 `http://127.0.0.1:5183`；通过环境变量 `MAGIC_SERVER_URL` 改用远端服务。必须另行运行一个战斗服务器。
+
+服务端环境变量：`PORT`（5183）、`HOST`（0.0.0.0）、`KC_DATA_DIR`（项目内data）。账号与阵营落盘；会话、战局、成长、积分及临时房主配置仅在内存中，重启后重置。
+
+## 版本限制
+
+当前客户端与服务端版本均为 **0.3.0**，版本来源为`shared/protocol.js`的`GAME_VERSION`。两端版本必须完全一致；缺少版本号、旧版或超前版本均无法注册、登录、读取战局、提交操作或建立SSE连接。客户端显示当前版本和服务器要求的版本，并要求更新。
+
+每次发布新客户端都要递增`GAME_VERSION`，重新构建并同时分发两端；接口不兼容时另外递增`PROTOCOL_VERSION`。服务器升级后，在线客户端重连时也会校验并转入更新页。更新采用手动完整换包。
+
+## 分别打包与分发
+
+```sh
+npm run package:server
+npm run package:client -- --server https://game.example.com
+```
+
+输出位于 `release/` 的独立版本目录，包含Windows桌面客户端ZIP及SHA-256。玩家完整解压桌面ZIP，双击 `魔法王座.exe`，无需安装Node.js、浏览器或运行CMD。请保留同目录所有DLL和resources文件，不能单独复制EXE。
+
+`npm run package:browser`保留旧的浏览器开发分发方式；默认`package:client`与`package:desktop`均生成桌面版。
+
+服务器只上传服务端包，执行 `node server/index.mjs`，不需要客户端、美术、构建工具或 `node_modules`。长期运行、更新、账号备份及Nginx设置见 [部署说明](deploy/README.md)。客户端使用和更新见 [客户端说明](client/README.md)。
 
 ## 当前规则要点
 
@@ -34,7 +70,7 @@ npm start
 - 主动技能共用一次施法收益额度：1级每体力1600%攻击等效基准、2000%峰值；3体力大招上限6000%。
 - 阶段默认3600秒，进攻突破1排防线获胜；阶段重建后重新契约，体力、成长、积分及尚未结束的技能冷却保留。
 
-完整条件、计算顺序和职业差异以[模块规则](docs/rules/README.md)与[最终配置](src/config.js)为准。
+完整条件、计算顺序和职业差异以[模块规则](docs/rules/README.md)与[最终配置](shared/config.js)为准。
 
 ## 代码模块
 
@@ -50,7 +86,7 @@ npm start
 | [战场渲染、单位动作与技能反馈](docs/architecture/08-rendering-and-feedback.md) | Phaser镜头、双方视角、局部动作、轮廓命中、VFX、状态、姓名、光圈和伤害数字。 |
 | [配置、迁移与历史兼容](docs/architecture/09-configuration-and-compatibility.md) | 最终默认值、基础配置、校验、旧存储迁移、旧范围升级和历史界面兼容文件。 |
 
-源码沿用原路径，运行所需美术资源位于`public/art/`。服务端20Hz模拟、正常约5Hz同步，客户端插值显示。`Simulation`、`HeroRules`及`Room`为共享实现入口；[全文件索引](docs/architecture/source-file-index.md)列出全部归属及静态依赖。
+界面位于`client/src/`，运行美术位于`client/public/art/`，战斗规则位于`shared/`。服务端20Hz模拟、正常约5Hz同步，客户端插值显示。`Simulation`、`HeroRules`及`Room`为共享实现入口；[全文件索引](docs/architecture/source-file-index.md)列出全部归属及静态依赖。
 
 ## 验证
 
@@ -58,9 +94,10 @@ npm start
 npm test
 npm run build
 npm run test:browser
+npm run test:desktop
 ```
 
-浏览器验收在5194隔离服务及临时账号目录运行。原Playwright配置使用Windows Chrome安装路径，其他环境需按[验证指南](docs/architecture/testing-and-tools.md)调整。
+浏览器验收使用独立的API服务和5194本地客户端，账号位于临时目录；截图与报告默认写入系统临时目录，可用`MAGIC_QA_DIR`指定。Windows默认使用Chrome，其他浏览器路径可用`CHROME_PATH`指定。
 
 ## 仓库内容与版本
 

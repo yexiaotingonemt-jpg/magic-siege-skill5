@@ -22,6 +22,6 @@
 
 ---
 
-代码入口：[src/config.js](../../../src/config.js)、[src/skill5-mechanics.js](../../../src/skill5-mechanics.js)、[src/hero-rules.js](../../../src/hero-rules.js)。
+代码入口：[shared/config.js](../../../shared/config.js)、[shared/skill5-mechanics.js](../../../shared/skill5-mechanics.js)、[shared/hero-rules.js](../../../shared/hero-rules.js)。
 
 验证入口：[tests/model.test.js](../../../tests/model.test.js)、[tests/ally-target.test.js](../../../tests/ally-target.test.js)、[tests/skill-double.test.js](../../../tests/skill-double.test.js)。

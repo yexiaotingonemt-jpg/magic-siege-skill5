@@ -1,9 +1,9 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {Simulation} from '../src/simulation.js';
-import {defaults,clone,contractType,availableClasses,contractClasses} from '../src/config.js';
-import {describeAbilities} from '../src/ability-descriptions.js';
-import {unitStatuses,indexStatusFields} from '../src/unit-status.js';
+import {Simulation} from '../shared/simulation.js';
+import {defaults,clone,contractType,availableClasses,contractClasses} from '../shared/config.js';
+import {describeAbilities} from '../client/src/ability-descriptions.js';
+import {unitStatuses,indexStatusFields} from '../client/src/unit-status.js';
 const ids=[0,2,3,4,5],near=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
 function arena(id=0){const s=new Simulation();s.units=[];s.players[0].retired=true;s.waveAt=1e9;s.populationAt=1e9;for(const t of s.towers)t.x=100;function make(classId,x,y){const side=classId===3?1:0,p=s.makePlayer(side,false);p.classId=classId;p.level=6;p.builds[classId]=[1,1,1,1];const u=s.spawn(side,contractType(classId),0,1,x);assert.ok(s.contract(p,u.id));Object.assign(u,{x,y,hp:u.maxHp,cd:1e9,speed:0});return {p,h:u};}const {p,h}=make(id,0,0);s.localPlayerId=p.id;const enemy=make(id===3?0:3,0,3).h;enemy.hp=enemy.maxHp=1e7;const allies=[make(id===3?3:0,2,0).h,make(id===3?3:4,-2,0).h];for(const u of allies)u.hp=u.maxHp*.4;return {s,p,h,enemy,allies,make};}
 function advance(s,time){for(let end=s.time+time;s.time<end-1e-8;)s.tick(Math.min(.05,end-s.time));}

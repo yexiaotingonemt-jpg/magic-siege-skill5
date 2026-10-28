@@ -30,6 +30,8 @@
 
 所有小兵及开放英雄表现移动与普攻动作，塔表现发射反馈。普通动作由实际移动及出手驱动；技能、引导、冲锋和眩晕优先于普通动作。暂停时保持对应战斗姿态。
 
+五个开放职业使用八向表现，包含待机、移动、普攻和通用施法关键姿态。移动面向实际行进方向，停止后保持最后朝向；普攻面向本次攻击位置，施法面向已受理时锁定的位置，并在对应动作期间保持方向。切换阵营视角重新映射屏幕方向。方向选择与动作衔接不改变服务端结算；资源规格见[正式美术与八向动作](../正式美术与八向动作.md)。
+
 每个技能具有可辨认的起手、释放、命中、持续与消散阶段。大招具有区别于小技能的主体形象：兽人巨盾、战车晶核、领主王权、火法天火和精灵圣树。特效不改变技能实际命中与服务端结算时序。
 
 英雄主动技能对敌方英雄、小兵或建筑产生有效伤害时，在目标头顶显示伤害数字。包含直接伤害、群攻、冲锋、弹道、连轰、灼烧及大招附加；不为普通攻击、反射、友方和0伤害产生此类数字。
@@ -48,6 +50,6 @@
 
 模块范围：640×1136界面、触控、姓名、状态、动作和飘字。
 
-代码入口：[src/main.js](../../src/main.js)、[src/game-layout.js](../../src/game-layout.js)、[src/renderer.js](../../src/renderer.js)、[src/status-icons.js](../../src/status-icons.js)、[src/combat-numbers.js](../../src/combat-numbers.js)。
+代码入口：[client/src/main.js](../../client/src/main.js)、[client/src/game-layout.js](../../client/src/game-layout.js)、[client/src/renderer.js](../../client/src/renderer.js)、[client/src/status-icons.js](../../client/src/status-icons.js)、[client/src/combat-numbers.js](../../client/src/combat-numbers.js)。
 
 验证入口：[tests/smoke.spec.js](../../tests/smoke.spec.js)、[tests/hero-names.test.js](../../tests/hero-names.test.js)、[tests/unit-motion.test.js](../../tests/unit-motion.test.js)、[tests/unit-hit.test.js](../../tests/unit-hit.test.js)、[tests/damage-numbers.test.js](../../tests/damage-numbers.test.js)。

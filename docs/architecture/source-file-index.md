@@ -1,76 +1,83 @@
 # 全文件代码模块索引
 
-[模块总览](README.md)
+[模块总览](README.md) · [客户端说明](../../client/README.md) · [部署说明](../../deploy/README.md)
 
-覆盖全部`src/`文件及HTTP/账号/房间入口。加载状态通过从`server.mjs`、`src/main.js`递归解析本地静态导入与重新导出来判断；可达只代表文件被加载，不表示每个导出或分支都会执行。未静态引用不等于可以删除。
+客户端、美术与本地启动器位于client/，服务端位于server/，通用规则位于shared/。以下索引覆盖当前全部源码和CSS，加载可达性从两端入口、启动器及Vite配置的静态导入计算；不代表每个导出或分支都会运行。
 
 | 文件 | 主归属模块 | 启动加载状态 | 本地直接依赖 |
 |---|---|---|---|
-| [server.mjs](../../server.mjs) | [账号、会话与多人同步](01-accounts-and-network.md) | 入口可达 | [accounts.mjs](../../server/accounts.mjs)、[room.mjs](../../server/room.mjs) |
+| [client/launcher.mjs](../../client/launcher.mjs) | 客户端 | 入口可达 | [shared/protocol.js](../../shared/protocol.js) |
+| [client/src/ability-descriptions.js](../../client/src/ability-descriptions.js) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | [shared/config.js](../../shared/config.js)、[shared/skill-progression.js](../../shared/skill-progression.js)、[client/src/ability-tags.js](../../client/src/ability-tags.js)、[shared/skill-value.js](../../shared/skill-value.js) |
+| [client/src/ability-summaries.js](../../client/src/ability-summaries.js) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 未静态引用 | — |
+| [client/src/ability-tags.js](../../client/src/ability-tags.js) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | — |
+| [client/src/art-catalog.js](../../client/src/art-catalog.js) | 客户端 | 入口可达 | — |
+| [client/src/art-layout.js](../../client/src/art-layout.js) | 客户端 | 入口可达 | — |
+| [client/src/battlefield.js](../../client/src/battlefield.js) | [战场、兵线、阶段与建筑](02-battlefield-and-waves.md) | 入口可达 | — |
+| [client/src/combat-numbers.js](../../client/src/combat-numbers.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | — |
+| [client/src/game-layout.js](../../client/src/game-layout.js) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | — |
+| [client/src/game-shell.js](../../client/src/game-shell.js) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | — |
+| [client/src/hero-action-layout.js](../../client/src/hero-action-layout.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | — |
+| [client/src/hero-names.js](../../client/src/hero-names.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | [client/src/art-catalog.js](../../client/src/art-catalog.js) |
+| [client/src/kc-final.css](../../client/src/kc-final.css) | 客户端 | 入口可达 | — |
+| [client/src/kc-layout.css](../../client/src/kc-layout.css) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | — |
+| [client/src/legacy-descriptions.js](../../client/src/legacy-descriptions.js) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 未静态引用 | [shared/config.js](../../shared/config.js)、[shared/skill-progression.js](../../shared/skill-progression.js)、[client/src/ability-tags.js](../../client/src/ability-tags.js)、[shared/skill-value.js](../../shared/skill-value.js) |
+| [client/src/legacy-match3.css](../../client/src/legacy-match3.css) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 未静态引用 | — |
+| [client/src/legacy-match3.js](../../client/src/legacy-match3.js) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 未静态引用 | [client/src/style.css](../../client/src/style.css) |
+| [client/src/main.js](../../client/src/main.js) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | [client/src/style.css](../../client/src/style.css)、[client/src/kc-layout.css](../../client/src/kc-layout.css)、[client/src/multiplayer.css](../../client/src/multiplayer.css)、[client/src/kc-final.css](../../client/src/kc-final.css)、[client/src/art-catalog.js](../../client/src/art-catalog.js)、[client/src/game-shell.js](../../client/src/game-shell.js)、[client/src/game-layout.js](../../client/src/game-layout.js)、[shared/config.js](../../shared/config.js)、[client/src/renderer.js](../../client/src/renderer.js)、[client/src/selection.js](../../client/src/selection.js)、[client/src/visual-theme.js](../../client/src/visual-theme.js)、[client/src/skill-hud.js](../../client/src/skill-hud.js)、[client/src/ability-descriptions.js](../../client/src/ability-descriptions.js)、[client/src/network.js](../../client/src/network.js)、[shared/skill-value.js](../../shared/skill-value.js) |
+| [client/src/melee-walk-layout.js](../../client/src/melee-walk-layout.js) | 客户端 | 入口可达 | — |
+| [client/src/minion-art-layout.js](../../client/src/minion-art-layout.js) | 客户端 | 入口可达 | — |
+| [client/src/multiplayer.css](../../client/src/multiplayer.css) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | — |
+| [client/src/network.js](../../client/src/network.js) | [账号、会话与多人同步](01-accounts-and-network.md) | 入口可达 | [shared/simulation.js](../../shared/simulation.js)、[shared/protocol.js](../../shared/protocol.js) |
+| [client/src/premium-vfx.js](../../client/src/premium-vfx.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | [shared/config.js](../../shared/config.js)、[shared/skill-value.js](../../shared/skill-value.js)、[client/src/vfx-profiles.js](../../client/src/vfx-profiles.js)、[client/src/vfx-brushes.js](../../client/src/vfx-brushes.js) |
+| [client/src/ranged-walk-layout.js](../../client/src/ranged-walk-layout.js) | 客户端 | 入口可达 | — |
+| [client/src/renderer.js](../../client/src/renderer.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | [client/src/art-catalog.js](../../client/src/art-catalog.js)、[client/src/unit-facing.js](../../client/src/unit-facing.js)、[client/src/walk-animation.js](../../client/src/walk-animation.js)、[client/src/unit-art.js](../../client/src/unit-art.js)、[client/src/art-catalog.js](../../client/src/art-catalog.js)、[client/src/hero-action-layout.js](../../client/src/hero-action-layout.js)、[client/src/premium-vfx.js](../../client/src/premium-vfx.js)、[client/src/unit-hit.js](../../client/src/unit-hit.js)、[client/src/battlefield.js](../../client/src/battlefield.js)、[client/src/target-halos.js](../../client/src/target-halos.js)、[client/src/tower-guard-visual.js](../../client/src/tower-guard-visual.js)、[client/src/status-icons.js](../../client/src/status-icons.js)、[client/src/combat-numbers.js](../../client/src/combat-numbers.js)、[client/src/unit-motion-view.js](../../client/src/unit-motion-view.js)、[client/src/hero-names.js](../../client/src/hero-names.js) |
+| [client/src/selection.js](../../client/src/selection.js) | [契约、体力、职业成长与评价](03-contracts-and-progression.md) | 入口可达 | [shared/config.js](../../shared/config.js)、[client/src/visual-theme.js](../../client/src/visual-theme.js)、[client/src/battlefield.js](../../client/src/battlefield.js)、[shared/manual-target.js](../../shared/manual-target.js) |
+| [client/src/skill-animation.js](../../client/src/skill-animation.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 未静态引用 | [shared/config.js](../../shared/config.js) |
+| [client/src/skill-hud.js](../../client/src/skill-hud.js) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | [client/src/art-catalog.js](../../client/src/art-catalog.js)、[shared/config.js](../../shared/config.js)、[client/src/ability-descriptions.js](../../client/src/ability-descriptions.js)、[shared/skill-progression.js](../../shared/skill-progression.js) |
+| [client/src/skill-range-upgrade.js](../../client/src/skill-range-upgrade.js) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 未静态引用 | — |
+| [client/src/skill3-visuals.js](../../client/src/skill3-visuals.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 未静态引用 | [shared/config.js](../../shared/config.js) |
+| [client/src/status-icons.js](../../client/src/status-icons.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | [client/src/art-catalog.js](../../client/src/art-catalog.js)、[client/src/unit-status.js](../../client/src/unit-status.js) |
+| [client/src/style.css](../../client/src/style.css) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | — |
+| [client/src/target-halos.js](../../client/src/target-halos.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | [shared/manual-target.js](../../shared/manual-target.js) |
+| [client/src/tower-guard-visual.js](../../client/src/tower-guard-visual.js) | [战场、兵线、阶段与建筑](02-battlefield-and-waves.md) | 入口可达 | [shared/tower-guard.js](../../shared/tower-guard.js) |
+| [client/src/unit-art.js](../../client/src/unit-art.js) | 客户端 | 入口可达 | [client/src/art-catalog.js](../../client/src/art-catalog.js)、[client/src/art-layout.js](../../client/src/art-layout.js)、[client/src/minion-art-layout.js](../../client/src/minion-art-layout.js)、[client/src/ranged-walk-layout.js](../../client/src/ranged-walk-layout.js)、[client/src/melee-walk-layout.js](../../client/src/melee-walk-layout.js)、[client/src/walk-animation.js](../../client/src/walk-animation.js) |
+| [client/src/unit-facing.js](../../client/src/unit-facing.js) | 客户端 | 入口可达 | — |
+| [client/src/unit-hit.js](../../client/src/unit-hit.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | — |
+| [client/src/unit-motion-view.js](../../client/src/unit-motion-view.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | [client/src/unit-motion.js](../../client/src/unit-motion.js) |
+| [client/src/unit-motion.js](../../client/src/unit-motion.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | [shared/attack-range.js](../../shared/attack-range.js) |
+| [client/src/unit-status.js](../../client/src/unit-status.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | [shared/skill-value.js](../../shared/skill-value.js)、[shared/tower-guard.js](../../shared/tower-guard.js) |
+| [client/src/vfx-brushes.js](../../client/src/vfx-brushes.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | — |
+| [client/src/vfx-profiles.js](../../client/src/vfx-profiles.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | — |
+| [client/src/visual-theme.js](../../client/src/visual-theme.js) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | — |
+| [client/src/walk-animation.js](../../client/src/walk-animation.js) | 客户端 | 入口可达 | — |
+| [client/vite.config.js](../../client/vite.config.js) | 客户端 | 入口可达 | — |
 | [server/accounts.mjs](../../server/accounts.mjs) | [账号、会话与多人同步](01-accounts-and-network.md) | 入口可达 | — |
-| [server/room.mjs](../../server/room.mjs) | [账号、会话与多人同步](01-accounts-and-network.md) | 入口可达 | [simulation.js](../../src/simulation.js)、[config.js](../../src/config.js) |
-| [src/ability-descriptions.js](../../src/ability-descriptions.js) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | [config.js](../../src/config.js)、[skill-progression.js](../../src/skill-progression.js)、[ability-tags.js](../../src/ability-tags.js)、[skill-value.js](../../src/skill-value.js) |
-| [src/ability-summaries.js](../../src/ability-summaries.js) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 未静态引用 | — |
-| [src/ability-tags.js](../../src/ability-tags.js) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | — |
-| [src/attack-cooldown.js](../../src/attack-cooldown.js) | [自动行动、普攻与手动目标](04-navigation-and-attacks.md) | 入口可达 | — |
-| [src/attack-range.js](../../src/attack-range.js) | [自动行动、普攻与手动目标](04-navigation-and-attacks.md) | 入口可达 | — |
-| [src/backline-ai.js](../../src/backline-ai.js) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 未静态引用 | — |
-| [src/base-config.js](../../src/base-config.js) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 入口可达 | — |
-| [src/battlefield.js](../../src/battlefield.js) | [战场、兵线、阶段与建筑](02-battlefield-and-waves.md) | 入口可达 | — |
-| [src/bot-population.js](../../src/bot-population.js) | [战场、兵线、阶段与建筑](02-battlefield-and-waves.md) | 未静态引用 | — |
-| [src/combat-numbers.js](../../src/combat-numbers.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | — |
-| [src/config-migrations.js](../../src/config-migrations.js) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 未静态引用 | [config.js](../../src/config.js)、[bot-population.js](../../src/bot-population.js) |
-| [src/config.js](../../src/config.js) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 入口可达 | [base-config.js](../../src/base-config.js) |
-| [src/formation-ranges.js](../../src/formation-ranges.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 未静态引用 | [config.js](../../src/config.js) |
-| [src/game-layout.js](../../src/game-layout.js) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | — |
-| [src/game-shell.js](../../src/game-shell.js) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | — |
-| [src/hero-action-layout.js](../../src/hero-action-layout.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | — |
-| [src/hero-names.js](../../src/hero-names.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | — |
-| [src/hero-rules.js](../../src/hero-rules.js) | [伤害、治疗、状态与归属统计](06-combat-and-statistics.md) | 入口可达 | [tower-guard.js](../../src/tower-guard.js)、[config.js](../../src/config.js)、[skill-progression.js](../../src/skill-progression.js)、[attack-cooldown.js](../../src/attack-cooldown.js)、[skill-value.js](../../src/skill-value.js)、[skill5-mechanics.js](../../src/skill5-mechanics.js) |
-| [src/kc-layout.css](../../src/kc-layout.css) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | — |
-| [src/legacy-descriptions.js](../../src/legacy-descriptions.js) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 未静态引用 | [config.js](../../src/config.js)、[skill-progression.js](../../src/skill-progression.js)、[ability-tags.js](../../src/ability-tags.js)、[skill-value.js](../../src/skill-value.js) |
-| [src/legacy-match3.css](../../src/legacy-match3.css) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 未静态引用 | — |
-| [src/legacy-match3.js](../../src/legacy-match3.js) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 未静态引用 | [style.css](../../src/style.css) |
-| [src/lord-flame-shield.js](../../src/lord-flame-shield.js) | [五职业技能、共享额度与持续效果](05-skills-and-budget.md) | 入口可达 | [skill-value.js](../../src/skill-value.js)、[manual-target.js](../../src/manual-target.js) |
-| [src/main.js](../../src/main.js) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | [style.css](../../src/style.css)、[kc-layout.css](../../src/kc-layout.css)、[multiplayer.css](../../src/multiplayer.css)、[game-shell.js](../../src/game-shell.js)、[game-layout.js](../../src/game-layout.js)、[config.js](../../src/config.js)、[renderer.js](../../src/renderer.js)、[selection.js](../../src/selection.js)、[visual-theme.js](../../src/visual-theme.js)、[skill-hud.js](../../src/skill-hud.js)、[ability-descriptions.js](../../src/ability-descriptions.js)、[network.js](../../src/network.js)、[skill-value.js](../../src/skill-value.js) |
-| [src/manual-target.js](../../src/manual-target.js) | [自动行动、普攻与手动目标](04-navigation-and-attacks.md) | 入口可达 | — |
-| [src/multiplayer.css](../../src/multiplayer.css) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | — |
-| [src/navigation.js](../../src/navigation.js) | [自动行动、普攻与手动目标](04-navigation-and-attacks.md) | 入口可达 | [manual-target.js](../../src/manual-target.js)、[attack-range.js](../../src/attack-range.js) |
-| [src/network.js](../../src/network.js) | [账号、会话与多人同步](01-accounts-and-network.md) | 入口可达 | [simulation.js](../../src/simulation.js) |
-| [src/premium-vfx.js](../../src/premium-vfx.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | [config.js](../../src/config.js)、[skill-value.js](../../src/skill-value.js)、[vfx-profiles.js](../../src/vfx-profiles.js)、[vfx-brushes.js](../../src/vfx-brushes.js) |
-| [src/renderer.js](../../src/renderer.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | [hero-action-layout.js](../../src/hero-action-layout.js)、[premium-vfx.js](../../src/premium-vfx.js)、[unit-hit.js](../../src/unit-hit.js)、[battlefield.js](../../src/battlefield.js)、[target-halos.js](../../src/target-halos.js)、[tower-guard-visual.js](../../src/tower-guard-visual.js)、[status-icons.js](../../src/status-icons.js)、[combat-numbers.js](../../src/combat-numbers.js)、[unit-motion-view.js](../../src/unit-motion-view.js)、[hero-names.js](../../src/hero-names.js) |
-| [src/selection.js](../../src/selection.js) | [契约、体力、职业成长与评价](03-contracts-and-progression.md) | 入口可达 | [config.js](../../src/config.js)、[visual-theme.js](../../src/visual-theme.js)、[battlefield.js](../../src/battlefield.js)、[manual-target.js](../../src/manual-target.js) |
-| [src/simulation.js](../../src/simulation.js) | [契约、体力、职业成长与评价](03-contracts-and-progression.md) | 入口可达 | [hero-rules.js](../../src/hero-rules.js)、[config.js](../../src/config.js)、[tower-guard.js](../../src/tower-guard.js)、[skill-progression.js](../../src/skill-progression.js)、[navigation.js](../../src/navigation.js)、[manual-target.js](../../src/manual-target.js)、[attack-range.js](../../src/attack-range.js)、[troop-population.js](../../src/troop-population.js) |
-| [src/skill-animation.js](../../src/skill-animation.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 未静态引用 | [config.js](../../src/config.js) |
-| [src/skill-hud.js](../../src/skill-hud.js) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | [config.js](../../src/config.js)、[ability-descriptions.js](../../src/ability-descriptions.js)、[skill-progression.js](../../src/skill-progression.js) |
-| [src/skill-progression.js](../../src/skill-progression.js) | [契约、体力、职业成长与评价](03-contracts-and-progression.md) | 入口可达 | — |
-| [src/skill-range-upgrade.js](../../src/skill-range-upgrade.js) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 未静态引用 | — |
-| [src/skill-value.js](../../src/skill-value.js) | [五职业技能、共享额度与持续效果](05-skills-and-budget.md) | 入口可达 | — |
-| [src/skill3-visuals.js](../../src/skill3-visuals.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 未静态引用 | [config.js](../../src/config.js) |
-| [src/skill4-mechanics.js](../../src/skill4-mechanics.js) | [五职业技能、共享额度与持续效果](05-skills-and-budget.md) | 入口可达 | [skill-value.js](../../src/skill-value.js) |
-| [src/skill5-mechanics.js](../../src/skill5-mechanics.js) | [五职业技能、共享额度与持续效果](05-skills-and-budget.md) | 入口可达 | [skill4-mechanics.js](../../src/skill4-mechanics.js)、[skill-value.js](../../src/skill-value.js)、[lord-flame-shield.js](../../src/lord-flame-shield.js)、[manual-target.js](../../src/manual-target.js) |
-| [src/status-icons.js](../../src/status-icons.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | [unit-status.js](../../src/unit-status.js) |
-| [src/style.css](../../src/style.css) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | — |
-| [src/target-halos.js](../../src/target-halos.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | [manual-target.js](../../src/manual-target.js) |
-| [src/tower-guard-visual.js](../../src/tower-guard-visual.js) | [战场、兵线、阶段与建筑](02-battlefield-and-waves.md) | 入口可达 | [tower-guard.js](../../src/tower-guard.js) |
-| [src/tower-guard.js](../../src/tower-guard.js) | [战场、兵线、阶段与建筑](02-battlefield-and-waves.md) | 入口可达 | — |
-| [src/troop-population.js](../../src/troop-population.js) | [战场、兵线、阶段与建筑](02-battlefield-and-waves.md) | 入口可达 | — |
-| [src/unit-hit.js](../../src/unit-hit.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | — |
-| [src/unit-motion-view.js](../../src/unit-motion-view.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | [unit-motion.js](../../src/unit-motion.js) |
-| [src/unit-motion.js](../../src/unit-motion.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | [attack-range.js](../../src/attack-range.js) |
-| [src/unit-status.js](../../src/unit-status.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | [skill-value.js](../../src/skill-value.js)、[tower-guard.js](../../src/tower-guard.js) |
-| [src/vfx-brushes.js](../../src/vfx-brushes.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | — |
-| [src/vfx-profiles.js](../../src/vfx-profiles.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 入口可达 | — |
-| [src/visual-theme.js](../../src/visual-theme.js) | [界面、技能HUD与交互文案](07-interface-and-skill-hud.md) | 入口可达 | — |
+| [server/index.mjs](../../server/index.mjs) | [账号、会话与多人同步](01-accounts-and-network.md) | 入口可达 | [server/accounts.mjs](../../server/accounts.mjs)、[server/room.mjs](../../server/room.mjs)、[shared/protocol.js](../../shared/protocol.js) |
+| [server/room.mjs](../../server/room.mjs) | [账号、会话与多人同步](01-accounts-and-network.md) | 入口可达 | [shared/simulation.js](../../shared/simulation.js)、[shared/config.js](../../shared/config.js) |
+| [shared/attack-cooldown.js](../../shared/attack-cooldown.js) | [自动行动、普攻与手动目标](04-navigation-and-attacks.md) | 入口可达 | — |
+| [shared/attack-range.js](../../shared/attack-range.js) | [自动行动、普攻与手动目标](04-navigation-and-attacks.md) | 入口可达 | — |
+| [shared/backline-ai.js](../../shared/backline-ai.js) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 未静态引用 | — |
+| [shared/base-config.js](../../shared/base-config.js) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 入口可达 | — |
+| [shared/bot-population.js](../../shared/bot-population.js) | [战场、兵线、阶段与建筑](02-battlefield-and-waves.md) | 未静态引用 | — |
+| [shared/config-migrations.js](../../shared/config-migrations.js) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 未静态引用 | [shared/config.js](../../shared/config.js)、[shared/bot-population.js](../../shared/bot-population.js) |
+| [shared/config.js](../../shared/config.js) | [配置、迁移与历史兼容](09-configuration-and-compatibility.md) | 入口可达 | [shared/base-config.js](../../shared/base-config.js) |
+| [shared/formation-ranges.js](../../shared/formation-ranges.js) | [战场渲染、单位动作与技能反馈](08-rendering-and-feedback.md) | 未静态引用 | [shared/config.js](../../shared/config.js) |
+| [shared/hero-rules.js](../../shared/hero-rules.js) | [伤害、治疗、状态与归属统计](06-combat-and-statistics.md) | 入口可达 | [shared/tower-guard.js](../../shared/tower-guard.js)、[shared/config.js](../../shared/config.js)、[shared/skill-progression.js](../../shared/skill-progression.js)、[shared/attack-cooldown.js](../../shared/attack-cooldown.js)、[shared/skill-value.js](../../shared/skill-value.js)、[shared/skill5-mechanics.js](../../shared/skill5-mechanics.js) |
+| [shared/lord-flame-shield.js](../../shared/lord-flame-shield.js) | [五职业技能、共享额度与持续效果](05-skills-and-budget.md) | 入口可达 | [shared/skill-value.js](../../shared/skill-value.js)、[shared/manual-target.js](../../shared/manual-target.js) |
+| [shared/manual-target.js](../../shared/manual-target.js) | [自动行动、普攻与手动目标](04-navigation-and-attacks.md) | 入口可达 | — |
+| [shared/navigation.js](../../shared/navigation.js) | [自动行动、普攻与手动目标](04-navigation-and-attacks.md) | 入口可达 | [shared/manual-target.js](../../shared/manual-target.js)、[shared/attack-range.js](../../shared/attack-range.js) |
+| [shared/protocol.js](../../shared/protocol.js) | 共享规则 | 入口可达 | — |
+| [shared/simulation.js](../../shared/simulation.js) | [契约、体力、职业成长与评价](03-contracts-and-progression.md) | 入口可达 | [shared/hero-rules.js](../../shared/hero-rules.js)、[shared/config.js](../../shared/config.js)、[shared/tower-guard.js](../../shared/tower-guard.js)、[shared/skill-progression.js](../../shared/skill-progression.js)、[shared/navigation.js](../../shared/navigation.js)、[shared/manual-target.js](../../shared/manual-target.js)、[shared/attack-range.js](../../shared/attack-range.js)、[shared/troop-population.js](../../shared/troop-population.js) |
+| [shared/skill-progression.js](../../shared/skill-progression.js) | [契约、体力、职业成长与评价](03-contracts-and-progression.md) | 入口可达 | — |
+| [shared/skill-value.js](../../shared/skill-value.js) | [五职业技能、共享额度与持续效果](05-skills-and-budget.md) | 入口可达 | — |
+| [shared/skill4-mechanics.js](../../shared/skill4-mechanics.js) | [五职业技能、共享额度与持续效果](05-skills-and-budget.md) | 入口可达 | [shared/skill-value.js](../../shared/skill-value.js) |
+| [shared/skill5-mechanics.js](../../shared/skill5-mechanics.js) | [五职业技能、共享额度与持续效果](05-skills-and-budget.md) | 入口可达 | [shared/skill4-mechanics.js](../../shared/skill4-mechanics.js)、[shared/skill-value.js](../../shared/skill-value.js)、[shared/lord-flame-shield.js](../../shared/lord-flame-shield.js)、[shared/manual-target.js](../../shared/manual-target.js) |
+| [shared/tower-guard.js](../../shared/tower-guard.js) | [战场、兵线、阶段与建筑](02-battlefield-and-waves.md) | 入口可达 | — |
+| [shared/troop-population.js](../../shared/troop-population.js) | [战场、兵线、阶段与建筑](02-battlefield-and-waves.md) | 入口可达 | — |
 
-## 资源与外围入口
+## 桌面应用入口
 
-| 目录/文件 | 用途 |
-|---|---|
-| [public/art](../../public/art) | 运行所需图集与特效素材，随源码提交。 |
-| [tests](../../tests) | 模型、HTTP及浏览器测试。 |
-| [scripts](../../scripts) | 专项验收、历史审计与素材处理；部分需要本地输入。 |
-| [package.json](../../package.json) | 安装依赖与运行命令。 |
-| [vite.config.js](../../vite.config.js) | 构建及Phaser分包。 |
-| [playwright.config.js](../../playwright.config.js) | 5194隔离验收与本机Chrome路径。 |
-| [start.mjs](../../start.mjs) | Windows启动器、已有服务检查及日志。 |
+- [client/desktop/main.mjs](../../client/desktop/main.mjs)：原生窗口、菜单、单实例、本地服务生命周期与设置IPC。
+- [client/desktop/config.mjs](../../client/desktop/config.mjs)：分发默认地址、个人设置与持久化。
+- [client/desktop/settings-preload.cjs](../../client/desktop/settings-preload.cjs)、[settings.html](../../client/desktop/settings.html)、[settings.js](../../client/desktop/settings.js)：隔离的设置窗口。
+- [scripts/package-desktop.mjs](../../scripts/package-desktop.mjs)：独立Windows EXE与ZIP打包。

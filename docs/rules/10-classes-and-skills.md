@@ -22,6 +22,6 @@
 
 模块范围：五职业20技能及专属资源。
 
-代码入口：[src/skill5-mechanics.js](../../src/skill5-mechanics.js)、[src/skill4-mechanics.js](../../src/skill4-mechanics.js)、[src/lord-flame-shield.js](../../src/lord-flame-shield.js)、[src/config.js](../../src/config.js)。
+代码入口：[shared/skill5-mechanics.js](../../shared/skill5-mechanics.js)、[shared/skill4-mechanics.js](../../shared/skill4-mechanics.js)、[shared/lord-flame-shield.js](../../shared/lord-flame-shield.js)、[shared/config.js](../../shared/config.js)。
 
 验证入口：[tests/model.test.js](../../tests/model.test.js)、[tests/lord-flame.test.js](../../tests/lord-flame.test.js)、[tests/skill-double.test.js](../../tests/skill-double.test.js)。

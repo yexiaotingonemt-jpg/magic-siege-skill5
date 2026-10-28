@@ -3,7 +3,7 @@ from collections import deque
 from array import array
 from pathlib import Path
 import json
-out=Path('public/art/skill5');im=Image.open(out/'assassin-source.png').convert('RGBA');w,h=im.size;a=im.getchannel('A').tobytes();lab=array('I',[0])*(w*h);components=[];number=0
+out=Path('client/public/art/skill5');im=Image.open(out/'assassin-source.png').convert('RGBA');w,h=im.size;a=im.getchannel('A').tobytes();lab=array('I',[0])*(w*h);components=[];number=0
 for index,value in enumerate(a):
  if value<=32 or lab[index]: continue
  number+=1;q=deque([index]);lab[index]=number;count=0;x0=w;y0=h;x1=y1=0

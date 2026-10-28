@@ -16,9 +16,9 @@ damage / heal / debuff / cleanse → 额度与实际生命变化 → stat / kill
 
 | 文件 | 当前加载状态 |
 |---|---|
-| [src/hero-rules.js](../../src/hero-rules.js) | 启动入口可达 |
+| [shared/hero-rules.js](../../shared/hero-rules.js) | 启动入口可达 |
 
-共享入口：[src/simulation.js](../../src/simulation.js)、[src/tower-guard.js](../../src/tower-guard.js)、[src/skill-value.js](../../src/skill-value.js)、[src/lord-flame-shield.js](../../src/lord-flame-shield.js)。
+共享入口：[shared/simulation.js](../../shared/simulation.js)、[shared/tower-guard.js](../../shared/tower-guard.js)、[shared/skill-value.js](../../shared/skill-value.js)、[shared/lord-flame-shield.js](../../shared/lord-flame-shield.js)。
 
 ## 对应规则
 

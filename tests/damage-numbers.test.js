@@ -1,12 +1,13 @@
+import {GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {Simulation} from '../src/simulation.js';
-import {contractType} from '../src/config.js';
-import {createGameServer} from '../server.mjs';
-import {createCombatNumberModel} from '../src/combat-numbers.js';
+import {Simulation} from '../shared/simulation.js';
+import {contractType} from '../shared/config.js';
+import {createGameServer} from '../server/index.mjs';
+import {createCombatNumberModel} from '../client/src/combat-numbers.js';
 
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
 const advance=(s,n)=>{const end=s.time+n;while(s.time<end-1e-8)s.tick(Math.min(.05,end-s.time));};
@@ -77,7 +78,7 @@ test('技能对防御塔造成伤害时记录塔身份和减伤后的伤害',()=
 test('两账号HTTP快照拥有同一技能伤害事件，重复读取不重新生成事件',async()=>{
  const game=createGameServer({dataDir:fs.mkdtempSync(path.join(os.tmpdir(),'kc5-damage-test-'))});game.room.paused=true;
  await new Promise(r=>game.server.listen(0,'127.0.0.1',r));const base=`http://127.0.0.1:${game.server.address().port}`;
- const call=async(route,body,cookie)=>{const response=await fetch(base+route,{method:body?'POST':'GET',headers:{...(body?{'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},body:body?JSON.stringify(body):undefined});assert.equal(response.status,200);return {data:await response.json(),cookie:response.headers.get('set-cookie')?.split(';')[0]};};
+ const call=async(route,body,cookie)=>{const response=await fetch(base+route,{method:body?'POST':'GET',headers:{'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),...(body?{'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},body:body?JSON.stringify(body):undefined});assert.equal(response.status,200);return {data:await response.json(),cookie:response.headers.get('set-cookie')?.split(';')[0]};};
  try{
   const clients=[];for(const side of [0,1])clients.push(await call('/api/register',{name:'伤害同步'+side,password:'isolated-damage-test',side}));
   const s=game.room.sim;s.units=[];s.waveAt=s.populationAt=1e9;for(const t of s.towers)t.x=100;

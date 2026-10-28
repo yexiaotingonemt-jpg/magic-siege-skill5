@@ -16,6 +16,6 @@
 
 模块范围：玩家职责、非对称攻防和自动行动。
 
-代码入口：[src/main.js](../../src/main.js)、[server/room.mjs](../../server/room.mjs)、[src/simulation.js](../../src/simulation.js)。
+代码入口：[client/src/main.js](../../client/src/main.js)、[server/room.mjs](../../server/room.mjs)、[shared/simulation.js](../../shared/simulation.js)。
 
 验证入口：[tests/model.test.js](../../tests/model.test.js)、[tests/smoke.spec.js](../../tests/smoke.spec.js)。

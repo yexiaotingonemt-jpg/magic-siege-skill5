@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {motionStyle,unitMotionPose,deformUnitVertex,createUnitMotionModel} from '../src/unit-motion.js';
+import {motionStyle,unitMotionPose,deformUnitVertex,createUnitMotionModel} from '../client/src/unit-motion.js';
 
 const unit=(extra={})=>({id:7,x:0,y:0,hp:100,side:0,type:'melee',range:1.5,speed:2,cd:10,...extra});
 const different=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y)>1e-5;

@@ -16,12 +16,12 @@ skill4-mechanics.js仍被设计5复用，不能按文件名删除。一次施法
 
 | 文件 | 当前加载状态 |
 |---|---|
-| [src/skill5-mechanics.js](../../src/skill5-mechanics.js) | 启动入口可达 |
-| [src/skill4-mechanics.js](../../src/skill4-mechanics.js) | 启动入口可达 |
-| [src/skill-value.js](../../src/skill-value.js) | 启动入口可达 |
-| [src/lord-flame-shield.js](../../src/lord-flame-shield.js) | 启动入口可达 |
+| [shared/skill5-mechanics.js](../../shared/skill5-mechanics.js) | 启动入口可达 |
+| [shared/skill4-mechanics.js](../../shared/skill4-mechanics.js) | 启动入口可达 |
+| [shared/skill-value.js](../../shared/skill-value.js) | 启动入口可达 |
+| [shared/lord-flame-shield.js](../../shared/lord-flame-shield.js) | 启动入口可达 |
 
-共享入口：[src/hero-rules.js](../../src/hero-rules.js)、[src/skill-progression.js](../../src/skill-progression.js)、[src/config.js](../../src/config.js)、[src/simulation.js](../../src/simulation.js)。
+共享入口：[shared/hero-rules.js](../../shared/hero-rules.js)、[shared/skill-progression.js](../../shared/skill-progression.js)、[shared/config.js](../../shared/config.js)、[shared/simulation.js](../../shared/simulation.js)。
 
 ## 对应规则
 

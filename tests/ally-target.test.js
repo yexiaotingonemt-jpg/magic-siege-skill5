@@ -1,12 +1,13 @@
+import {GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
-import {Simulation} from '../src/simulation.js';
-import {contractType} from '../src/config.js';
-import {canSelectAllies,manualTarget} from '../src/manual-target.js';
-import {createGameServer} from '../server.mjs';
+import {Simulation} from '../shared/simulation.js';
+import {contractType} from '../shared/config.js';
+import {canSelectAllies,manualTarget} from '../shared/manual-target.js';
+import {createGameServer} from '../server/index.mjs';
 
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
 function arena(id=5){
@@ -78,7 +79,7 @@ test('友方塔可手选但不会扩展到链接、净化、治疗和群守原�
 });
 test('HTTP友方锁定仅操作登录英雄，跨端同步，非法职业和重复指令不绕过限制',async()=>{
  const game=createGameServer({dataDir:await mkdtemp(path.join(tmpdir(),'kc5-ally-target-'))});game.room.paused=true;await new Promise(r=>game.server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+game.server.address().port;
- const call=async(route,body,cookie)=>{const res=await fetch(base+route,{method:body?'POST':'GET',headers:{...(body?{'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},body:body?JSON.stringify(body):undefined});return {status:res.status,data:await res.json(),cookie:res.headers.get('set-cookie')?.split(';')[0]};};
+ const call=async(route,body,cookie)=>{const res=await fetch(base+route,{method:body?'POST':'GET',headers:{'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),...(body?{'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},body:body?JSON.stringify(body):undefined});return {status:res.status,data:await res.json(),cookie:res.headers.get('set-cookie')?.split(';')[0]};};
  try{const a=await call('/api/register',{name:'友方锁定精灵',password:'isolated-ally-target',side:0}),b=await call('/api/register',{name:'友方锁定火法',password:'isolated-ally-target',side:0}),s=game.room.sim,p=game.room.player(game.accounts.rows[0]),q=game.room.player(game.accounts.rows[1]);p.classId=5;q.classId=4;p.stamina=q.stamina=100;const one=s.spawn(0,'ranged',0,1,0),two=s.spawn(0,'ranged',0,1,0);assert.ok(s.contract(p,one.id));assert.ok(s.contract(q,two.id));Object.assign(one,{x:0,y:0});Object.assign(two,{x:0,y:2});const enemy=s.spawn(1,'melee',0,1,0);Object.assign(enemy,{x:0,y:1});one.targetId=enemy.id;const body={id:'ally-repeat',type:'target',args:{unitId:two.id,playerId:q.id,sourceId:two.id}};const first=await call('/api/action',body,a.cookie);assert.equal(first.data.ok,true,first.data.message);assert.equal(one.manualTargetId,two.id);assert.equal(one.targetId,enemy.id);assert.ok(!two.manualTargetId);const state=await call('/api/state',null,b.cookie);assert.equal(state.data.units.find(u=>u.id===one.id).manualTargetId,two.id);const rejected=await call('/api/action',{...body,id:'fire-invalid',args:{unitId:one.id}},b.cookie);assert.equal(rejected.data.ok,false);assert.match(rejected.data.message,/职业/);two.y=100;assert.deepEqual((await call('/api/action',body,a.cookie)).data,first.data);assert.equal((await call('/api/action',{...body,id:'new-outside'},a.cookie)).data.ok,false);assert.equal((await call('/api/action',body)).status,401);
  }finally{for(const c of [...game.room.clients])c.res.end();game.server.closeAllConnections();await new Promise(r=>game.server.close(r));}
 });

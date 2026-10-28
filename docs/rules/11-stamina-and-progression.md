@@ -50,6 +50,6 @@
 
 模块范围：体力、职业独立成长、升级、加点和重分。
 
-代码入口：[src/simulation.js](../../src/simulation.js)、[src/skill-progression.js](../../src/skill-progression.js)、[src/skill-hud.js](../../src/skill-hud.js)。
+代码入口：[shared/simulation.js](../../shared/simulation.js)、[shared/skill-progression.js](../../shared/skill-progression.js)、[client/src/skill-hud.js](../../client/src/skill-hud.js)。
 
 验证入口：[tests/stamina.test.js](../../tests/stamina.test.js)、[tests/model.test.js](../../tests/model.test.js)。

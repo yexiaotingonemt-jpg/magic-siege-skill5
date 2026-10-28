@@ -1,0 +1,2822 @@
+{
+  "version": "kc-final-20261027",
+  "cell": [
+    192,
+    256
+  ],
+  "feet": [
+    96,
+    240
+  ],
+  "classes": [
+    "orc",
+    "chariot",
+    "lord",
+    "mage",
+    "elf"
+  ],
+  "poseOrder": [
+    "idle",
+    "move",
+    "attack",
+    "cast"
+  ],
+  "source": "Midjourney direction + built-in image generation alpha strips",
+  "groundJoin": "Full-width ground with 64-source-pixel crossfade at repeated vertical joins",
+  "ui": "Direction 4 material slice, responsive code-native components and 20 generated skill icons",
+  "headings": [
+    "S",
+    "SE",
+    "E",
+    "NE",
+    "N",
+    "NW",
+    "W",
+    "SW"
+  ],
+  "directionalFrames": [
+    {
+      "class": "orc",
+      "pose": 0,
+      "direction": "S",
+      "frame": 0,
+      "bbox": [
+        37,
+        145,
+        118,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 0,
+      "direction": "SE",
+      "frame": 1,
+      "bbox": [
+        69,
+        147,
+        151,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 0,
+      "direction": "E",
+      "frame": 2,
+      "bbox": [
+        81,
+        146,
+        149,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 0,
+      "direction": "NE",
+      "frame": 3,
+      "bbox": [
+        80,
+        148,
+        163,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 0,
+      "direction": "N",
+      "frame": 4,
+      "bbox": [
+        49,
+        145,
+        125,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 0,
+      "direction": "NW",
+      "frame": 5,
+      "bbox": [
+        29,
+        148,
+        112,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "orc",
+      "pose": 0,
+      "direction": "W",
+      "frame": 6,
+      "bbox": [
+        43,
+        146,
+        111,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "orc",
+      "pose": 0,
+      "direction": "SW",
+      "frame": 7,
+      "bbox": [
+        41,
+        147,
+        123,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "orc",
+      "pose": 1,
+      "direction": "S",
+      "frame": 8,
+      "bbox": [
+        58,
+        144,
+        134,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 1,
+      "direction": "SE",
+      "frame": 9,
+      "bbox": [
+        48,
+        145,
+        125,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 1,
+      "direction": "E",
+      "frame": 10,
+      "bbox": [
+        47,
+        149,
+        122,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 1,
+      "direction": "NE",
+      "frame": 11,
+      "bbox": [
+        69,
+        146,
+        155,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 1,
+      "direction": "N",
+      "frame": 12,
+      "bbox": [
+        71,
+        146,
+        148,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 1,
+      "direction": "NW",
+      "frame": 13,
+      "bbox": [
+        37,
+        146,
+        123,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "orc",
+      "pose": 1,
+      "direction": "W",
+      "frame": 14,
+      "bbox": [
+        70,
+        149,
+        145,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "orc",
+      "pose": 1,
+      "direction": "SW",
+      "frame": 15,
+      "bbox": [
+        67,
+        145,
+        144,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "orc",
+      "pose": 2,
+      "direction": "S",
+      "frame": 16,
+      "bbox": [
+        52,
+        150,
+        140,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 2,
+      "direction": "SE",
+      "frame": 17,
+      "bbox": [
+        83,
+        154,
+        153,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 2,
+      "direction": "E",
+      "frame": 18,
+      "bbox": [
+        29,
+        158,
+        139,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 2,
+      "direction": "NE",
+      "frame": 19,
+      "bbox": [
+        81,
+        154,
+        180,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 2,
+      "direction": "N",
+      "frame": 20,
+      "bbox": [
+        82,
+        151,
+        158,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 2,
+      "direction": "NW",
+      "frame": 21,
+      "bbox": [
+        12,
+        154,
+        111,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "orc",
+      "pose": 2,
+      "direction": "W",
+      "frame": 22,
+      "bbox": [
+        53,
+        158,
+        163,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "orc",
+      "pose": 2,
+      "direction": "SW",
+      "frame": 23,
+      "bbox": [
+        39,
+        154,
+        109,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "orc",
+      "pose": 3,
+      "direction": "S",
+      "frame": 24,
+      "bbox": [
+        70,
+        127,
+        169,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 3,
+      "direction": "SE",
+      "frame": 25,
+      "bbox": [
+        79,
+        130,
+        160,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 3,
+      "direction": "E",
+      "frame": 26,
+      "bbox": [
+        77,
+        128,
+        149,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 3,
+      "direction": "NE",
+      "frame": 27,
+      "bbox": [
+        76,
+        133,
+        159,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 3,
+      "direction": "N",
+      "frame": 28,
+      "bbox": [
+        46,
+        133,
+        139,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "orc",
+      "pose": 3,
+      "direction": "NW",
+      "frame": 29,
+      "bbox": [
+        33,
+        133,
+        116,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "orc",
+      "pose": 3,
+      "direction": "W",
+      "frame": 30,
+      "bbox": [
+        43,
+        128,
+        115,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "orc",
+      "pose": 3,
+      "direction": "SW",
+      "frame": 31,
+      "bbox": [
+        32,
+        130,
+        113,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "chariot",
+      "pose": 0,
+      "direction": "S",
+      "frame": 0,
+      "bbox": [
+        37,
+        73,
+        155,
+        184
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 0,
+      "direction": "SE",
+      "frame": 1,
+      "bbox": [
+        43,
+        51,
+        157,
+        189
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 0,
+      "direction": "E",
+      "frame": 2,
+      "bbox": [
+        40,
+        69,
+        151,
+        187
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 0,
+      "direction": "NE",
+      "frame": 3,
+      "bbox": [
+        19,
+        67,
+        157,
+        182
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 0,
+      "direction": "N",
+      "frame": 4,
+      "bbox": [
+        37,
+        73,
+        155,
+        184
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 0,
+      "direction": "NW",
+      "frame": 5,
+      "bbox": [
+        35,
+        68,
+        149,
+        206
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 0,
+      "direction": "W",
+      "frame": 6,
+      "bbox": [
+        40,
+        69,
+        151,
+        187
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 0,
+      "direction": "SW",
+      "frame": 7,
+      "bbox": [
+        35,
+        75,
+        173,
+        190
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 1,
+      "direction": "S",
+      "frame": 8,
+      "bbox": [
+        37,
+        74,
+        154,
+        183
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 1,
+      "direction": "SE",
+      "frame": 9,
+      "bbox": [
+        18,
+        53,
+        161,
+        184
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 1,
+      "direction": "E",
+      "frame": 10,
+      "bbox": [
+        41,
+        70,
+        150,
+        187
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 1,
+      "direction": "NE",
+      "frame": 11,
+      "bbox": [
+        20,
+        63,
+        151,
+        206
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 1,
+      "direction": "N",
+      "frame": 12,
+      "bbox": [
+        37,
+        74,
+        154,
+        183
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 1,
+      "direction": "NW",
+      "frame": 13,
+      "bbox": [
+        30,
+        73,
+        173,
+        204
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 1,
+      "direction": "W",
+      "frame": 14,
+      "bbox": [
+        41,
+        70,
+        150,
+        187
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 1,
+      "direction": "SW",
+      "frame": 15,
+      "bbox": [
+        40,
+        51,
+        171,
+        194
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 2,
+      "direction": "S",
+      "frame": 16,
+      "bbox": [
+        38,
+        74,
+        154,
+        182
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 2,
+      "direction": "SE",
+      "frame": 17,
+      "bbox": [
+        41,
+        60,
+        170,
+        195
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 2,
+      "direction": "E",
+      "frame": 18,
+      "bbox": [
+        42,
+        70,
+        150,
+        186
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 2,
+      "direction": "NE",
+      "frame": 19,
+      "bbox": [
+        28,
+        54,
+        163,
+        183
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 2,
+      "direction": "N",
+      "frame": 20,
+      "bbox": [
+        38,
+        74,
+        154,
+        182
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 2,
+      "direction": "NW",
+      "frame": 21,
+      "bbox": [
+        22,
+        61,
+        151,
+        196
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 2,
+      "direction": "W",
+      "frame": 22,
+      "bbox": [
+        42,
+        70,
+        150,
+        186
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 2,
+      "direction": "SW",
+      "frame": 23,
+      "bbox": [
+        29,
+        73,
+        164,
+        202
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 3,
+      "direction": "S",
+      "frame": 24,
+      "bbox": [
+        34,
+        74,
+        158,
+        182
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 3,
+      "direction": "SE",
+      "frame": 25,
+      "bbox": [
+        18,
+        63,
+        159,
+        187
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 3,
+      "direction": "E",
+      "frame": 26,
+      "bbox": [
+        42,
+        66,
+        150,
+        190
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 3,
+      "direction": "NE",
+      "frame": 27,
+      "bbox": [
+        31,
+        65,
+        155,
+        206
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 3,
+      "direction": "N",
+      "frame": 28,
+      "bbox": [
+        34,
+        74,
+        158,
+        182
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 3,
+      "direction": "NW",
+      "frame": 29,
+      "bbox": [
+        33,
+        69,
+        174,
+        193
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 3,
+      "direction": "W",
+      "frame": 30,
+      "bbox": [
+        42,
+        66,
+        150,
+        190
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "chariot",
+      "pose": 3,
+      "direction": "SW",
+      "frame": 31,
+      "bbox": [
+        37,
+        50,
+        161,
+        191
+      ],
+      "method": "rigid-rotation"
+    },
+    {
+      "class": "lord",
+      "pose": 0,
+      "direction": "S",
+      "frame": 0,
+      "bbox": [
+        66,
+        143,
+        136,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 0,
+      "direction": "SE",
+      "frame": 1,
+      "bbox": [
+        69,
+        142,
+        129,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 0,
+      "direction": "E",
+      "frame": 2,
+      "bbox": [
+        70,
+        143,
+        123,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 0,
+      "direction": "NE",
+      "frame": 3,
+      "bbox": [
+        58,
+        145,
+        126,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 0,
+      "direction": "N",
+      "frame": 4,
+      "bbox": [
+        65,
+        145,
+        121,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 0,
+      "direction": "NW",
+      "frame": 5,
+      "bbox": [
+        66,
+        145,
+        134,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "lord",
+      "pose": 0,
+      "direction": "W",
+      "frame": 6,
+      "bbox": [
+        69,
+        143,
+        122,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "lord",
+      "pose": 0,
+      "direction": "SW",
+      "frame": 7,
+      "bbox": [
+        63,
+        142,
+        123,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "lord",
+      "pose": 1,
+      "direction": "S",
+      "frame": 8,
+      "bbox": [
+        64,
+        145,
+        130,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 1,
+      "direction": "SE",
+      "frame": 9,
+      "bbox": [
+        52,
+        145,
+        123,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 1,
+      "direction": "E",
+      "frame": 10,
+      "bbox": [
+        49,
+        147,
+        113,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 1,
+      "direction": "NE",
+      "frame": 11,
+      "bbox": [
+        67,
+        146,
+        133,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 1,
+      "direction": "N",
+      "frame": 12,
+      "bbox": [
+        71,
+        147,
+        130,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 1,
+      "direction": "NW",
+      "frame": 13,
+      "bbox": [
+        59,
+        146,
+        125,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "lord",
+      "pose": 1,
+      "direction": "W",
+      "frame": 14,
+      "bbox": [
+        79,
+        147,
+        143,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "lord",
+      "pose": 1,
+      "direction": "SW",
+      "frame": 15,
+      "bbox": [
+        69,
+        145,
+        140,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "lord",
+      "pose": 2,
+      "direction": "S",
+      "frame": 16,
+      "bbox": [
+        81,
+        151,
+        151,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 2,
+      "direction": "SE",
+      "frame": 17,
+      "bbox": [
+        83,
+        150,
+        175,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 2,
+      "direction": "E",
+      "frame": 18,
+      "bbox": [
+        83,
+        155,
+        180,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 2,
+      "direction": "NE",
+      "frame": 19,
+      "bbox": [
+        57,
+        157,
+        167,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 2,
+      "direction": "N",
+      "frame": 20,
+      "bbox": [
+        80,
+        152,
+        160,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 2,
+      "direction": "NW",
+      "frame": 21,
+      "bbox": [
+        25,
+        157,
+        135,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "lord",
+      "pose": 2,
+      "direction": "W",
+      "frame": 22,
+      "bbox": [
+        12,
+        155,
+        109,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "lord",
+      "pose": 2,
+      "direction": "SW",
+      "frame": 23,
+      "bbox": [
+        17,
+        150,
+        109,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "lord",
+      "pose": 3,
+      "direction": "S",
+      "frame": 24,
+      "bbox": [
+        73,
+        144,
+        148,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 3,
+      "direction": "SE",
+      "frame": 25,
+      "bbox": [
+        75,
+        144,
+        155,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 3,
+      "direction": "E",
+      "frame": 26,
+      "bbox": [
+        72,
+        145,
+        154,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 3,
+      "direction": "NE",
+      "frame": 27,
+      "bbox": [
+        53,
+        144,
+        120,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 3,
+      "direction": "N",
+      "frame": 28,
+      "bbox": [
+        71,
+        144,
+        141,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "lord",
+      "pose": 3,
+      "direction": "NW",
+      "frame": 29,
+      "bbox": [
+        72,
+        144,
+        139,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "lord",
+      "pose": 3,
+      "direction": "W",
+      "frame": 30,
+      "bbox": [
+        38,
+        145,
+        120,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "lord",
+      "pose": 3,
+      "direction": "SW",
+      "frame": 31,
+      "bbox": [
+        37,
+        144,
+        117,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "mage",
+      "pose": 0,
+      "direction": "S",
+      "frame": 0,
+      "bbox": [
+        51,
+        103,
+        141,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 0,
+      "direction": "SE",
+      "frame": 1,
+      "bbox": [
+        47,
+        106,
+        135,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 0,
+      "direction": "E",
+      "frame": 2,
+      "bbox": [
+        64,
+        105,
+        136,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 0,
+      "direction": "NE",
+      "frame": 3,
+      "bbox": [
+        54,
+        106,
+        145,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 0,
+      "direction": "N",
+      "frame": 4,
+      "bbox": [
+        53,
+        103,
+        143,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 0,
+      "direction": "NW",
+      "frame": 5,
+      "bbox": [
+        47,
+        106,
+        138,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "mage",
+      "pose": 0,
+      "direction": "W",
+      "frame": 6,
+      "bbox": [
+        56,
+        105,
+        128,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "mage",
+      "pose": 0,
+      "direction": "SW",
+      "frame": 7,
+      "bbox": [
+        57,
+        106,
+        145,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "mage",
+      "pose": 1,
+      "direction": "S",
+      "frame": 8,
+      "bbox": [
+        52,
+        108,
+        143,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 1,
+      "direction": "SE",
+      "frame": 9,
+      "bbox": [
+        40,
+        116,
+        134,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 1,
+      "direction": "E",
+      "frame": 10,
+      "bbox": [
+        41,
+        115,
+        125,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 1,
+      "direction": "NE",
+      "frame": 11,
+      "bbox": [
+        57,
+        113,
+        155,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 1,
+      "direction": "N",
+      "frame": 12,
+      "bbox": [
+        48,
+        116,
+        140,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 1,
+      "direction": "NW",
+      "frame": 13,
+      "bbox": [
+        37,
+        113,
+        135,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "mage",
+      "pose": 1,
+      "direction": "W",
+      "frame": 14,
+      "bbox": [
+        67,
+        115,
+        151,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "mage",
+      "pose": 1,
+      "direction": "SW",
+      "frame": 15,
+      "bbox": [
+        58,
+        116,
+        152,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "mage",
+      "pose": 2,
+      "direction": "S",
+      "frame": 16,
+      "bbox": [
+        45,
+        129,
+        161,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 2,
+      "direction": "SE",
+      "frame": 17,
+      "bbox": [
+        48,
+        130,
+        176,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 2,
+      "direction": "E",
+      "frame": 18,
+      "bbox": [
+        53,
+        132,
+        180,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 2,
+      "direction": "NE",
+      "frame": 19,
+      "bbox": [
+        57,
+        135,
+        175,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 2,
+      "direction": "N",
+      "frame": 20,
+      "bbox": [
+        45,
+        132,
+        165,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 2,
+      "direction": "NW",
+      "frame": 21,
+      "bbox": [
+        17,
+        135,
+        135,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "mage",
+      "pose": 2,
+      "direction": "W",
+      "frame": 22,
+      "bbox": [
+        12,
+        132,
+        139,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "mage",
+      "pose": 2,
+      "direction": "SW",
+      "frame": 23,
+      "bbox": [
+        16,
+        130,
+        144,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "mage",
+      "pose": 3,
+      "direction": "S",
+      "frame": 24,
+      "bbox": [
+        49,
+        108,
+        150,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 3,
+      "direction": "SE",
+      "frame": 25,
+      "bbox": [
+        48,
+        110,
+        144,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 3,
+      "direction": "E",
+      "frame": 26,
+      "bbox": [
+        64,
+        110,
+        146,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 3,
+      "direction": "NE",
+      "frame": 27,
+      "bbox": [
+        49,
+        111,
+        143,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 3,
+      "direction": "N",
+      "frame": 28,
+      "bbox": [
+        45,
+        109,
+        142,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "mage",
+      "pose": 3,
+      "direction": "NW",
+      "frame": 29,
+      "bbox": [
+        49,
+        111,
+        143,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "mage",
+      "pose": 3,
+      "direction": "W",
+      "frame": 30,
+      "bbox": [
+        46,
+        110,
+        128,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "mage",
+      "pose": 3,
+      "direction": "SW",
+      "frame": 31,
+      "bbox": [
+        48,
+        110,
+        144,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "elf",
+      "pose": 0,
+      "direction": "S",
+      "frame": 0,
+      "bbox": [
+        44,
+        131,
+        119,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 0,
+      "direction": "SE",
+      "frame": 1,
+      "bbox": [
+        43,
+        134,
+        121,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 0,
+      "direction": "E",
+      "frame": 2,
+      "bbox": [
+        67,
+        129,
+        117,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 0,
+      "direction": "NE",
+      "frame": 3,
+      "bbox": [
+        55,
+        129,
+        127,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 0,
+      "direction": "N",
+      "frame": 4,
+      "bbox": [
+        54,
+        130,
+        132,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 0,
+      "direction": "NW",
+      "frame": 5,
+      "bbox": [
+        65,
+        129,
+        137,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "elf",
+      "pose": 0,
+      "direction": "W",
+      "frame": 6,
+      "bbox": [
+        75,
+        129,
+        125,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "elf",
+      "pose": 0,
+      "direction": "SW",
+      "frame": 7,
+      "bbox": [
+        71,
+        134,
+        149,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "elf",
+      "pose": 1,
+      "direction": "S",
+      "frame": 8,
+      "bbox": [
+        60,
+        132,
+        136,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 1,
+      "direction": "SE",
+      "frame": 9,
+      "bbox": [
+        52,
+        132,
+        133,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 1,
+      "direction": "E",
+      "frame": 10,
+      "bbox": [
+        43,
+        140,
+        114,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 1,
+      "direction": "NE",
+      "frame": 11,
+      "bbox": [
+        68,
+        134,
+        146,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 1,
+      "direction": "N",
+      "frame": 12,
+      "bbox": [
+        64,
+        135,
+        138,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 1,
+      "direction": "NW",
+      "frame": 13,
+      "bbox": [
+        46,
+        134,
+        124,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "elf",
+      "pose": 1,
+      "direction": "W",
+      "frame": 14,
+      "bbox": [
+        78,
+        140,
+        149,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "elf",
+      "pose": 1,
+      "direction": "SW",
+      "frame": 15,
+      "bbox": [
+        59,
+        132,
+        140,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "elf",
+      "pose": 2,
+      "direction": "S",
+      "frame": 16,
+      "bbox": [
+        55,
+        152,
+        163,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 2,
+      "direction": "SE",
+      "frame": 17,
+      "bbox": [
+        75,
+        156,
+        168,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 2,
+      "direction": "E",
+      "frame": 18,
+      "bbox": [
+        74,
+        154,
+        180,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 2,
+      "direction": "NE",
+      "frame": 19,
+      "bbox": [
+        77,
+        155,
+        179,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 2,
+      "direction": "N",
+      "frame": 20,
+      "bbox": [
+        69,
+        155,
+        171,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 2,
+      "direction": "NW",
+      "frame": 21,
+      "bbox": [
+        13,
+        155,
+        115,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "elf",
+      "pose": 2,
+      "direction": "W",
+      "frame": 22,
+      "bbox": [
+        12,
+        154,
+        118,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "elf",
+      "pose": 2,
+      "direction": "SW",
+      "frame": 23,
+      "bbox": [
+        24,
+        156,
+        117,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "elf",
+      "pose": 3,
+      "direction": "S",
+      "frame": 24,
+      "bbox": [
+        56,
+        141,
+        134,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 3,
+      "direction": "SE",
+      "frame": 25,
+      "bbox": [
+        68,
+        142,
+        146,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 3,
+      "direction": "E",
+      "frame": 26,
+      "bbox": [
+        53,
+        143,
+        119,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 3,
+      "direction": "NE",
+      "frame": 27,
+      "bbox": [
+        56,
+        147,
+        132,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 3,
+      "direction": "N",
+      "frame": 28,
+      "bbox": [
+        59,
+        144,
+        134,
+        240
+      ],
+      "method": "drawn"
+    },
+    {
+      "class": "elf",
+      "pose": 3,
+      "direction": "NW",
+      "frame": 29,
+      "bbox": [
+        60,
+        147,
+        136,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "elf",
+      "pose": 3,
+      "direction": "W",
+      "frame": 30,
+      "bbox": [
+        73,
+        143,
+        139,
+        240
+      ],
+      "method": "mirror"
+    },
+    {
+      "class": "elf",
+      "pose": 3,
+      "direction": "SW",
+      "frame": 31,
+      "bbox": [
+        46,
+        142,
+        124,
+        240
+      ],
+      "method": "mirror"
+    }
+  ],
+  "directionalNote": "Humanoids: 5 drawn views + 3 mirrored views; cannon: rigid sprite rotations. Each heading has 4 action keyframes; simulation-clock mesh animation supplies motion between states.",
+  "minions": {
+    "cell": [
+      128,
+      160
+    ],
+    "feet": [
+      64,
+      150
+    ],
+    "rows": [
+      "melee",
+      "ranged",
+      "siege"
+    ],
+    "headings": [
+      "S",
+      "SE",
+      "E",
+      "NE",
+      "N",
+      "NW",
+      "W",
+      "SW"
+    ],
+    "files": [
+      "minions-attack.png",
+      "minions-defense.png"
+    ],
+    "frames": [
+      {
+        "side": 0,
+        "type": "melee",
+        "heading": "S",
+        "frame": 0,
+        "bbox": [
+          13,
+          71,
+          84,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 0,
+        "type": "melee",
+        "heading": "SE",
+        "frame": 1,
+        "bbox": [
+          15,
+          73,
+          85,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 0,
+        "type": "melee",
+        "heading": "E",
+        "frame": 2,
+        "bbox": [
+          52,
+          72,
+          120,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 0,
+        "type": "melee",
+        "heading": "NE",
+        "frame": 3,
+        "bbox": [
+          24,
+          70,
+          102,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 0,
+        "type": "melee",
+        "heading": "N",
+        "frame": 4,
+        "bbox": [
+          35,
+          71,
+          100,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 0,
+        "type": "melee",
+        "heading": "NW",
+        "frame": 5,
+        "bbox": [
+          26,
+          70,
+          104,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 0,
+        "type": "melee",
+        "heading": "W",
+        "frame": 6,
+        "bbox": [
+          8,
+          72,
+          76,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 0,
+        "type": "melee",
+        "heading": "SW",
+        "frame": 7,
+        "bbox": [
+          43,
+          73,
+          113,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 0,
+        "type": "ranged",
+        "heading": "S",
+        "frame": 8,
+        "bbox": [
+          14,
+          51,
+          93,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 0,
+        "type": "ranged",
+        "heading": "SE",
+        "frame": 9,
+        "bbox": [
+          8,
+          52,
+          89,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 0,
+        "type": "ranged",
+        "heading": "E",
+        "frame": 10,
+        "bbox": [
+          23,
+          51,
+          119,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 0,
+        "type": "ranged",
+        "heading": "NE",
+        "frame": 11,
+        "bbox": [
+          29,
+          55,
+          118,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 0,
+        "type": "ranged",
+        "heading": "N",
+        "frame": 12,
+        "bbox": [
+          16,
+          54,
+          85,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 0,
+        "type": "ranged",
+        "heading": "NW",
+        "frame": 13,
+        "bbox": [
+          10,
+          55,
+          99,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 0,
+        "type": "ranged",
+        "heading": "W",
+        "frame": 14,
+        "bbox": [
+          9,
+          51,
+          105,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 0,
+        "type": "ranged",
+        "heading": "SW",
+        "frame": 15,
+        "bbox": [
+          39,
+          52,
+          120,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 0,
+        "type": "siege",
+        "heading": "S",
+        "frame": 16,
+        "bbox": [
+          14,
+          36,
+          116,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 0,
+        "type": "siege",
+        "heading": "SE",
+        "frame": 17,
+        "bbox": [
+          10,
+          38,
+          112,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 0,
+        "type": "siege",
+        "heading": "E",
+        "frame": 18,
+        "bbox": [
+          10,
+          42,
+          120,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 0,
+        "type": "siege",
+        "heading": "NE",
+        "frame": 19,
+        "bbox": [
+          16,
+          44,
+          114,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 0,
+        "type": "siege",
+        "heading": "N",
+        "frame": 20,
+        "bbox": [
+          12,
+          38,
+          113,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 0,
+        "type": "siege",
+        "heading": "NW",
+        "frame": 21,
+        "bbox": [
+          14,
+          44,
+          112,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 0,
+        "type": "siege",
+        "heading": "W",
+        "frame": 22,
+        "bbox": [
+          8,
+          42,
+          118,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 0,
+        "type": "siege",
+        "heading": "SW",
+        "frame": 23,
+        "bbox": [
+          16,
+          38,
+          118,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 1,
+        "type": "melee",
+        "heading": "S",
+        "frame": 0,
+        "bbox": [
+          10,
+          54,
+          82,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 1,
+        "type": "melee",
+        "heading": "SE",
+        "frame": 1,
+        "bbox": [
+          8,
+          53,
+          79,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 1,
+        "type": "melee",
+        "heading": "E",
+        "frame": 2,
+        "bbox": [
+          39,
+          54,
+          86,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 1,
+        "type": "melee",
+        "heading": "NE",
+        "frame": 3,
+        "bbox": [
+          22,
+          52,
+          85,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 1,
+        "type": "melee",
+        "heading": "N",
+        "frame": 4,
+        "bbox": [
+          28,
+          54,
+          91,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 1,
+        "type": "melee",
+        "heading": "NW",
+        "frame": 5,
+        "bbox": [
+          43,
+          52,
+          106,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 1,
+        "type": "melee",
+        "heading": "W",
+        "frame": 6,
+        "bbox": [
+          42,
+          54,
+          89,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 1,
+        "type": "melee",
+        "heading": "SW",
+        "frame": 7,
+        "bbox": [
+          49,
+          53,
+          120,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 1,
+        "type": "ranged",
+        "heading": "S",
+        "frame": 8,
+        "bbox": [
+          12,
+          47,
+          83,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 1,
+        "type": "ranged",
+        "heading": "SE",
+        "frame": 9,
+        "bbox": [
+          11,
+          47,
+          83,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 1,
+        "type": "ranged",
+        "heading": "E",
+        "frame": 10,
+        "bbox": [
+          30,
+          53,
+          120,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 1,
+        "type": "ranged",
+        "heading": "NE",
+        "frame": 11,
+        "bbox": [
+          23,
+          53,
+          112,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 1,
+        "type": "ranged",
+        "heading": "N",
+        "frame": 12,
+        "bbox": [
+          14,
+          54,
+          83,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 1,
+        "type": "ranged",
+        "heading": "NW",
+        "frame": 13,
+        "bbox": [
+          16,
+          53,
+          105,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 1,
+        "type": "ranged",
+        "heading": "W",
+        "frame": 14,
+        "bbox": [
+          8,
+          53,
+          98,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 1,
+        "type": "ranged",
+        "heading": "SW",
+        "frame": 15,
+        "bbox": [
+          45,
+          47,
+          117,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 1,
+        "type": "siege",
+        "heading": "S",
+        "frame": 16,
+        "bbox": [
+          13,
+          37,
+          117,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 1,
+        "type": "siege",
+        "heading": "SE",
+        "frame": 17,
+        "bbox": [
+          11,
+          44,
+          113,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 1,
+        "type": "siege",
+        "heading": "E",
+        "frame": 18,
+        "bbox": [
+          13,
+          51,
+          120,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 1,
+        "type": "siege",
+        "heading": "NE",
+        "frame": 19,
+        "bbox": [
+          11,
+          50,
+          115,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 1,
+        "type": "siege",
+        "heading": "N",
+        "frame": 20,
+        "bbox": [
+          12,
+          40,
+          114,
+          150
+        ],
+        "method": "drawn"
+      },
+      {
+        "side": 1,
+        "type": "siege",
+        "heading": "NW",
+        "frame": 21,
+        "bbox": [
+          13,
+          50,
+          117,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 1,
+        "type": "siege",
+        "heading": "W",
+        "frame": 22,
+        "bbox": [
+          8,
+          51,
+          115,
+          150
+        ],
+        "method": "mirror"
+      },
+      {
+        "side": 1,
+        "type": "siege",
+        "heading": "SW",
+        "frame": 23,
+        "bbox": [
+          15,
+          44,
+          117,
+          150
+        ],
+        "method": "mirror"
+      }
+    ],
+    "note": "Each faction/type uses five drawn upright views and three mirrored views. Simulation-clock mesh motion supplies gait and attack. Faction never determines heading."
+  },
+  "arbalestWalk": {
+    "files": [
+      "arbalest-walk-attack.png",
+      "arbalest-walk-defense.png"
+    ],
+    "cell": [
+      128,
+      160
+    ],
+    "directionRows": [
+      "S",
+      "SE",
+      "E",
+      "NE",
+      "N",
+      "NW",
+      "W",
+      "SW"
+    ],
+    "timeColumns": 8,
+    "cycleHz": 1.1,
+    "method": "Eight drawn gait frames per facing; five drawn facings and three mirrored; simulation clock advances frames only during move; no additional procedural leg deformation."
+  },
+  "infantryWalk": {
+    "files": [
+      "infantry-walk-attack.png",
+      "infantry-walk-defense.png"
+    ],
+    "cell": [
+      128,
+      160
+    ],
+    "directionRows": [
+      "S",
+      "SE",
+      "E",
+      "NE",
+      "N",
+      "NW",
+      "W",
+      "SW"
+    ],
+    "timeColumns": 8,
+    "cycleHz": 0.9,
+    "method": "Eight drawn gait frames per facing; five drawn facings and three mirrored; simulation clock advances frames only during move; no additional procedural leg deformation."
+  }
+}

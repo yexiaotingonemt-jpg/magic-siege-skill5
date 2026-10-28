@@ -1,6 +1,8 @@
 # Dependencies and builds
 node_modules/
 dist/
+release/
+client/runtime/
 # Local accounts, sessions and environment
 data/
 .env

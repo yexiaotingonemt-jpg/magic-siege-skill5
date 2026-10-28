@@ -1,10 +1,10 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {Simulation} from '../src/simulation.js';
-import {contractType} from '../src/config.js';
-import {unitStatuses} from '../src/unit-status.js';
-import {describeAbilities} from '../src/ability-descriptions.js';
-import {applyMovingFlameShield} from '../src/lord-flame-shield.js';
+import {Simulation} from '../shared/simulation.js';
+import {contractType} from '../shared/config.js';
+import {unitStatuses} from '../client/src/unit-status.js';
+import {describeAbilities} from '../client/src/ability-descriptions.js';
+import {applyMovingFlameShield} from '../shared/lord-flame-shield.js';
 
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
 const advance=(s,seconds)=>{const end=s.time+seconds;while(s.time<end-1e-8)s.tick(Math.min(.05,end-s.time));};

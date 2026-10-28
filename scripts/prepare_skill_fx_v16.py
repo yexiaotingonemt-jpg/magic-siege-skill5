@@ -4,7 +4,7 @@ from PIL import Image
 import json, shutil
 root=Path(__file__).resolve().parents[1]
 source=Path(r'C:\Users\onemt\.codex\generated_images\01a13d38-4767-70c1-854e-efc7daeac632\exec-6ccc1b90-9244-4953-a967-1aa39a9bfe0f.png')
-out=root/'public/art/skill-fx-v16';evidence=root/'evidence/skill-fx-v16'
+out=root/'client/public/art/skill-fx-v16';evidence=root/'evidence/skill-fx-v16'
 out.mkdir(parents=True,exist_ok=True);evidence.mkdir(parents=True,exist_ok=True)
 shutil.copy2(source,evidence/'raw-atlas.png')
 raw=Image.open(source).convert('RGBA');assert raw.getchannel('A').getextrema()[0]==0

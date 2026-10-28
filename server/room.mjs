@@ -1,5 +1,5 @@
-import {Simulation} from '../src/simulation.js';
-import {defaults,clone,availableClasses,contractClasses,validateConfig} from '../src/config.js';
+import {Simulation} from '../shared/simulation.js';
+import {defaults,clone,availableClasses,contractClasses,validateConfig} from '../shared/config.js';
 const snapshotReplacer=(key,value)=>['settledReport','contributors','support','attackerMemory','stats','deathDone'].includes(key)?undefined:value;
 const actorSnapshot=u=>u?{id:u.id,side:u.side,classId:u.classId,type:u.type,tower:u.tower,x:u.x,y:u.y,hp:u.hp,maxHp:u.maxHp}:undefined;
 export class Room{

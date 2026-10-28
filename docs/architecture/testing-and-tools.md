@@ -11,12 +11,13 @@ npm run build
 npm run test:browser
 ```
 
-本项目浏览器验收在5194端口启动隔离服务，使用系统临时账号目录；不读取正式账号。`playwright.config.js`保留原Windows Chrome路径，其他系统须按实际安装位置调整。验收结果与截图生成于被忽略的`evidence/`、`test-results/`目录。
+浏览器验收分别启动临时API服务和5194端口的本地客户端，使用系统临时账号目录。截图、报告和浏览器测试输出默认位于系统临时目录的`magic-siege-browser-qa/`，可用`MAGIC_QA_DIR`指定；不写入源码目录。Windows默认使用Chrome，其他浏览器路径用`CHROME_PATH`指定。历史专项脚本仍可能写入旧版evidence目录。
 
 ## 测试分组
 
 | 规则模块 | 测试文件 |
 |---|---|
+| 本地客户端与接口分离 | [tests/local-client.test.js](../../tests/local-client.test.js)、[tests/local-client.spec.js](../../tests/local-client.spec.js) |
 | 账号、会话与多人同步 | [tests/multiplayer.test.js](../../tests/multiplayer.test.js)、[tests/smoke.spec.js](../../tests/smoke.spec.js) |
 | 战场、兵线、阶段与建筑 | [tests/model.test.js](../../tests/model.test.js)、[tests/multiplayer.test.js](../../tests/multiplayer.test.js) |
 | 契约、体力、职业成长与评价 | [tests/model.test.js](../../tests/model.test.js)、[tests/stamina.test.js](../../tests/stamina.test.js)、[tests/multiplayer.test.js](../../tests/multiplayer.test.js)、[tests/smoke.spec.js](../../tests/smoke.spec.js) |
@@ -34,7 +35,7 @@ npm run test:browser
 | 当前专项浏览器验收 | `scripts/verify-*.mjs`，覆盖目标、动作、飘字、火盾、射程、减攻速和冲锋回弹 | 先构建；浏览器路径按本机；逐脚本核对隔离数据目录。 |
 | 多人验收服务 | [playtest-server.mjs](../../scripts/playtest-server.mjs) | 固定5194端口，使用系统临时账号目录。 |
 | 历史审计/跟进 | `scripts/audit-*.mjs`、`scripts/qa-followup-*.mjs` | 部分依赖原始`evidence/`快照；那些本地输入不随仓库提交。旧探针不代表当前参数。 |
-| 历史素材处理 | `scripts/prepare_*.py`、`scripts/render_fx_review_v16.py`等 | 需要原始生成图、本机字体或Python依赖；运行游戏使用已提交的`public/art/`，不需要重跑。 |
+| 历史素材处理 | `scripts/prepare_*.py`、`scripts/render_fx_review_v16.py`等 | 需要原始生成图、本机字体或Python依赖；运行游戏使用已提交的`client/public/art/`，不需要重跑。 |
 
 ## 已知实现边界
 

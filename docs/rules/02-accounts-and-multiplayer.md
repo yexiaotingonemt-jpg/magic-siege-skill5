@@ -30,6 +30,6 @@
 
 模块范围：账号身份、阵营固定、共享战场、断线与重启。
 
-代码入口：[server/accounts.mjs](../../server/accounts.mjs)、[server.mjs](../../server.mjs)、[server/room.mjs](../../server/room.mjs)、[src/network.js](../../src/network.js)。
+代码入口：[server/accounts.mjs](../../server/accounts.mjs)、[server/index.mjs](../../server/index.mjs)、[server/room.mjs](../../server/room.mjs)、[client/src/network.js](../../client/src/network.js)。
 
 验证入口：[tests/multiplayer.test.js](../../tests/multiplayer.test.js)。

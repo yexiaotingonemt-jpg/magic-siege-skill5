@@ -7,7 +7,7 @@ from PIL import Image
 
 ROOT=Path(__file__).resolve().parents[1]
 SOURCE=Path(r'C:\Users\onemt\.codex\generated_images\01a13d38-4767-70c1-854e-efc7daeac632')
-OUT=ROOT/'public/art/magic-v12'
+OUT=ROOT/'client/public/art/magic-v12'
 OUT.mkdir(parents=True,exist_ok=True)
 RAW=ROOT/'evidence/magic-v12/raw'
 RAW.mkdir(parents=True,exist_ok=True)
@@ -76,7 +76,7 @@ heroes.save(OUT/'heroes.png');actions.save(OUT/'hero-actions.png')
 towers=Image.open(RAW/'towers.png').convert('RGBA');tower_atlas=Image.new('RGBA',(1152,512))
 for col in range(3):tower_atlas.alpha_composite(fit(slot(towers,col,0,3,1),384,512,326,466,488),(col*384,0))
 tower_atlas.save(OUT/'towers.png')
-layout_file=ROOT/'src/hero-action-layout.js'
+layout_file=ROOT/'client/src/hero-action-layout.js'
 layout_file.write_text('// Generated from one shared scale and foot anchor per hero row.\nexport const heroActionLayout='+json.dumps(layouts)+';\nexport const heroActionFrames='+json.dumps(frames)+';\n',encoding='utf-8')
 manifest={'sources':files,'rawHeroRowCuts':row_cuts,'rawHeroColumnCuts':column_cuts,'heroLayout':layouts,'heroFrames':frames,'heroIdleFrames':hero_cells,'groundViewportCrop':{'x':128,'width':768},'assets':{p.name:list(Image.open(p).size) for p in OUT.glob('*.png')},'method':'Built-in image_gen.imagegen; content-aware crop, shared scale and foot-anchor normalization','generationPrompts':str(ROOT/'evidence/magic-v12/generation-prompts.json'),'assetDirectory':str(OUT),'gameplayConfigMatchesV11':True,'terrainPlacement':'Alternating reflected road segments eliminate hard joins.'}
 (ROOT/'evidence/magic-v12/assets.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')

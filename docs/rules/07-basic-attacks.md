@@ -30,6 +30,6 @@
 
 模块范围：射程、出手、弹道和减攻速冷却进度。
 
-代码入口：[src/attack-range.js](../../src/attack-range.js)、[src/attack-cooldown.js](../../src/attack-cooldown.js)、[src/simulation.js](../../src/simulation.js)、[src/hero-rules.js](../../src/hero-rules.js)。
+代码入口：[shared/attack-range.js](../../shared/attack-range.js)、[shared/attack-cooldown.js](../../shared/attack-cooldown.js)、[shared/simulation.js](../../shared/simulation.js)、[shared/hero-rules.js](../../shared/hero-rules.js)。
 
 验证入口：[tests/attack-arrival.test.js](../../tests/attack-arrival.test.js)、[tests/frost-cooldown.test.js](../../tests/frost-cooldown.test.js)。

@@ -34,6 +34,6 @@
 
 模块范围：职业兵种映射、契约确认、扣费、继承生命比例。
 
-代码入口：[src/config.js](../../src/config.js)、[src/selection.js](../../src/selection.js)、[src/simulation.js](../../src/simulation.js)、[server/room.mjs](../../server/room.mjs)。
+代码入口：[shared/config.js](../../shared/config.js)、[client/src/selection.js](../../client/src/selection.js)、[shared/simulation.js](../../shared/simulation.js)、[server/room.mjs](../../server/room.mjs)。
 
 验证入口：[tests/model.test.js](../../tests/model.test.js)、[tests/multiplayer.test.js](../../tests/multiplayer.test.js)、[tests/smoke.spec.js](../../tests/smoke.spec.js)。

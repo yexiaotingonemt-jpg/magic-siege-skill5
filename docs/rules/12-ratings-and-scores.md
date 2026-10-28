@@ -53,6 +53,6 @@
 
 模块范围：有效贡献、职业权重、评价积分和战报。
 
-代码入口：[src/simulation.js](../../src/simulation.js)、[src/hero-rules.js](../../src/hero-rules.js)、[server/room.mjs](../../server/room.mjs)、[src/main.js](../../src/main.js)。
+代码入口：[shared/simulation.js](../../shared/simulation.js)、[shared/hero-rules.js](../../shared/hero-rules.js)、[server/room.mjs](../../server/room.mjs)、[client/src/main.js](../../client/src/main.js)。
 
 验证入口：[tests/model.test.js](../../tests/model.test.js)、[tests/multiplayer.test.js](../../tests/multiplayer.test.js)。

@@ -1,8 +1,8 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {Simulation} from '../src/simulation.js';
-import {defaults,contractType} from '../src/config.js';
-import {describeAbilities} from '../src/ability-descriptions.js';
+import {Simulation} from '../shared/simulation.js';
+import {defaults,contractType} from '../shared/config.js';
+import {describeAbilities} from '../client/src/ability-descriptions.js';
 
 const ids=[0,2,3,4,5],near=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
 const advance=(s,n)=>{const end=s.time+n;while(s.time<end-1e-8)s.tick(Math.min(.05,end-s.time));};

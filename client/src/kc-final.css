@@ -1,0 +1,236 @@
+/* Shared visual language. Geometry remains in kc-layout.css (640 × 1136). */
+:root {
+ --kc-bronze:#9c8760; --kc-edge:#465344; --kc-ivory:#ece6d5;
+ --kc-green:#172b25; --kc-surface:url('/art/kc-final/panel.webp');
+ --ui-text:#ece6d5; --ui-muted:#a9b9ac; --ui-gold:#c6ad79;
+ --ui-line:#455548; --ui-accent:#92c7ad; --ui-radius:6px;
+ font-family:"Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif;
+ -webkit-font-smoothing:antialiased;
+}
+body {background:radial-gradient(ellipse at 45% 0,#243b30 0,transparent 65%),#0c1715;color:var(--ui-text)}
+button,select,input {font-family:inherit;text-shadow:none}
+button,select {border:1px solid var(--ui-line);border-radius:var(--ui-radius);background:#20362c;box-shadow:inset 0 1px #ffffff06;color:var(--ui-text)}
+button {transition:background-color .16s,border-color .16s,color .16s;touch-action:manipulation}
+button:hover {background-color:#2b4637;border-color:#92a386;filter:none}
+button:disabled {opacity:.45;cursor:default}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible {outline:2px solid var(--ui-accent);outline-offset:3px}
+input {border-color:var(--ui-line);border-radius:var(--ui-radius);background:#0e201a;color:var(--ui-text)}
+input::placeholder {color:#81958a;opacity:1}
+.ui-icon {display:inline-block;width:24px;height:24px;flex:none;vertical-align:middle;pointer-events:none}
+.layout {gap:24px;padding:24px 16px}
+.game-viewport {border-radius:8px;overflow:hidden;contain:layout paint}
+.game {--skills-height:max(178px,calc(136px / var(--game-scale,1)));grid-template-rows:72px 40px minmax(0,1fr) 128px var(--skills-height) max(32px,calc(22px / var(--game-scale,1))) max(64px,var(--touch-size));border:1px solid var(--kc-bronze);border-radius:8px;box-shadow:0 12px 48px #0006;background:#172b25}
+.game:has(.upgrade:not([hidden])) {--skills-height:max(246px,calc(190px / var(--game-scale,1)))}
+.game header,.game .hero-hud,.game .skills,.game footer,.game .sheet-panel,.game .contract-popover {
+ background-image:linear-gradient(110deg,#172b25e6,#172b25cc),var(--kc-surface);
+ background-size:auto,384px 384px;
+}
+.game header {border-bottom:1px solid #7d7354;padding:8px 20px;gap:12px;box-shadow:inset 0 2px #d5c2950c}
+.game header:before,.game header:after {display:none}
+.game header small {font-size:13px;letter-spacing:2px;color:var(--ui-muted)}
+.game h1 {font:700 31px SimSun,serif;color:var(--ui-text);letter-spacing:3px;text-shadow:none;margin:3px 0}
+.game h1 span {font:14px "Microsoft YaHei",sans-serif;letter-spacing:1px;color:var(--ui-muted)}
+.game .currency {display:grid;grid-template-columns:22px auto;column-gap:5px;align-items:center;min-width:82px;padding:5px 9px;border:1px solid #65705380;border-radius:6px;background:#0c1c16a6;color:var(--ui-gold);box-shadow:none}
+.game .currency .ui-icon {width:21px;height:21px}
+.game .currency b {font-size:24px;line-height:1.1;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ui-text)}
+.game .currency small {grid-column:1/-1;font-size:13px;line-height:1.5;color:var(--ui-muted)}
+.game .battle-info {background:#14271f;border-bottom:1px solid #6e7054;box-shadow:none;padding:3px 14px;gap:10px;font-size:17px}
+.game .battle-info b {font-weight:500;color:#d8dcca}
+.game #wave {color:var(--ui-accent);font-size:16px;font-variant-numeric:tabular-nums}
+.game #locate {display:flex;align-items:center;gap:4px;border-color:#6c765b;background:#23392d;font-size:16px;min-height:32px;padding:2px 8px}
+.game #locate .ui-icon {width:19px;height:19px}
+.game #battle {background:#aea28c}
+.game .map-jumps {left:12px;top:14px;gap:6px}
+.game .map-jumps button {border-color:#86947a88;background:#14271fea;color:#ece6d5;border-radius:5px;font-size:17px;min-height:42px;padding:7px 12px;box-shadow:0 2px 6px #0003}
+.game .map-rail {right:10px;width:25px;font-size:15px;color:#f3ead5}
+.game .map-track {background:#102219ba;border-color:#777d5c;width:7px;border-radius:4px;box-shadow:none}
+.game .map-track i {border-color:#d7d8ad;background:#becdac55;border-radius:3px;box-shadow:none}
+.game .hero-hud {padding:10px 18px;gap:16px;border-top:1px solid #97845d;border-bottom:1px solid #3d5143;box-shadow:inset 0 1px #d1bd8d10}
+.game .portrait {width:74px;height:84px;flex-basis:74px;border:1px solid #a68d60;border-radius:7px;box-shadow:0 0 0 3px #0b1c16;background-color:#23392d}
+.game .hero-copy b {font:600 23px "Microsoft YaHei",sans-serif;color:var(--ui-text);text-shadow:none;margin-bottom:8px}
+.game .hero-copy>span {top:35px;font-size:max(16px,calc(12px / var(--game-scale,1)));line-height:19px}
+.game .bar {height:19px;border:1px solid #64836b;border-radius:4px;background:#091910;box-shadow:none}
+.game .bar i {background:linear-gradient(#96d0a7,#4b9e72);box-shadow:inset 0 1px #eff8da44;transition:width .18s}
+.game .xp {height:4px;border:0;border-radius:2px;background:#0c1c18;margin-top:6px;box-shadow:none}
+.game .xp i {background:#74afb1}
+.game .hero-copy small {font-size:15px;line-height:21px;color:var(--ui-muted)}
+.game .hero-copy .hero-attack {font-size:17px;line-height:22px;color:#d5dfcf}
+.game .hero-copy>.lord-energy {top:auto;font-size:15px}
+.contract-guide {display:none}
+.game.awaiting-contract .hero-hud {flex-direction:column;gap:24px;padding:28px 24px}
+.game.awaiting-contract .hero-copy {flex:0 1 auto}
+.game.awaiting-contract .hero-copy b {font:600 24px "Microsoft YaHei",sans-serif;margin-bottom:10px}
+.game.awaiting-contract .hero-copy>span {font-size:19px;line-height:1.6;color:var(--ui-muted);text-shadow:none}
+.game.awaiting-contract .contract-guide {display:flex;align-items:center;justify-content:center;gap:13px;border-top:1px solid #49604477;padding-top:23px;width:100%;max-width:520px}
+.contract-guide span {display:flex;align-items:center;gap:8px;font-size:17px;color:#bbcab9;white-space:nowrap}
+.contract-guide i {display:grid;place-items:center;width:29px;height:29px;border:1px solid #6a7a5b;border-radius:50%;font:14px Georgia,serif;color:var(--ui-gold)}
+.contract-guide .ui-icon {width:16px;height:16px;color:#607863}
+.game .skills {border-bottom:1px solid var(--kc-edge);padding:12px 16px 6px;gap:12px}
+.game .skill {width:max(78px,var(--touch-size));height:max(78px,var(--touch-size));border:2px solid #9c8054;background:#10241a;box-shadow:0 0 0 3px #0c1c16,0 0 0 4px #536046,0 4px 8px #0005;margin-bottom:4px}
+.game .skill-art {inset:0;width:100%;height:100%;background-repeat:no-repeat;z-index:-1}
+.game .skill.ready {border-color:#b6d6a8;box-shadow:0 0 0 3px #1c3f2d,0 0 0 4px #668365,0 0 14px #92c7ad33}
+.game .skill.ready .skill-art {filter:none}
+.game .skill.unready {filter:saturate(.5) brightness(.75)}
+.game .skill em {bottom:5px;background:#0e1b15ef;border:1px solid #b3a78350;border-radius:4px;color:#fff4d9;font-variant-numeric:tabular-nums}
+.game .skill-info {color:var(--ui-text);border-radius:5px;gap:6px}
+.game .skill-info:hover {background:#5d81551c}
+.game .skill-info b {font-weight:500;font-size:max(20px,calc(12px / var(--game-scale,1)))}
+.game .skill-info span {border-color:#72816c;background:none;color:var(--ui-muted);width:21px;height:21px;flex-basis:21px;font-size:16px}
+.game .skills small {color:var(--ui-gold);font-variant-numeric:tabular-nums}
+.game .upgrade {border-color:#91b398;background:#315c40;color:#f2f0d7;box-shadow:0 2px 6px #0004;margin-top:6px}
+.game #notice {height:100%;line-height:max(30px,calc(20px / var(--game-scale,1)));color:#b8c8b9;border-color:#3b5141;background:#12241b;font-size:max(16px,calc(11px / var(--game-scale,1)));text-shadow:none;padding:0 16px}
+.game #notice.penalty {color:var(--penalty)}
+.game footer {height:100%;border-top:1px solid #89704b;box-shadow:none}
+.game footer button {position:relative;color:#9fb09f;border-right:1px solid #5d69442f;gap:10px;text-shadow:none;border-radius:0}
+.game footer button:last-child {color:#9fb09f}
+.game footer button .ui-icon {width:25px;height:25px}
+.game footer button span {font-family:"Microsoft YaHei",sans-serif;font-size:max(18px,calc(13px / var(--game-scale,1)));color:inherit;margin:0}
+.game footer button[aria-current] {color:#eed8a4;background:#8b9c6524;box-shadow:inset 0 3px #c6ad79}
+.game footer button:hover {background:#9ba87e14;color:#e0d7b4}
+.game .game-sheet {bottom:max(64px,var(--touch-size));background:#07150dda;backdrop-filter:blur(5px);padding:24px 18px}
+.game .sheet-panel,.game .contract-popover {border:1px solid #8d815e;border-radius:8px;box-shadow:0 12px 32px #0007;overflow:hidden}
+.game .sheet-heading {border-bottom:1px solid #526044;background:#20362a;padding:12px 18px;min-height:72px}
+.game .sheet-heading h2 {font:700 27px SimSun,serif;color:var(--ui-text);letter-spacing:2px}
+.game #sheetClose {border:1px solid #74806755;border-radius:6px;color:#cdd5c2}
+.game #sheetClose:hover {background:#3b5139}
+.game .sheet-scroll {padding:18px 22px 24px;scrollbar-width:thin;scrollbar-color:#667653 #14291e}
+.game .hero-sheet-heading {font-size:24px;align-items:center;min-height:48px;padding-bottom:14px;color:var(--ui-text)}
+.game .hero-sheet-heading:has(#abilityClassName:empty) {display:none}
+.game #respec {font-size:max(17px,calc(12px / var(--game-scale,1)));min-height:var(--touch-size);border-color:#6c7b5b;background:#243c2d}
+.game .ability-entry {padding:20px 0;border-color:#53634688}
+.game .ability-entry h3 {font-size:24px;color:#ecdfbb;margin-bottom:10px}
+.game .ability-entry h3 small {font-size:17px;color:var(--ui-muted);font-weight:400}
+.game .ability-entry p {color:#dce2d3!important;font-size:max(21px,calc(14px / var(--game-scale,1)))!important;line-height:1.8!important}
+.game .ability-meta {color:var(--ui-accent)!important;font-size:max(18px,calc(12px / var(--game-scale,1)))!important;margin:10px 0}
+.game .ability-entry details {border:1px solid #52604677;border-radius:5px;margin-top:12px;padding:0 12px;background:#10231a66}
+.game .ability-entry details[open] {padding:0 12px 12px;border-left:2px solid #9c986a}
+.game .ability-entry summary {font-size:max(19px,calc(14px / var(--game-scale,1)));color:#b7cbb9}
+.game .ability-tag {border-radius:4px;font-size:17px;padding:1px 9px}
+.game .ability-value {font-size:17px;color:var(--ui-muted);margin-bottom:10px}
+.game .ability-context {color:var(--ui-muted)!important}
+.game .rank {display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:21px;padding:19px 0;border-color:#52604688}
+.game .rank span {min-width:0;overflow-wrap:anywhere}
+.game .rank b {color:var(--ui-gold);font-variant-numeric:tabular-nums}
+.game #reports {font-size:21px;line-height:1.8;color:#c5d1bf}
+.game #reports article {padding:16px 0;border-color:#52604688}
+.game #reports article b {color:var(--ui-text)}
+.game #reports small {font-size:18px}
+.game .uncontracted-skills {border:1px dashed #627052;padding:30px 24px;border-radius:6px;color:var(--ui-muted);font-size:22px}
+.game .contract-popover {background-color:#172b25;padding:20px}
+.game .contract-popover h3 {font:600 26px "Microsoft YaHei",sans-serif;color:var(--ui-text);padding-right:calc(var(--touch-size) + 8px)}
+.game .contract-popover>small {color:var(--ui-gold)}
+.game .contract-popover p {color:#b9cabb;font-size:18px;line-height:1.7}
+.game .nearby-units button {border-color:#566e53;background:#1a3025;color:#b9cabb;border-radius:5px}
+.game .nearby-units button.selected {border-color:var(--ui-accent);background:#304c37;color:#eef0dc}
+.game .selected-health {border-color:#5c7558;border-radius:3px;background:#0c1c14}
+.game .selected-health i {background:#8abc99}
+.game .primary {background:linear-gradient(#537956,#315138);border-color:#97ac7e;color:#f1ead5}
+.game .popover-actions button {border-radius:5px;min-height:max(50px,var(--touch-size))}
+.game .popover-close {min-width:var(--touch-size);min-height:var(--touch-size);display:grid;place-items:center}
+.game.disconnected .battle-info {border-bottom-color:#cf9b71}
+.game.disconnected #notice {color:#e1b890}
+/* Account entry: one compact, legible form in the same material as the HUD. */
+.auth-stage {min-height:100dvh;padding:32px 16px;background:radial-gradient(ellipse at 50% 0,#314c3c77,transparent 65%),#0c1715}
+.auth-card {width:min(100%,520px);padding:30px 36px;border:1px solid #827752;border-radius:10px;background-image:linear-gradient(120deg,#1c3228ed,#15291ff5),var(--kc-surface);box-shadow:0 24px 70px #0005,inset 0 1px #d4bf8d13}
+.auth-crest {display:grid;place-items:center;width:56px;height:56px;margin:0 auto 14px;border:1px solid #a793624f;border-radius:50%;color:var(--ui-gold);background:#293c291f}
+.auth-crest .ui-icon {width:32px;height:32px}
+.auth-eyebrow {font-size:12px;letter-spacing:2px;color:var(--ui-gold);margin:0 0 10px}
+.auth-card h1 {font:700 30px SimSun,serif;color:var(--ui-text);text-shadow:none;letter-spacing:4px;margin:10px 0 12px}
+.auth-intro {font-size:13px;color:#b5c4b7;line-height:1.8;margin:0}
+.auth-tabs {gap:4px;padding:4px;margin:24px 0 20px;border:1px solid #4b5d4399;border-radius:7px;background:#0c1e17}
+.auth-tabs button {font-size:14px;min-height:42px;padding:8px 0;border:0;border-radius:4px;color:#a4b6a9;background:transparent;box-shadow:none}
+.auth-tabs button.active {color:#f2e5c2;background:#304735;box-shadow:inset 0 0 0 1px #76846055;border:0}
+.auth-card form>label {font-size:13px;font-weight:500;margin:16px 0;color:#cdd6c5}
+.auth-card input:not([type=radio]) {height:48px;padding:12px 14px;background:#0d2019;border:1px solid #506244;border-radius:6px;font-size:14px;margin-top:8px}
+.auth-card fieldset {margin-top:20px}
+.auth-card legend {font-size:12px;color:#aebfae;margin-bottom:12px;line-height:1.7}
+.side-cards {gap:12px}
+.side-card {border:1px solid #506449;border-radius:6px;padding:16px 14px;min-height:122px;background:#192f25;gap:9px;transition:border-color .15s,background-color .15s}
+.side-card.defense {background:#262832;border-color:#58596a}
+.side-card:has(input:checked) {border-color:#9ac5a1;box-shadow:inset 0 0 0 1px #9ac5a155;background:#2b4533}
+.side-card.defense:has(input:checked) {background:#383246;border-color:#b2a1d2;box-shadow:inset 0 0 0 1px #b2a1d255}
+.side-card:has(input:focus-visible) {outline:2px solid var(--ui-accent);outline-offset:3px}
+.side-card input {width:16px;height:16px;accent-color:#93c7a3;right:12px;top:14px}
+.side-card b {font:600 18px "Microsoft YaHei",sans-serif;color:var(--ui-text);padding-right:20px}
+.side-card span {font-size:11px;color:#b7c6b7;line-height:1.65}
+.side-card small {font-size:12px;color:#9fb29f}
+.auth-error {font-size:12px;line-height:1.6;min-height:18px;margin:14px 0 8px;color:#f2aa97}
+.auth-primary {border:1px solid #9ab186;border-radius:6px;background:linear-gradient(#6b9c76,#4a7757);box-shadow:inset 0 1px #edfad633,0 4px 12px #0002;color:#f6f2dd;font:600 15px "Microsoft YaHei",sans-serif;min-height:48px;padding:12px}
+.auth-primary:hover {background:linear-gradient(#7aad85,#548563);border-color:#bdcda3}
+.auth-note {font-size:11px;color:#91a793;line-height:1.9;margin:18px 0 0}
+.auth-card:has(#sideChoices[hidden]) {padding-bottom:30px}
+/* Utility rail uses larger spacing and quiet surfaces, keeping the game primary. */
+.dev-tools {font-size:13px;line-height:1.7}
+.dev-tools .panel {border:1px solid #4e6045;border-radius:7px;background-image:linear-gradient(120deg,#1c3228ef,#15291ff5),var(--kc-surface);padding:18px;margin:0 0 14px;box-shadow:0 4px 16px #0002}
+.dev-tools h2 {font:600 17px "Microsoft YaHei",sans-serif;color:#e2dcc3;letter-spacing:.5px;margin:0 0 16px}
+.dev-tools .account-heading h2 {font-size:20px;margin:0;overflow-wrap:anywhere;min-width:0}
+.account-heading {align-items:center;gap:12px;margin-bottom:14px}
+.account-heading button {flex-shrink:0;font-size:12px;min-height:34px;padding:5px 10px;background:#10261d}
+.dev-tools p {font-size:12px;color:#a9bca9;line-height:1.9;margin:10px 0}
+.dev-tools button,.dev-tools select,.dev-tools input {font-size:13px;min-height:38px;border-radius:5px}
+.dev-tools .account-panel>p {font-size:12px}
+#connection {display:flex;align-items:center;gap:7px;color:#acd1b3;margin:8px 0 14px}
+#connection:before {content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.online-player {padding:8px 0 0;line-height:1.7;gap:8px;font-size:12px;border-top:1px solid #4e654144}
+.online-player>span {min-width:0;overflow-wrap:anywhere}
+.online-player i.online {background:#92c7ad}
+.online-player small {white-space:nowrap;font-size:11px;color:#b6c6b2}
+.self-stamina-tools {padding:0 0 16px;margin-bottom:12px;border-color:#4e654166}
+.self-stamina-tools>div {gap:4px}
+.self-stamina-tools button {min-height:40px;font-size:13px;padding:8px 14px;background:#365a3d;border-color:#7f9d71}
+.self-stamina-tools strong {color:#e3dfbf;font-variant-numeric:tabular-nums}
+.dev-tools .auto-setting {display:flex;align-items:center;justify-content:space-between;width:100%;font-size:13px;color:#d0ddc8;min-height:44px;padding:6px 0;flex-direction:row-reverse}
+.dev-tools .auto-setting input {appearance:none;position:relative;min-height:0;width:36px;height:22px;padding:0;margin:0;flex:none;background:#0e2119;border:1px solid #62745a;border-radius:20px;cursor:pointer}
+.dev-tools .auto-setting input:before {content:"";display:block;position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#93a68d;transition:transform .16s}
+.dev-tools .auto-setting input:checked {background:#507854;border-color:#99b488}
+.dev-tools .auto-setting input:checked:before {transform:translateX(14px);background:#edf3de}
+#hostControls {border-top:1px solid #4e654166;margin-top:8px;padding-top:4px}
+.bot-settings {gap:10px 12px}
+.bot-settings label {font-size:12px;color:#b9cab3}
+.bot-settings input {margin-top:6px;padding:8px 10px;font-variant-numeric:tabular-nums}
+.bot-settings button {background:#2b4b34;border-color:#708965;padding:7px;color:#e5e5cf}
+.dev-tools .quick {grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:6px 0 0}
+.dev-tools .quick button,.dev-tools .quick select {font-size:12px;min-height:38px;padding:7px 6px}
+.dev-tools #reset {grid-column:1/-1;color:#cdb995;border-color:#7b71504d;background:#362f211f}
+#toolNotice {font-size:12px;color:#c5d4b4;margin-bottom:0}
+#toolNotice:empty {display:none}
+.dev-tools .panel>summary {display:flex;align-items:center;justify-content:space-between;list-style:none;min-height:26px;font:500 15px "Microsoft YaHei",sans-serif;color:#d4d9c1;letter-spacing:.5px}
+.dev-tools .panel>summary::-webkit-details-marker {display:none}
+.dev-tools .panel>summary:after {content:"";width:7px;height:7px;border-right:1.5px solid #9aa88c;border-bottom:1.5px solid #9aa88c;transform:rotate(45deg);margin:0 4px 5px 12px;flex:none}
+.dev-tools .panel[open]>summary {padding-bottom:16px;border-bottom:1px solid #4e654166;margin-bottom:12px}
+.dev-tools .panel[open]>summary:after {transform:rotate(225deg);margin-top:6px}
+.dev-tools #stats,.dev-tools #cameraPosition,.dev-tools #feed {font-size:12px;line-height:1.9;color:#a4b99f}
+.dev-tools #feed {border-top:1px solid #4e654155;margin-top:12px;padding-top:8px}
+.dev-tools #feed p {margin:5px 0;font-size:11px;color:#8ea58d}
+.dev-tools .param {gap:12px;padding:8px 0;border-color:#4e654144}
+.dev-tools .param input {width:95px}
+@media(max-width:1039px) {
+ .layout {gap:20px;padding:0}
+ .game-viewport,.game {border-radius:0}
+ .dev-tools {padding:0 16px 24px}
+}
+@media(max-width:550px) {
+ .auth-stage {padding:20px 16px}
+ .auth-card {padding:24px 22px}
+ .auth-card h1 {font-size:27px}
+ .auth-crest {width:48px;height:48px;margin-bottom:12px}
+ .auth-intro {font-size:12px}
+ .auth-tabs {margin-top:22px;margin-bottom:18px}
+ .auth-note {font-size:11px}
+ .side-card {padding:14px 10px;min-height:122px}
+ .side-card b {font-size:16px}
+ .side-card span {font-size:11px}
+ .side-card small {font-size:11px}
+ .side-cards {gap:10px}
+ .dev-tools .panel {padding:16px}
+}
+@media(max-width:359px) {
+ .auth-stage {padding:12px 8px}
+ .auth-card {padding:20px 14px}
+ .side-card b {font-size:14px}
+ .side-card input {right:7px}
+ .side-card small {font-size:10px}
+}
+@media(prefers-reduced-motion:reduce) {
+ *,*:before,*:after {scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}

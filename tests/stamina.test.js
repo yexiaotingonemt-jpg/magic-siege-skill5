@@ -1,12 +1,13 @@
+import {GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
 import {test,before,after} from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
-import {createGameServer} from '../server.mjs';
+import {createGameServer} from '../server/index.mjs';
 let game,base,host,guest;
 async function request(route,body,cookie){
- const response=await fetch(base+route,{method:body?'POST':'GET',headers:{...(body?{'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},body:body?JSON.stringify(body):undefined});
+ const response=await fetch(base+route,{method:body?'POST':'GET',headers:{'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),...(body?{'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},body:body?JSON.stringify(body):undefined});
  return {status:response.status,data:await response.json(),cookie:response.headers.get('set-cookie')?.split(';')[0]};
 }
 const add=(account,args={},id=crypto.randomUUID())=>request('/api/action',{type:'stamina',args,id},account.cookie);

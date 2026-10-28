@@ -39,6 +39,6 @@
 
 模块范围：地图距离、防线、阶段胜负与重建。
 
-代码入口：[src/battlefield.js](../../src/battlefield.js)、[server/room.mjs](../../server/room.mjs)、[src/simulation.js](../../src/simulation.js)。
+代码入口：[client/src/battlefield.js](../../client/src/battlefield.js)、[server/room.mjs](../../server/room.mjs)、[shared/simulation.js](../../shared/simulation.js)。
 
 验证入口：[tests/multiplayer.test.js](../../tests/multiplayer.test.js)、[tests/model.test.js](../../tests/model.test.js)。

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Simulation} from '../src/simulation.js';
+import {Simulation} from '../shared/simulation.js';
 
 function arena({from={x:0,y:-36},to={x:0,y:-48},targetHp=1e7}={}){
  const s=new Simulation();s.units=[];s.player.retired=true;s.waveAt=s.populationAt=1e9;

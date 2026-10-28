@@ -28,6 +28,6 @@
 
 模块范围：20格选择、职业友方权限、敌友独立锁。
 
-代码入口：[src/manual-target.js](../../src/manual-target.js)、[src/selection.js](../../src/selection.js)、[server/room.mjs](../../server/room.mjs)。
+代码入口：[shared/manual-target.js](../../shared/manual-target.js)、[client/src/selection.js](../../client/src/selection.js)、[server/room.mjs](../../server/room.mjs)。
 
 验证入口：[tests/manual-target.test.js](../../tests/manual-target.test.js)、[tests/ally-target.test.js](../../tests/ally-target.test.js)。

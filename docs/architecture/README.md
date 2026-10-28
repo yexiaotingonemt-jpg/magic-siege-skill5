@@ -19,7 +19,7 @@
 ```mermaid
 flowchart TD
   Browser[main / selection / skill-hud] --> Network[network HTTP / SSE]
-  Network --> HTTP[server.mjs / Accounts]
+  Network --> HTTP[server/index.mjs / Accounts]
   HTTP --> Room[Room 单房间 / 固定步长]
   Room --> Sim[Simulation 出兵 / 契约 / 普攻 / 成长]
   Sim --> Nav[navigation / manual-target / attack-range]

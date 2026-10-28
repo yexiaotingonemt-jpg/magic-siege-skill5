@@ -16,11 +16,11 @@ selection.js → contract命令 → Simulation.contract → 职业独立progress
 
 | 文件 | 当前加载状态 |
 |---|---|
-| [src/simulation.js](../../src/simulation.js) | 启动入口可达 |
-| [src/selection.js](../../src/selection.js) | 启动入口可达 |
-| [src/skill-progression.js](../../src/skill-progression.js) | 启动入口可达 |
+| [shared/simulation.js](../../shared/simulation.js) | 启动入口可达 |
+| [client/src/selection.js](../../client/src/selection.js) | 启动入口可达 |
+| [shared/skill-progression.js](../../shared/skill-progression.js) | 启动入口可达 |
 
-共享入口：[src/config.js](../../src/config.js)、[src/hero-rules.js](../../src/hero-rules.js)、[src/main.js](../../src/main.js)、[server/room.mjs](../../server/room.mjs)。
+共享入口：[shared/config.js](../../shared/config.js)、[shared/hero-rules.js](../../shared/hero-rules.js)、[client/src/main.js](../../client/src/main.js)、[server/room.mjs](../../server/room.mjs)。
 
 ## 对应规则
 

@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import {performance} from 'node:perf_hooks';
 import assert from 'node:assert/strict';
-import {Simulation} from '../src/simulation.js';
-import {defaults,clone,contractType,validateConfig} from '../src/config.js';
+import {Simulation} from '../shared/simulation.js';
+import {defaults,clone,contractType,validateConfig} from '../shared/config.js';
 import {Room} from '../server/room.mjs';
-import {describeAbilities} from '../src/ability-descriptions.js';
+import {describeAbilities} from '../client/src/ability-descriptions.js';
 const dir='evidence/audit-20261026'; fs.mkdirSync(dir,{recursive:true});
 const results=[];
 function check(name,fn){try{const evidence=fn();results.push({name,status:'PASS',evidence});}catch(e){results.push({name,status:'FAIL',error:e.message,stack:e.stack});}}

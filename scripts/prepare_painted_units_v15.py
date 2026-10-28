@@ -8,7 +8,7 @@ from PIL import Image, ImageFilter
 
 ROOT=Path(__file__).resolve().parents[1]
 SOURCE=Path(r'C:\Users\onemt\.codex\generated_images\01a13d38-4767-70c1-854e-efc7daeac632')
-OUT=ROOT/'public/art/magic-v15'
+OUT=ROOT/'client/public/art/magic-v15'
 RAW=ROOT/'evidence/magic-v15/raw'
 OUT.mkdir(parents=True,exist_ok=True);RAW.mkdir(parents=True,exist_ok=True)
 files={'minions':'exec-62b86525-96e6-4004-99de-f491ca92db26.png','heroes':'exec-4520f990-bed1-4f26-b8b0-40e548b5f863.png'}
@@ -104,7 +104,7 @@ for row in range(6):
     index=hero_cells[row];heroes.alpha_composite(cell,(index%4*384,index//4*512))
     if row==0:heroes.alpha_composite(cell,(0,0))
 heroes.save(OUT/'heroes.png');actions.save(OUT/'hero-actions.png')
-(ROOT/'src/hero-action-layout.js').write_text('// Generated: shared scale per hero, all pose feet anchored at y=224.\nexport const heroActionLayout='+json.dumps(layouts)+';\nexport const heroActionFrames='+json.dumps(frames)+';\n',encoding='utf-8')
+(ROOT/'client/src/hero-action-layout.js').write_text('// Generated: shared scale per hero, all pose feet anchored at y=224.\nexport const heroActionLayout='+json.dumps(layouts)+';\nexport const heroActionFrames='+json.dumps(frames)+';\n',encoding='utf-8')
 manifest={'sources':files,'method':'Built-in image_gen thick-painted redraw; alpha separation, crop, proportional scale, shared animation anchors only','assetDirectory':str(OUT),'assets':{p.name:list(Image.open(p).size) for p in OUT.glob('*.png')},'rawMinionBoxes':minion_boxes,'rawHeroRowCuts':row_cuts,'rawHeroColumnCuts':column_cuts,'heroLayout':layouts,'heroAnchors':anchors,'heroIdleFrames':hero_cells,'unchanged':['ground v13','towers v13','unit HP/attack/cadence','experience','bot population'],'towerRules':'All surviving tower rows can target, fire, receive damage; reset after all twelve destroyed.','generationPrompts':str(ROOT/'evidence/magic-v15/generation-prompts.json')}
 (ROOT/'evidence/magic-v15/assets.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')
 print(json.dumps({'assets':manifest['assets'],'minions':minion_boxes,'rows':row_cuts,'heroLayout':layouts}))

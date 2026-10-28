@@ -3,12 +3,12 @@ import os from 'node:os';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import {chromium} from '@playwright/test';
-import {createGameServer} from '../server.mjs';
-import {contractType,classes} from '../src/config.js';
+import {createBrowserGame as createGameServer} from './browser-game-server.mjs';
+import {contractType,classes} from '../shared/config.js';
 
 const dir='evidence/unit-motion';fs.mkdirSync(dir,{recursive:true});
 const result={at:new Date().toISOString(),checks:[],errors:[],samples:{}},actors=[];
-const game=createGameServer({dataDir:fs.mkdtempSync(path.join(os.tmpdir(),'kc5-unit-motion-ui-'))}),room=game.room,sim=room.sim;
+const game=await createGameServer({dataDir:fs.mkdtempSync(path.join(os.tmpdir(),'kc5-unit-motion-ui-'))}),room=game.room,sim=room.sim;
 room.paused=false;room.step=()=>{};
 await new Promise(r=>game.server.listen(0,'127.0.0.1',r));const base=`http://127.0.0.1:${game.server.address().port}`;
 const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});

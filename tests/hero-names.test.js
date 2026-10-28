@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {heroNameData,shortHeroName,HERO_NAME_COLORS} from '../src/hero-names.js';
+import {heroNameData,shortHeroName,HERO_NAME_COLORS} from '../client/src/hero-names.js';
 const sim={player:{side:0,heroId:10},players:[{id:2,name:'艾尔莎'},{id:5,name:'暗影王庭守护者'},{id:8,name:'普通契约者'}]};
 test('契约英雄按实际所属账号显示名字，玩家ID无需连续',()=>{
  const data=heroNameData(sim,{id:11,hero:true,hp:100,side:1,playerId:5});assert.equal(data.name,'暗影王庭守护者');assert.equal(data.fullName,'暗影王庭守护者');assert.equal(data.team,'enemy');assert.equal(data.color,HERO_NAME_COLORS.enemy);
