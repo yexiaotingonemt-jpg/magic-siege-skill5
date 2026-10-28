@@ -62,7 +62,7 @@ export class Simulation extends HeroRules {
  upgradePlan(i,p=this.player){return planSkillUpgrade(p,i);}
  upgrade(i,p=this.player){return this.fail(p,'基础技能自动解锁，升级通过词条强化');}
  respec(p=this.player){return this.fail(p,'词条构筑保留至本场结束，不能重分技能点');}
- chooseTrait(id,level,p=this.player){const ok=chooseTrait(this,p,id,level);const h=this.hero(p);if(ok&&h?.classId===2)h.range=this.config.heroes[2].range+(p.progress[2].traits.C18||0)*.08;return ok;}
+ chooseTrait(id,level,p=this.player,classId=p.classId){const h=this.hero(p);if(!Number.isInteger(classId)||!availableClasses(p.side,this.config).includes(classId)||h&&h.classId!==classId)return this.fail(p,'只能选择本阵营待契约职业或当前英雄的强化');const ok=chooseTrait(this,p,id,level,classId);if(ok&&h?.classId===2)h.range=this.config.heroes[2].range+(p.progress[2].traits.C18||0)*.08;return ok;}
  enemies(u,range=Infinity){return [...this.units,...this.activeTowers()].filter(t=>t.hp>0&&t.side!==u.side&&dist(u,t)<=range);}
  allies(u,range=Infinity,towers=false){return [...this.units,...(towers?this.activeTowers():[])].filter(t=>t.hp>0&&t.side===u.side&&dist(u,t)<=range);}
  stat(u,k,n){if(u?.hero){u.stats[k]=(u.stats[k]||0)+n;if(u.settledReport){const r=u.settledReport,old=r.reward;for(const part of r.parts){part.value=u.stats[part.key]||0;part.normalized=Math.min(100,part.value/this.config.rating[u.classId][part.key]*100);}r.rating=r.parts.reduce((n,p)=>n+p.normalized*p.weight/100,0);r.reward=this.config.world.scoreCap*r.rating/100;this.players[u.playerId].score+=r.reward-old;}}}

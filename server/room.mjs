@@ -17,7 +17,7 @@ export class Room{
    if(type==='contract'){const u=s.get(args.unitId);if(!u||!contractClasses(u,s.config).includes(args.classId)||u.side!==account.side)throw Error('此单位不可契约为所选职业');if(!s.setClass(args.classId,p))throw Error('已有存活英雄，或职业不属于本阵营');ok=s.contract(p,u.id);}
    else if(type==='cast')ok=s.cast(args.skill,p);
    else if(type==='target')ok=s.setManualTarget(args.unitId,p);
-   else if(type==='chooseTrait')ok=s.chooseTrait(args.traitId,args.level,p);
+   else if(type==='chooseTrait')ok=s.chooseTrait(args.traitId,args.level,p,args.classId??p.classId);
    else if(type==='upgrade')throw Error('技能自动解锁，请通过升级选择词条');
    else if(type==='respec')ok=s.respec(p);
    else if(type==='auto'){p.auto=!!args.enabled;ok=true;}

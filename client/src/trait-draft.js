@@ -28,6 +28,7 @@ export function createTraitDraft(getSim, send) {
       const ok = await send("chooseTrait", {
         traitId: id,
         level: choice.level,
+        classId: sim.player.classId,
       });
       if (ok) {
         key = "";

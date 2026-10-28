@@ -539,3 +539,91 @@ test("贯穿火球按整条路径判断孤立，不能对远端群体套用单�
   advance(s, 1);
   near(hp - enemy.hp, 1200);
 });
+
+test("亡灵护卫出生满血且上限为领主5%，护卫击杀不递归召唤", () => {
+  const { s, p, h, enemy, troop } = arena(3);
+  p.progress[3].traits.L16 = 1;
+  s.cast(3, p);
+  advance(s, 0.4);
+  const victim = troop(0, 1, -2, 1);
+  s.damage(h, victim, 100);
+  const guard = s.units.find((u) => u.summoned);
+  assert.ok(guard);
+  near(guard.hp, guard.maxHp);
+  near(guard.maxHp, h.maxHp * 0.05);
+  enemy.hp = 1;
+  s.damage(guard, enemy, 100);
+  assert.equal(s.units.filter((u) => u.summoned).length, 1);
+  assert.ok(h.stats.heroKills >= 1);
+});
+test("精灵治疗反击只保留未满阈值进度，不将超过单次三次的触发缓存到下次", () => {
+  const { s, p, h, enemy, friends } = arena(5);
+  p.progress[5].traits.E17 = 1;
+  const value = {
+    classId: 5,
+    skill: 3,
+    attack: 100,
+    healProcs: 0,
+    limit: null,
+    spent: 0,
+    parts: {},
+    ranks: { E17: 1 },
+  };
+  const hp = enemy.hp;
+  s.heal(friends[0], 15000, h, value);
+  near(hp - enemy.hp, 300);
+  near(h.healCounter, 1000);
+  const next = { ...value, healProcs: 0, parts: {} };
+  const after = enemy.hp;
+  s.heal(friends[1], 1, h, next);
+  near(enemy.hp, after);
+  near(h.healCounter, 1001);
+});
+test("没有合法敌人时不无限储存治疗反击的完整触发", () => {
+  const { s, p, h, enemy, friends } = arena(5);
+  p.progress[5].traits.E17 = 1;
+  enemy.x = 100;
+  const value = {
+    classId: 5,
+    skill: 0,
+    attack: 100,
+    healProcs: 0,
+    limit: null,
+    spent: 0,
+    parts: {},
+    ranks: { E17: 1 },
+  };
+  s.heal(friends[0], 10000, h, value);
+  near(h.healCounter, 0);
+  enemy.x = 0;
+  const hp = enemy.hp;
+  s.heal(friends[1], 100, h, { ...value, healProcs: 0, parts: {} });
+  near(enemy.hp, hp);
+});
+
+test("无英雄时可处理预览职业的待选，存活时不能替其他职业选择", () => {
+  const { s, p, h } = arena(0, 1);
+  s.addXp(p, 3, 5);
+  const choice = p.progress[5].choices[0],
+    id = choice.options[0];
+  assert.equal(s.chooseTrait(id, choice.level, p, 5), false);
+  s.damage(null, h, 1e9);
+  assert.ok(s.chooseTrait(id, choice.level, p, 5));
+  assert.equal(p.classId, 0);
+  assert.equal(p.progress[5].traits[id], 1);
+  assert.deepEqual(p.progress[0].traits, {});
+  assert.equal(s.chooseTrait(id, choice.level, p, 3), false);
+});
+test("额外焚魂标记的死亡爆炸继承30%倍率，即60%攻击", () => {
+  const { s, p, h, enemy, troop } = arena(4),
+    secondary = troop(1, 0, 5),
+    victim = troop(1, 0, 7.5);
+  p.progress[4].traits.F11 = 1;
+  p.progress[4].traits.F12 = 1;
+  s.setManualTarget(enemy.id, p);
+  s.cast(2, p);
+  advance(s, 0.4);
+  const hp = victim.hp;
+  s.damage(h, secondary, 1e9);
+  near(hp - victim.hp, h.attack * 0.6);
+});

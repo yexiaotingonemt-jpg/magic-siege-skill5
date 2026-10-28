@@ -62,7 +62,10 @@ const groups = {
         "本技能及其灼烧击杀时爆炸，3格内最多3人各受200%攻击，不递归。",
       ],
       ["火球增幅", "技能伤害加成每次+15%。"],
-      ["孤立烈焰", "大火球释放时仅有1个落点目标（贯穿看整条路径），伤害加成每次+30%。"],
+      [
+        "孤立烈焰",
+        "大火球释放时仅有1个落点目标（贯穿看整条路径），伤害加成每次+30%。",
+      ],
       ["熟练炙热", "大火球所需热量每次-1层。"],
       [
         "贯穿烈日",
@@ -70,8 +73,14 @@ const groups = {
       ],
       ["烙印增幅", "伤害加成每次+15%。"],
       ["焚魂易伤", "标记附加5%易伤/次，5秒。"],
-      ["连锁烙印", "额外标记1人/次，额外目标受主伤30%，死亡仍提供2热量。"],
-      ["焚魂爆破", "标记目标死亡产生200%攻击爆炸，3格最多3人，不附加新标记。"],
+      [
+        "连锁烙印",
+        "额外标记1人/次，额外目标的伤害及死亡爆炸按主目标30%，死亡仍提供2热量。",
+      ],
+      [
+        "焚魂爆破",
+        "主标记死亡爆炸200%攻击，额外标记60%；3格最多3人，不附加新标记。",
+      ],
       ["天火增幅", "伤害加成每次+15%。"],
       [
         "分流天火",
@@ -107,7 +116,7 @@ const groups = {
       ],
       [
         "灵息反击",
-        "每累计2000%攻击的直接有效治疗，反击100%攻击/次，每次技能最多3次。",
+        "每累计2000%攻击的直接有效治疗，反击100%攻击/次，每次技能最多3次；仅未满阈值进度跨次保留，超限或无敌人时不缓存完整触发。",
       ],
       ["绝境生机", "每缺失10%生命，攻击+2点/次，最多9档，随回血变化。"],
     ],
@@ -180,22 +189,22 @@ export function prepareChoice(sim, p, classId = p.classId) {
   choice.options = pool.slice(0, 3);
   return choice;
 }
-export function chooseTrait(sim, p, id, level) {
-  const progress = p.progress[p.classId],
-    choice = prepareChoice(sim, p),
+export function chooseTrait(sim, p, id, level, classId = p.classId) {
+  const progress = p.progress[classId],
+    choice = prepareChoice(sim, p, classId),
     t = TRAIT_BY_ID[id];
   if (
     !choice ||
     choice.level !== level ||
     !choice.options.includes(id) ||
     !t ||
-    t.classId !== p.classId ||
+    t.classId !== classId ||
     (progress.traits[id] || 0) >= t.max
   )
     return sim.fail(p, "词条选择已变化，请选择当前候选");
   progress.traits[id] = (progress.traits[id] || 0) + 1;
   progress.choices.shift();
-  prepareChoice(sim, p);
+  prepareChoice(sim, p, classId);
   sim.log(p.name + " 获得「" + t.name + "」");
   return true;
 }

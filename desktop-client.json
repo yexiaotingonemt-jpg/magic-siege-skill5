@@ -5,10 +5,10 @@
   "protocolVersion": 2,
   "files": {
     "client/prebuilt/assets/index-DVbRNJra.css": "d02b12173369b0546e24e8e568a3c6c479073bbf9ab810683f443917f9e70643",
-    "client/prebuilt/assets/index-DyPT3kE7.js": "d94ccf940e12672c95c12e826c3d60273bb9b241d1063bf68d6e238f21e08d99",
+    "client/prebuilt/assets/index-KPp8jYrp.js": "906942d83dd47715844ffd99d4494a31dd2d838b552b36d8e2c44f29eb75ff3e",
     "client/prebuilt/assets/phaser-DFK5Ua9d.js": "f9025c1a29bc3ae097dd886ce07717b297466da1ce8f032c8294252ce6cf5cdb",
     "client/prebuilt/client-version.json": "91e537c0122b399fa4488db58be83f13de850e5e3daaf60940aaccc700ad3056",
-    "client/prebuilt/index.html": "0658715704163cfcc37c03773025d748d2ce916c57b2189eb9705ab5feab45fe",
+    "client/prebuilt/index.html": "fee5e10e0578c9c1a08a54d4a324b31d78acd5b929e8dcbd6f38955c6562c89a",
     "client/desktop/config.mjs": "af3a2c715c7ea9d1af042edd7f12e4dc04cbcca1579801499c5ed02b4b4a27ef",
     "client/desktop/install-update.ps1": "993b8e4ae209523136505d07cb4596c06cf7043ce11a38848e9a9b2dadd9b4d7",
     "client/desktop/login-credentials.mjs": "1a6d02bf5b94b7db6b357fb68a43056f7b3b7b3159dec864a83446540d5fd358",

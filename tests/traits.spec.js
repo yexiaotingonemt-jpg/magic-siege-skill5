@@ -162,3 +162,22 @@ test("桌面和窄屏选卡截图：无错误、卡片未超出游戏区域", as
   expect(bounds.every((b) => b.left >= 0 && b.right <= 390)).toBe(true);
   expect(errors).toEqual([]);
 });
+
+test("契约前切换预览职业，可以选择该职业保留的强化", async ({ page }) => {
+  const s = game.room.sim;
+  s.addXp(p, 3, 5);
+  game.room.sequence++;
+  game.room.broadcast();
+  const u = s.units.find((u) => u.side === 0 && u.type === "ranged");
+  await page.evaluate((id) => window.__game.selection.select(id), u.id);
+  await page.locator('[data-contract-role="5"]').click();
+  await expect(page.locator("#traitDraft")).toBeVisible();
+  const id = await page
+    .locator("[data-trait]")
+    .first()
+    .getAttribute("data-trait");
+  await page.locator("[data-trait]").first().click();
+  await expect(page.locator("#traitDraft")).toBeHidden();
+  expect(p.classId).toBe(0);
+  expect(p.progress[5].traits[id]).toBe(1);
+});

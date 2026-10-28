@@ -107,6 +107,8 @@ export const traitEffects = {
         proc: true,
       });
     }
+    // Keep fractional progress only; capped or unavailable procs cannot be banked.
+    if (h.healCounter >= threshold) h.healCounter %= threshold;
   },
   onKill(h, t, summonedKill = false) {
     const p = this.players[h.playerId];
@@ -141,7 +143,7 @@ export const traitEffects = {
         ownerId: h.id,
         expiresAt: this.time + 10,
         hp: h.maxHp * 0.05,
-        maxHp: h.maxHp * 0.08,
+        maxHp: h.maxHp * 0.05,
         attack: this.attackPower(h) * 0.5,
         interval: 1.5,
         range: 1.5,
