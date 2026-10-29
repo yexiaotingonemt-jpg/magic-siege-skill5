@@ -7,9 +7,10 @@ import {symlinkSync,renameSync,appendFileSync,unlinkSync} from 'node:fs';
 import {verify} from 'node:crypto';
 import {verifyRelease,hashFile,newerVersion} from './release-manifest.mjs';
 import {UPDATE_PUBLIC_KEY,validateRelease,canonicalRelease} from '../shared/update-protocol.js';
+import {GitHubSourceVerifier} from './source-provenance.mjs';
 
-const fixedFiles=['server/index.mjs','server/hot-update.mjs','server/release-manifest.mjs','shared/update-protocol.js'];
-export function createHotUpdater({getRuntime,setRuntime,quiesce,resume,runtimeRoot,appRoot,updateDir,requireClientPackage=true,runtimeOptions={}}){
+const fixedFiles=['server/index.mjs','server/hot-update.mjs','server/release-manifest.mjs','server/source-provenance.mjs','shared/update-protocol.js'];
+export function createHotUpdater({getRuntime,setRuntime,quiesce,resume,runtimeRoot,appRoot,updateDir,requireClientPackage=true,runtimeOptions={},sourceVerifier=new GitHubSourceVerifier({cacheDir:path.join(appRoot||runtimeRoot,'shared/runtime/github-source.git')})}){
  let activeRoot=path.resolve(runtimeRoot),busy=false,reloads=0;
  const status=async()=>({releaseDir:activeRoot,manifest:await verifyRelease(activeRoot),...getRuntime().metadata,matchId:getRuntime().room.matchId,reloads});
  const update=async({releaseDir,baseDigest,battle='preserve'}={})=>{
@@ -40,14 +41,15 @@ export function createHotUpdater({getRuntime,setRuntime,quiesce,resume,runtimeRo
     const file=path.join(folder,'package.zip');
     if((await stat(file)).size!==release.size||await hashFile(file)!==release.sha256)throw Error('配套客户端包未就绪');
    }
-   // An immutable directory gives every release a fresh ESM dependency graph.
+   const sourceProof=await sourceVerifier.verifyManifest(next,current);
+   // Verify GitHub provenance before importing any candidate code.
    const module=await import(pathToFileURL(path.join(target,'server/game-runtime.mjs')).href);
    if(typeof module.prepareGameRuntime!=='function')throw Error('目标版本不支持热更');
    paused=true;await quiesce();prior=getRuntime();oldRoot=activeRoot;
    prepared=module.prepareGameRuntime(runtimeOptions,prior,{restartBattle:battle==='restart'});
    for(const key of ['serverVersion','clientVersion','gameVersion','protocolVersion'])if(prepared.runtime.metadata[key]!==next.version[key])throw Error('运行代码与发布清单版本不一致');
    if(appRoot&&(await realpath(path.join(appRoot,'current')))!==await realpath(activeRoot))throw Error('激活前 current 已被其他部署修改');
-   const record={at:new Date().toISOString(),previous:activeRoot,releaseDir:target,baseDigest,digest:next.digest,battle,previousMatchId:prior.room.matchId,matchId:prepared.runtime.room.matchId,...prepared.runtime.metadata};
+   const record={at:new Date().toISOString(),previous:activeRoot,releaseDir:target,baseDigest,digest:next.digest,source:sourceProof,battle,previousMatchId:prior.room.matchId,matchId:prepared.runtime.room.matchId,...prepared.runtime.metadata};
    // No await after commit: no timer or command can observe a half-applied runtime.
    prepared.commit();setRuntime(prepared.runtime);
    JSON.stringify(prepared.runtime.room.snapshot());

@@ -5,14 +5,17 @@ import {constants} from 'node:fs';
 import {readFile,writeFile,mkdir,copyFile,realpath,rmdir} from 'node:fs/promises';
 import {pathToFileURL} from 'node:url';
 import {validateManifest,verifyRelease,regularFile,sha256} from '../server/release-manifest.mjs';
+import {GitHubSourceVerifier} from '../server/source-provenance.mjs';
 
 const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 export function changes(base,next){
  return {changed:Object.keys(next.files).filter(name=>base.files[name]!==next.files[name]).sort(),removed:Object.keys(base.files).filter(name=>!(name in next.files)).sort()};
 }
-export async function packDelta({baseFile,source,output}){
+export async function packDelta({baseFile,source,output,sourceVerifier}){
  const input=JSON.parse(await readFile(baseFile,'utf8')),base=validateManifest(input.manifest||input),next=await verifyRelease(source);
  if(base.digest===next.digest)throw Error('没有需要发布的差异');
+ const verifier=sourceVerifier||new GitHubSourceVerifier({cacheDir:path.join(path.dirname(path.resolve(output)),'.github-source.git'),ref:next.version.source.ref});
+ await verifier.verifyManifest(next,base);
  const delta={format:1,baseDigest:base.digest,manifest:next,...changes(base,next)};
  await mkdir(output,{recursive:false});
  for(const name of delta.changed){

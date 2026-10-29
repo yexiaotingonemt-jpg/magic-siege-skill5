@@ -14,10 +14,11 @@ export function releasePath(name){
 }
 export function manifestDigest(value){return sha256(JSON.stringify({format:value.format,files:Object.fromEntries(Object.entries(value.files).sort(([a],[b])=>a.localeCompare(b,'en'))),version:value.version}));}
 export function validateManifest(value){
- if(value?.format!==1||!value.files||typeof value.files!=='object'||Array.isArray(value.files)||Object.keys(value.files).length>2000)throw Error('发布清单格式错误');
+ if(value?.format!==2||!value.files||typeof value.files!=='object'||Array.isArray(value.files)||Object.keys(value.files).length>2000)throw Error('发布清单需为带 GitHub 来源的格式 2；旧版本须先常规升级');
  for(const [name,digest]of Object.entries(value.files)){releasePath(name);if(!/^[a-f0-9]{64}$/.test(digest))throw Error('文件哈希格式错误');}
  for(const name of ['server/index.mjs','server/game-runtime.mjs','server/hot-update.mjs','shared/protocol.js','package.json','VERSION.json'])if(!value.files[name])throw Error('发布清单缺少：'+name);
  if(!value.version||value.version.serverVersion!==value.version.clientVersion||!/^\d+\.\d+\.\d+$/.test(value.version.serverVersion)||!value.version.gameVersion||!Number.isInteger(value.version.protocolVersion))throw Error('发布版本不一致');
+ if(!value.version.source||!/^https:\/\/github\.com\/[^/]+\/[^/]+\.git$/.test(value.version.source.repository)||!/^refs\/heads\/.+/.test(value.version.source.ref)||!/^[a-f0-9]{40}$/.test(value.version.source.commit))throw Error('发布清单缺少 GitHub 提交来源');
  if(value.digest!==manifestDigest(value))throw Error('发布清单摘要错误');
  return value;
 }
@@ -39,7 +40,7 @@ export async function buildManifest(directory){
  for(const directory of ['server','shared','deploy'])await walk(directory);
  for(const name of ['package.json','VERSION.json','README.md'])await walk(name);
  const version=JSON.parse(await readFile(path.join(root,'VERSION.json'),'utf8'));
- const value={format:1,files,version};value.digest=manifestDigest(value);return validateManifest(value);
+ const value={format:2,files,version};value.digest=manifestDigest(value);return validateManifest(value);
 }
 export async function verifyRelease(directory){
  const expected=validateManifest(JSON.parse(await readFile(path.join(directory,'server-manifest.json'),'utf8')));
