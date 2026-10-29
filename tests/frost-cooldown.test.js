@@ -15,7 +15,7 @@ function advance(s,n){for(let k=0;k<Math.round(n/.05);k++)s.tick(.05);}
 function impact(s,h,target,ratio=.4){const skill={...s.config.heroes[2].skills[1],attackSpeedDown:ratio},value=createSkillValue(h,skill,1,s.time);value.skill=1;s.impactSkill({source:h,targetId:target.id,tx:target.x,ty:target.y,payload:{...skill,value,design5:true,skill:1}});return value;}
 
 test('三战车同帧冰霜弹只按最高40%减速调整一次剩余普攻冷却',()=>{
- const {s,casters,target}=arena();for(const {p,h}of casters){assert.ok(s.setManualTarget(target.id,p));assert.ok(s.cast(1,p));}advance(s,.7);
+ const {s,casters,target}=arena();for(const {p,h}of casters){p.progress[2].traits.C06=3;assert.ok(s.setManualTarget(target.id,p));assert.ok(s.cast(1,p));}advance(s,.7);
  const hits=s.animations.filter(e=>e.kind==='damage'&&e.targetId===target.id&&e.skill===1);assert.equal(hits.length,3);const first=hits[0].start;near(target.cd,first+(3-first)/.6);near(s.attackRate(target),.6);assert.equal(s.activeDebuffs(target,'attackSpeedDown').length,3);
 });
 test('同一战车刷新同强度冰霜只延长状态时限，不再次拉长剩余冷却',()=>{
@@ -32,7 +32,7 @@ test('负面免疫不延长冷却，已经就绪的攻击冷却不被重置',()=
  const two=arena(1);two.s.time=1;two.target.cd=-2;impact(two.s,two.casters[0].h,two.target);near(two.target.cd,-2);assert.equal(two.s.activeDebuffs(two.target,'attackSpeedDown').length,1);
 });
 test('修正冷却叠加不改变冰霜伤害、40%减攻速、4秒持续及后续最高减速攻速',()=>{
- const {s,casters:[a,b,c],target}=arena();s.time=1;const hp=target.hp,A=a.h.attack;impact(s,a.h,target);impact(s,b.h,target);impact(s,c.h,target);near(hp-target.hp,A*12*3);for(const debuff of s.activeDebuffs(target,'attackSpeedDown')){near(debuff.ratio,.4);near(debuff.until,5);}near(s.attackRate(target),.6);s.time=5.001;near(s.attackRate(target),1);
+ const {s,casters:[a,b,c],target}=arena();s.time=1;const hp=target.hp,A=a.h.attack;impact(s,a.h,target);impact(s,b.h,target);impact(s,c.h,target);near(hp-target.hp,A*8*3);for(const debuff of s.activeDebuffs(target,'attackSpeedDown')){near(debuff.ratio,.4);near(debuff.until,5);}near(s.attackRate(target),.6);s.time=5.001;near(s.attackRate(target),1);
 });
 test('减攻速到期还原当前剩余冷却，并在正确时点实际普通攻击',()=>{
  const {s,casters:[{h}],target}=arena(1);target.y=1;s.debuff(target,h,'attackSpeedDown',.4,4);near(target.cd,5);advance(s,4.55);assert.ok(target.cd>=4.6-1e-7&&target.cd<=4.65+1e-7,'expiry is resolved within one 20Hz simulation step');assert.equal(target.lastAttackAt,undefined);advance(s,.1);assert.ok(target.lastAttackAt>=4.6-1e-7&&target.lastAttackAt<=4.65+1e-7);assert.ok(h.hp<h.maxHp);

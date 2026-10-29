@@ -66,7 +66,7 @@ for(const [id,skills]of [[0,[0,2]],[2,[0,1,2,3]],[3,[0,1]],[4,[0,1,2,3]],[5,[0]]
 test('超距提示覆盖已解锁技能的冷却和体力状态，未加点仍显示锁定',()=>{
  const {s,p,soldier}=arena(),chosen=soldier(0,15);assert.ok(s.setManualTarget(chosen.id,p));
  p.cd[0]=99;p.stamina=0;assert.equal(s.castPlan(0,p).code,'range');
- p.builds[p.classId][0]=0;assert.equal(s.castPlan(0,p).code,'locked');
+ p.builds[p.classId][0]=0;assert.equal(s.castPlan(0,p).code,'range');p.level=4;assert.equal(s.castPlan(3,p).code,'locked');
 });
 for(const id of [0,2,3,4,5])test(`职业${id}可定向敌方技能使用手动目标并保持原技能范围`,()=>{
  const {s,p,h,make,soldier}=arena(id),closer=make(id===3?0:3,0,1).h,chosen=soldier(0,Math.min(4,h.aggro));assert.ok(s.setManualTarget(chosen.id,p));
@@ -90,7 +90,7 @@ test('已开始的前摇锁定原目标，切换手动目标只改变后续施�
  const {s,p,h,soldier}=arena(4),a=soldier(0,2),b=soldier(1,3);assert.ok(s.setManualTarget(a.id,p));assert.ok(s.cast(0,p));assert.ok(s.setManualTarget(b.id,p));const ahp=a.hp,bhp=b.hp;advance(s,.4);assert.ok(a.hp<ahp);near(b.hp,bhp);p.cd[0]=0;assert.equal(s.castPlan(0,p).t.id,b.id);
 });
 test('飞行中炮弹锁定原目标，后续手动选择不会转向',()=>{
- const {s,p,h,soldier}=arena(2),a=soldier(0,10),b=soldier(2,8);assert.ok(s.setManualTarget(a.id,p));assert.ok(s.cast(0,p));advance(s,.4);assert.equal(s.projectiles.length,1);assert.ok(s.setManualTarget(b.id,p));assert.equal(s.projectiles[0].targetId,a.id);const ahp=a.hp,bhp=b.hp;advance(s,1.5);assert.ok(a.hp<ahp);near(b.hp,bhp);
+ const {s,p,h,soldier}=arena(2),a=soldier(0,10),b=soldier(2,8);assert.ok(s.setManualTarget(a.id,p));assert.ok(s.cast(0,p));advance(s,.4);assert.equal(s.projectiles.length,1);assert.ok(s.setManualTarget(b.id,p));assert.equal(s.projectiles[0].targetId,a.id);const ahp=a.hp,bhp=b.hp;advance(s,2.5);assert.ok(a.hp<ahp);near(b.hp,bhp);
 });
 test('连轰固定场地保留施法时的手动目标名额，后续切换不改变场地或锁定对象',()=>{
  const {s,p,h,soldier}=arena(2),crowd=Array.from({length:6},()=>soldier(0,5)),chosen=soldier(0,5),next=soldier(8,0);assert.ok(s.setManualTarget(chosen.id,p));assert.ok(s.cast(2,p));advance(s,.4);assert.ok(s.setManualTarget(next.id,p));const hp=chosen.hp,nextHp=next.hp;advance(s,1);assert.ok(chosen.hp<hp);near(next.hp,nextHp);const field=s.fields.find(f=>f.kind==='runeBarrage');near(field.x,0);near(field.y,5);const hits=s.animations.filter(e=>e.kind==='damage'&&e.skill===2);assert.equal(hits.length,s.config.heroes[2].skills[2].targets);assert.ok(hits.some(e=>e.targetId===chosen.id));assert.ok(crowd.some(u=>u.hp===u.maxHp));

@@ -14,6 +14,7 @@ import (
  "os/exec"
  "path/filepath"
  "runtime"
+ "strconv"
  "strings"
  "syscall"
  "unsafe"
@@ -24,6 +25,7 @@ type Runtime struct { Version string `json:"version"`; SHA256 string `json:"sha2
 type Manifest struct {
  Version string `json:"version"`; ServerVersion string `json:"serverVersion"`; GameVersion string `json:"gameVersion"`
  ProtocolVersion int `json:"protocolVersion"`; Files map[string]string `json:"files"`; Runtime Runtime `json:"runtime"`
+ Standalone bool `json:"-"`
 }
 var user32=syscall.NewLazyDLL("user32.dll")
 var kernel32=syscall.NewLazyDLL("kernel32.dll")
@@ -62,9 +64,27 @@ func closeOlderWindow(version string)error{
  })
  user32.NewProc("EnumWindows").Call(callback,0);if oldPID!=0{return waitForPID(oldPID)};return nil
 }
+func higherVersion(candidate,baseline string)bool{
+ parse:=func(value string)([3]uint64,bool){var result [3]uint64;parts:=strings.Split(value,".");if len(parts)!=3{return result,false};for i,part:=range parts{if part==""{return result,false};for _,ch:=range part{if ch<'0'||ch>'9'{return result,false}};n,e:=strconv.ParseUint(part,10,32);if e!=nil{return result,false};result[i]=n};return result,true}
+ next,ok:=parse(candidate);if !ok{return false};old,ok:=parse(baseline);if !ok{return false}
+ for i:=range next{if next[i]!=old[i]{return next[i]>old[i]}};return false
+}
+func newerStandalone(cache string,m Manifest)(Manifest,bool){
+ var installed struct{ClientVersion string `json:"clientVersion"`;ServerVersion string `json:"serverVersion"`;GameVersion string `json:"gameVersion"`;ProtocolVersion int `json:"protocolVersion"`}
+ b,e:=os.ReadFile(filepath.Join(cache,"VERSION.json"));if e!=nil||json.Unmarshal(b,&installed)!=nil{return m,false}
+ if !higherVersion(installed.ClientVersion,m.Version)||installed.ServerVersion!=installed.ClientVersion||installed.GameVersion==""||installed.ProtocolVersion<1{return m,false}
+ for _,name:=range []string{"魔法王座.exe","resources/app.asar"}{info,e:=os.Stat(filepath.Join(cache,filepath.FromSlash(name)));if e!=nil||!info.Mode().IsRegular()||info.Size()==0{return m,false}}
+ m.Version=installed.ClientVersion;m.ServerVersion=installed.ServerVersion;m.GameVersion=installed.GameVersion;m.ProtocolVersion=installed.ProtocolVersion;m.Standalone=true;return m,true
+}
+func launchEnvironment(root,profile string,standalone bool)[]string{
+ env:=[]string{};for _,item:=range os.Environ(){key,_,_:=strings.Cut(item,"=");if !strings.EqualFold(key,"MAGIC_REPOSITORY_ROOT")&&!strings.EqualFold(key,"MAGIC_DESKTOP_USER_DATA"){env=append(env,item)}}
+ if !standalone{env=append(env,"MAGIC_REPOSITORY_ROOT="+root)};return append(env,"MAGIC_DESKTOP_USER_DATA="+profile)
+}
 func prepare(root,cache,profile string)(Manifest,error){
  var m Manifest;b,e:=os.ReadFile(filepath.Join(root,"desktop-client.json"));if e!=nil{return m,errors.New("找不到桌面发布清单，请在完整仓库中运行启动器")};if e=json.Unmarshal(b,&m);e!=nil{return m,e}
  if m.Version==""||m.ServerVersion!=m.Version||m.GameVersion==""||len(m.Files)==0||len(m.Runtime.Parts)==0{return m,errors.New("桌面发布清单不完整")}
+ // A signed full update may be newer than this checkout. Keep it intact until git pull catches up.
+ if installed,ok:=newerStandalone(cache,m);ok{return installed,nil}
  for f,h:=range m.Files{if e=check(root,f,h);e!=nil{return m,e}}
  // A fixed local cache keeps the SDK out of Git history after its first release.
  marker:=filepath.Join(cache,"repository-runtime.json");var prior struct{Version string `json:"version"`}
@@ -95,13 +115,13 @@ func prepare(root,cache,profile string)(Manifest,error){
 }
 func run()error{
  exe,_:=os.Executable();rootArg:=flag.String("root",filepath.Dir(exe),"");cacheArg:=flag.String("cache","","");profileArg:=flag.String("profile","","");only:=flag.Bool("prepare-only",false,"");waitPID:=flag.Uint("wait-pid",0,"");flag.Parse()
- root,e:=filepath.Abs(*rootArg);if e!=nil{return e};cache:=*cacheArg;if cache==""{cache=filepath.Join(os.Getenv("LOCALAPPDATA"),"MagicSiege","repository-client")};cache,e=filepath.Abs(cache);if e!=nil{return e}
+ root,e:=filepath.Abs(*rootArg);if e!=nil{return e};cache:=*cacheArg;if cache==""{cache=filepath.Join(root,".desktop-cache","repository-client")};cache,e=filepath.Abs(cache);if e!=nil{return e}
  if filepath.Base(cache)!="repository-client"{return errors.New("本机缓存目录无效")}
  profile:=*profileArg;if profile==""{profile=os.Getenv("MAGIC_DESKTOP_USER_DATA")};if profile==""{profile=filepath.Join(os.Getenv("APPDATA"),"Magic Siege")}
  if *waitPID>0{if e=waitForPID(uintptr(*waitPID));e!=nil{return e}}
- m,e:=prepare(root,cache,profile);if e!=nil{return e};if *only{return json.NewEncoder(os.Stdout).Encode(map[string]any{"version":m.Version,"cache":cache,"prepared":true})}
+ m,e:=prepare(root,cache,profile);if e!=nil{return e};if *only{return json.NewEncoder(os.Stdout).Encode(map[string]any{"version":m.Version,"cache":cache,"prepared":true,"standalone":m.Standalone})}
  if os.Getenv("MAGIC_DESKTOP_TEST")!="1"{if e=closeOlderWindow(m.Version);e!=nil{return e}}
- cmd:=exec.Command(filepath.Join(cache,"魔法王座.exe"));cmd.Dir=root;cmd.Env=append(os.Environ(),"MAGIC_REPOSITORY_ROOT="+root,"MAGIC_DESKTOP_USER_DATA="+profile);cmd.SysProcAttr=&syscall.SysProcAttr{HideWindow:true};return cmd.Start()
+ cmd:=exec.Command(filepath.Join(cache,"魔法王座.exe"));cmd.Dir=root;cmd.Env=launchEnvironment(root,profile,m.Standalone);cmd.SysProcAttr=&syscall.SysProcAttr{HideWindow:true};return cmd.Start()
 }
 func main(){
  runtime.LockOSThread();err:=run();if err!=nil{fmt.Fprintln(os.Stderr,err);if !strings.Contains(strings.Join(os.Args," "),"--prepare-only"){user32.NewProc("MessageBoxW").Call(0,uintptr(unsafe.Pointer(wide(err.Error()))),uintptr(unsafe.Pointer(wide("魔法王座启动失败"))),0x10)};os.Exit(1)}

@@ -22,17 +22,17 @@ test('领主冲锋范围18格包含边界，范围外不选取',()=>{
  enemy.y=-18.001;assert.equal(s.castPlan(1,p).ok,false);enemy.y=-17;assert.equal(s.castPlan(1,p).t.id,enemy.id);
  assert.match(describeAbilities(s).skills[1].summary,/18格/);
 });
-test('火焰盾减伤35%，离开后独立灼烧6秒，结算6次40%攻击伤害',()=>{
+test('火焰盾减伤35%，离开后独立灼烧4秒，结算4次40%攻击伤害',()=>{
  const {s,p,h,make}=arena(),enemy=make(0,3),hp=enemy.hp;assert.ok(s.cast(2,p));advance(s,.4);
  const selfHp=h.hp;s.damage(enemy,h,100);near(selfHp-h.hp,65);assert.equal(burns(s,enemy).length,1);
  const burn=burns(s,enemy)[0],lastUntil=burn.until;enemy.y=15;near(enemy.hp,hp);
  advance(s,1);near(hp-enemy.hp,h.attack*.4);assert.equal(unitStatuses(s,enemy)[0].name,'灼烧');
- advance(s,5.1);near(hp-enemy.hp,h.attack*2.4);assert.ok(s.time>lastUntil);assert.equal(burns(s,enemy).length,0);
+ advance(s,5.1);near(hp-enemy.hp,h.attack*1.6);assert.ok(s.time>lastUntil);assert.equal(burns(s,enemy).length,0);
 });
 test('连续接触只刷新期限、不叠层、不推迟每秒跳伤',()=>{
  const {s,p,h,make}=arena(),enemy=make(0,3),hp=enemy.hp;s.cast(2,p);advance(s,.4);const tick=burns(s,enemy)[0].tick;
  advance(s,.8);near(burns(s,enemy)[0].tick,tick);advance(s,.2);near(hp-enemy.hp,h.attack*.4);assert.equal(burns(s,enemy).length,1);
- advance(s,1);near(hp-enemy.hp,h.attack*.8);assert.ok(burns(s,enemy)[0].until>s.time+5.9);
+ advance(s,1);near(hp-enemy.hp,h.attack*.8);assert.ok(burns(s,enemy)[0].until>s.time+3.9);
 });
 test('先火焰盾再18格突进：沿途与终点挂灼烧，离开后继续跳伤',()=>{
  const {s,p,h,make}=arena(),first=make(0,-4),middle=make(0,-9),far=make(0,-17),hp=first.hp;
@@ -58,9 +58,9 @@ test('领主阵亡停止附加，已挂灼烧与图标仍保留并结算',()=>{
  assert.ok(enemy.hp<hp);assert.equal(burns(s,fresh).length,0);assert.equal(unitStatuses(s,enemy)[0].name,'灼烧');
  assert.equal(s.fields.some(f=>f.kind==='lordBurn'),false);
 });
-test('多目标灼烧和减伤共用单次2000%攻击预算，耗尽后不再伤害或显示图标',()=>{
+test('多目标灼烧超过旧2000%额度仍完整结算，到期后移除',()=>{
  const {s,p,h,make}=arena(),targets=Array.from({length:5},(_,i)=>make(i-2,2));s.cast(2,p);advance(s,.4);
  const value=s.skillValues.at(-1);s.damage(targets[0],h,100);advance(s,12);
- near(value.limit,h.attack*20);near(value.spent,value.limit);assert.ok(value.parts['伤害']>0);assert.ok(Object.keys(value.parts).some(k=>k.includes('减伤')));
+ assert.equal(value.limit,null);assert.ok(value.spent>h.attack*20);assert.ok(value.parts['伤害']>0);
  const hp=targets.map(u=>u.hp);advance(s,2);assert.deepEqual(targets.map(u=>u.hp),hp);for(const u of targets)assert.equal(unitStatuses(s,u).some(x=>x.id==='dot'),false);
 });

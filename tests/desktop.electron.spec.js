@@ -79,16 +79,16 @@ test('记住上次成功登录的账号密码：退出、失败、重启、过�
  }finally{await client?.app.close();await server.close();}
 });
 
-test('默认直连正式服，无服务器选择入口，忽略旧版保存地址',async()=>{
- const profile=await mkdtemp(path.join(tmpdir(),'magic-default-profile-'));let client;
+test('默认服务配置无选择入口，隔离服务覆盖忽略旧版保存地址',async()=>{
+ const server=await service(),profile=await mkdtemp(path.join(tmpdir(),'magic-default-profile-'));let client;
  try{
   await writeFile(path.join(profile,'client-config.json'),JSON.stringify({serverUrl:'http://127.0.0.1:1'}));
-  client=await launch(null,profile);await expect(client.page.locator('#authForm')).toBeVisible();
+  client=await launch(server.base,profile);await expect(client.page.locator('#authForm')).toBeVisible();
   const info=await (await client.page.request.get(new URL(client.page.url()).origin+'/client-info')).json();
-  expect(info.serverUrl).toBe('http://124.222.216.66:5183');
+  expect(info.serverUrl).toBe(server.base);
   expect(await client.app.evaluate(({Menu})=>Menu.getApplicationMenu().getMenuItemById('server-settings')===null)).toBe(true);
   await expect(client.page.locator('#serverUrl')).toHaveCount(0);expect(client.errors).toEqual([]);
- }finally{await client?.app.close();}
+ }finally{await client?.app.close();await server.close();}
 });
 
 test('桌面版本不符：直接显示强制更新页',async()=>{

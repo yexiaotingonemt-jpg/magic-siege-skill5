@@ -31,7 +31,10 @@ catch(error){if(error.code!=='ENOENT')throw error;
   await writeFile(runtimeManifest,JSON.stringify(sdk,null,2)+'\n');
  }finally{if(path.dirname(scratch)!==tmpdir()||!path.basename(scratch).startsWith('magic-repository-runtime-'))throw Error('临时目录无效');await rm(scratch,{recursive:true,force:true});}
 }
-execFileSync('go',['build','-trimpath','-ldflags=-s -w -H windowsgui','-o',path.join(root,'魔法王座.exe'),path.join(root,'client/bootstrap/main_windows.go')],{cwd:root,stdio:'inherit',windowsHide:true});
+if(process.argv.includes('--reuse-launcher')){
+ const prior=JSON.parse(await readFile(path.join(root,'desktop-client.json'),'utf8'));
+ if(await hash(path.join(root,'魔法王座.exe'))!==prior.files['魔法王座.exe'])throw Error('既有启动器校验失败，不能复用');
+}else execFileSync('go',['build','-trimpath','-ldflags=-s -w -H windowsgui','-o',path.join(root,'魔法王座.exe'),path.join(root,'client/bootstrap/main_windows.go')],{cwd:root,stdio:'inherit',windowsHide:true});
 const prebuilt=path.join(root,'client/prebuilt');
 if(path.resolve(prebuilt)!==path.resolve(root,'client/prebuilt'))throw Error('预构建目录无效');
 await rm(prebuilt,{recursive:true,force:true});await mkdir(prebuilt);

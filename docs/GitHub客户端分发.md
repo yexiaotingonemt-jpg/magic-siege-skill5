@@ -12,7 +12,7 @@
 ## 本机位置与更新
 
 - 固定运行环境首次以约 158 MB 的四个分片随 Git 拉取，后续版本复用；仅在升级 Electron 运行环境时新增对应运行环境版本。
-- 展开的运行环境默认位于 `%LOCALAPPDATA%/MagicSiege/repository-client`，仓库保持可直接拉取。
+- 展开的运行环境默认位于 仓库内被 Git 忽略的 `.desktop-cache/repository-client`，缓存不进入提交，仓库仍可直接拉取。
 - 页面使用已提交的 `client/prebuilt`，美术使用已有 `client/public/art`，不重复打进一份完整桌面包。
 - 账号和登录资料仍放在独立的用户目录；`%APPDATA%/Magic Siege/repository-source.json` 只记录本机仓库位置，不存账号密码。
 - 客户端发现正式服版本变化后，若本机仓库已经拉到完整的对应版本，校验后直接启动该本地版本；没有完整本机版本时仍使用原有服务器签名下载更新。

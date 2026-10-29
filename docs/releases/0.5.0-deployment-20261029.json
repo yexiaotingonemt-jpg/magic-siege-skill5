@@ -1,0 +1,43 @@
+{
+  "publishedVersion": "0.5.0",
+  "gameVersion": "0.5.0",
+  "protocolVersion": 2,
+  "revision": "skill5-traits-elites-ranking-20261029",
+  "sourceCommit": "b8a3b109d5db79c11a7bb2f6dce611820d19fede",
+  "cutoverAtBeijing": "2026-10-29 09:40:41",
+  "verifiedAtBeijing": "2026-10-29 09:52:13",
+  "pr": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5/pull/1",
+  "currentDirectory": "/home/colleague/apps/magic-siege-skill5/releases/unified-v0.5.0-20261029T013640Z",
+  "rollbackDirectory": "/home/colleague/apps/magic-siege-skill5/releases/unified-v0.4.6-1793174847959858500",
+  "backupDirectory": "/home/colleague/apps/magic-siege-skill5/shared/backups/pre-v0.5.0-20261029T014040Z",
+  "clientZip": "magic-siege-desktop-v0.5.0-win-x64-20261029012821935.zip",
+  "clientSha256": "644f5597f349c5dcfdd4171db5d4a13854f69710b7fd29ae83c1e799a9e9f2e1",
+  "serverZip": "magic-siege-server-v0.5.0-20261029012821446.zip",
+  "serverSha256": "885812d505ac09e9faded07c4eafd59cbf9170a46a2d3f04af3202fe5e8b6a82",
+  "tests": {
+    "unit": 451,
+    "browser": 24,
+    "packagedDesktop": 5,
+    "pairedPackageChecks": 9,
+    "realOldReleaseMigration": true,
+    "profilePreserved": true,
+    "savedCredentialsPreserved": true,
+    "productionDesktopAndRepository": true,
+    "productionLoginLogoutReload": true,
+    "productionBothSidesContract": true,
+    "productionSseSameMatch": true,
+    "productionConfig": true,
+    "signedManifest": true,
+    "publicHeadAndRange": true
+  },
+  "accounts": {
+    "originalCount": 12,
+    "finalCount": 12,
+    "temporaryQaRemoved": 2,
+    "originalAccountsPreserved": true,
+    "sha256Before": "2b3f9bd545df805463696abca481c1c468a8e409fccf80c22e9f95ed69563a57",
+    "sha256After": "2b3f9bd545df805463696abca481c1c468a8e409fccf80c22e9f95ed69563a57"
+  },
+  "cronRestored": true,
+  "cleanFreshMatch": true
+}

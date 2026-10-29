@@ -13,6 +13,8 @@ import {packDelta,stageDelta,applyDelta,controlRequest} from '../deploy/server-u
 import {SERVER_VERSION,GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
 import {git,GITHUB_REPOSITORY,GitHubSourceVerifier,prepareCommittedPackage} from '../server/source-provenance.mjs';
 
+const NEXT_VERSION=SERVER_VERSION.split('.').map((v,i)=>i===2?Number(v)+1:v).join('.');
+const FUTURE_VERSION=SERVER_VERSION.split('.').map((v,i)=>i===2?Number(v)+2:v).join('.');
 const source=fileURLToPath(new URL('../',import.meta.url));
 async function writeManifest(directory){
  const remote=path.join(path.dirname(path.dirname(directory)),'github.git');
@@ -35,10 +37,10 @@ async function fixture(t){
  const version={serverVersion:SERVER_VERSION,clientVersion:SERVER_VERSION,gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION};
  await writeFile(path.join(first,'VERSION.json'),JSON.stringify(version));const baseline=await writeManifest(first);
  await cp(first,next,{recursive:true});
- await change(next,'shared/protocol.js',value=>value.replaceAll("'"+SERVER_VERSION+"'","'0.4.7'"));
- await change(next,'shared/hero-rules.js',value=>value.replace('export class HeroRules{',"export class HeroRules{\n hotUpdateProbe(){return 'new-runtime';}"));
+ await change(next,'shared/protocol.js',value=>value.replaceAll("'"+SERVER_VERSION+"'","'"+NEXT_VERSION+"'"));
+ await change(next,'shared/hero-rules.js',value=>value.replace(/export class HeroRules\s*\{/,"export class HeroRules{\n hotUpdateProbe(){return 'new-runtime';}"));
  await change(next,'shared/config.js',value=>value+'\ndefaults.world.initialStamina=4321;\n');
- await writeFile(path.join(next,'VERSION.json'),JSON.stringify({...version,serverVersion:'0.4.7',clientVersion:'0.4.7'}));
+ await writeFile(path.join(next,'VERSION.json'),JSON.stringify({...version,serverVersion:NEXT_VERSION,clientVersion:NEXT_VERSION}));
  const manifest=await writeManifest(next);
  const game=createGameServer({dataDir:path.join(root,'data'),runtimeRoot:first,requireClientPackage:false,sourceVerifier});
  await new Promise(resolve=>game.server.listen(0,'127.0.0.1',resolve));
@@ -66,7 +68,7 @@ test('保留战局热更加载整个新依赖图，保留身份、成长、冷�
  assert.equal(player.score,123);assert.equal(player.totalPoints,42);assert.equal(player.cd[0],100);assert.equal(s.time,12);assert.equal(room.stageEnd,300);assert.equal(room.paused,true);assert.equal(room.speed,2);
  assert.equal(s.hotUpdateProbe(),'new-runtime');assert.equal(s.config.world.initialStamina,4321);assert.equal(s.config.world.stageDuration,777);
  s.projectiles=[];s.tick(.05);assert.equal(ran,1);assert.equal(hero.shield,123);s.tick(.05);assert.equal(ran,1);
- assert.equal((await f.call('/api/me')).status,200);assert.equal((await f.call('/api/health')).data.serverVersion,'0.4.7');
+ assert.equal((await f.call('/api/me')).status,200);assert.equal((await f.call('/api/health')).data.serverVersion,NEXT_VERSION);
  assert.deepEqual((await f.call('/api/action',{id:'before-update',type:'stamina'})).data,priorCommand.data);assert.equal(player.stamina,priorStamina);
  const response=await f.call('/api/action',{id:'same-command',type:'stamina'});assert.equal(response.data.ok,true);
 });
@@ -79,8 +81,8 @@ test('保留模式不会打断已有 SSE，重开模式断开旧 SSE 并保留�
  f.player.level=8;f.player.score=99;
  await f.game.hotUpdate.update({releaseDir:f.next,baseDigest:f.baseline.digest});
  assert.equal(f.game.room,oldRoom);assert.equal(closed,false);
- const third=path.join(f.root,'releases/third');await cp(f.next,third,{recursive:true});await change(third,'shared/protocol.js',v=>v.replace("'0.4.7'","'0.4.8'").replace("'0.4.7'","'0.4.8'"));
- const version=JSON.parse(await readFile(path.join(third,'VERSION.json'),'utf8'));version.serverVersion=version.clientVersion='0.4.8';await writeFile(path.join(third,'VERSION.json'),JSON.stringify(version));await writeManifest(third);
+ const third=path.join(f.root,'releases/third');await cp(f.next,third,{recursive:true});await change(third,'shared/protocol.js',v=>v.replace("'"+NEXT_VERSION+"'","'"+FUTURE_VERSION+"'").replace("'"+NEXT_VERSION+"'","'"+FUTURE_VERSION+"'"));
+ const version=JSON.parse(await readFile(path.join(third,'VERSION.json'),'utf8'));version.serverVersion=version.clientVersion=FUTURE_VERSION;await writeFile(path.join(third,'VERSION.json'),JSON.stringify(version));await writeManifest(third);
  const result=await f.game.hotUpdate.update({releaseDir:third,baseDigest:f.manifest.digest,battle:'restart'});
  await closedPromise;
  assert.notEqual(result.matchId,oldRoom.matchId);assert.equal(closed,true);assert.equal(f.game.room.sim.time,0);assert.equal(f.game.room.stageNumber,1);
@@ -131,9 +133,9 @@ test('战局 schema 改变仅允许重开，账号 schema 改变始终要求常�
  await assert.rejects(f.game.hotUpdate.update({releaseDir:f.next,baseDigest:f.baseline.digest}),/战局状态结构不兼容/);
  assert.equal((await f.game.hotUpdate.update({releaseDir:f.next,baseDigest:f.baseline.digest,battle:'restart'})).ok,true);
  const other=path.join(f.root,'releases/account-schema');await cp(f.next,other,{recursive:true});
- await change(other,'shared/protocol.js',v=>v.replaceAll("'0.4.7'","'0.4.8'"));
+ await change(other,'shared/protocol.js',v=>v.replaceAll("'"+NEXT_VERSION+"'","'"+FUTURE_VERSION+"'"));
  await change(other,'server/game-runtime.mjs',v=>v.replace('HOT_ACCOUNT_SCHEMA=1','HOT_ACCOUNT_SCHEMA=2'));
- const version=JSON.parse(await readFile(path.join(other,'VERSION.json'),'utf8'));version.serverVersion=version.clientVersion='0.4.8';await writeFile(path.join(other,'VERSION.json'),JSON.stringify(version));await writeManifest(other);
+ const version=JSON.parse(await readFile(path.join(other,'VERSION.json'),'utf8'));version.serverVersion=version.clientVersion=FUTURE_VERSION;await writeFile(path.join(other,'VERSION.json'),JSON.stringify(version));await writeManifest(other);
  await assert.rejects(f.game.hotUpdate.update({releaseDir:other,baseDigest:(await verifyRelease(f.next)).digest,battle:'restart'}),/账号结构不兼容/);
 });
 test('差异包只携带变化文件，暂存保留未变内容、正确删除文件且不改动旧版本',async t=>{

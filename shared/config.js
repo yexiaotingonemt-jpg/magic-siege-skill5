@@ -4,7 +4,7 @@ export const classes=['兽人战士','雷霆巨人','符文战车','黑暗领主
 export const names=[['破甲重击','守护战吼','换位救援','蓄伤壁垒'],['导电电弧','远阵雷击','电弧牵引','禁疗雷云'],['腐蚀炮弹','冰霜炮弹','定点连轰','震荡炮弹'],['裂地震荡','暗影冲锋','焚身壁垒','灭军君临'],['烈焰冲击','炙热火球','焚魂烙印','天火审判'],['灵息冲击','共生链接','献生净化','生命群疗'],['蚀骨飞刃','影袭','残影回溯','环刃风暴']];
 export const contractType=id=>['melee','ranged','siege','melee','ranged','ranged','melee'][id];
 export const availableClasses=(side,config=defaults)=>side?[3]:[0,4,5,2];
-export const contractClasses=(u,config=defaults)=>availableClasses(u.side,config).filter(id=>contractType(id)===u.type);
+export const contractClasses=(u,config=defaults)=>availableClasses(u.side,config).filter(id=>!u.elite&&!u.summoned&&contractType(id)===u.type);
 const skill=(power,cd,targetRange,radius=0,extra={})=>({power,cd,targetRange,radius,duration:0,cost:1,castTime:.35,levelGrowth:.2,...extra});
 export const defaults=clone(base);
 Object.assign(defaults.world,{attackBots:6,defenseBots:2,attackHpMultiplier:1,defenseHpMultiplier:1,troopHpMultiplier:1,heroHpMultiplier:1,heroHpGrowth:.02,heroAttackGrowth:.015,towerDamageExpRate:.0002,towerBreakXp:2});
@@ -90,6 +90,18 @@ for(const hero of defaults.heroes)for(const s of hero.skills){
 // also raises their shared skill allowance, so multi-target effects aren't clipped.
 for(const id of [4,5])defaults.heroes[id].attack*=1.5;
 
+// Lord loses his innate sustain; health pays for asymmetric frontline survival.
+defaults.heroes[3].hp=72000;
+// 0.5: fixed base skills, attribute growth and level-based trait drafts.
+Object.assign(defaults.world,{maxLevel:40,expBase:3,expGrowth:1,expCostMultiplier:1,towerDamageExpRate:.00005});
+defaults.heroes[0].skills=[skill(800,5,6.5,0,{targets:1,duration:4,vulnerability:0}),skill(0,10,6,6,{targets:3,damageReduction:.25,duration:5}),skill(0,15,14,0,{damageReduction:.35,duration:4}),skill(0,30,0,4,{duration:5,shieldDuration:8,conversionRatio:1,storeCap:.6,cost:3})];
+defaults.heroes[3].skills=[skill(320,5,10,0,{targets:5}),skill(240,10,18,2,{targets:5,dashSpeed:12,knockback:0,castTime:.7}),skill(40,15,0,5,{targets:5,duration:6,burnDuration:4,damageReduction:.35}),skill(180,30,0,4,{targets:4,duration:12,cost:3})];
+delete defaults.heroes[3].passiveHealRatio;delete defaults.heroes[3].passiveMinionKills;
+defaults.heroes[4].skills=[skill(800,5,9,0,{targets:1,heatCap:5,heatDuration:15}),skill(800,10,12,3,{targets:3,heatThreshold:3,hotPower:1200,splashPower:150}),skill(800,15,9,3,{targets:1,duration:5,heatOnDeath:2}),skill(2000,30,19,0,{targets:1,heatStep:2,heatCap:5,cost:3})];
+defaults.heroes[5].skills=[skill(400,5,12,5,{targets:3,healPower:200}),skill(0,10,12,0,{targets:1,duration:6,shareRatio:.5}),skill(0,15,12,0,{targets:3,hpCost:.1}),skill(800,30,12,0,{targets:4,cost:3})];
+defaults.heroes[2].skills=[skill(0,5,12,0,{targets:1,percentMaxHp:.01,tickCapPower:150,duration:5}),skill(800,10,12,0,{attackSpeedDown:.25,duration:4}),skill(250,15,12,3,{shots:4,targets:1,duration:3,slowPerStack:.15,slowCap:3,slowDuration:4}),skill(1000,30,12,4,{targets:5,knockback:2,cost:3})];
+for(const hero of defaults.heroes)for(const s of hero.skills)s.levelGrowth=0;
+
 export const labels={...baseLabels,heroHpGrowth:'每级英雄生命成长比例',heroAttackGrowth:'每级英雄攻击成长比例',towerDamageExpRate:'每点有效塔伤经验',towerBreakXp:'推倒防御塔经验',columns:'每排防御塔数量',strength:'1级基础强度目标',vulnerability:'受到伤害加深比例',shieldBurstPower:'破盾攻击力系数（%）',pullStopDistance:'勾取后距自身格数',bounces:'额外弹射次数',threshold:'生命比例判断阈值',bonusDamage:'条件额外伤害比例',damageReduction:'伤害降低比例',healingReduction:'受到治疗降低比例',buildingBonus:'对建筑额外伤害比例 / 普攻倍率',percentCurrentHp:'每跳当前生命伤害比例',directPower:'首段直接攻击力系数（%）',burnPower:'燃烧每跳攻击力系数（%）',burnDuration:'燃烧持续秒',extensionHits:'旋风每次延时承伤次数',extensionSeconds:'旋风延长秒',attackDown:'攻击力降低比例',remoteReflect:'远程承伤反弹比例',flatDamage:'每跳固定伤害',percentMaxHp:'每跳最大生命伤害比例',stun:'眩晕秒',healPower:'治疗攻击力系数（%）',cleanseBoost:'成功净化后增攻比例',targets:'最多目标数'};
 Object.assign(labels,{conversionRatio:'累计承伤转化护盾倍率',shareRatio:'链接共享有效治疗倍率'});
 Object.assign(labels,{utilityPower:'控制与净化等效攻击系数（%）',shieldPower:'护盾攻击力上限（%）',tickCapPower:'每目标每跳攻击力上限（%）',extensionLimit:'旋风最多延长秒'});
@@ -97,6 +109,7 @@ Object.assign(labels,{retaliationMemory:'受击来源记忆秒',retaliationLeash
 Object.assign(labels,{skillDesignVersion:'技能规则版本',scarDuration:'伤痕持续秒',scarCap:'伤痕层数上限',scarKnockback:'每层伤痕增加击飞格数',scarBonus:'每层伤痕伤害增幅',conductDuration:'导电持续秒',attackSpeedDown:'攻击速度降低比例',shots:'定点炮击次数',heatCap:'炙热层数上限',heatThreshold:'大火球炙热门槛',heatStep:'每增加一目标消耗的炙热层数',splashPower:'溅射总攻击力系数（%）',healingBoost:'受到治疗提升比例',debuffDuration:'命中减益持续秒'});
 Object.assign(labels,{heroKillXp:'击杀英雄经验',minionKillXp:'击杀小兵经验',attackSiege:'进攻攻城兵占比',damageTaken:'原始承伤',percentMaxHp:'目标最大生命伤害比例',heatOnDeath:'标记目标阵亡增加炙热层数',hpCost:'当前生命消耗比例',shieldDuration:'转化护盾持续秒',slowPerStack:'每层移动减速比例',slowCap:'移动减速叠层上限',slowDuration:'移动减速持续秒'});
 export function validateConfig(x){
+ if(x.world.maxLevel!==40)throw Error('本版英雄等级上限固定40');
  const walk=(a,b,path='')=>{if(typeof b==='number'){if(typeof a!=='number'||!Number.isFinite(a)||Math.abs(a)>1e7)throw Error(path+' 数值无效');if(a<0&&!['attackSpawnY','defenseLimitY','mapMinY','mapMaxY','defenseRallyOffset'].includes(path.split('.').at(-1)))throw Error(path+' 不能为负数');return;}if(!a||typeof a!=='object'||Array.isArray(a)!==Array.isArray(b))throw Error(path+' 配置结构不完整');for(const k of Object.keys(a))if(!Object.hasOwn(b,k)||k==='__proto__')throw Error(path+'.'+k+' 是未知字段');for(const k of Object.keys(b))walk(a[k],b[k],path+'.'+k);};walk(x,defaults);
  for(const k of ['waveInterval','projectileSpeed','expBase','expGrowth','expCostMultiplier','maxLevel','targetRecheckInterval'])if(x.world[k]<=0)throw Error(k+' 必须大于0');
  if(x.world.retaliationMemory<=0||x.world.retaliationMemory>10||x.world.retaliationLeash<=0||x.world.retaliationLeash>30||x.world.heroPriorityDistance>5)throw Error('受击记忆需0～10秒、反击距离0～30格、英雄距离容差0～5格');
