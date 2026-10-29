@@ -11,5 +11,7 @@ export HOST="${HOST:-0.0.0.0}"
 export PORT="${PORT:-5183}"
 export KC_DATA_DIR="$APP_ROOT/shared/data"
 export MAGIC_UPDATE_DIR="$APP_ROOT/shared/updates"
+export MAGIC_SIEGE_ROOT="$APP_ROOT"
+export MAGIC_HOT_UPDATE_SOCKET="$APP_ROOT/shared/runtime/hot-update.sock"
 printf '%s\n' "$$" > "$APP_ROOT/shared/runtime/service.pid"
 exec "${NODE_BIN:-/usr/bin/node}" server/index.mjs >> "$APP_ROOT/shared/logs/server.log" 2>&1
