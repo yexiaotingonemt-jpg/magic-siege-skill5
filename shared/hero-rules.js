@@ -415,6 +415,7 @@ export class HeroRules {
     h.castToken = token;
     const heat = h.heat || 0;
     p.stamina -= s.cost;
+    p.staminaSpent += s.cost;
     p.score += this.config.world.castScore;
     this.addXp(p, s.cost * this.config.world.expPerStamina);
     p.cd[i] = this.time + s.cd * (h.eliteBuffs?.arcane > this.time ? 0.85 : 1);

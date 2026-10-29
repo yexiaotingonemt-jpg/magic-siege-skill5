@@ -10,5 +10,5 @@ export const SERVER_VERSION='0.5.0';
 // Desktop release version must match SERVER_VERSION.
 export const CLIENT_VERSION='0.5.0';
 // Diagnostic ruleset label; changing this alone does not require a client update.
-export const RULESET_REVISION='skill5-traits-elites-20261028';
+export const RULESET_REVISION='skill5-traits-elites-ranking-20261029';
 export const UPDATE_REQUIRED_CODE='CLIENT_UPDATE_REQUIRED';
