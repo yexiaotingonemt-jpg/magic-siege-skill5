@@ -49,6 +49,30 @@ async function capture(app,page,file){
 async function register(page,label='桌面'){
  await expect(page.locator('#authForm')).toBeVisible();await page.locator('#tabRegister').click();await page.locator('#accountName').fill(label+Date.now());await page.locator('#accountPassword').fill('desktop-test-password');await page.locator('#authSubmit').click();await page.waitForFunction(()=>window.__game?.network.connected&&__game.renderer.getCamera());
 }
+
+test('桌面窗口：升级仅显示强化次数，详情可返回且不会消耗选卡',async()=>{
+ const server=await service();server.room.paused=true;let client;
+ try{
+  client=await launch(server.base);const {app,page}=client;await register(page,'手动强化');
+  const p=server.room.player(server.accounts.rows[0]),s=server.room.sim;
+  s.addXp(p,3);p.progress[0].choices[0].options=['O01','O05','O17'];
+  server.room.sequence++;server.room.broadcast();
+  await expect(page.locator('[data-trait-count]')).toHaveText('1');
+  await expect(page.locator('#traitDraft')).toBeHidden();
+  await page.locator('#traitPending').click();
+  await expect(page.locator('#traitDraft')).toBeVisible();
+  await page.locator('[data-trait-info="O01"]').click();
+  await expect(page.locator('[data-skill-detail-body]')).toContainText('技能效果');
+  await expect(page.locator('[data-skill-detail-body]')).toContainText('该技能尚未选择强化');
+  await capture(app,page,path.join(process.env.MAGIC_QA_DIR,'desktop-trait-details.png'));
+  await page.keyboard.press('1');expect(p.progress[0].choices).toHaveLength(1);
+  await page.locator('[data-detail-back]').click();
+  await page.locator('[data-trait="O01"]').click();
+  await expect(page.locator('#traitDraft')).toBeHidden();
+  await expect(page.locator('#traitPending')).toBeHidden();
+  expect(p.progress[0].traits.O01).toBe(1);expect(client.errors).toEqual([]);
+ }finally{await client?.app.close();await server.close();}
+});
 test('桌面EXE独立窗口：本机资源、登录契约、关闭退出、重启保留会话',async()=>{
  const server=await service();let client;const remoteRequests=[];server.server.on('request',r=>remoteRequests.push(r.url));
  try{
