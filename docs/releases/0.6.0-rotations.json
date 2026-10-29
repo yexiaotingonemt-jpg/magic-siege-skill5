@@ -1,0 +1,127 @@
+{
+  "release": "0.6.0",
+  "scope": "equal-four-stamina-controlled-rotations",
+  "limitations": "每组同为4体力、26秒、10级无词条，关闭升级和普攻；目标静止且无护甲。火法首目标设为600%施法攻击生命以验证真实死亡标记循环；仅统计实际伤害，不计减伤、控制和剩余炙热价值。不能据此推断单体场景一定应连招，也不是正式玩家胜率。",
+  "rows": [
+    {
+      "classId": 2,
+      "hero": "符文战车",
+      "targets": 1,
+      "policy": "single",
+      "stamina": 4,
+      "casts": 4,
+      "damageAttackPercent": 2400,
+      "heat": 0
+    },
+    {
+      "classId": 2,
+      "hero": "符文战车",
+      "targets": 1,
+      "policy": "combo",
+      "stamina": 4,
+      "casts": 3,
+      "damageAttackPercent": 1800,
+      "heat": 0
+    },
+    {
+      "classId": 2,
+      "hero": "符文战车",
+      "targets": 5,
+      "policy": "single",
+      "stamina": 4,
+      "casts": 4,
+      "damageAttackPercent": 2400,
+      "heat": 0
+    },
+    {
+      "classId": 2,
+      "hero": "符文战车",
+      "targets": 5,
+      "policy": "combo",
+      "stamina": 4,
+      "casts": 3,
+      "damageAttackPercent": 3900,
+      "heat": 0
+    },
+    {
+      "classId": 3,
+      "hero": "黑暗领主",
+      "targets": 1,
+      "policy": "single",
+      "stamina": 4,
+      "casts": 4,
+      "damageAttackPercent": 800,
+      "heat": 0
+    },
+    {
+      "classId": 3,
+      "hero": "黑暗领主",
+      "targets": 1,
+      "policy": "combo",
+      "stamina": 4,
+      "casts": 3,
+      "damageAttackPercent": 1030,
+      "heat": 0
+    },
+    {
+      "classId": 3,
+      "hero": "黑暗领主",
+      "targets": 5,
+      "policy": "single",
+      "stamina": 4,
+      "casts": 4,
+      "damageAttackPercent": 4000,
+      "heat": 0
+    },
+    {
+      "classId": 3,
+      "hero": "黑暗领主",
+      "targets": 5,
+      "policy": "combo",
+      "stamina": 4,
+      "casts": 3,
+      "damageAttackPercent": 5150,
+      "heat": 0
+    },
+    {
+      "classId": 4,
+      "hero": "火焰法师",
+      "targets": 1,
+      "policy": "single",
+      "stamina": 4,
+      "casts": 4,
+      "damageAttackPercent": 1500,
+      "heat": 4
+    },
+    {
+      "classId": 4,
+      "hero": "火焰法师",
+      "targets": 1,
+      "policy": "combo",
+      "stamina": 4,
+      "casts": 3,
+      "damageAttackPercent": 1600,
+      "heat": 0
+    },
+    {
+      "classId": 4,
+      "hero": "火焰法师",
+      "targets": 5,
+      "policy": "single",
+      "stamina": 4,
+      "casts": 4,
+      "damageAttackPercent": 1500,
+      "heat": 4
+    },
+    {
+      "classId": 4,
+      "hero": "火焰法师",
+      "targets": 5,
+      "policy": "combo",
+      "stamina": 4,
+      "casts": 3,
+      "damageAttackPercent": 3600,
+      "heat": 0
+    }
+  ]
+}

@@ -28,15 +28,15 @@ test('单体技能飘字事件使用实际结算伤害并保留施法和目标�
 });
 test('护甲和减伤后的真实扣血进入飘字，非技能系数或减免前伤害',()=>{
  const {s,p,h,enemy}=arena();enemy.armor=50;enemy.guards=[{ratio:.4,until:10,value:null}];const hp=enemy.hp;
- s.cast(0,p);advance(s,.4);const [e]=numbers(s);near(e.amount,h.attack*8*.4);near(e.amount,hp-enemy.hp);
+ s.cast(0,p);advance(s,.4);const [e]=numbers(s);near(e.amount,h.attack*4.5*.4);near(e.amount,hp-enemy.hp);
 });
 test('技能击中护盾分别记录扣血与吸收，合计等于实际伤害',()=>{
  const {s,p,h,enemy}=arena();s.shield(enemy,80,enemy,10);const hp=enemy.hp;
- s.cast(0,p);advance(s,.4);const [e]=numbers(s);near(e.shieldDamage,80);near(e.hpDamage,hp-enemy.hp);near(e.amount,e.hpDamage+e.shieldDamage);near(e.amount,h.attack*8);
+ s.cast(0,p);advance(s,.4);const [e]=numbers(s);near(e.shieldDamage,80);near(e.hpDamage,hp-enemy.hp);near(e.amount,e.hpDamage+e.shieldDamage);near(e.amount,h.attack*4.5);
 });
 test('完全被护盾吸收的技能仍有吸收反馈，生命伤害为零',()=>{
  const {s,p,h,enemy}=arena();s.shield(enemy,1e5,enemy,10);const hp=enemy.hp;
- s.cast(0,p);advance(s,.4);const [e]=numbers(s);near(e.hpDamage,0);near(e.shieldDamage,h.attack*8);near(e.amount,e.shieldDamage);near(enemy.hp,hp);
+ s.cast(0,p);advance(s,.4);const [e]=numbers(s);near(e.hpDamage,0);near(e.shieldDamage,h.attack*4.5);near(e.amount,e.shieldDamage);near(enemy.hp,hp);
 });
 test('击杀飘字只记录剩余生命，目标从战场移除后仍保留命中位置',()=>{
  const {s,p,enemy}=arena();enemy.hp=17;const pos={x:enemy.x,y:enemy.y};s.cast(0,p);advance(s,.4);
@@ -50,29 +50,29 @@ test('没有真实伤害、普通攻击、反伤和非英雄伤害均不产生�
 test('群攻对每个实际命中的英雄与小兵分别生成独立事件',()=>{
  const {s,p,h,enemy,target}=arena(3),soldiers=[target(-2,-3),target(2,-3)];s.cast(0,p);advance(s,.4);
  const events=numbers(s);assert.equal(events.length,3);assert.deepEqual(new Set(events.map(e=>e.targetId)),new Set([enemy.id,...soldiers.map(u=>u.id)]));
- assert.equal(new Set(events.map(e=>e.id)).size,3);for(const e of events)near(e.amount,h.attack*3.2);assert.equal(events.filter(e=>e.targetHero).length,1);
+ assert.equal(new Set(events.map(e=>e.id)).size,3);for(const e of events)near(e.amount,h.attack*2);assert.equal(events.filter(e=>e.targetHero).length,1);
 });
 test('火焰盾每秒独立跳伤生成新事件，离场灼烧继续归属原技能',()=>{
  const {s,p,h,enemy}=arena(3);s.cast(2,p);advance(s,.4);enemy.y=-20;advance(s,1);const first=numbers(s)[0];
- near(first.amount,h.attack*.4);assert.equal(first.skill,2);advance(s,1.1);const events=numbers(s);assert.equal(events.length,2);assert.notEqual(events[0].id,events[1].id);
- for(const e of events){near(e.amount,h.attack*.4);assert.equal(e.sourceId,h.id);assert.equal(e.targetId,enemy.id);assert.equal(e.skill,2);}
+ near(first.amount,h.attack*.45);assert.equal(first.skill,2);advance(s,1.1);const events=numbers(s);assert.equal(events.length,2);assert.notEqual(events[0].id,events[1].id);
+ for(const e of events){near(e.amount,h.attack*.45);assert.equal(e.sourceId,h.id);assert.equal(e.targetId,enemy.id);assert.equal(e.skill,2);}
 });
 test('冲锋沿途伤害产生飘字且同一目标不重复记录',()=>{
  const {s,p,h,enemy,target}=arena(3);enemy.y=-10;const wing=target(2,-7);assert.ok(s.setManualTarget(enemy.id,p));s.cast(1,p);advance(s,1.7);
- const events=numbers(s);assert.equal(events.filter(e=>e.targetId===wing.id).length,1);assert.ok(events.some(e=>e.targetId===enemy.id));for(const e of events){assert.equal(e.skill,1);near(e.amount,h.attack*2.4);}
+ const events=numbers(s);assert.equal(events.filter(e=>e.targetId===wing.id).length,1);assert.ok(events.some(e=>e.targetId===enemy.id));for(const e of events){assert.equal(e.skill,1);near(e.amount,h.attack*1.6);}
 });
 test('领主大招的附加伤害飘字与普通攻击主目标分开，完整持续期间附加伤害不被统一额度截断',()=>{
  const {s,p,h,enemy,target}=arena(3),extras=[target(-1,-3),target(1,-3)];s.cast(3,p);advance(s,.4);s.afterBasicAttack(h,enemy);
- assert.equal(numbers(s).length,2);for(const e of numbers(s)){assert.equal(e.skill,3);assert.ok(extras.some(u=>u.id===e.targetId));near(e.amount,h.attack*1.8);}
+ assert.equal(numbers(s).length,2);for(const e of numbers(s)){assert.equal(e.skill,3);assert.ok(extras.some(u=>u.id===e.targetId));near(e.amount,h.attack*1.4);}
  s.damage(h,enemy,h.attack,true);assert.equal(numbers(s).length,2);for(let i=0;i<3;i++)s.afterBasicAttack(h,enemy);const count=numbers(s).length;s.afterBasicAttack(h,enemy);assert.equal(numbers(s).length,count+2);
 });
 test('来源阵亡后的在途技能炮弹仍同步原英雄身份和实际伤害',()=>{
  const {s,p,h,enemy}=arena(2);enemy.y=10;enemy.hp=enemy.maxHp=10000;s.cast(0,p);advance(s,.4);h.hp=1;s.damage(null,h,2);advance(s,2);
- const [e]=numbers(s);near(e.amount,100);assert.equal(e.sourceId,h.id);assert.equal(e.classId,2);assert.equal(e.skill,0);assert.equal(e.targetId,enemy.id);assert.equal(s.get(h.id),undefined);
+ const [e]=numbers(s);near(e.amount,80);assert.equal(e.sourceId,h.id);assert.equal(e.classId,2);assert.equal(e.skill,0);assert.equal(e.targetId,enemy.id);assert.equal(s.get(h.id),undefined);
 });
 test('技能对防御塔造成伤害时记录塔身份和减伤后的伤害',()=>{
  const {s,p,h,enemy}=arena();enemy.x=100;const tower=s.towers[0];Object.assign(tower,{x:0,y:3,cd:1e9,hp:1e5,maxHp:1e5,towerGuardUntil:10});
- const hp=tower.hp;s.cast(0,p);advance(s,.4);const [e]=numbers(s);assert.equal(e.targetId,tower.id);assert.equal(e.targetTower,true);assert.equal(e.targetHero,false);near(e.amount,h.attack*4);near(e.amount,hp-tower.hp);
+ const hp=tower.hp;s.cast(0,p);advance(s,.4);const [e]=numbers(s);assert.equal(e.targetId,tower.id);assert.equal(e.targetTower,true);assert.equal(e.targetHero,false);near(e.amount,h.attack*2.25);near(e.amount,hp-tower.hp);
 });
 
 test('两账号HTTP快照拥有同一技能伤害事件，重复读取不重新生成事件',async()=>{
@@ -85,7 +85,7 @@ test('两账号HTTP快照拥有同一技能伤害事件，重复读取不重新�
   const actors=game.accounts.rows.map((a,i)=>{const p=game.room.player(a);p.classId=i?3:4;p.level=6;p.builds[p.classId]=[1,1,1,1];const h=s.spawn(p.side,contractType(p.classId),0,1,0);assert.ok(s.contract(p,h.id));Object.assign(h,{x:0,y:i?3:0,cd:1e9,speed:0,hp:1e5,maxHp:1e5});return {p,h};});
   assert.ok((await call('/api/action',{id:crypto.randomUUID(),type:'cast',args:{skill:0}},clients[0].cookie)).data.ok);advance(s,.4);
   const snapshots=await Promise.all(clients.map(c=>call('/api/state',null,c.cookie)));const es=snapshots.map(r=>r.data.animations.filter(e=>e.kind==='damage'));
-  assert.equal(es[0].length,1);assert.deepEqual(es[0],es[1]);near(es[0][0].amount,actors[0].h.attack*8);
+  assert.equal(es[0].length,1);assert.deepEqual(es[0],es[1]);near(es[0][0].amount,actors[0].h.attack*4.5);
   const repeated=(await call('/api/state',null,clients[0].cookie)).data.animations.filter(e=>e.kind==='damage');assert.deepEqual(repeated,es[0]);
  }finally{for(const c of [...game.room.clients])c.res.end();game.server.closeAllConnections();await new Promise(r=>game.server.close(r));}
 });

@@ -1,7 +1,7 @@
 import {defaults as base,labels as baseLabels} from './base-config.js';
 export const clone=x=>JSON.parse(JSON.stringify(x));
 export const classes=['兽人战士','雷霆巨人','符文战车','黑暗领主','火焰法师','森林精灵','暗影刺客'];
-export const names=[['破甲重击','守护战吼','换位救援','蓄伤壁垒'],['导电电弧','远阵雷击','电弧牵引','禁疗雷云'],['腐蚀炮弹','冰霜炮弹','定点连轰','震荡炮弹'],['裂地震荡','暗影冲锋','焚身壁垒','灭军君临'],['烈焰冲击','炙热火球','焚魂烙印','天火审判'],['灵息冲击','共生链接','献生净化','生命群疗'],['蚀骨飞刃','影袭','残影回溯','环刃风暴']];
+export const names=[['汲血链接','守护战吼','换位救援','蓄伤壁垒'],['导电电弧','远阵雷击','电弧牵引','禁疗雷云'],['腐蚀炮弹','冰霜炮弹','震荡炮弹','定点连轰'],['裂地震荡','暗影冲锋','焚身壁垒','灭军君临'],['烈焰冲击','焚魂烙印','炙热火球','天火审判'],['灵息冲击','共生链接','献生净化','生命群疗'],['蚀骨飞刃','影袭','残影回溯','环刃风暴']];
 export const contractType=id=>['melee','ranged','siege','melee','ranged','ranged','melee'][id];
 export const availableClasses=(side,config=defaults)=>side?[3]:[0,4,5,2];
 export const contractClasses=(u,config=defaults)=>availableClasses(u.side,config).filter(id=>!u.elite&&!u.summoned&&contractType(id)===u.type);
@@ -102,7 +102,41 @@ defaults.heroes[5].skills=[skill(400,5,12,5,{targets:3,healPower:200}),skill(0,1
 defaults.heroes[2].skills=[skill(0,5,12,0,{targets:1,percentMaxHp:.01,tickCapPower:150,duration:5}),skill(800,10,12,0,{attackSpeedDown:.25,duration:4}),skill(250,15,12,3,{shots:4,targets:1,duration:3,slowPerStack:.15,slowCap:3,slowDuration:4}),skill(1000,30,12,4,{targets:5,knockback:2,cost:3})];
 for(const hero of defaults.heroes)for(const s of hero.skills)s.levelGrowth=0;
 
+// 0.6：新版连携技能，所有费用固定为1/1/2/3，旧的成长只提升属性。
+defaults.heroes[0].skills=[
+ skill(90,6,6.5,3,{targets:1,duration:4,breakRange:9,drainRatio:1}),
+ skill(0,10,6,6,{targets:3,damageReduction:.2,duration:5}),
+ skill(0,22,14,0,{damageReduction:.45,duration:6,cost:2}),
+ skill(0,42,0,4,{duration:6,shieldDuration:10,conversionRatio:1,storeCap:.75,cost:3})
+];
+defaults.heroes[3].skills=[
+ skill(200,6,10,4,{targets:5,burnBonusPower:220}),
+ skill(160,10,18,2,{targets:5,dashSpeed:12,knockback:0,castTime:.7}),
+ skill(45,22,0,5,{duration:6,burnDuration:4,targets:5,damageReduction:.35,cost:2}),
+ skill(140,42,0,4,{duration:12,targets:4,cost:3})
+];
+defaults.heroes[4].skills=[
+ skill(450,6,9,0,{targets:1,heatCap:6,heatDuration:15}),
+ skill(300,10,12,3,{targets:1,duration:6,heatOnDeath:3,heatCost:1}),
+ skill(1000,22,12,3,{targets:3,heatThreshold:3,cost:2}),
+ skill(1800,42,19,0,{targets:1,heatStep:2,cost:3})
+];
+defaults.heroes[5].skills=[
+ skill(200,6,12,4,{targets:3,healPower:200}),
+ skill(0,10,12,0,{duration:8,targets:1,shareRatio:.5}),
+ skill(0,22,12,0,{targets:4,hpCost:.08,cost:2}),
+ skill(1000,42,12,0,{targets:4,cost:3})
+];
+defaults.heroes[2].skills=[
+ skill(0,6,12,0,{targets:1,percentMaxHp:.008,tickCapPower:120,duration:5}),
+ skill(500,10,12,0,{attackSpeedDown:.3,duration:5}),
+ skill(700,22,12,4,{targets:4,knockback:2,cost:2}),
+ skill(600,42,12,3,{shots:5,targets:1,duration:3.75,slowPerStack:.15,slowCap:3,slowDuration:4,cost:3})
+];
+for(const id of [0,2,3,4,5])for(const s of defaults.heroes[id].skills){s.levelGrowth=0;s.revision=6;}
+
 export const labels={...baseLabels,heroHpGrowth:'每级英雄生命成长比例',heroAttackGrowth:'每级英雄攻击成长比例',towerDamageExpRate:'每点有效塔伤经验',towerBreakXp:'推倒防御塔经验',columns:'每排防御塔数量',strength:'1级基础强度目标',vulnerability:'受到伤害加深比例',shieldBurstPower:'破盾攻击力系数（%）',pullStopDistance:'勾取后距自身格数',bounces:'额外弹射次数',threshold:'生命比例判断阈值',bonusDamage:'条件额外伤害比例',damageReduction:'伤害降低比例',healingReduction:'受到治疗降低比例',buildingBonus:'对建筑额外伤害比例 / 普攻倍率',percentCurrentHp:'每跳当前生命伤害比例',directPower:'首段直接攻击力系数（%）',burnPower:'燃烧每跳攻击力系数（%）',burnDuration:'燃烧持续秒',extensionHits:'旋风每次延时承伤次数',extensionSeconds:'旋风延长秒',attackDown:'攻击力降低比例',remoteReflect:'远程承伤反弹比例',flatDamage:'每跳固定伤害',percentMaxHp:'每跳最大生命伤害比例',stun:'眩晕秒',healPower:'治疗攻击力系数（%）',cleanseBoost:'成功净化后增攻比例',targets:'最多目标数'};
+Object.assign(labels,{revision:'技能规则修订',breakRange:'链接断开距离',drainRatio:'实际伤害治疗转化倍率',burnBonusPower:'灼烧连携额外攻击系数（%）',heatCost:'施法消耗炙热层数'});
 Object.assign(labels,{conversionRatio:'累计承伤转化护盾倍率',shareRatio:'链接共享有效治疗倍率'});
 Object.assign(labels,{utilityPower:'控制与净化等效攻击系数（%）',shieldPower:'护盾攻击力上限（%）',tickCapPower:'每目标每跳攻击力上限（%）',extensionLimit:'旋风最多延长秒'});
 Object.assign(labels,{retaliationMemory:'受击来源记忆秒',retaliationLeash:'反击追踪最远距离格',heroPriorityDistance:'英雄优先的距离容差格',strength:'阵营名义强度预算（含射程安全性）'});

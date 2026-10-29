@@ -171,7 +171,7 @@ test("桌面和窄屏选卡截图：无错误、卡片未超出游戏区域", as
     "技能1：" + names[4][0], "技能2：" + names[4][1], "技能3：" + names[4][2],
   ]);
   expect(await page.locator("[data-trait]").evaluateAll((bs) => bs.map((b) => b.dataset.trait)))
-    .toEqual(["F01", "F05", "F09"]);
+    .toEqual(["F01", "F09", "F05"]);
   await page.locator(".draft-panel").screenshot({
     path: path.join(out, "desktop-draft.png"),
   });
@@ -244,7 +244,7 @@ test("感叹号独立查看当前技能效果和已选强化，查看或按数�
   await expect(page.locator("#draftSkillTitle")).toHaveText(names[0][0]);
   const body = page.locator("[data-skill-detail-body]");
   await expect(body).toContainText("技能效果");
-  await expect(body).toContainText(String(s.config.heroes[0].skills[0].power * 1.3) + "%攻击伤害");
+  await expect(body).toContainText(String(s.config.heroes[0].skills[0].power * 1.3) + "%施法攻击伤害");
   await expect(body).toContainText("已选强化 · 3 次");
   await expect(body).toContainText("2/4 次");
   await expect(body).toContainText(TRAITS.find((t) => t.id === "O17").name);
@@ -261,7 +261,7 @@ test("感叹号独立查看当前技能效果和已选强化，查看或按数�
   await expect(page.locator("#draftSkillTitle")).toHaveText(names[0][1]);
   await page.locator("[data-detail-back]").click();
   await page.locator('[data-trait-info="O17"]').click();
-  await expect(page.locator("#draftSkillTitle")).toHaveText("通用强化");
+  await expect(page.locator("#draftSkillTitle")).toHaveText("通用强化 · " + TRAITS.find((t) => t.id === "O17").name);
   await expect(body).toContainText("已选强化 · 1 次");
   await page.locator("[data-detail-back]").click();
   await page.locator('[data-trait="O01"]').click();

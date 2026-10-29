@@ -4,6 +4,7 @@ import {
   towerAllyProtection,
   TOWER_GUARD,
 } from "./tower-guard.js";
+import { commonId, commonRank } from "./common-traits.js";
 import { names } from "./config.js";
 import { SKILL_PROGRESSION } from "./skill-progression.js";
 import { adjustAttackCooldown } from "./attack-cooldown.js";
@@ -62,7 +63,11 @@ export class HeroRules {
     );
     return Math.max(
       0,
-      ((u.attack || 0) + flat) *
+      ((u.attack || 0) +
+        flat +
+        (this.config.heroes[u.classId]?.attack || 0) *
+          0.02 *
+          commonRank(this, u, 2)) *
         (u.boostUntil > this.time ? 1 + (u.attackBoost || 0) : 1) *
         (u.eliteBuffs?.assault > this.time ? 1.2 : 1) *
         (1 - down),
@@ -225,6 +230,7 @@ export class HeroRules {
       .filter((f) => f.until > this.time)
       .map((f) => f.ratio);
     if (u.haste?.until > this.time) values.push(u.haste.ratio);
+    values.push(0.1 * commonRank(this, u, 8));
     return (
       (1 +
         Math.min(
@@ -242,6 +248,7 @@ export class HeroRules {
     );
     const wanted =
         Math.max(0, n) *
+        (1 + 0.04 * commonRank(this, t, 4)) *
         (1 - down) *
         (t.healingBoostUntil > this.time ? 1 + t.healingBoost : 1),
       actual = Math.min(wanted, t.maxHp - t.hp);
@@ -263,6 +270,10 @@ export class HeroRules {
           f.until > this.time &&
           f.owner.hp > 0 &&
           this.get(f.host) &&
+          Math.hypot(
+            f.owner.x - this.get(f.host).x,
+            f.owner.y - this.get(f.host).y,
+          ) <= (f.breakRange ?? Infinity) &&
           (f.owner.id === t.id || f.host === t.id)
         ) {
           const other = t.id === f.owner.id ? this.get(f.host) : f.owner;
@@ -280,6 +291,53 @@ export class HeroRules {
       : a;
     if (t.shieldUntil <= this.time) t.shield = 0;
     if (meta.value?.limit != null) n = Math.min(n, available(meta.value));
+    // 先平摊原始伤害，再由各成员独立结算一次减伤/护盾；同一伤害不再次分摊。
+    if (!meta.damageSplit && !meta.execute && !t.tower) {
+      const owners = [
+        ...new Set(
+          this.fields
+            .filter(
+              (f) =>
+                f.kind === "link" &&
+                f.shareDamage &&
+                f.until > this.time &&
+                f.owner.hp > 0 &&
+                (f.owner.id === t.id || f.host === t.id),
+            )
+            .map((f) => f.owner.id),
+        ),
+      ].sort((a, b) => a - b);
+      for (const ownerId of owners) {
+        const owner = this.get(ownerId);
+        if (!owner) continue;
+        const links = this.fields.filter(
+          (f) =>
+            f.kind === "link" &&
+            f.shareDamage &&
+            f.owner.id === ownerId &&
+            f.until > this.time,
+        );
+        const members = [
+          owner,
+          ...links
+            .map((f) => this.get(f.host))
+            .filter(
+              (u) => u && Math.hypot(u.x - owner.x, u.y - owner.y) <= 12 + 1e-7,
+            ),
+        ];
+        const unique = [...new Map(members.map((u) => [u.id, u])).values()];
+        if (unique.length > 1 && unique.some((u) => u.id === t.id))
+          return unique.reduce(
+            (sum, u) =>
+              sum +
+              this.damage(a, u, n / unique.length, basic, reflected, {
+                ...meta,
+                damageSplit: true,
+              }),
+            0,
+          );
+      }
+    }
     if (basic) n = this.attackEffect(a, n);
     if (basic && a?.classId === 2 && t.tower) n *= a.buildingBonus || 1;
     if (t.tower && a?.classId === 2) n *= 1 + this.rank(a, "C17") * 0.1;
@@ -288,6 +346,12 @@ export class HeroRules {
       ...this.activeDebuffs(t, "vulnerable").map((d) => d.ratio),
     );
     n *= 1 + vulnerable;
+    if (!reflected && !a?.summoned)
+      n *=
+        1 +
+        0.06 *
+          (meta.value?.ranks?.[commonId(a?.classId, 11)] ??
+            commonRank(this, a, 11));
     const raw = Math.max(0, n);
     n = (raw * 100) / (100 + (t.armor || 0));
     // Strongest same-kind guard, multiplicative across distinct skills and buffs.
@@ -299,6 +363,8 @@ export class HeroRules {
           Math.max(guards.get(g.kind || "guard") || 0, g.ratio),
         );
     if (t.eliteBuffs?.fortitude > this.time) guards.set("elite", 0.15);
+    guards.set("commonFinal", 0.06 * commonRank(this, t, 10));
+    if (a?.tower) guards.set("commonTower", 0.1 * commonRank(this, t, 7));
     let remaining = 1;
     for (const ratio of guards.values()) remaining *= 1 - ratio;
     n *= Math.max(0.2, remaining);
@@ -368,7 +434,10 @@ export class HeroRules {
         );
     }
     if (t.damageStore?.until > this.time)
-      t.damageStore.total = Math.min(t.maxHp * 0.6, t.damageStore.total + sum);
+      t.damageStore.total = Math.min(
+        t.maxHp * (t.damageStore.storeCap ?? 0.75),
+        t.damageStore.total + sum,
+      );
     if (sum > 0) this.afterDamage?.(a, t, sum, basic, reflected, meta);
     if (t.hp <= 0) {
       t.lethalSkill = {
@@ -402,6 +471,8 @@ export class HeroRules {
     if (h.castUntil > this.time) return bad("casting", "正在施法");
     if (p.cd[i] > this.time) return bad("cooldown", "技能冷却中");
     if (p.stamina < s.cost) return bad("stamina", "体力不足");
+    if (id === 4 && i === 1 && (h.heat || 0) < s.heatCost)
+      return bad("heat", "需要至少1层炙热才能施加烙印");
     const selection = selectSkill5.call(this, h, i, s);
     return selection.ok
       ? { code: "ready", reason: "可释放", h, c, s, lv: 1, id, ...selection }
@@ -414,9 +485,12 @@ export class HeroRules {
       token = (h.castToken || 0) + 1;
     h.castToken = token;
     const heat = h.heat || 0;
+    if (h.classId === 4 && i === 1) {
+      h.heat = Math.max(0, heat - s.heatCost);
+    }
     p.stamina -= s.cost;
     p.staminaSpent += s.cost;
-    p.score += this.config.world.castScore;
+    p.score += this.config.world.castScore * s.cost;
     this.addXp(p, s.cost * this.config.world.expPerStamina);
     p.cd[i] = this.time + s.cd * (h.eliteBuffs?.arcane > this.time ? 0.85 : 1);
     h.castUntil = this.time + s.castTime;
@@ -439,6 +513,8 @@ export class HeroRules {
     value.attack = this.attackPower(h);
     value.skill = i;
     value.ranks = s.ranks;
+    // 本次消耗新获得的炙热增攻只影响后续施法，不能倒灌当前快照。
+    if (h.classId === 4 && i === 1) this.heatBoost(h, s.heatCost);
     value.healProcs = 0;
     this.skillValues ??= [];
     this.skillValues.push(value);

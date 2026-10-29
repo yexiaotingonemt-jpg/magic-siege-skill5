@@ -114,16 +114,18 @@
       "strength": 8,
       "skills": [
         {
-          "power": 800,
-          "cd": 5,
+          "power": 90,
+          "cd": 6,
           "targetRange": 6.5,
-          "radius": 0,
+          "radius": 3,
           "duration": 4,
           "cost": 1,
           "castTime": 0.35,
           "levelGrowth": 0,
           "targets": 1,
-          "vulnerability": 0
+          "breakRange": 9,
+          "drainRatio": 1,
+          "revision": 6
         },
         {
           "power": 0,
@@ -135,31 +137,34 @@
           "castTime": 0.35,
           "levelGrowth": 0,
           "targets": 3,
-          "damageReduction": 0.25
+          "damageReduction": 0.2,
+          "revision": 6
         },
         {
           "power": 0,
-          "cd": 15,
+          "cd": 22,
           "targetRange": 14,
           "radius": 0,
-          "duration": 4,
-          "cost": 1,
+          "duration": 6,
+          "cost": 2,
           "castTime": 0.35,
           "levelGrowth": 0,
-          "damageReduction": 0.35
+          "damageReduction": 0.45,
+          "revision": 6
         },
         {
           "power": 0,
-          "cd": 30,
+          "cd": 42,
           "targetRange": 0,
           "radius": 4,
-          "duration": 5,
+          "duration": 6,
           "cost": 3,
           "castTime": 0.35,
           "levelGrowth": 0,
-          "shieldDuration": 8,
+          "shieldDuration": 10,
           "conversionRatio": 1,
-          "storeCap": 0.6
+          "storeCap": 0.75,
+          "revision": 6
         }
       ]
     },
@@ -240,7 +245,7 @@
       "skills": [
         {
           "power": 0,
-          "cd": 5,
+          "cd": 6,
           "targetRange": 12,
           "radius": 0,
           "duration": 5,
@@ -248,46 +253,50 @@
           "castTime": 0.35,
           "levelGrowth": 0,
           "targets": 1,
-          "percentMaxHp": 0.01,
-          "tickCapPower": 150
+          "percentMaxHp": 0.008,
+          "tickCapPower": 120,
+          "revision": 6
         },
         {
-          "power": 800,
+          "power": 500,
           "cd": 10,
           "targetRange": 12,
           "radius": 0,
-          "duration": 4,
+          "duration": 5,
           "cost": 1,
           "castTime": 0.35,
           "levelGrowth": 0,
-          "attackSpeedDown": 0.25
+          "attackSpeedDown": 0.3,
+          "revision": 6
         },
         {
-          "power": 250,
-          "cd": 15,
-          "targetRange": 12,
-          "radius": 3,
-          "duration": 3,
-          "cost": 1,
-          "castTime": 0.35,
-          "levelGrowth": 0,
-          "shots": 4,
-          "targets": 1,
-          "slowPerStack": 0.15,
-          "slowCap": 3,
-          "slowDuration": 4
-        },
-        {
-          "power": 1000,
-          "cd": 30,
+          "power": 700,
+          "cd": 22,
           "targetRange": 12,
           "radius": 4,
           "duration": 0,
+          "cost": 2,
+          "castTime": 0.35,
+          "levelGrowth": 0,
+          "targets": 4,
+          "knockback": 2,
+          "revision": 6
+        },
+        {
+          "power": 600,
+          "cd": 42,
+          "targetRange": 12,
+          "radius": 3,
+          "duration": 3.75,
           "cost": 3,
           "castTime": 0.35,
           "levelGrowth": 0,
-          "targets": 5,
-          "knockback": 2
+          "shots": 5,
+          "targets": 1,
+          "slowPerStack": 0.15,
+          "slowCap": 3,
+          "slowDuration": 4,
+          "revision": 6
         }
       ]
     },
@@ -303,18 +312,20 @@
       "strength": 24,
       "skills": [
         {
-          "power": 320,
-          "cd": 5,
+          "power": 200,
+          "cd": 6,
           "targetRange": 10,
-          "radius": 0,
+          "radius": 4,
           "duration": 0,
           "cost": 1,
           "castTime": 0.35,
           "levelGrowth": 0,
-          "targets": 5
+          "targets": 5,
+          "burnBonusPower": 220,
+          "revision": 6
         },
         {
-          "power": 240,
+          "power": 160,
           "cd": 10,
           "targetRange": 18,
           "radius": 2,
@@ -324,31 +335,34 @@
           "levelGrowth": 0,
           "targets": 5,
           "dashSpeed": 12,
-          "knockback": 0
+          "knockback": 0,
+          "revision": 6
         },
         {
-          "power": 40,
-          "cd": 15,
+          "power": 45,
+          "cd": 22,
           "targetRange": 0,
           "radius": 5,
           "duration": 6,
-          "cost": 1,
+          "cost": 2,
           "castTime": 0.35,
           "levelGrowth": 0,
-          "targets": 5,
           "burnDuration": 4,
-          "damageReduction": 0.35
+          "targets": 5,
+          "damageReduction": 0.35,
+          "revision": 6
         },
         {
-          "power": 180,
-          "cd": 30,
+          "power": 140,
+          "cd": 42,
           "targetRange": 0,
           "radius": 4,
           "duration": 12,
           "cost": 3,
           "castTime": 0.35,
           "levelGrowth": 0,
-          "targets": 4
+          "targets": 4,
+          "revision": 6
         }
       ]
     },
@@ -364,8 +378,8 @@
       "strength": 8,
       "skills": [
         {
-          "power": 800,
-          "cd": 5,
+          "power": 450,
+          "cd": 6,
           "targetRange": 9,
           "radius": 0,
           "duration": 0,
@@ -373,38 +387,40 @@
           "castTime": 0.35,
           "levelGrowth": 0,
           "targets": 1,
-          "heatCap": 5,
-          "heatDuration": 15
+          "heatCap": 6,
+          "heatDuration": 15,
+          "revision": 6
         },
         {
-          "power": 800,
+          "power": 300,
           "cd": 10,
           "targetRange": 12,
           "radius": 3,
-          "duration": 0,
-          "cost": 1,
-          "castTime": 0.35,
-          "levelGrowth": 0,
-          "targets": 3,
-          "heatThreshold": 3,
-          "hotPower": 1200,
-          "splashPower": 150
-        },
-        {
-          "power": 800,
-          "cd": 15,
-          "targetRange": 9,
-          "radius": 3,
-          "duration": 5,
+          "duration": 6,
           "cost": 1,
           "castTime": 0.35,
           "levelGrowth": 0,
           "targets": 1,
-          "heatOnDeath": 2
+          "heatOnDeath": 3,
+          "heatCost": 1,
+          "revision": 6
         },
         {
-          "power": 2000,
-          "cd": 30,
+          "power": 1000,
+          "cd": 22,
+          "targetRange": 12,
+          "radius": 3,
+          "duration": 0,
+          "cost": 2,
+          "castTime": 0.35,
+          "levelGrowth": 0,
+          "targets": 3,
+          "heatThreshold": 3,
+          "revision": 6
+        },
+        {
+          "power": 1800,
+          "cd": 42,
           "targetRange": 19,
           "radius": 0,
           "duration": 0,
@@ -413,7 +429,7 @@
           "levelGrowth": 0,
           "targets": 1,
           "heatStep": 2,
-          "heatCap": 5
+          "revision": 6
         }
       ]
     },
@@ -429,51 +445,55 @@
       "strength": 8,
       "skills": [
         {
-          "power": 400,
-          "cd": 5,
+          "power": 200,
+          "cd": 6,
           "targetRange": 12,
-          "radius": 5,
+          "radius": 4,
           "duration": 0,
           "cost": 1,
           "castTime": 0.35,
           "levelGrowth": 0,
           "targets": 3,
-          "healPower": 200
+          "healPower": 200,
+          "revision": 6
         },
         {
           "power": 0,
           "cd": 10,
           "targetRange": 12,
           "radius": 0,
-          "duration": 6,
+          "duration": 8,
           "cost": 1,
           "castTime": 0.35,
           "levelGrowth": 0,
           "targets": 1,
-          "shareRatio": 0.5
+          "shareRatio": 0.5,
+          "revision": 6
         },
         {
           "power": 0,
-          "cd": 15,
+          "cd": 22,
           "targetRange": 12,
           "radius": 0,
           "duration": 0,
-          "cost": 1,
+          "cost": 2,
           "castTime": 0.35,
           "levelGrowth": 0,
-          "targets": 3,
-          "hpCost": 0.1
+          "targets": 4,
+          "hpCost": 0.08,
+          "revision": 6
         },
         {
-          "power": 800,
-          "cd": 30,
+          "power": 1000,
+          "cd": 42,
           "targetRange": 12,
           "radius": 0,
           "duration": 0,
           "cost": 3,
           "castTime": 0.35,
           "levelGrowth": 0,
-          "targets": 4
+          "targets": 4,
+          "revision": 6
         }
       ]
     },

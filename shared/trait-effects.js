@@ -1,3 +1,4 @@
+import { commonRank } from "./common-traits.js";
 const near = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 export const ELITE_BUFFS = {
   hunt: { name: "狩猎恢复", description: "击杀非召唤单位恢复2%最大生命" },
@@ -20,6 +21,8 @@ export const traitEffects = {
   afterDamage(a, t, sum, basic, reflected, meta) {
     if (
       !reflected &&
+      !basic &&
+      !meta.royalSplash &&
       !a?.summoned &&
       a?.hp > 0 &&
       a.lordUlt?.until > this.time &&
@@ -27,7 +30,10 @@ export const traitEffects = {
     )
       this.heal(
         a,
-        sum * 0.08 * (a.lordUlt.s.ranks?.L15 ?? this.rank(a, "L15")),
+        sum *
+          0.06 *
+          (a.lordUlt.s.ranks?.L15 ?? this.rank(a, "L15")) *
+          (meta.periodic || meta.area || meta.proc ? 0.5 : 1),
         a,
       );
     if (!reflected && a?.hp > 0 && a.side !== t.side) {
@@ -50,7 +56,7 @@ export const traitEffects = {
         h.damageStore.friends.includes(t.id)
       )
         h.damageStore.total = Math.min(
-          h.maxHp * 0.6,
+          h.maxHp * (h.damageStore.storeCap ?? 0.75),
           h.damageStore.total +
             sum * (h.damageStore.share ?? this.rank(h, "O14") * 0.1),
         );
@@ -119,6 +125,12 @@ export const traitEffects = {
         h.classId,
       );
     if (h.hp <= 0 || t.tower || t.summoned || h.side === t.side) return;
+    if (!summonedKill && commonRank(this, h, 6))
+      this.heal(
+        h,
+        this.config.heroes[h.classId].hp * 0.0005 * commonRank(this, h, 6),
+        h,
+      );
     if (h.eliteBuffs?.hunt > this.time) this.heal(h, h.maxHp * 0.02, h);
     if (this.rank(h, "L17")) {
       h.minionKills = (h.minionKills || 0) + (t.hero ? 0 : 1);
@@ -261,7 +273,7 @@ export const traitEffects = {
           ((s.value.attack * s.power) / 100) * (1 + s.bonusDamage),
           false,
           false,
-          { value: s.value, remote: false },
+          { value: s.value, remote: false, royalSplash: true, area: true },
         );
       this.visual("release", h, t, {
         skill: 3,
