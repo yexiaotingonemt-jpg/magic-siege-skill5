@@ -1,5 +1,6 @@
 // A single stroke family keeps navigation and utility controls consistent.
 const paths={
+ enhance:'<path d="M12 7C9 5 5 5 2 6v14c3-1 7-1 10 1 3-2 7-2 10-1V6c-3-1-7-1-10 1Zm0 0v14M5 10h3m-3 4h3m8-4h3m-3 4h3M12 1v3m-5-2 1 2m9-2-1 2"/>',
  battle:'<path d="m4 3 7 7-2 2-7-7V3h2Zm16 0-7 7 2 2 7-7V3h-2ZM8 14l-5 5m0-4 6 6m7-7 5 5m0-4-6 6"/>',
  hero:'<path d="M12 5C9 3 5 3 2 4v15c3-1 7-1 10 1 3-2 7-2 10-1V4c-3-1-7-1-10 1Zm0 0v15"/>',
  reports:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6m-6 4h6m-6 4h4"/>',

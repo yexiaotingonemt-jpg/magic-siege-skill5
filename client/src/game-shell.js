@@ -12,6 +12,7 @@ export const gameShell=`
    <div class="battle-info"><b id="front"></b><span id="wave"></span><button id="locate" aria-label="定位英雄">${uiIcon('locate')} 定位</button></div>
    <div class="battle-wrap">
     <div id="battle"></div>
+    <button id="traitPending" class="trait-pending" type="button" aria-haspopup="dialog" aria-controls="traitDraft" aria-expanded="false" aria-label="技能强化，当前可选择 0 次" hidden><span class="trait-pending-icon" aria-hidden="true">${uiIcon('enhance')}</span><span class="trait-pending-label">技能强化</span><span class="trait-pending-count" data-trait-count aria-hidden="true">0</span></button>
     <details class="battle-ranking" open>
      <summary>实时排行 <span>总积分 ↓ · KDA</span></summary>
      <div id="battleRanking" class="battle-ranking-scroll" tabindex="0" aria-label="战斗贡献排行榜"></div>
@@ -21,7 +22,7 @@ export const gameShell=`
    </div>
    <section class="hero-hud" aria-label="英雄状态">
     <div class="portrait" id="portrait"></div>
-    <div class="hero-copy"><b id="heroName"></b><span id="hpLabel"></span><div class="bar"><i id="hpbar"></i></div><div class="xp"><i id="xpbar"></i></div><small id="xpLabel"></small><small id="attackLabel" class="hero-attack" hidden></small><button id="traitPending" class="trait-pending" hidden>选择强化</button><span id="eliteBuffs" class="elite-buffs"></span></div>
+    <div class="hero-copy"><b id="heroName"></b><span id="hpLabel"></span><div class="bar"><i id="hpbar"></i></div><div class="xp"><i id="xpbar"></i></div><small id="xpLabel"></small><small id="attackLabel" class="hero-attack" hidden></small><span id="eliteBuffs" class="elite-buffs"></span></div>
     <div class="contract-guide" aria-hidden="true"><span><i>1</i>点选士兵</span>${uiIcon('chevron')}<span><i>2</i>确认契约</span>${uiIcon('chevron')}<span><i>3</i>释放技能</span></div>
    </section>
    <div id="skills" class="skills" aria-label="英雄技能" hidden></div>

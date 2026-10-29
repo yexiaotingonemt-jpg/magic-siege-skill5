@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { createBrowserGame } from "../scripts/browser-game-server.mjs";
 import { TRAITS } from "../shared/traits.js";
+import { names } from "../shared/config.js";
 let game, base, p;
 test.beforeEach(async ({ page }) => {
   game = await createBrowserGame({
@@ -26,13 +27,17 @@ test.afterEach(async ({ page }) => {
   game.server.closeAllConnections();
   await new Promise((r) => game.server.close(r));
 });
-test("升级选择、稍后选择、键盘选择与重连保持同一候选", async ({ page }) => {
+test("升级仅提示次数，积攒、稍后选择与重连均不自动弹窗，候选保持不变", async ({ page }) => {
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   const s = game.room.sim;
   s.addXp(p, 3);
   game.room.sequence++;
   game.room.broadcast();
+  await expect(page.locator("[data-trait-count]")).toHaveText("1");
+  await expect(page.locator("#traitDraft")).toBeHidden();
+  await expect(page.locator("#traitPending")).toHaveAttribute("aria-expanded", "false");
+  await page.locator("#traitPending").click();
   await expect(page.locator("#traitDraft")).toBeVisible();
   await expect(page.locator(".trait-card")).toHaveCount(3);
   await expect(page.locator("#draftTitle")).toHaveText("蓝色技能强化");
@@ -42,10 +47,18 @@ test("升级选择、稍后选择、键盘选择与重连保持同一候选", as
   await page.locator("[data-defer]").click();
   await expect(page.locator("#traitDraft")).toBeHidden();
   await expect(page.locator("#traitPending")).toContainText("1");
+  s.addXp(p, s.expNeeded(p) - p.xp);
+  game.room.sequence++;
+  game.room.broadcast();
+  await expect(page.locator("[data-trait-count]")).toHaveText("2");
+  await expect(page.locator("#traitDraft")).toBeHidden();
   await page.locator("#traitPending").click();
   await expect(page.locator("#traitDraft")).toBeVisible();
   await page.reload();
   await page.waitForFunction(() => window.__game?.network.connected);
+  await expect(page.locator("[data-trait-count]")).toHaveText("2");
+  await expect(page.locator("#traitDraft")).toBeHidden();
+  await page.locator("#traitPending").click();
   await expect(page.locator("#traitDraft")).toBeVisible();
   expect(
     await page
@@ -53,8 +66,13 @@ test("升级选择、稍后选择、键盘选择与重连保持同一候选", as
       .evaluateAll((bs) => bs.map((b) => b.dataset.trait)),
   ).toEqual(options);
   await page.keyboard.press("1");
-  await expect(page.locator("#traitDraft")).toBeHidden();
+  await expect(page.locator("[data-trait-count]")).toHaveText("1");
+  await expect(page.locator("#traitDraft")).toBeVisible();
   expect(p.progress[0].traits[options[0]]).toBe(1);
+  await expect(page.locator("[data-trait]").first()).toBeEnabled();
+  await page.keyboard.press("2");
+  await expect(page.locator("#traitDraft")).toBeHidden();
+  await expect(page.locator("#traitPending")).toBeHidden();
   await expect(page.locator("#xpLabel")).not.toContainText("技能点");
   expect(errors).toEqual([]);
 });
@@ -67,6 +85,9 @@ test("紫金品质、候选不足3项、已选构筑与真实技能说明", asyn
   }
   game.room.sequence++;
   game.room.broadcast();
+  await expect(page.locator("#traitPending")).toBeVisible();
+  await expect(page.locator("#traitDraft")).toBeHidden();
+  await page.locator("#traitPending").click();
   await expect(page.locator("#draftTitle")).toHaveText("金色技能强化");
   const choice = p.progress[0].choices[0],
     gold = TRAITS.filter((t) => t.classId === 0 && t.rarity === "gold");
@@ -75,7 +96,7 @@ test("紫金品质、候选不足3项、已选构筑与真实技能说明", asyn
   game.room.sequence++;
   game.room.broadcast();
   await expect(page.locator(".trait-card")).toHaveCount(1);
-  await page.locator(".trait-card").click();
+  await page.locator("[data-trait]").click();
   await expect(page.locator("#traitDraft")).toBeHidden();
   const u = s.units.find((u) => u.side === 0 && u.type === "melee" && !u.hero);
   s.contract(p, u.id);
@@ -138,15 +159,24 @@ test("桌面和窄屏选卡截图：无错误、卡片未超出游戏区域", as
   s.setClass(4, p);
   s.contract(p, u.id);
   s.addXp(p, 3);
+  p.progress[4].choices[0].options = ["F01", "F05", "F09"];
+  p.progress[4].traits = { F01: 2, F17: 1 };
   game.room.sequence++;
   game.room.broadcast();
-  await expect(page.locator(".trait-card")).toHaveCount(3);
-  const out = path.resolve("evidence/traits-ui");
+  await expect(page.locator("#traitPending")).toBeVisible();
+  const out = path.join(process.env.MAGIC_QA_DIR || tmpdir(), "traits-ui");
   mkdirSync(out, { recursive: true });
+  await page.screenshot({ path: path.join(out, "desktop-pending.png"), fullPage: true });
+  await page.locator("#traitPending").click();
+  await expect(page.locator(".trait-card")).toHaveCount(3);
   await page.screenshot({
     path: path.join(out, "desktop-draft.png"),
     fullPage: true,
   });
+  await page.locator('[data-trait-info="F01"]').click();
+  await expect(page.locator("#draftSkillTitle")).toHaveText(names[4][0]);
+  await page.locator("#gameViewport").screenshot({ path: path.join(out, "desktop-details.png") });
+  await page.locator("[data-detail-back]").click();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(250);
   await page.screenshot({
@@ -160,6 +190,16 @@ test("桌面和窄屏选卡截图：无错误、卡片未超出游戏区域", as
     }),
   );
   expect(bounds.every((b) => b.left >= 0 && b.right <= 390)).toBe(true);
+  await page.locator('[data-trait-info="F01"]').click();
+  await expect(page.locator("#draftSkillTitle")).toHaveText(names[4][0]);
+  await page.locator("#gameViewport").screenshot({ path: path.join(out, "mobile-details.png") });
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#traitDraft")).toBeHidden();
+  const badgeBounds = await page.locator("#traitPending").boundingBox();
+  expect(badgeBounds.width).toBeGreaterThanOrEqual(44);
+  expect(badgeBounds.height).toBeGreaterThanOrEqual(44);
+  await page.locator("#gameViewport").screenshot({ path: path.join(out, "mobile-pending.png") });
   expect(errors).toEqual([]);
 });
 
@@ -171,6 +211,9 @@ test("契约前切换预览职业，可以选择该职业保留的强化", async
   const u = s.units.find((u) => u.side === 0 && u.type === "ranged");
   await page.evaluate((id) => window.__game.selection.select(id), u.id);
   await page.locator('[data-contract-role="5"]').click();
+  await expect(page.locator("#traitPending")).toBeVisible();
+  await expect(page.locator("#traitDraft")).toBeHidden();
+  await page.locator("#traitPending").click();
   await expect(page.locator("#traitDraft")).toBeVisible();
   const id = await page
     .locator("[data-trait]")
@@ -180,4 +223,72 @@ test("契约前切换预览职业，可以选择该职业保留的强化", async
   await expect(page.locator("#traitDraft")).toBeHidden();
   expect(p.classId).toBe(0);
   expect(p.progress[5].traits[id]).toBe(1);
+});
+
+test("感叹号独立查看当前技能效果和已选强化，查看或按数字均不会误选", async ({ page }) => {
+  const s = game.room.sim;
+  s.addXp(p, 3);
+  const progress = p.progress[0];
+  progress.traits = { O01: 2, O02: 1, O05: 1, O17: 1 };
+  progress.choices[0].options = ["O01", "O05", "O17"];
+  game.room.sequence++;
+  game.room.broadcast();
+  await page.locator("#traitPending").click();
+  const options = progress.choices[0].options.slice(),
+    info = page.locator('[data-trait-info="O01"]');
+  const categorySize = await page.locator(".trait-category").first().evaluate((n) => parseFloat(getComputedStyle(n).fontSize));
+  expect(categorySize).toBeGreaterThanOrEqual(25);
+  await info.click();
+  await expect(page.locator("#traitDraft")).toHaveAttribute("aria-labelledby", "draftSkillTitle");
+  await expect(page.locator("#draftSkillTitle")).toHaveText(names[0][0]);
+  const body = page.locator("[data-skill-detail-body]");
+  await expect(body).toContainText("技能效果");
+  await expect(body).toContainText(String(s.config.heroes[0].skills[0].power * 1.3) + "%攻击伤害");
+  await expect(body).toContainText("已选强化 · 3 次");
+  await expect(body).toContainText("2/4 次");
+  await expect(body).toContainText(TRAITS.find((t) => t.id === "O17").name);
+  await expect(body).not.toContainText(TRAITS.find((t) => t.id === "O05").name);
+  await page.keyboard.press("1");
+  expect(progress.choices[0].options).toEqual(options);
+  expect(progress.traits.O01).toBe(2);
+  await page.keyboard.press("Tab");
+  await expect(page.locator("[data-detail-back]")).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(info).toBeFocused();
+  await expect(page.locator("#traitDraft")).toBeVisible();
+  await page.locator('[data-trait-info="O05"]').click();
+  await expect(page.locator("#draftSkillTitle")).toHaveText(names[0][1]);
+  await page.locator("[data-detail-back]").click();
+  await page.locator('[data-trait-info="O17"]').click();
+  await expect(page.locator("#draftSkillTitle")).toHaveText("通用强化");
+  await expect(body).toContainText("已选强化 · 1 次");
+  await page.locator("[data-detail-back]").click();
+  await page.locator('[data-trait="O01"]').click();
+  await expect(page.locator("#traitDraft")).toBeHidden();
+  expect(progress.traits.O01).toBe(3);
+});
+
+test("查看无已选强化的技能，并在拒绝选择后保留次数和重试入口", async ({ page }) => {
+  const s = game.room.sim;
+  s.addXp(p, 3);
+  p.progress[0].choices[0].options = ["O01", "O05", "O17"];
+  game.room.sequence++;
+  game.room.broadcast();
+  await page.locator("#traitPending").click();
+  await page.locator('[data-trait-info="O01"]').click();
+  await expect(page.locator("[data-skill-detail-body]")).toContainText("该技能尚未选择强化");
+  await page.locator("[data-detail-back]").click();
+  await page.route("**/api/action", async (route) => {
+    if (route.request().postDataJSON().type !== "chooseTrait") return route.continue();
+    return route.fulfill({ json: { ok: false, message: "测试拒绝选择，请重试" } });
+  });
+  await page.locator('[data-trait="O01"]').click();
+  await expect(page.locator("[data-draft-error]")).toContainText("测试拒绝选择");
+  await expect(page.locator('[data-trait="O01"]')).toBeEnabled();
+  await expect(page.locator("[data-trait-count]")).toHaveText("1");
+  expect(p.progress[0].traits.O01).toBeUndefined();
+  await page.unroute("**/api/action");
+  await page.locator('[data-trait="O01"]').click();
+  await expect(page.locator("#traitDraft")).toBeHidden();
+  expect(p.progress[0].traits.O01).toBe(1);
 });
