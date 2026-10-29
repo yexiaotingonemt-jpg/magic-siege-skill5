@@ -3,6 +3,7 @@ import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {buildManifest} from '../server/release-manifest.mjs';
 // Client releases and combat compatibility are versioned independently.
 import {SERVER_VERSION,CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
 if(SERVER_VERSION!==CLIENT_VERSION)throw Error('客户端与服务器发布版本必须一致');
@@ -41,6 +42,7 @@ if(kind==='client'){
 }
 await writeFile(path.join(output,'package.json'),JSON.stringify({name:'magic-siege-'+kind,version:kind==='client'?CLIENT_VERSION:SERVER_VERSION,private:true,type:'module',scripts:{start:kind==='server'?'node server/index.mjs':'node client/launcher.mjs'}},null,2)+'\n');
 await writeFile(path.join(output,'VERSION.json'),JSON.stringify({serverVersion:SERVER_VERSION,clientVersion:CLIENT_VERSION,gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION},null,2)+'\n');
+if(kind==='server')await writeFile(path.join(output,'server-manifest.json'),JSON.stringify(await buildManifest(output),null,2)+'\n');
 // Ship the licenses for the bundled browser libraries with the player package.
 if(kind==='client')for(const [source,dest]of [['node_modules/phaser/LICENSE.md','PHASER-LICENSE.md'],['node_modules/eventemitter3/LICENSE','EVENTEMITTER3-LICENSE.txt']])await copy(source,dest);
 console.log('Release directory: '+output);
