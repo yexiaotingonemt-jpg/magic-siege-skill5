@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {_electron as electron} from 'playwright';
 import {createRequire} from 'node:module';
+import {execFileSync} from 'node:child_process';
 import {mkdtemp,mkdir,readFile,writeFile,readdir} from 'node:fs/promises';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
@@ -8,6 +9,23 @@ import {fileURLToPath} from 'node:url';
 import {createGameServer} from '../server/index.mjs';
 import {CLIENT_VERSION,GAME_VERSION} from '../shared/protocol.js';
 const root=fileURLToPath(new URL('..',import.meta.url)),require=createRequire(import.meta.url);
+
+test('仓库启动器普通启动时必须显示原生游戏窗口',async()=>{
+ test.skip(process.platform!=='win32','Windows GUI launcher');
+ const folder=await mkdtemp(path.join(tmpdir(),'magic-launcher-visible-')),cache=path.join(folder,'repository-client'),profile=path.join(folder,'profile'),exe=path.join(cache,'魔法王座.exe');
+ const env={...process.env,MAGIC_VISIBILITY_EXE:exe};delete env.MAGIC_DESKTOP_TEST;delete env.ELECTRON_RUN_AS_NODE;
+ const launcher=path.join(root,'魔法王座.exe');
+ const powershell=code=>execFileSync('powershell.exe',['-NoProfile','-Command',code],{env,encoding:'utf8',windowsHide:true});
+ try{
+  execFileSync(launcher,['--root',root,'--cache',cache,'--profile',profile],{env,windowsHide:true,timeout:30000});
+  await expect.poll(()=>{
+   const text=powershell("@(Get-Process -Name '魔法王座' -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $env:MAGIC_VISIBILITY_EXE -and $_.MainWindowHandle -ne 0 } | Select-Object -ExpandProperty MainWindowTitle) | ConvertTo-Json -Compress");
+   return text.includes(`v${CLIENT_VERSION}`);
+  },{timeout:20000}).toBe(true);
+ }finally{
+  powershell("Get-Process -Name '魔法王座' -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $env:MAGIC_VISIBILITY_EXE } | Stop-Process -ErrorAction SilentlyContinue");
+ }
+});
 async function service(gameVersion=GAME_VERSION,clientVersion=CLIENT_VERSION){
  const dataDir=await mkdtemp(path.join(tmpdir(),'magic-desktop-server-')),game=createGameServer({dataDir,gameVersion,clientVersion});
  await new Promise(resolve=>game.server.listen(0,'127.0.0.1',resolve));
