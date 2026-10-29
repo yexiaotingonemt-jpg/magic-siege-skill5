@@ -1,0 +1,127 @@
+{
+  "deployment": {
+    "cutoverAtBeijing": "2026-10-29T11:14:39.454986+08:00",
+    "release": "/home/colleague/apps/magic-siege-skill5/releases/github-v0.5.1-20261029T025134Z",
+    "previous": "/home/colleague/apps/magic-siege-skill5/releases/unified-v0.5.0-20261029T013640Z",
+    "backup": "/home/colleague/apps/magic-siege-skill5/shared/backups/pre-github-v0.5.1-20261029T025134Z",
+    "pid": 3064014,
+    "serviceRecoverySeconds": 0.336,
+    "accountsBefore": 13,
+    "accountsAfter": 13,
+    "existingAccountsUnchanged": true,
+    "accountFileUnchanged": true,
+    "accountFileSha256": "338236cd1db413fb1bf595a57424c26f59cf89155401457b839a56edf5156b59",
+    "health": {
+      "ok": true,
+      "version": 5,
+      "serverVersion": "0.5.1",
+      "gameVersion": "0.5.0",
+      "clientVersion": "0.5.1",
+      "protocolVersion": 2,
+      "revision": "skill5-traits-elites-ranking-20261029",
+      "matchId": "03c80d13-1af9-4566-931c-cd06f99ba676",
+      "sequence": 0,
+      "clients": 0
+    },
+    "hotControlSocket": true,
+    "source": {
+      "repository": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5.git",
+      "ref": "refs/heads/main",
+      "branchHead": "c89bd4a9cad82427d26bf1800d5b3711f570e833",
+      "commit": "c89bd4a9cad82427d26bf1800d5b3711f570e833",
+      "previousCommit": null,
+      "verifiedAt": "2026-10-29T03:14:39.100Z"
+    },
+    "manifestDigest": "7d8a33693e50aa625cde2f55f1bf21690605ba8ca447741062d6f0f9bcc6c92c",
+    "clientSha256": "bfcdcb417cb659e12abbe938e754ab83237a317819cb9af24801d3899e3d2756",
+    "clientSize": 226903074,
+    "cronRestored": true
+  },
+  "operations": {
+    "pid": 3064014,
+    "release": "/home/colleague/apps/magic-siege-skill5/releases/github-v0.5.1-20261029T025134Z",
+    "cronActiveAndRestored": true,
+    "accountsStillUnchanged": true,
+    "accounts": 13,
+    "hotControlSocketMode": "0600",
+    "githubPrivateKeyMode": "0600",
+    "sourceCommit": "c89bd4a9cad82427d26bf1800d5b3711f570e833",
+    "manifestDigest": "7d8a33693e50aa625cde2f55f1bf21690605ba8ca447741062d6f0f9bcc6c92c",
+    "health": {
+      "ok": true,
+      "version": 5,
+      "serverVersion": "0.5.1",
+      "gameVersion": "0.5.0",
+      "clientVersion": "0.5.1",
+      "protocolVersion": 2,
+      "revision": "skill5-traits-elites-ranking-20261029",
+      "matchId": "03c80d13-1af9-4566-931c-cd06f99ba676",
+      "sequence": 352,
+      "clients": 0
+    }
+  },
+  "publicVerification": {
+    "version": {
+      "serverVersion": "0.5.1",
+      "gameVersion": "0.5.0",
+      "clientVersion": "0.5.1",
+      "protocolVersion": 2
+    },
+    "health": {
+      "ok": true,
+      "version": 5,
+      "serverVersion": "0.5.1",
+      "gameVersion": "0.5.0",
+      "clientVersion": "0.5.1",
+      "protocolVersion": 2,
+      "revision": "skill5-traits-elites-ranking-20261029",
+      "matchId": "03c80d13-1af9-4566-931c-cd06f99ba676",
+      "sequence": 55,
+      "clients": 0
+    },
+    "signatureVerified": true,
+    "packageSize": 226903074,
+    "packageSha256": "bfcdcb417cb659e12abbe938e754ab83237a317819cb9af24801d3899e3d2756",
+    "headVerified": true,
+    "publicRangeMatchesLocal": true,
+    "desktop": {
+      "title": "榄旀硶鐜嬪骇 v0.5.1",
+      "login": true,
+      "configReceived": true,
+      "sseSequenceAdvanced": true,
+      "canvas": true,
+      "pageErrors": []
+    },
+    "repository": {
+      "title": "榄旀硶鐜嬪骇 v0.5.1",
+      "login": true,
+      "configReceived": true,
+      "sseSequenceAdvanced": true,
+      "canvas": true,
+      "pageErrors": []
+    }
+  },
+  "publicOldClientUpgrade": {
+    "previousVersion": "0.5.0",
+    "installedVersion": "0.5.1",
+    "publicDownloadCompleted": true,
+    "seededPrefixBytes": 225854498,
+    "publicBytesRequired": 1048576,
+    "signatureVerified": true,
+    "publishedBundleMatched": true,
+    "profilePreserved": true
+  },
+  "tests": {
+    "nodePassed": 465,
+    "windowsSkippedLinuxTests": 3,
+    "browserPassed": 26,
+    "packagedDesktopPassed": 5,
+    "linuxHotUpdatePassed": 17
+  },
+  "serverZipSha256": "3e28ab78a6d0297126131ff1057e61f5000059b3325ff1dbc80c749e577c32b2",
+  "limits": [
+    "Production baseline installed by one regular restart; preserve/restart hot activation verified in Linux isolation, not by another production update.",
+    "Public old-client upgrade resumed final 1048576 bytes; full signed transfer and retained encrypted login verified on an isolated local feed.",
+    "Official old client 75 files matched remote official ZIP; reconstructed from identical new-package files and exact sparse file patches."
+  ]
+}
