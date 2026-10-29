@@ -3,10 +3,12 @@ export function mountGameLayout(){
  const viewport=document.querySelector('#gameViewport'),game=document.querySelector('.game');
  const resize=()=>{
   const availableWidth=document.documentElement.clientWidth,availableHeight=document.documentElement.clientHeight;
-  const desktop=availableWidth>=1040,padding=desktop?48:0;
-  const width=Math.max(280,Math.min(640,availableWidth-(desktop?440:0),(availableHeight-padding)*640/1136));
+  const desktop=availableWidth>=1040,tablet=availableWidth>=700;
+  const padding=desktop?48:tablet?32:0,sideWidth=desktop?652:tablet?248:0;
+  const width=Math.max(280,Math.min(640,availableWidth-sideWidth,(availableHeight-padding)*640/1136));
   const scale=width/640;viewport.style.width=width+'px';viewport.style.height=1136*scale+'px';
   game.style.transform=`scale(${scale})`;document.documentElement.style.setProperty('--game-scale',scale);
+  document.documentElement.style.setProperty('--game-height',1136*scale+'px');
   window.dispatchEvent(new Event('game-layout-resize'));
  };
  window.addEventListener('resize',resize);resize();
