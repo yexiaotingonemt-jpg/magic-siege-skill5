@@ -1,0 +1,139 @@
+{
+  "publishedVersion": "0.5.3",
+  "gameVersion": "0.5.0",
+  "protocolVersion": 3,
+  "sourceCommit": "a12077104a40818bee20b6f9b1e0f78dda3357a7",
+  "pr": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5/pull/6",
+  "deployment": {
+    "deployment": {
+      "ok": true,
+      "at": "2026-10-29T03:38:15.667Z",
+      "previous": "/home/colleague/apps/magic-siege-skill5/releases/github-v0.5.2-20261029T032223Z",
+      "releaseDir": "/home/colleague/apps/magic-siege-skill5/releases/hot-08c95d93-6d38-487b-bf35-e385747149dd",
+      "baseDigest": "995dc934ca0ef22609f812cf33730f70c2aaff9e11c82a7d45c8010ce00b61fe",
+      "digest": "f79bdb024d76d2b9f8d629e7dca76d11bf73e36be811eab75f988f3d0088fd06",
+      "source": {
+        "repository": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5.git",
+        "ref": "refs/heads/main",
+        "branchHead": "a12077104a40818bee20b6f9b1e0f78dda3357a7",
+        "commit": "a12077104a40818bee20b6f9b1e0f78dda3357a7",
+        "previousCommit": "f5565f52a824af5be252550c6144f5b5f2c57a4c",
+        "verifiedAt": "2026-10-29T03:38:15.647Z"
+      },
+      "battle": "preserve",
+      "previousMatchId": "add69839-ac3c-4889-a385-9aadfa89a3c2",
+      "matchId": "add69839-ac3c-4889-a385-9aadfa89a3c2",
+      "stateSchema": 1,
+      "accountSchema": 1,
+      "serverVersion": "0.5.3",
+      "clientVersion": "0.5.3",
+      "gameVersion": "0.5.0",
+      "protocolVersion": 3,
+      "revision": "skill5-traits-elites-ranking-20261029",
+      "reloads": 1,
+      "changed": 5,
+      "removed": 0,
+      "verified": true
+    },
+    "backup": "/home/colleague/apps/magic-siege-skill5/shared/backups/pre-v0.5.3-hot-20261029T033749Z",
+    "previousDirectory": "/home/colleague/apps/magic-siege-skill5/releases/github-v0.5.2-20261029T032223Z",
+    "currentDirectory": "/home/colleague/apps/magic-siege-skill5/releases/hot-08c95d93-6d38-487b-bf35-e385747149dd",
+    "pidBefore": 3066875,
+    "pidAfter": 3066875,
+    "processPreserved": true,
+    "matchPreserved": true,
+    "health": {
+      "ok": true,
+      "version": 5,
+      "serverVersion": "0.5.3",
+      "gameVersion": "0.5.0",
+      "clientVersion": "0.5.3",
+      "protocolVersion": 3,
+      "revision": "skill5-traits-elites-ranking-20261029",
+      "matchId": "add69839-ac3c-4889-a385-9aadfa89a3c2",
+      "sequence": 98,
+      "clients": 0
+    },
+    "accountsBefore": 13,
+    "accountsAfter": 13,
+    "accountSha256Before": "338236cd1db413fb1bf595a57424c26f59cf89155401457b839a56edf5156b59",
+    "accountSha256After": "338236cd1db413fb1bf595a57424c26f59cf89155401457b839a56edf5156b59",
+    "originalAccountsPreserved": true,
+    "cronUnchanged": true,
+    "verifiedAt": "2026-10-29T03:38:15.797989+00:00"
+  },
+  "production": {
+    "version": {
+      "serverVersion": "0.5.3",
+      "gameVersion": "0.5.0",
+      "clientVersion": "0.5.3",
+      "protocolVersion": 3
+    },
+    "checks": [
+      {
+        "release": "0.5.0",
+        "status": 409
+      },
+      {
+        "release": "0.5.1",
+        "status": 409
+      },
+      {
+        "release": "0.5.2",
+        "status": 409
+      },
+      {
+        "endpoint": "win32-x64",
+        "method": "GET",
+        "status": 410
+      },
+      {
+        "endpoint": "win32-x64",
+        "method": "HEAD",
+        "status": 410
+      },
+      {
+        "endpoint": "win32-x64/package.zip",
+        "method": "GET",
+        "status": 410
+      },
+      {
+        "endpoint": "win32-x64/package.zip",
+        "method": "HEAD",
+        "status": 410
+      }
+    ],
+    "actualDesktopDefaultServer": true,
+    "existingAccountLogin": true,
+    "noQaAccountsCreated": true,
+    "configLoaded": true,
+    "canvasRendered": true,
+    "sseProgress": true,
+    "reloadAndLogout": true,
+    "manualUpdatesOnly": true,
+    "matchId": "add69839-ac3c-4889-a385-9aadfa89a3c2",
+    "errors": []
+  },
+  "repository": {
+    "manifestFiles": 13,
+    "prebuiltFiles": 5,
+    "launcherPrepared": true,
+    "actualRepositoryRuntime": true,
+    "upgradeDoesNotInterrupt": true,
+    "readOnlyDetails": true,
+    "countAndCandidatesRetained": true
+  },
+  "tests": {
+    "windowsLogicPassed": 462,
+    "windowsLinuxOnlySkipped": 3,
+    "browserPassed": 29,
+    "packagedDesktopPassed": 6,
+    "linuxHotUpdatePassed": 17
+  },
+  "clientZip": "magic-siege-desktop-v0.5.3-win-x64-20261029032943353.zip",
+  "clientSha256": "bb183ab0a13082e1bf02f0e5f62740363657c2c5873d0c764d21b8e2c4f42941",
+  "serverZip": "magic-siege-server-v0.5.3-20261029033340605.zip",
+  "serverSha256": "d74e5b66fe6fb6a4f1439452192b87dfebc373c976b451171c33ef6a5c442c93",
+  "postLoginAccountFileUnchanged": true,
+  "postLoginMatchPreserved": true
+}
