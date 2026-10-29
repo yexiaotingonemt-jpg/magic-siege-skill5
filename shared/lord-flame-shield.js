@@ -17,7 +17,7 @@ export function applyFlameShield(sim,field,from=field.previous||field.owner){
   .sort((a,b)=>Number(b.id===selected?.id)-Number(a.id===selected?.id)||segmentDistance(a,from,owner)-segmentDistance(b,from,owner)||a.id-b.id).slice(0,s.targets);
  for(const target of targets){
   const old=sim.fields.find(f=>f.kind==='dot'&&f.type==='lordScorch'&&f.owner.id===owner.id&&f.host===target.id);
-  if(old){old.until=sim.time+(s.burnDuration??s.duration);old.s=s;}
+  if(old){old.until=sim.time+(s.burnDuration??s.duration);if(s.power>=old.s.power)old.s=s;}
   else sim.fields.push({kind:'dot',type:'lordScorch',owner,host:target.id,x:target.x,y:target.y,side:owner.side,s,start:sim.time,until:sim.time+(s.burnDuration??s.duration),tick:sim.time+1});
  }
  field.x=owner.x;field.y=owner.y;field.previous={x:owner.x,y:owner.y};

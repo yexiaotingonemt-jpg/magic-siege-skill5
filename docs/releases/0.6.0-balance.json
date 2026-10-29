@@ -1,0 +1,431 @@
+{
+  "scope": "isolated-auto-combat",
+  "limitations": "无小兵、无塔支援；体力1000排除断粮；同级、按实际选择次数形成随机构筑，自动施法。不是多人实战胜率或固定60秒承诺。",
+  "rows": [
+    {
+      "level": 1,
+      "seed": 3,
+      "attackers": 2,
+      "seconds": 60.5,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 50
+    },
+    {
+      "level": 1,
+      "seed": 3,
+      "attackers": 3,
+      "seconds": 63,
+      "lordAlive": false,
+      "attackersAlive": 3,
+      "casts": 70
+    },
+    {
+      "level": 1,
+      "seed": 71,
+      "attackers": 2,
+      "seconds": 60.5,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 50
+    },
+    {
+      "level": 1,
+      "seed": 71,
+      "attackers": 3,
+      "seconds": 62,
+      "lordAlive": false,
+      "attackersAlive": 3,
+      "casts": 70
+    },
+    {
+      "level": 1,
+      "seed": 1234,
+      "attackers": 2,
+      "seconds": 60.5,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 50
+    },
+    {
+      "level": 1,
+      "seed": 1234,
+      "attackers": 3,
+      "seconds": 62,
+      "lordAlive": false,
+      "attackersAlive": 3,
+      "casts": 70
+    },
+    {
+      "level": 5,
+      "seed": 3,
+      "attackers": 2,
+      "seconds": 70.15,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 54
+    },
+    {
+      "level": 5,
+      "seed": 3,
+      "attackers": 3,
+      "seconds": 56.75,
+      "lordAlive": false,
+      "attackersAlive": 3,
+      "casts": 64
+    },
+    {
+      "level": 5,
+      "seed": 71,
+      "attackers": 2,
+      "seconds": 70,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 54
+    },
+    {
+      "level": 5,
+      "seed": 71,
+      "attackers": 3,
+      "seconds": 64.05,
+      "lordAlive": false,
+      "attackersAlive": 3,
+      "casts": 73
+    },
+    {
+      "level": 5,
+      "seed": 1234,
+      "attackers": 2,
+      "seconds": 70.15,
+      "lordAlive": false,
+      "attackersAlive": 2,
+      "casts": 61
+    },
+    {
+      "level": 5,
+      "seed": 1234,
+      "attackers": 3,
+      "seconds": 58.65,
+      "lordAlive": false,
+      "attackersAlive": 3,
+      "casts": 66
+    },
+    {
+      "level": 10,
+      "seed": 3,
+      "attackers": 2,
+      "seconds": 64.05,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 50
+    },
+    {
+      "level": 10,
+      "seed": 3,
+      "attackers": 3,
+      "seconds": 61,
+      "lordAlive": false,
+      "attackersAlive": 3,
+      "casts": 71
+    },
+    {
+      "level": 10,
+      "seed": 71,
+      "attackers": 2,
+      "seconds": 70.15,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 53
+    },
+    {
+      "level": 10,
+      "seed": 71,
+      "attackers": 3,
+      "seconds": 64.05,
+      "lordAlive": false,
+      "attackersAlive": 3,
+      "casts": 74
+    },
+    {
+      "level": 10,
+      "seed": 1234,
+      "attackers": 2,
+      "seconds": 70.15,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 55
+    },
+    {
+      "level": 10,
+      "seed": 1234,
+      "attackers": 3,
+      "seconds": 88.45,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 81
+    },
+    {
+      "level": 20,
+      "seed": 3,
+      "attackers": 2,
+      "seconds": 73.2,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 54
+    },
+    {
+      "level": 20,
+      "seed": 3,
+      "attackers": 3,
+      "seconds": 51.85,
+      "lordAlive": false,
+      "attackersAlive": 3,
+      "casts": 60
+    },
+    {
+      "level": 20,
+      "seed": 71,
+      "attackers": 2,
+      "seconds": 51.05,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 39
+    },
+    {
+      "level": 20,
+      "seed": 71,
+      "attackers": 3,
+      "seconds": 89.1,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 83
+    },
+    {
+      "level": 20,
+      "seed": 1234,
+      "attackers": 2,
+      "seconds": 67.45,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 51
+    },
+    {
+      "level": 20,
+      "seed": 1234,
+      "attackers": 3,
+      "seconds": 64.05,
+      "lordAlive": false,
+      "attackersAlive": 3,
+      "casts": 72
+    },
+    {
+      "level": 30,
+      "seed": 3,
+      "attackers": 2,
+      "seconds": 74.8,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 54
+    },
+    {
+      "level": 30,
+      "seed": 3,
+      "attackers": 3,
+      "seconds": 61,
+      "lordAlive": false,
+      "attackersAlive": 3,
+      "casts": 72
+    },
+    {
+      "level": 30,
+      "seed": 71,
+      "attackers": 2,
+      "seconds": 70.15,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 54
+    },
+    {
+      "level": 30,
+      "seed": 71,
+      "attackers": 3,
+      "seconds": 58.65,
+      "lordAlive": false,
+      "attackersAlive": 3,
+      "casts": 67
+    },
+    {
+      "level": 30,
+      "seed": 1234,
+      "attackers": 2,
+      "seconds": 76.25,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 58
+    },
+    {
+      "level": 30,
+      "seed": 1234,
+      "attackers": 3,
+      "seconds": 85.4,
+      "lordAlive": false,
+      "attackersAlive": 1,
+      "casts": 88
+    },
+    {
+      "level": 40,
+      "seed": 3,
+      "attackers": 2,
+      "seconds": 76.75,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 55
+    },
+    {
+      "level": 40,
+      "seed": 3,
+      "attackers": 3,
+      "seconds": 54.9,
+      "lordAlive": false,
+      "attackersAlive": 3,
+      "casts": 64
+    },
+    {
+      "level": 40,
+      "seed": 71,
+      "attackers": 2,
+      "seconds": 79.8,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 59
+    },
+    {
+      "level": 40,
+      "seed": 71,
+      "attackers": 3,
+      "seconds": 61,
+      "lordAlive": false,
+      "attackersAlive": 3,
+      "casts": 70
+    },
+    {
+      "level": 40,
+      "seed": 1234,
+      "attackers": 2,
+      "seconds": 48.3,
+      "lordAlive": true,
+      "attackersAlive": 0,
+      "casts": 37
+    },
+    {
+      "level": 40,
+      "seed": 1234,
+      "attackers": 3,
+      "seconds": 57.9,
+      "lordAlive": false,
+      "attackersAlive": 3,
+      "casts": 67
+    }
+  ],
+  "summary": [
+    {
+      "level": 1,
+      "attackers": 2,
+      "min": 60.5,
+      "max": 60.5,
+      "lordDeaths": 0,
+      "samples": 3
+    },
+    {
+      "level": 1,
+      "attackers": 3,
+      "min": 62,
+      "max": 63,
+      "lordDeaths": 3,
+      "samples": 3
+    },
+    {
+      "level": 5,
+      "attackers": 2,
+      "min": 70,
+      "max": 70.15,
+      "lordDeaths": 1,
+      "samples": 3
+    },
+    {
+      "level": 5,
+      "attackers": 3,
+      "min": 56.75,
+      "max": 64.05,
+      "lordDeaths": 3,
+      "samples": 3
+    },
+    {
+      "level": 10,
+      "attackers": 2,
+      "min": 64.05,
+      "max": 70.15,
+      "lordDeaths": 0,
+      "samples": 3
+    },
+    {
+      "level": 10,
+      "attackers": 3,
+      "min": 61,
+      "max": 88.45,
+      "lordDeaths": 2,
+      "samples": 3
+    },
+    {
+      "level": 20,
+      "attackers": 2,
+      "min": 51.05,
+      "max": 73.2,
+      "lordDeaths": 0,
+      "samples": 3
+    },
+    {
+      "level": 20,
+      "attackers": 3,
+      "min": 51.85,
+      "max": 89.1,
+      "lordDeaths": 2,
+      "samples": 3
+    },
+    {
+      "level": 30,
+      "attackers": 2,
+      "min": 70.15,
+      "max": 76.25,
+      "lordDeaths": 0,
+      "samples": 3
+    },
+    {
+      "level": 30,
+      "attackers": 3,
+      "min": 58.65,
+      "max": 85.4,
+      "lordDeaths": 3,
+      "samples": 3
+    },
+    {
+      "level": 40,
+      "attackers": 2,
+      "min": 48.3,
+      "max": 79.8,
+      "lordDeaths": 0,
+      "samples": 3
+    },
+    {
+      "level": 40,
+      "attackers": 3,
+      "min": 54.9,
+      "max": 61,
+      "lordDeaths": 3,
+      "samples": 3
+    }
+  ],
+  "release": "0.6.0",
+  "revision": "skill5-synergy-common-traits-20261029",
+  "readAt": "2026-10-29T11:50:03.738Z"
+}

@@ -22,17 +22,17 @@ test('领主冲锋范围18格包含边界，范围外不选取',()=>{
  enemy.y=-18.001;assert.equal(s.castPlan(1,p).ok,false);enemy.y=-17;assert.equal(s.castPlan(1,p).t.id,enemy.id);
  assert.match(describeAbilities(s).skills[1].summary,/18格/);
 });
-test('火焰盾减伤35%，离开后独立灼烧4秒，结算4次40%攻击伤害',()=>{
+test('火焰盾减伤35%，离开后独立灼烧4秒，结算4次45%攻击伤害',()=>{
  const {s,p,h,make}=arena(),enemy=make(0,3),hp=enemy.hp;assert.ok(s.cast(2,p));advance(s,.4);
  const selfHp=h.hp;s.damage(enemy,h,100);near(selfHp-h.hp,65);assert.equal(burns(s,enemy).length,1);
  const burn=burns(s,enemy)[0],lastUntil=burn.until;enemy.y=15;near(enemy.hp,hp);
- advance(s,1);near(hp-enemy.hp,h.attack*.4);assert.equal(unitStatuses(s,enemy)[0].name,'灼烧');
- advance(s,5.1);near(hp-enemy.hp,h.attack*1.6);assert.ok(s.time>lastUntil);assert.equal(burns(s,enemy).length,0);
+ advance(s,1);near(hp-enemy.hp,h.attack*.45);assert.equal(unitStatuses(s,enemy)[0].name,'灼烧');
+ advance(s,5.1);near(hp-enemy.hp,h.attack*1.8);assert.ok(s.time>lastUntil);assert.equal(burns(s,enemy).length,0);
 });
 test('连续接触只刷新期限、不叠层、不推迟每秒跳伤',()=>{
  const {s,p,h,make}=arena(),enemy=make(0,3),hp=enemy.hp;s.cast(2,p);advance(s,.4);const tick=burns(s,enemy)[0].tick;
- advance(s,.8);near(burns(s,enemy)[0].tick,tick);advance(s,.2);near(hp-enemy.hp,h.attack*.4);assert.equal(burns(s,enemy).length,1);
- advance(s,1);near(hp-enemy.hp,h.attack*.8);assert.ok(burns(s,enemy)[0].until>s.time+3.9);
+ advance(s,.8);near(burns(s,enemy)[0].tick,tick);advance(s,.2);near(hp-enemy.hp,h.attack*.45);assert.equal(burns(s,enemy).length,1);
+ advance(s,1);near(hp-enemy.hp,h.attack*.9);assert.ok(burns(s,enemy)[0].until>s.time+3.9);
 });
 test('先火焰盾再18格突进：沿途与终点挂灼烧，离开后继续跳伤',()=>{
  const {s,p,h,make}=arena(),first=make(0,-4),middle=make(0,-9),far=make(0,-17),hp=first.hp;

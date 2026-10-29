@@ -25,15 +25,18 @@ const directedEnemy = (h, i) =>
   h.classId === 2 ||
   (h.classId === 3 && i < 2) ||
   h.classId === 4 ||
-  (h.classId === 5 && i === 0);
-const friendlySkill = (h,i) => (h.classId === 5 && i >= 1) || (h.classId === 0 && (i === 1 || i === 2));
-const skillTarget = (sim,h,i) =>
-  friendlySkill(h,i) ? targetForSide(sim,h,h.side)
-  : directedEnemy(h,i) ? targetForSide(sim,h,1-h.side)
-  : h;
+  false;
+const friendlySkill = (h, i) =>
+  h.classId === 5 || (h.classId === 0 && (i === 1 || i === 2));
+const skillTarget = (sim, h, i) =>
+  friendlySkill(h, i)
+    ? targetForSide(sim, h, h.side)
+    : directedEnemy(h, i)
+      ? targetForSide(sim, h, 1 - h.side)
+      : h;
 // Keep applicable explicit selections locked even when a nearer target exists.
 export function skill5RangeFailure(sim, h, i, s) {
-  const support = friendlySkill(h,i);
+  const support = friendlySkill(h, i);
   const chosen = skillTarget(sim, h, i);
   if (directedEnemy(h, i) && !chosen)
     return { ok: false, code: "target", reason: "请选择敌方目标" };
@@ -41,8 +44,10 @@ export function skill5RangeFailure(sim, h, i, s) {
     const bad = (reason) => ({ ok: false, code: "wrong-target", reason });
     if (!chosen) return bad("范围内没有符合条件的己方目标");
     if (chosen.tower) return bad("该技能不能对建筑释放");
-    if (h.classId === 5 && i === 1 && chosen.id === h.id) return bad("共生链接不能选择自己");
-    if (h.classId === 0 && i === 2 && chosen.id === h.id) return bad("换位救援不能选择自己");
+    if (h.classId === 5 && i === 1 && chosen.id === h.id)
+      return bad("共生链接不能选择自己");
+    if (h.classId === 0 && i === 2 && chosen.id === h.id)
+      return bad("换位救援不能选择自己");
     if (d(h, chosen) > s.targetRange + 1e-7)
       return { ok: false, code: "range", reason: "目标太远" };
     if (h.classId === 5 && i === 2 && !sim.hasNegative(chosen))
@@ -89,26 +94,15 @@ export function selectSkill5(h, i, s) {
     if (i === 0) {
       t = selected || near(h, es)[0];
       if (!t) return bad("范围内没有重击目标");
-      targets =
-        s.targets > 1
-          ? prefer(
+      targets = t
+        ? [
+            t,
+            ...near(
               t,
-              near(
-                h,
-                es.filter((u) => {
-                  const a = d(h, u),
-                    b = d(h, t);
-                  return (
-                    a < 1e-7 ||
-                    b < 1e-7 ||
-                    ((u.x - h.x) * (t.x - h.x) + (u.y - h.y) * (t.y - h.y)) /
-                      (a * b) >=
-                      Math.SQRT1_2
-                  );
-                }),
-              ),
-            ).slice(0, s.targets)
-          : [t];
+              es.filter((u) => u.id !== t.id && d(t, u) <= s.radius),
+            ).slice(0, s.targets - 1),
+          ]
+        : [];
       selectedId = selected?.id;
     }
     if (i === 1) {
@@ -127,9 +121,9 @@ export function selectSkill5(h, i, s) {
     }
     if (i === 2) {
       if (!friend || friend.id === h.id) return bad("没有可换位的己方目标");
-      if (!es.some((u) => u.hero && u.targetId === friend.id))
-        return bad("友方目标未被范围内的敌方英雄攻击");
-      t = friend; targets = [friend]; selectedId = friend.id;
+      t = friend;
+      targets = [friend];
+      selectedId = friend.id;
     }
     if (i === 3) t = h;
   } else if (h.classId === 2) {
@@ -144,11 +138,13 @@ export function selectSkill5(h, i, s) {
         dx = len ? (t.x - h.x) / len : 0,
         dy = len ? (t.y - h.y) / len : h.side ? -1 : 1;
       targets = prefer(
-        selected,
+        t,
         es.filter(
           (u) =>
-            d(h, u) < 1e-7 ||
-            ((u.x - h.x) * dx + (u.y - h.y) * dy) / d(h, u) >= 0.35,
+            d(t, u) <= s.radius + 1e-7 &&
+            (len < 1e-7 ||
+              d(h, u) < 1e-7 ||
+              ((u.x - h.x) * dx + (u.y - h.y) * dy) / d(h, u) >= 0.35),
         ),
       ).slice(0, s.targets);
       selectedId = selected?.id;
@@ -160,7 +156,7 @@ export function selectSkill5(h, i, s) {
     }
     if (i >= 2) t = h;
   } else if (h.classId === 4) {
-    if (i === 0 || i === 2) {
+    if (i === 0 || i === 1) {
       t = selected || near(h, es)[0];
       targets = t
         ? [
@@ -172,7 +168,7 @@ export function selectSkill5(h, i, s) {
           ]
         : [];
     }
-    if (i === 1) t = selected || currentEnemy || t;
+    if (i === 2) t = selected || currentEnemy || t;
     if (i === 3) {
       targets = prefer(
         selected,
@@ -184,13 +180,10 @@ export function selectSkill5(h, i, s) {
     if (!t) return bad("范围内没有可攻击目标");
   } else if (h.classId === 5) {
     if (i === 0) {
-      t = selected || currentEnemy || t;
-      if (!t) return bad("范围内没有灵息冲击目标");
-      const ally = friendlyTarget(this, h);
-      selectedId =
-        ally && !ally.tower && d(t, ally) <= s.radius + 1e-7
-          ? ally.id
-          : selected?.id;
+      t = friend;
+      if (!t) return bad("请选择需要治疗的友方目标");
+      targets = [t];
+      selectedId = t.id;
     }
     if (i === 1) {
       t =
@@ -276,6 +269,7 @@ const hit = (sim, h, s, u, power = s.power, scale = 1, extra = {}) =>
         s.skill === 0 &&
         !!(s.ranks?.F04 ?? sim.rank(h, "F04")),
       bonus: s.bonusDamage || 0,
+      area: (s.targets || 1) > 1,
       ...extra,
     },
   );
@@ -297,20 +291,29 @@ export function resolveSkill5(h, i, s, locked, ids = [], extra = {}) {
     this.guard(u, h, kind, ratio, duration, more);
   if (h.classId === 0) {
     if (i === 0) {
-      let total = 0;
+      // 非引导链接：可移动和使用其他技能；同一施法者重放只刷新，不叠层。
+      const hosts = new Set(targets.map((u) => u.id));
+      this.fields = this.fields.filter(
+        (f) =>
+          !(
+            f.kind === "dot" &&
+            f.type === "orcDrain" &&
+            f.owner.id === h.id &&
+            !hosts.has(f.host)
+          ),
+      );
       for (let j = 0; j < targets.length; j++) {
-        const u = targets[j];
-        total += hit(this, h, s, u, s.power, ids.indexOf(u.id) > 0 ? 0.3 : 1);
-        this.debuff(u, h, "vulnerable", r("O02") * 0.05, 4, s.value);
-      }
-      if (r("O03"))
-        this.shield(
+        const u = targets[j],
+          scale = ids.indexOf(u.id) > 0 ? 0.35 : 1;
+        this.dot(
           h,
-          Math.min(h.maxHp * 0.3, total * 0.2 * r("O03")),
-          h,
-          6,
-          s.value,
+          u,
+          "orcDrain",
+          { ...s, power: s.power * scale, drainRatio: s.drainRatio },
+          s.duration,
         );
+        this.debuff(u, h, "vulnerable", r("O02") * 0.05, s.duration, s.value);
+      }
     }
     if (i === 1)
       for (const u of targets) {
@@ -325,14 +328,14 @@ export function resolveSkill5(h, i, s, locked, ids = [], extra = {}) {
       this.moveUnit(h, t.x, t.y);
       this.moveUnit(t, old.x, old.y);
       guard(h, "orcRescue", s.damageReduction, s.duration);
-      this.heal(t, A * 1.5 * r("O10"), h, s.value);
-      if (r("O11")) this.explode(h, h, 3, 3, A * 2 * r("O11"), s.value);
+      this.heal(t, A * 2 * r("O10"), h, s.value);
+      if (r("O11")) this.explode(h, h, 3, 3, A * 2.5 * r("O11"), s.value);
       if (r("O12"))
         for (const u of targetsAt(this, h, h, 3, 5))
           if (!u.tower && !(u.immuneUntil > this.time)) {
             this.interrupt(u);
             u.tauntId = h.id;
-            u.tauntUntil = this.time + 1.5;
+            u.tauntUntil = this.time + 2;
           }
       event.swapFrom = old;
       event.to = { x: h.x, y: h.y };
@@ -343,6 +346,7 @@ export function resolveSkill5(h, i, s, locked, ids = [], extra = {}) {
         total: 0,
         shieldDuration: s.shieldDuration,
         conversionRatio: 1,
+        storeCap: s.storeCap,
         value: s.value,
         friends: near(
           h,
@@ -354,11 +358,11 @@ export function resolveSkill5(h, i, s, locked, ids = [], extra = {}) {
         share: r("O14") * 0.1,
       };
       if (r("O13")) this.shield(h, h.maxHp * 0.05 * r("O13"), h, 5, s.value);
-      if (r("O16")) h.immortalUntil = this.time + 5;
+      if (r("O16")) h.immortalUntil = this.time + s.duration;
     }
   }
   if (h.classId === 2) {
-    if (i === 2) {
+    if (i === 3) {
       h.channelUntil = this.time + s.duration;
       this.fields.push({
         kind: "runeBarrage",
@@ -393,7 +397,17 @@ export function resolveSkill5(h, i, s, locked, ids = [], extra = {}) {
   if (h.classId === 3) {
     if (i === 0) {
       for (const u of targets) {
+        const burning =
+          this.fields.some(
+            (f) =>
+              f.kind === "dot" &&
+              f.type === "lordScorch" &&
+              f.host === u.id &&
+              f.owner.id === h.id &&
+              f.until > this.time,
+          ) && !(u.immuneUntil > this.time);
         hit(this, h, s, u);
+        if (burning && u.hp > 0) hit(this, h, s, u, s.burnBonusPower);
         this.debuff(u, h, "moveSlow", r("L03") * 0.15, 3, s.value);
       }
       if (r("L04")) {
@@ -408,6 +422,7 @@ export function resolveSkill5(h, i, s, locked, ids = [], extra = {}) {
               if (
                 distance > s.targetRange + 1e-7 ||
                 (distance > 1e-7 &&
+                  Math.hypot(direction.x, direction.y) > 1e-7 &&
                   ((u.x - origin.x) * direction.x +
                     (u.y - origin.y) * direction.y) /
                     (distance * len) <
@@ -473,30 +488,48 @@ export function resolveSkill5(h, i, s, locked, ids = [], extra = {}) {
     if (i === 0) {
       for (const u of targets) {
         hit(this, h, s, u);
-        if (r("F02")) applyBurn(this, h, s, u, "fireBurn", 40 * r("F02"), 4);
+        this.debuff(u, h, "attackDown", r("F02") * 0.05, 4, s.value);
       }
       if (t && r("F03"))
         for (const u of targetsAt(this, h, t, 3, r("F03") + 1, t).filter(
           (u) => u.id !== t.id,
         )) {
           hit(this, h, s, u, s.power, 0.35);
-          if (r("F02"))
-            applyBurn(this, h, s, u, "fireBurn", 40 * r("F02") * 0.35, 4);
+          this.debuff(u, h, "attackDown", r("F02") * 0.05, 4, s.value);
         }
       this.addHeat(h, 1);
     }
-    if (i === 1 && t) {
-      const hot = (h.heat || 0) >= s.heatThreshold,
-        es = hot ? targetsAt(this, h, t, s.radius, s.targets + 1, t) : [t],
-        isolated =
-          hot &&
-          (r("F08") ? piercingTargetCount(this, h, at) === 1 : es.length === 1);
+    if (i === 1)
+      for (let j = 0; j < targets.length; j++) {
+        const u = targets[j],
+          scale = ids.indexOf(u.id) > 0 ? 0.45 : 1;
+        u.soulMarks ??= [];
+        u.soulMarks = u.soulMarks.filter((m) => m.ownerId !== h.id);
+        u.soulMarks.push({
+          ownerId: h.id,
+          until: this.time + s.duration,
+          heat: s.heatOnDeath,
+          attack: A,
+          bonus: s.bonusDamage,
+          scale,
+          explode: !!r("F12"),
+          value: s.value,
+        });
+        this.debuff(u, h, "vulnerable", r("F10") * 0.05, s.duration, s.value);
+        hit(this, h, s, u, s.power, scale);
+      }
+    if (i === 2 && t) {
+      const hot = (extra.heat ?? h.heat ?? 0) >= s.heatThreshold;
+      const es = hot ? targetsAt(this, h, t, s.radius, s.targets, t) : [t];
+      const isolated = r("F08")
+        ? piercingTargetCount(this, h, at) === 1
+        : es.length === 1;
       const fire = {
         ...s,
-        power: hot ? s.hotPower : s.power,
-        bonusDamage: s.bonusDamage + (isolated ? r("F06") * 0.3 : 0),
+        bonusDamage: s.bonusDamage + (isolated ? r("F06") * 0.25 : 0),
+        knockback: r("F07") * 0.6,
       };
-      if (hot && r("F08")) {
+      if (r("F08")) {
         const len = d(h, at) || 1;
         this.fields.push({
           kind: "piercingFire",
@@ -508,47 +541,40 @@ export function resolveSkill5(h, i, s, locked, ids = [], extra = {}) {
           dy: (at.y - h.y) / len,
           travel: 0,
           primaryId: t.id,
+          primaryIds: es.map((u) => u.id),
           hits: {},
           until: this.time + 3,
           start: this.time,
           last: this.time,
         });
-      } else {
-        hit(this, h, fire, t);
-        if (hot) {
-          event.bigFireball = true;
-          for (const u of es.filter((u) => u.id !== t.id))
-            hit(this, h, s, u, s.splashPower);
+      } else
+        for (const u of es) {
+          hit(this, h, fire, u);
+          if (hot) event.bigFireball = true;
+          if (
+            u.hp > 0 &&
+            !u.tower &&
+            !(u.immuneUntil > this.time) &&
+            fire.knockback
+          ) {
+            const len = d(h, u) || 1;
+            this.interrupt(u);
+            this.moveUnit(
+              u,
+              u.x + ((u.x - h.x) / len) * fire.knockback,
+              u.y + ((u.y - h.y) / len) * fire.knockback,
+            );
+          }
         }
-      }
+      event.targets = es.map((u) => ({ id: u.id, x: u.x, y: u.y }));
     }
-    if (i === 2)
-      for (let j = 0; j < targets.length; j++) {
-        const u = targets[j],
-          scale = ids.indexOf(u.id) > 0 ? 0.3 : 1;
-        u.soulMarks ??= [];
-        u.soulMarks = u.soulMarks.filter((m) => m.ownerId !== h.id);
-        u.soulMarks.push({
-          ownerId: h.id,
-          until: this.time + s.duration,
-          heat: 2,
-          attack: A,
-          bonus: s.bonusDamage,
-          scale,
-          explode: !!r("F12"),
-          value: s.value,
-        });
-        this.debuff(u, h, "vulnerable", r("F10") * 0.05, 5, s.value);
-        hit(this, h, s, u, s.power, scale);
-      }
     if (i === 3) {
       const consumed = Math.min(h.heat || 0, extra.heat || 0);
       h.heat = Math.max(0, (h.heat || 0) - consumed);
       this.heatBoost(h, consumed);
       const full = 1 + Math.floor((extra.heat || 0) / s.heatStep);
-      for (let j = 0; j < targets.length; j++) {
-        const u = targets[j];
-        hit(this, h, s, u, s.power, ids.indexOf(u.id) < full ? 1 : 0.15);
+      for (const u of targets) {
+        hit(this, h, s, u, s.power, ids.indexOf(u.id) < full ? 1 : 0.35);
         if (
           u.hp > 0 &&
           !u.tower &&
@@ -569,23 +595,32 @@ export function resolveSkill5(h, i, s, locked, ids = [], extra = {}) {
     }
   }
   if (h.classId === 5) {
-    const pulse = (u, scale) => {
-      hit(this, h, s, u, s.power, scale);
-      this.debuff(u, h, "vulnerable", r("E03") * 0.1, 4, s.value);
-      const cs = near(u, this.allies({ ...u, side: h.side }, s.radius));
-      for (const v of prefer(
-        cs.find((v) => v.id === extra.manualTargetId),
-        cs,
-      ).slice(0, s.targets))
-        this.heal(v, ((A * s.healPower) / 100) * scale, h, s.value);
-    };
     if (i === 0 && t) {
-      pulse(t, 1);
+      const amount = ((A * s.healPower) / 100) * (1 + s.bonusDamage);
+      this.heal(t, amount, h, s.value);
+      const enemies = targetsAt(this, h, t, s.radius, s.targets);
+      for (const u of enemies) {
+        this.damage(h, u, amount, false, false, {
+          value: s.value,
+          area: enemies.length > 1,
+        });
+        this.debuff(u, h, "vulnerable", r("E03") * 0.1, 4, s.value);
+      }
+      event.targets = enemies.map((u) => ({ id: u.id, x: u.x, y: u.y }));
+      event.haloTargets = [{ id: t.id }];
       if (r("E04")) {
-        const second = targetsAt(this, h, t, 3, 2, t).find(
-          (u) => u.id !== t.id,
-        );
-        if (second) pulse(second, 0.6);
+        const second = this.allies({ ...t, side: h.side }, s.radius)
+          .filter((u) => u.id !== t.id)
+          .sort(
+            (a, b) =>
+              a.hp / a.maxHp - b.hp / b.maxHp ||
+              d(t, a) - d(t, b) ||
+              a.id - b.id,
+          )[0];
+        if (second) {
+          this.heal(second, amount * 0.6, h, s.value);
+          event.haloTargets.push({ id: second.id });
+        }
       }
     }
     if (i === 1 && t) {
@@ -609,20 +644,14 @@ export function resolveSkill5(h, i, s, locked, ids = [], extra = {}) {
           until: this.time + s.duration,
           shareRatio: j ? 0.25 : s.shareRatio,
           value: s.value,
+          breakRange: s.targetRange,
+          shareDamage: !!r("E08"),
         });
         if (r("E05")) guard(u, "elfLink", r("E05") * 0.03, s.duration);
         if (r("E07")) this.haste(u, "elfLink", r("E07") * 0.12, s.duration);
       });
       h.linkId = t.id;
       h.linkUntil = this.time + s.duration;
-      if (r("E08"))
-        this.fields.push({
-          kind: "linkRegen",
-          owner: h,
-          s,
-          until: this.time + s.duration,
-          tick: this.time + 1,
-        });
     }
     if (i === 2 && targets.length) {
       h.hp = Math.max(1, h.hp * (1 - s.hpCost));
@@ -684,7 +713,7 @@ export function impactSkill4(b) {
     at = { x: b.tx, y: b.ty, side: h.side },
     r = (id) => s.ranks?.[id] ?? this.rank(h, id),
     es =
-      s.skill === 3
+      s.skill === 2
         ? targetsAt(this, h, at, s.radius, s.targets, t)
         : t
           ? [t]
@@ -708,14 +737,23 @@ export function impactSkill4(b) {
   }
   if (s.skill === 1 && t) {
     hit(this, h, s, t);
-    this.debuff(
-      t,
-      h,
-      "attackSpeedDown",
-      s.attackSpeedDown,
-      s.duration,
-      s.value,
-    );
+    if (
+      this.fields.some(
+        (f) =>
+          f.kind === "dot" &&
+          f.type === "corrosion" &&
+          f.host === t.id &&
+          f.until > this.time,
+      )
+    )
+      this.debuff(
+        t,
+        h,
+        "attackSpeedDown",
+        s.attackSpeedDown,
+        s.duration,
+        s.value,
+      );
     if (r("C07")) this.haste(h, "runeFrost", r("C07") * 0.15, 8);
     if (r("C08"))
       for (const u of targetsAt(this, h, at, 3, 4, t).filter(
@@ -723,7 +761,7 @@ export function impactSkill4(b) {
       ))
         hit(this, h, s, u, s.power, 0.25);
   }
-  if (s.skill === 3) {
+  if (s.skill === 2) {
     for (const u of es) {
       hit(this, h, s, u);
       if (u.hp > 0 && !u.tower && !(u.immuneUntil > this.time)) {
@@ -735,7 +773,7 @@ export function impactSkill4(b) {
           u.x + ((u.x - h.x) / len) * s.knockback,
           u.y + ((u.y - h.y) / len) * s.knockback,
         );
-        if (r("C15")) hit(this, h, s, u, d(old, u) * 75 * r("C15"));
+        if (r("C15")) hit(this, h, s, u, d(old, u) * 60 * r("C15"));
       }
     }
     if (r("C16")) {
@@ -747,8 +785,8 @@ export function impactSkill4(b) {
             h,
             center,
             3,
-            5,
-            s.value.attack * 6 * (1 + s.bonusDamage),
+            4,
+            s.value.attack * 4 * (1 + s.bonusDamage),
             s.value,
           ),
       });
@@ -760,7 +798,9 @@ export function processSkill5Effects() {
     const h = f.owner,
       s = f.s;
     if (f.kind === "link") {
-      if (!this.get(f.host) || h.hp <= 0) f.until = this.time;
+      const host = this.get(f.host);
+      if (!host || h.hp <= 0 || d(h, host) > (f.breakRange ?? Infinity))
+        f.until = this.time;
       continue;
     }
     if (f.kind === "lordBurn") {
@@ -794,9 +834,19 @@ export function processSkill5Effects() {
         f.until = this.time;
         continue;
       }
+      if (f.type === "orcDrain" && (h.hp <= 0 || d(h, u) > s.breakRange)) {
+        f.until = this.time;
+        continue;
+      }
       while (f.tick <= this.time + 1e-7 && f.tick <= f.until + 1e-7) {
         f.tick++;
         if (u.immuneUntil > this.time) continue;
+        if (f.type === "orcDrain") {
+          const dealt = hit(this, h, s, u, s.power, 1, { periodic: true });
+          this.heal(h, dealt * s.drainRatio, h, s.value);
+          if (u.hp <= 0) break;
+          continue;
+        }
         if (f.type === "corrosion")
           this.damage(
             h,
@@ -812,7 +862,7 @@ export function processSkill5Effects() {
             { value: s.value },
           );
         else {
-          hit(this, h, s, u);
+          hit(this, h, s, u, s.power, 1, { periodic: true });
           if (f.type === "lordScorch")
             this.debuff(
               u,
@@ -851,12 +901,28 @@ export function processSkill5Effects() {
           s,
           u,
           s.power,
-          (u.id === f.primaryId ? 1 : 0.25) * (state.count ? 0.15 : 1),
+          ((f.primaryIds || [f.primaryId]).includes(u.id) ? 1 : 0.25) *
+            (state.count ? 0.15 : 1),
         );
+        if (
+          state.count === 0 &&
+          s.knockback &&
+          u.hp > 0 &&
+          !u.tower &&
+          !(u.immuneUntil > this.time)
+        ) {
+          const len = d(h, u) || 1;
+          this.interrupt(u);
+          this.moveUnit(
+            u,
+            u.x + ((u.x - h.x) / len) * s.knockback,
+            u.y + ((u.y - h.y) / len) * s.knockback,
+          );
+        }
         state.count++;
         state.next = this.time + 0.75;
         this.visual("impact", h, u, {
-          skill: 1,
+          skill: 2,
           bigFireball: true,
           until: this.time + 0.5,
         });
@@ -892,7 +958,7 @@ export function processSkill5Effects() {
           u,
           s.power,
           (j ? 0.35 : 1) *
-            (1 + f.index * 0.18 * (s.ranks?.C11 ?? this.rank(h, "C11"))),
+            (1 + f.index * 0.12 * (s.ranks?.C11 ?? this.rank(h, "C11"))),
         );
         if (u.hp > 0) {
           const old = u.debuffs?.[h.id + ":moveSlow"],
@@ -916,7 +982,7 @@ export function processSkill5Effects() {
       }
       if (es.length) f.index++;
       this.visual("impact", h, f, {
-        skill: 2,
+        skill: 3,
         targets: es.map((u) => ({ id: u.id, x: u.x, y: u.y })),
         until: this.time + 0.6,
       });
@@ -974,6 +1040,11 @@ export function updateSkill5Unit(u) {
           continue;
         p.hit.push(e.id);
         hit(this, u, p.s, e);
+        const burnRank = p.s.ranks?.L07 ?? this.rank(u, "L07");
+        if (burnRank && e.hp > 0) {
+          const burn = { ...p.s, power: 30 * burnRank };
+          this.dot(u, e, "lordScorch", burn, 4);
+        }
       }
     if (k === 1) {
       if (p.s.ranks?.L08 ?? this.rank(u, "L08"))
@@ -1000,7 +1071,23 @@ export function chooseSkill5(p) {
     let score = 2 + plan.targets.length;
     if (h.classId === 0 && (i === 1 || i === 3))
       score = this.enemies(h, 8).length ? 7 : 0;
-    if (h.classId === 4 && i === 3) score = (h.heat || 0) >= 4 ? 10 : 1;
+    if (h.classId === 4) {
+      if (i === 0) score = (h.heat || 0) < 3 ? 8 : 3;
+      if (i === 1)
+        score = plan.t && plan.t.hp < this.attackPower(h) * 5 ? 9 : 4;
+      if (i === 2) score = (h.heat || 0) >= 3 ? 8 : 2;
+      if (i === 3) score = (h.heat || 0) >= 4 ? 10 : 1;
+    }
+    if (
+      h.classId === 3 &&
+      i === 0 &&
+      this.fields.some(
+        (f) =>
+          f.type === "lordScorch" && f.owner.id === h.id && f.until > this.time,
+      )
+    )
+      score = 8;
+    if (h.classId === 5 && i === 0) score = plan.t.hp < plan.t.maxHp ? 7 : 2;
     if (h.classId === 5 && i === 3)
       score =
         plan.targets.reduce((n, u) => n + 1 - u.hp / u.maxHp, 0) > 1 ? 10 : 0;

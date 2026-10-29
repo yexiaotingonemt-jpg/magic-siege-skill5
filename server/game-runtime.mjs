@@ -47,7 +47,7 @@ export function createGameRuntime({dataDir=process.env.KC_DATA_DIR||path.join(ba
 }
 
 // Increment when object layout or outstanding skill callbacks cannot be retained.
-export const HOT_STATE_SCHEMA=1;
+export const HOT_STATE_SCHEMA=2;
 export const HOT_ACCOUNT_SCHEMA=1;
 const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 function applyOverrides(prior,current,next){

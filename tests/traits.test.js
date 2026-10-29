@@ -62,14 +62,14 @@ function arena(id = 4, level = 10) {
   enemy.targetId = friends[0].id;
   return { s, p, h, enemy, friends, troop, make };
 }
-test("90类词条覆盖五职业，库存38蓝8紫4金且ID唯一", () => {
-  assert.equal(TRAITS.length, 90);
-  assert.equal(new Set(TRAITS.map((t) => t.id)).size, 90);
+test("145类词条覆盖五职业，库存78蓝14紫8金且ID唯一", () => {
+  assert.equal(TRAITS.length, 145);
+  assert.equal(new Set(TRAITS.map((t) => t.id)).size, 145);
   for (const id of [0, 2, 3, 4, 5])
     for (const [rarity, count] of [
-      ["blue", 38],
-      ["purple", 8],
-      ["gold", 4],
+      ["blue", 78],
+      ["purple", 14],
+      ["gold", 8],
     ])
       assert.equal(
         TRAITS.filter((t) => t.classId === id && t.rarity === rarity).reduce(
@@ -80,7 +80,7 @@ test("90类词条覆盖五职业，库存38蓝8紫4金且ID唯一", () => {
       );
 });
 for (const id of [0, 2, 3, 4, 5])
-  test("职业" + id + "完整1→40级：31蓝4紫4金、上限及3/3/2/1候选", () => {
+  test("职业" + id + "完整1→40级：31蓝4紫4金、上限及扩展金色池三选一", () => {
     const { s, p } = arena(id, 1);
     s.addXp(p, 10000);
     const counts = { blue: 0, purple: 0, gold: 0 },
@@ -96,7 +96,7 @@ for (const id of [0, 2, 3, 4, 5])
       assert.ok(s.chooseTrait(choice.options[0], choice.level, p));
     }
     assert.deepEqual(counts, { blue: 31, purple: 4, gold: 4 });
-    assert.deepEqual(gold, [3, 3, 2, 1]);
+    assert.deepEqual(gold, [3, 3, 3, 3]);
     assert.equal(p.points, 0);
     assert.deepEqual(p.builds[id], [1, 1, 1, 1]);
     for (const t of TRAITS)
@@ -207,31 +207,31 @@ test("小兵击杀、友方击杀、阵亡英雄的延迟击杀不领取精英Bu
 });
 test("移除统一额度：领主多目标震荡完整超过2000%攻击", () => {
   const { s, p, h, enemy, troop } = arena(3);
-  p.progress[3].traits.L01 = 4;
-  for (let j = 0; j < 4; j++) troop(0, j - 2, -4);
+  p.progress[3].traits.L01 = 4; p.progress[3].traits.L02=3;
+  for (let j = 0; j < 7; j++) troop(0, j - 2, -4);
   const before = enemy.hp;
   s.cast(0, p);
   advance(s, 0.4);
-  near(before - enemy.hp, h.attack * 3.2 * 1.6);
+  near(before - enemy.hp, h.attack * 2 * 1.6);
   const v = s.skillValues.at(-1);
   assert.equal(v.limit, null);
   assert.ok(v.spent > v.attack * 20);
 });
-test("兽人基础重击无易伤，蓝色词条才提供易伤；金色侧目标30%", () => {
+test("兽人基础汲血无易伤，蓝色词条才提供易伤；金色侧目标35%", () => {
   const { s, p, h, enemy, troop } = arena(0),
     side = troop(1, 1, 3);
   p.progress[0].traits.O04 = 1;
   const hp = enemy.hp,
     other = side.hp;
   s.cast(0, p);
-  advance(s, 0.4);
-  near(hp - enemy.hp, h.attack * 8);
-  near(other - side.hp, h.attack * 8 * 0.3);
+  advance(s, 1.4);
+  near(hp - enemy.hp, h.attack * .9);
+  near(other - side.hp, h.attack * .9 * .35);
   assert.equal(s.activeDebuffs(enemy, "vulnerable").length, 0);
   p.progress[0].traits.O02 = 3;
   p.cd[0] = 0;
   s.cast(0, p);
-  advance(s, 0.4);
+  advance(s, 1.4);
   near(s.activeDebuffs(enemy, "vulnerable")[0].ratio, 0.15);
 });
 test("腐蚀五跳且可净化，不可净化词条不穿透负面免疫", () => {
@@ -241,36 +241,36 @@ test("腐蚀五跳且可净化，不可净化词条不穿透负面免疫", () =>
     if (gold) p.progress[2].traits.C04 = 1;
     s.cast(0, p);
     advance(s, 2);
-    assert.equal(enemy.hp, 9900);
+    assert.equal(enemy.hp, 9920);
     assert.equal(s.hasNegative(enemy), !gold);
     s.cleanse(enemy);
     advance(s, 1);
-    assert.equal(enemy.hp, gold ? 9800 : 9900);
+    assert.equal(enemy.hp, gold ? 9840 : 9920);
     if (gold) {
       enemy.immuneUntil = 20;
       advance(s, 5);
-      assert.equal(enemy.hp, 9800);
+      assert.equal(enemy.hp, 9840);
       enemy.immuneUntil = 0;
       advance(s, 1);
-      assert.equal(enemy.hp, 9800);
+      assert.equal(enemy.hp, 9840);
     }
   }
 });
-test("额外腐蚀按主伤35%，火法烙印额外目标按30%", () => {
+test("额外腐蚀按主伤35%，火法烙印额外目标按45%", () => {
   for (const id of [2, 4]) {
     const { s, p, h, enemy, troop } = arena(id),
       side = troop(1, 1, 3),
-      skill = id === 2 ? 0 : 2;
+      skill = id === 2 ? 0 : 1;
     p.progress[id].traits[id === 2 ? "C03" : "F11"] = 1;
-    const hp = enemy.hp,
+    if(id===4)s.addHeat(h,1); const hp = enemy.hp,
       other = side.hp;
     s.cast(skill, p);
     advance(s, id === 2 ? 2 : 0.4);
-    near((other - side.hp) / (hp - enemy.hp), id === 2 ? 0.35 : 0.3);
+    near((other - side.hp) / (hp - enemy.hp), id === 2 ? 0.35 : 0.45);
     if (id === 4) assert.equal(side.soulMarks.length, 1);
   }
 });
-test("火法天火新增蓝色名额仅15%主伤，热量目标保持全额", () => {
+test("火法天火新增蓝色名额35%主伤，热量目标保持全额", () => {
   const { s, p, h, enemy, troop } = arena(4),
     side = troop(1, 1, 3);
   p.progress[4].traits.F14 = 1;
@@ -279,8 +279,8 @@ test("火法天火新增蓝色名额仅15%主伤，热量目标保持全额", ()
   s.setManualTarget(enemy.id, p);
   s.cast(3, p);
   advance(s, 0.4);
-  near(hp - enemy.hp, h.attack * 20);
-  near(other - side.hp, h.attack * 20 * 0.15);
+  near(hp - enemy.hp, h.attack * 18);
+  near(other - side.hp, h.attack * 18 * 0.35);
 });
 test("共生多链接采用星形非递归共享，额外链接25%", () => {
   const { s, p, h, friends } = arena(5);
@@ -307,7 +307,7 @@ test("满血群疗只转盾，不计有效治疗、不产生治疗转伤", () =>
   assert.ok(s.cast(3, p));
   advance(s, 0.4);
   near(enemy.hp, hp);
-  near(h.shield, h.attack * 8 * 0.6);
+  near(h.shield, h.attack * 10 * 0.6);
   assert.equal(h.stats.healing || 0, 0);
   assert.equal(h.healCounter || 0, 0);
 });
@@ -320,7 +320,7 @@ test("治疗转伤同一敌人每次最多三圈，分享治疗不额外产圈",
   const hp = enemy.hp;
   s.cast(3, p);
   advance(s, 0.4);
-  near(hp - enemy.hp, h.attack * 8 * 0.4 * 3);
+  near(hp - enemy.hp, h.attack * 10 * 0.4 * 3);
 });
 test("兽人不死优先于斩杀，挡掉伤害不进入蓄伤，结束后不补扣", () => {
   const { s, p, h, enemy } = arena(0);
@@ -331,7 +331,7 @@ test("兽人不死优先于斩杀，挡掉伤害不进入蓄伤，结束后不�
   s.damage(enemy, h, 1e9);
   assert.equal(h.hp, 1);
   near(h.damageStore.total, 9);
-  advance(s, 5);
+  advance(s, 6);
   assert.equal(h.hp, 1);
   near(h.shield, 9);
   s.damage(enemy, h, 100);
@@ -351,9 +351,9 @@ test("贯穿火球主目标首次保留完整大火球伤害，避免金色负�
   h.heat = 3;
   h.heatUntil = 30;
   const hp = enemy.hp;
-  s.cast(1, p);
+  s.cast(2, p);
   advance(s, 1.5);
-  assert.ok(hp - enemy.hp >= h.attack * 12 - 1e-6);
+  assert.ok(hp - enemy.hp >= h.attack * 10 - 1e-6);
 });
 test("斩杀对普通目标生效，对不死目标无效", () => {
   for (const immortal of [false, true]) {
@@ -365,7 +365,7 @@ test("斩杀对普通目标生效，对不死目标无效", () => {
     if (immortal) enemy.immortalUntil = 10;
     s.cast(3, p);
     advance(s, 0.4);
-    near(enemy.hp, immortal ? 1000 : 0);
+    near(enemy.hp, immortal ? 1200 : 0);
   }
 });
 test("领主基础冲锋不位移，金色将沿途目标带至终点", () => {
@@ -387,9 +387,9 @@ test("战车实际位移为零时不附伤，但金色二次爆炸仍只产生�
   Object.assign(p.progress[2].traits, { C15: 2, C16: 1 });
   enemy.immuneUntil = 20;
   const hp = enemy.hp;
-  s.cast(3, p);
+  s.cast(2, p);
   advance(s, 1.5);
-  near(hp - enemy.hp, h.attack * 16);
+  near(hp - enemy.hp, h.attack * 11);
 });
 test("生命百分比蓄伤记录受局部上限约束，紫色爆发不截断护盾", () => {
   const { s, p, h, enemy } = arena(0);
@@ -397,11 +397,11 @@ test("生命百分比蓄伤记录受局部上限约束，紫色爆发不截断�
   s.cast(3, p);
   advance(s, 0.4);
   h.hp = h.maxHp;
-  h.damageStore.total = h.maxHp * 0.6;
+  h.damageStore.total = h.maxHp * 0.75;
   const hp = enemy.hp;
-  advance(s, 5);
-  near(h.shield, h.maxHp * 0.6);
-  near(hp - enemy.hp, h.maxHp * 0.6 * 0.2);
+  advance(s, 6);
+  near(h.shield, h.maxHp * 0.75);
+  near(hp - enemy.hp, h.maxHp * 0.75 * 0.2);
 });
 test("战车射程蓝色满选仍低于塔射程", () => {
   const { s, p, h } = arena(2);
@@ -409,7 +409,7 @@ test("战车射程蓝色满选仍低于塔射程", () => {
   h.hp = 0;
   const u = s.spawn(0, "siege", 0, 1, 0);
   s.contract(p, u.id);
-  near(u.range, 10.9);
+  near(u.range, 10.7);
   assert.ok(u.range < s.config.tower.range);
 });
 for (const t of TRAITS)
@@ -422,6 +422,7 @@ for (const t of TRAITS)
       s.debuff(friends[0], enemy, "attackDown", 0.2, 10);
     }
     const skill = t.skill ?? 0;
+    if(t.classId===4&&skill===1)s.addHeat(h,1);
     assert.ok(s.cast(skill, p), s.notice);
     advance(s, 8);
     const room = new Room(s.config);
@@ -458,16 +459,16 @@ test("高等级完整构筑长战斗无递归爆炸、非法坐标或不受控�
   }
 });
 
-test("前摇中主目标死亡，额外烙印仍保持30%而不升格主伤", () => {
+test("前摇中主目标死亡，额外烙印仍保持45%而不升格主伤", () => {
   const { s, p, h, enemy, troop } = arena(4),
     side = troop(1, 1, 3);
   p.progress[4].traits.F11 = 1;
   s.setManualTarget(enemy.id, p);
   const hp = side.hp;
-  s.cast(2, p);
+  s.addHeat(h,1); s.cast(1, p);
   enemy.hp = 0;
   advance(s, 0.4);
-  near(hp - side.hp, h.attack * 8 * 0.3);
+  near(hp - side.hp, h.attack * 3 * 0.45);
 });
 test("飞行中获得金词条，不回写已经发出的腐蚀弹", () => {
   const { s, p, enemy } = arena(2);
@@ -535,9 +536,9 @@ test("贯穿火球按整条路径判断孤立，不能对远端群体套用单�
   p.progress[4].traits.F08 = 1;
   troop(1, 0, 8);
   const hp = enemy.hp;
-  s.cast(1, p);
+  s.cast(2, p);
   advance(s, 1);
-  near(hp - enemy.hp, 1200);
+  near(hp - enemy.hp, 1000);
 });
 
 test("亡灵护卫出生满血且上限为领主5%，护卫击杀不递归召唤", () => {
@@ -614,16 +615,16 @@ test("无英雄时可处理预览职业的待选，存活时不能替其他职�
   assert.deepEqual(p.progress[0].traits, {});
   assert.equal(s.chooseTrait(id, choice.level, p, 3), false);
 });
-test("额外焚魂标记的死亡爆炸继承30%倍率，即60%攻击", () => {
+test("额外焚魂标记的死亡爆炸继承45%倍率，即90%攻击", () => {
   const { s, p, h, enemy, troop } = arena(4),
     secondary = troop(1, 0, 5),
     victim = troop(1, 0, 7.5);
   p.progress[4].traits.F11 = 1;
   p.progress[4].traits.F12 = 1;
   s.setManualTarget(enemy.id, p);
-  s.cast(2, p);
+  s.addHeat(h,1); s.cast(1, p);
   advance(s, 0.4);
   const hp = victim.hp;
   s.damage(h, secondary, 1e9);
-  near(hp - victim.hp, h.attack * 0.6);
+  near(hp - victim.hp, h.attack * 0.9);
 });

@@ -1,4 +1,4 @@
-import {ART_ROOT,HERO_ART} from './art-catalog.js';
+import {ART_ROOT,HERO_ART,skillArtIndex} from './art-catalog.js';
 import {names} from '../../shared/config.js';
 import {describeAbilities} from './ability-descriptions.js';
 import {SKILL_PROGRESSION} from '../../shared/skill-progression.js';
@@ -19,7 +19,7 @@ export function createSkillHud(container){
    slot.button.classList.toggle('out-of-range',plan.code==='range'||plan.code==='wrong-target');
    slot.button.setAttribute('aria-label',names[id][i]+' · '+status);
    slot.button.title=`${guide.skills[i].summary}\n${guide.skills[i].compactMeta}\n${casting?'正在施法':plan.reason}${cd?` · 剩余${cd.toFixed(1)}秒`:''}`;
-   const art=HERO_ART[id];const frame=art?art.row*4+i:frames[id][i];slot.art.style.backgroundImage=art?`url('${ART_ROOT}/skill-icons.webp')`:'';slot.art.style.backgroundSize=art?'400% 500%':'';slot.art.style.backgroundPosition=`${frame%4/3*100}% ${Math.floor(frame/4)/(art?4:1)*100}%`;
+   const art=HERO_ART[id];const frame=art?art.row*4+skillArtIndex(id,i):frames[id][i];slot.art.style.backgroundImage=art?`url('${ART_ROOT}/skill-icons.webp')`:'';slot.art.style.backgroundSize=art?'400% 500%':'';slot.art.style.backgroundPosition=`${frame%4/3*100}% ${Math.floor(frame/4)/(art?4:1)*100}%`;
    slot.count.className=casting?'casting-count':cd?'cooldown-count':!b[i]?'locked-count':'';
    slot.lock.hidden=!!b[i];slot.count.textContent=casting?'◌':!b[i]?'':cd?cd.toFixed(1)+'s':'';
    slot.name.textContent=names[id][i];slot.cost.textContent=`ϟ ${s.cost} · ${b[i]?'已解锁':'5级解锁'}`;
