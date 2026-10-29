@@ -7,19 +7,16 @@ export const cannotAct=(u,time)=>u.stunUntil>time||u.castUntil>time||u.channelUn
 // 普通索敌只在当前目标丢失、嘲讽结束或没有目标时执行。
 export function chooseTarget(sim,u){
  const radius=u.aggro??u.range;
- // Losing the actively selected elf ally returns selection to local enemies.
- if(u.classId===5&&u.friendlyTargetId!=null&&u.manualTargetId===u.friendlyTargetId&&!sim.get(u.friendlyTargetId)){
-  u.manualTargetId=null;u.manualAttackTargetId=null;u.retaliationTargetId=null;
- }
  if(u.friendlyTargetId!=null&&!friendlyTarget(sim,u))u.friendlyTargetId=null;
  const taunter=activeTaunter(sim,u);
  if(taunter){u.manualTargetId=null;u.manualAttackTargetId=null;u.friendlyTargetId=null;u.wasTaunted=true;u.retaliationTargetId=null;return taunter;}
  if(u.wasTaunted){u.wasTaunted=false;u.manualTargetId=null;u.manualAttackTargetId=null;u.targetId=null;u.retaliationTargetId=null;}
  const selected=manualTarget(sim,u);
  const attackSelected=manualAttackTarget(sim,u);
- if(u.manualTargetId!=null&&!selected){if(u.targetId===u.manualTargetId)u.targetId=null;u.manualTargetId=null;}
- if(u.manualAttackTargetId!=null&&!attackSelected){if(u.targetId===u.manualAttackTargetId)u.targetId=null;u.manualAttackTargetId=null;}
- if(attackSelected)return attackSelected;
+ if(u.manualTargetId!=null&&(!selected||!attackSelected)){
+  u.manualTargetId=null;u.manualAttackTargetId=null;u.friendlyTargetId=null;u.targetId=null;u.retaliationTargetId=null;
+ }else if(attackSelected){u.manualAttackTargetId=attackSelected.id;return attackSelected;}
+ if(u.manualAttackTargetId!=null&&!attackSelected){u.targetId=null;u.manualAttackTargetId=null;}
  const current=sim.get(u.targetId);
  if(current&&current.side!==u.side){
   const retaliation=u.retaliationTargetId===current.id&&(u.attackerMemory?.[current.id]||0)>sim.time&&distance(u,current)<=sim.config.world.retaliationLeash;

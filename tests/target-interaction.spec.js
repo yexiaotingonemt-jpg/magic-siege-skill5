@@ -52,13 +52,16 @@ for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`�
   await sync();await expect(page.locator('[data-cast="0"]')).toHaveClass(/ready/);await expect(page.locator('[data-cast="0"]')).not.toHaveClass(/out-of-range/);
   await expect(page.locator('#targetHp')).toContainText(`${Math.ceil(enemy.hp)} / 10000`);
   await page.locator('[data-cast="0"]').click();await page.waitForFunction(()=>__game.sim.metrics.casts>0);expect(p.stamina).toBe(before.stamina-1);
-  // Inspect an ally even for a class that cannot make it a skill target.
-  const ally=s.spawn(0,'melee',0,1,5);Object.assign(ally,{x:5,y:h.y});await sync();await page.waitForTimeout(300);await clickUnit(ally);
-  await expect(page.locator('#targetInfo')).toHaveAttribute('data-side','ally');expect(h.manualTargetId).toBe(enemy.id);
+  // All classes can select allies and attack their current enemy.
+  const ally=s.spawn(0,'melee',0,1,5);Object.assign(ally,{x:5,y:h.y,targetId:enemy.id,stunUntil:1e9});await sync();await page.waitForTimeout(300);await clickUnit(ally);
+  await expect(page.locator('#targetInfo')).toHaveAttribute('data-side','ally');await page.waitForFunction(id=>__game.sim.hero().manualTargetId===id,ally.id);expect(h.targetId).toBe(enemy.id);
+  h.castUntil=0;h.cd=0;enemy.y=h.y+10;const allyStart=h.y,enemyHp=enemy.hp;s.tick(.5);expect(h.y).toBeGreaterThan(allyStart);for(let n=0;n<160;n++)s.tick(.05);expect(enemy.hp).toBeLessThan(enemyHp);expect(h.manualTargetId).toBe(ally.id);await sync();
+  await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`ally-follow-attack-${viewport.width}.png`)});
+  ally.targetId=null;s.tick(.05);expect(h.manualTargetId).toBeNull();await sync();
   const tower=s.towers[0];Object.assign(tower,{x:5,y:h.y+3});await sync();await page.waitForTimeout(300);await clickUnit(tower);
   await expect(page.locator('#targetName')).toHaveText('防御塔');
   tower.hp=0;await sync();await expect(page.locator('#targetInfo')).toBeHidden();
-  await clickUnit(enemy);await expect(page.locator('#targetInfo')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('#targetInfo')).toBeHidden();
+  await page.evaluate(()=>__game.renderer.focusUnit(__game.sim.hero().id));await page.waitForTimeout(350);await clickUnit(enemy);await expect(page.locator('#targetInfo')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('#targetInfo')).toBeHidden();
   expect(rejections).toHaveLength(1);expect(errors).toEqual([]);
  }finally{await context.close();await new Promise(resolve=>server.close(resolve));}
 });

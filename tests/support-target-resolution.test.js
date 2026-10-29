@@ -28,13 +28,13 @@ for(const skill of [1,2,3])test(`精灵支援${skill+1}选敌时对其攻击目�
  assert.equal(h.manualTargetId,enemy.id);
 });
 
-for(const selection of ['enemy-without-target','no-selection','dead-enemy-victim'])for(const skill of [1,2,3])test(`精灵支援${skill+1}在${selection}时选范围内合法友方最低绝对血量`,()=>{
+for(const selection of ['enemy-without-target','no-selection','dead-enemy-victim'])for(const skill of [1,2,3])test(`精灵支援${skill+1}在${selection}时提示无效且不回退其他友军`,()=>{
  const {s,p,h,unit}=arena(),low=unit(0,3,0,80),ratioLow=unit(0,2,0,100),outside=unit(0,13,0,1),enemy=unit(1,0,3);
  low.maxHp=100;ratioLow.maxHp=100000;
  if(selection!=='no-selection')s.setManualTarget(enemy.id,p);else enemy.hp=0;
  if(selection==='dead-enemy-victim'){const dead=unit(0,1,0,0);enemy.targetId=dead.id;}
  if(skill===2)for(const u of [low,ratioLow,outside])s.debuff(u,enemy,'moveSlow',.3,10,null,true);
- const plan=s.castPlan(skill,p);assert.ok(plan.ok,plan.reason);assert.equal(skill===1?plan.t.id:plan.manualTargetId,low.id);
+ const before={stamina:p.stamina,cd:[...p.cd],score:p.score};const plan=s.castPlan(skill,p);assert.equal(plan.ok,false);assert.equal(plan.code,'wrong-target');assert.equal(s.cast(skill,p),false);assert.ok(s.notice);assert.deepEqual({stamina:p.stamina,cd:p.cd,score:p.score},before);
 });
 
 test('直接选友方优先于其血量和敌人的攻击目标，非法类型和距离仍拒绝且不扣费',()=>{
