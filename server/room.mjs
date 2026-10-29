@@ -10,11 +10,19 @@ export class Room{
  snapshot(includeConfig=true){const s=this.sim;const metrics={...s.metrics};delete metrics.lifetimes;const snapshot={matchId:this.matchId,sequence:this.sequence,paused:this.paused,speed:this.speed,stage:{number:this.stageNumber,end:this.stageEnd,wins:this.stageWins,reports:this.stageReports},time:s.time,seed:s.seed,nextId:s.nextId,units:s.units.map(u=>u.shieldSource?{...u,shieldSource:actorSnapshot(u.shieldSource)}:u),towers:s.towers.map(u=>u.shieldSource?{...u,shieldSource:actorSnapshot(u.shieldSource)}:u),projectiles:s.projectiles.map(b=>({...b,source:actorSnapshot(b.source)})),fields:s.fields.map(f=>({...f,owner:actorSnapshot(f.owner)})),effects:s.effects,animations:s.animations,visualId:s.visualId,players:s.players.map(p=>({...p,...s.contribution(p),online:(this.online.get(p.accountId)||0)>0})),metrics,battleEvents:s.battleEvents,logs:s.logs,reports:s.reports.slice(0,15),layer:s.layer,waveAt:s.waveAt,configVersion:this.configVersion};if(includeConfig)snapshot.config=s.config;return snapshot;}
  broadcast(){if(!this.clients.size)return;let fullText,compactText;for(const client of this.clients){if(client.res.destroyed||client.res.writableNeedDrain)continue;const needsConfig=client.configVersion!==this.configVersion;let text;if(needsConfig){fullText??=JSON.stringify(this.snapshot(true),snapshotReplacer);text=fullText;client.configVersion=this.configVersion;}else{compactText??=JSON.stringify(this.snapshot(false),snapshotReplacer);text=compactText;}client.res.write('data: '+text+'\n\n');}}
  heartbeat(){for(const client of this.clients)if(!client.res.destroyed&&!client.res.writableNeedDrain)client.res.write('event: heartbeat\ndata: {}\n\n');}
- connect(account,res){const p=this.player(account),client={account,res,configVersion:-1};this.clients.add(client);this.online.set(account.id,(this.online.get(account.id)||0)+1);res.write('event: identity\ndata: '+JSON.stringify({account:{id:account.id,name:account.name,side:account.side,isHost:account.isHost},playerId:p.id})+'\n\n');this.broadcast();res.on('close',()=>{this.clients.delete(client);const count=Math.max(0,(this.online.get(account.id)||1)-1);this.online.set(account.id,count);if(!count)p.auto=false;});return client;}
+ connect(account,res){const p=this.player(account),client={account,res,configVersion:-1};this.clients.add(client);this.online.set(account.id,(this.online.get(account.id)||0)+1);res.write('event: identity\ndata: '+JSON.stringify({account:{id:account.id,name:account.name,side:account.side,isHost:account.isHost,isSuperAdmin:account.isSuperAdmin===true},playerId:p.id})+'\n\n');this.broadcast();res.on('close',()=>{this.clients.delete(client);const count=Math.max(0,(this.online.get(account.id)||1)-1);this.online.set(account.id,count);if(!count){const current=this.players.get(account.id);if(current)current.auto=false;}});return client;}
+ restartMatch(){
+  const fresh=new Room(this.config);
+  for(const p of this.players.values())fresh.player({id:p.accountId,name:p.name,side:p.side});
+  const retained={clients:this.clients,online:this.online,sequence:this.sequence,commandHistory:this.commandHistory,configVersion:this.configVersion+1};
+  Object.assign(this,fresh,retained);
+  for(const client of this.clients){const a=client.account;client.configVersion=-1;client.res.write('event: identity\ndata: '+JSON.stringify({account:{id:a.id,name:a.name,side:a.side,isHost:a.isHost,isSuperAdmin:a.isSuperAdmin===true},playerId:this.player(a).id})+'\n\n');}
+ }
  command(account,{type,args={},id}){
   const p=this.player(account),s=this.sim,key=account.id+':'+id;if(id&&this.commandHistory.has(key))return this.commandHistory.get(key);let ok=false,message='';s.localPlayerId=p.id;s.notice='';
   try{
-   if(type==='contract'){const u=s.get(args.unitId);if(!u||!contractClasses(u,s.config).includes(args.classId)||u.side!==account.side)throw Error('此单位不可契约为所选职业');if(!s.setClass(args.classId,p))throw Error('已有存活英雄，或职业不属于本阵营');ok=s.contract(p,u.id);}
+   if(type==='restartMatch'){if(account.isSuperAdmin!==true)throw Error('仅超级账号可以重开本局');this.restartMatch();ok=true;message='本局已重开';}
+   else if(type==='contract'){const u=s.get(args.unitId);if(!u||!contractClasses(u,s.config).includes(args.classId)||u.side!==account.side)throw Error('此单位不可契约为所选职业');if(!s.setClass(args.classId,p))throw Error('已有存活英雄，或职业不属于本阵营');ok=s.contract(p,u.id);}
    else if(type==='cast')ok=s.cast(args.skill,p);
    else if(type==='target')ok=s.setManualTarget(args.unitId,p);
    else if(type==='chooseTrait')ok=s.chooseTrait(args.traitId,args.level,p,args.classId??p.classId);
@@ -24,7 +32,7 @@ export class Room{
    else if(type==='stamina'){p.stamina+=100;ok=true;}
    else if(type==='reserve'){const u=s.get(args.unitId);p.reservedUnitId=u&&!u.hero&&u.side===p.side?u.id:null;ok=true;}
    else if(['bots','pause','speed','refill','level','restart','config'].includes(type)){
-    if(!account.isHost)throw Error('仅房主可以调整体验参数');
+    if(!account.isHost&&account.isSuperAdmin!==true)throw Error('仅房主或超级账号可以调整体验参数');
     if(type==='bots'){for(const key of ['attackBots','defenseBots'])if(!Number.isInteger(args[key])||args[key]<0||args[key]>50)throw Error('双方机器人数量需为0～50的整数');if(args.attackBots+args.defenseBots>99)throw Error('机器人总数最多99');Object.assign(s.config.world,{attackBots:args.attackBots,defenseBots:args.defenseBots,botMode:args.attackBots+args.defenseBots?5:4});this.config=clone(s.config);s.syncBots();this.configVersion++;}
     if(type==='config'){const next=validateConfig(clone(args.config));if(next.world.stageDuration<60||next.world.stageRequiredLayers<1||next.world.stageRequiredLayers>3)throw Error('阶段至少60秒，目标防线为1～3排');s.config=next;this.config=clone(next);s.syncBots();this.configVersion++;}
     if(type==='pause')this.paused=!!args.paused;

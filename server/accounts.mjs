@@ -20,7 +20,8 @@ export class Accounts{
  }
  issue(account){const token=randomBytes(32).toString('base64url');this.sessions.set(token,{id:account.id,until:Date.now()+7*86400000});return token;}
  token(req){return (req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith('kc_session='))?.slice(11);}
- get(req){const token=this.token(req),session=this.sessions.get(token);if(!session||session.until<Date.now()){this.sessions.delete(token);return null;}return this.rows.find(a=>a.id===session.id)||null;}
+ get(req){const token=this.token(req),session=this.sessions.get(token);if(!session||session.until<Date.now()){this.sessions.delete(token);return null;}const a=this.rows.find(a=>a.id===session.id);return a?{...a,isSuperAdmin:this.isSuperAdmin(a)}:null;}
  logout(req){this.sessions.delete(this.token(req));}
- public(a){return {id:a.id,name:a.name,side:a.side,isHost:a.isHost};}
+ isSuperAdmin(a){const file=path.join(path.dirname(this.file),'super-accounts.json');return existsSync(file)&&JSON.parse(readFileSync(file,'utf8')).includes(a.id);}
+ public(a){return {id:a.id,name:a.name,side:a.side,isHost:a.isHost,isSuperAdmin:this.isSuperAdmin(a)};}
 }
