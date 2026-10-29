@@ -4,11 +4,11 @@ import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {createGameServer} from '../server/index.mjs';
 import {createLocalClient} from '../client/launcher.mjs';
-import {GAME_VERSION,PROTOCOL_VERSION,UPDATE_REQUIRED_CODE} from '../shared/protocol.js';
+import {CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION,UPDATE_REQUIRED_CODE} from '../shared/protocol.js';
 const nextVersion=GAME_VERSION.replace(/\d+$/,value=>String(Number(value)+1));
-async function setup(version=GAME_VERSION){
+async function setup(version=GAME_VERSION,clientVersion=CLIENT_VERSION){
  const dataDir=mkdtempSync(path.join(tmpdir(),'magic-version-browser-'));
- let game=createGameServer({dataDir,gameVersion:version});
+ let game=createGameServer({dataDir,gameVersion:version,clientVersion});
  await new Promise(resolve=>game.server.listen(0,'127.0.0.1',resolve));
  const port=game.server.address().port,local=createLocalClient({serverUrl:`http://127.0.0.1:${port}`});
  await new Promise(resolve=>local.server.listen(0,'127.0.0.1',resolve));
@@ -35,6 +35,19 @@ test('启动版本不一致：桌面与窄屏展示强制更新页，不提供�
   expect(service.game.accounts.rows).toHaveLength(0);expect(service.game.room.clients.size).toBe(0);expect(errors).toEqual([]);
  }finally{for(const c of contexts)await c.close();await service.close();}
 });
+
+test('仅发布号不同也必须手动拉取，页面不下载客户端包',async({page})=>{
+ const service=await setup(GAME_VERSION,CLIENT_VERSION+'-next'),requests=[],errors=[];
+ page.on('request',req=>requests.push(req.url()));page.on('pageerror',error=>errors.push(error.message));
+ try{
+  await page.goto(service.base);await expect(page).toHaveTitle(/魔法王座/);
+  await expect(page.locator('#updateStatus')).toContainText('GitHub Desktop');
+  await expect(page.locator('#requiredClientVersion')).toHaveText(CLIENT_VERSION+'-next');
+  await expect(page.locator('#authForm, #retryUpdate, #updateProgress, vite-error-overlay')).toHaveCount(0);
+  await page.reload();await expect(page.locator('#updateRequired')).toBeVisible();
+  expect(requests.some(url=>url.includes('/api/updates/'))).toBe(false);expect(errors).toEqual([]);
+ }finally{await service.close();}
+});
 test('服务器提升战斗兼容版本：客户端重连后转更新页并停止重试与操作',async({browser})=>{
  const service=await setup(),context=await browser.newContext(),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  try{
@@ -46,11 +59,11 @@ test('服务器提升战斗兼容版本：客户端重连后转更新页并停�
  }finally{await context.close();await service.close();}
 });
 
-test('兼容版本不变：发布与诊断标识变化后可重连并继续操作，不显示更新页',async({browser})=>{
+test('发布版本不变：诊断标识变化后可重连并继续操作，不显示更新页',async({browser})=>{
  const service=await setup(),context=await browser.newContext(),page=await context.newPage();
  try{
   let revision='original-build';
-  await page.route('**/api/version',route=>route.fulfill({json:{gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION,revision,buildId:revision}}));
+  await page.route('**/api/version',route=>route.fulfill({json:{clientVersion:CLIENT_VERSION,gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION,revision,buildId:revision}}));
   await login(page,service.base);
   const previous=[...service.game.room.clients];expect(previous).toHaveLength(1);
   revision='ui-art-and-server-maintenance';

@@ -4,13 +4,11 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {readFile,realpath,mkdir,chmod,lstat,unlink,stat} from 'node:fs/promises';
 import {symlinkSync,renameSync,appendFileSync,unlinkSync} from 'node:fs';
-import {verify} from 'node:crypto';
-import {verifyRelease,hashFile,newerVersion} from './release-manifest.mjs';
-import {UPDATE_PUBLIC_KEY,validateRelease,canonicalRelease} from '../shared/update-protocol.js';
+import {verifyRelease,newerVersion} from './release-manifest.mjs';
 import {GitHubSourceVerifier} from './source-provenance.mjs';
 
-const fixedFiles=['server/index.mjs','server/hot-update.mjs','server/release-manifest.mjs','server/source-provenance.mjs','shared/update-protocol.js'];
-export function createHotUpdater({getRuntime,setRuntime,quiesce,resume,runtimeRoot,appRoot,updateDir,requireClientPackage=true,runtimeOptions={},sourceVerifier=new GitHubSourceVerifier({cacheDir:path.join(appRoot||runtimeRoot,'shared/runtime/github-source.git')})}){
+const fixedFiles=['server/index.mjs','server/hot-update.mjs','server/release-manifest.mjs','server/source-provenance.mjs'];
+export function createHotUpdater({getRuntime,setRuntime,quiesce,resume,runtimeRoot,appRoot,runtimeOptions={},sourceVerifier=new GitHubSourceVerifier({cacheDir:path.join(appRoot||runtimeRoot,'shared/runtime/github-source.git')})}){
  let activeRoot=path.resolve(runtimeRoot),busy=false,reloads=0;
  const status=async()=>({releaseDir:activeRoot,manifest:await verifyRelease(activeRoot),...getRuntime().metadata,matchId:getRuntime().room.matchId,reloads});
  const update=async({releaseDir,baseDigest,battle='preserve'}={})=>{
@@ -33,14 +31,6 @@ export function createHotUpdater({getRuntime,setRuntime,quiesce,resume,runtimeRo
     if(path.dirname(target)!==releases||(await realpath(path.join(appRoot,'current')))!==await realpath(activeRoot))throw Error('发布目录或 current 指向不正确');
    }
    for(const name of fixedFiles)if(next.files[name]!==current.files[name])throw Error('引导文件改变，需要常规部署：'+name);
-   if(requireClientPackage){
-    const folder=path.join(updateDir,next.version.clientVersion,'win32-x64');
-    const manifest=JSON.parse(await readFile(path.join(folder,'manifest.json'),'utf8'));
-    const release=validateRelease(manifest.release,next.version.clientVersion,'x64');
-    if(release.gameVersion!==next.version.gameVersion||release.protocolVersion!==next.version.protocolVersion||!verify(null,Buffer.from(canonicalRelease(release)),UPDATE_PUBLIC_KEY,Buffer.from(manifest.signature||'','base64')))throw Error('配套客户端签名或版本错误');
-    const file=path.join(folder,'package.zip');
-    if((await stat(file)).size!==release.size||await hashFile(file)!==release.sha256)throw Error('配套客户端包未就绪');
-   }
    const sourceProof=await sourceVerifier.verifyManifest(next,current);
    // Verify GitHub provenance before importing any candidate code.
    const module=await import(pathToFileURL(path.join(target,'server/game-runtime.mjs')).href);
@@ -55,8 +45,8 @@ export function createHotUpdater({getRuntime,setRuntime,quiesce,resume,runtimeRo
    JSON.stringify(prepared.runtime.room.snapshot());
    if(appRoot){switchLink(target);switched=true;process.chdir(target);appendFileSync(path.join(appRoot,'shared/runtime/hot-updates.jsonl'),JSON.stringify(record)+'\n',{mode:0o600});}
    activeRoot=target;reloads++;
-   if(battle==='restart')for(const client of [...prior.room.clients]){try{client.res.end();}catch{}}
-   else{try{prepared.runtime.room.broadcast();}catch{}}
+   // Every client must reconnect and pass the new release-version gate.
+   for(const client of [...prior.room.clients]){try{client.res.end();}catch{}}
    return {ok:true,...record,reloads};
   }catch(error){
    if(prepared){prepared.rollback();setRuntime(prior);}

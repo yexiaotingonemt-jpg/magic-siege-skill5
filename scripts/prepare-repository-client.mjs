@@ -42,6 +42,6 @@ for(const item of await readdir(path.join(root,'client/dist'),{withFileTypes:tru
 const files={};
 async function record(folder){for(const item of await readdir(path.join(root,folder),{withFileTypes:true})){const file=path.posix.join(folder,item.name);if(item.isDirectory())await record(file);else files[file]=await hash(path.join(root,file));}}
 await record('client/prebuilt');await record('client/desktop');
-for(const file of ['魔法王座.exe','client/launcher.mjs','client/client-config.json','shared/protocol.js','shared/update-protocol.js'])files[file]=await hash(path.join(root,file));
+for(const file of ['魔法王座.exe','client/launcher.mjs','client/client-config.json','shared/protocol.js'])files[file]=await hash(path.join(root,file));
 await writeFile(path.join(root,'desktop-client.json'),JSON.stringify({version:CLIENT_VERSION,serverVersion:SERVER_VERSION,gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION,files,runtime:sdk},null,2)+'\n');
 console.log(JSON.stringify({version:CLIENT_VERSION,launcher:path.join(root,'魔法王座.exe'),runtime:sdk.version,parts:sdk.parts.length,files:Object.keys(files).length}));

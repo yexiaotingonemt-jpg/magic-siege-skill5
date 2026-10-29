@@ -36,6 +36,6 @@
 
 ## 兼容版本限制
 
-版本源为[shared/protocol.js](../../shared/protocol.js)。`CLIENT_VERSION` 控制桌面包自动更新，`GAME_VERSION` 控制两端战斗规则兼容检查；结构不兼容时另外提升 `PROTOCOL_VERSION`。`/api/version` 公开返回全部标记。客户端发布版本不一致触发签名包自动下载、安装与重启；核心兼容版本不一致则游戏接口返回409，停止操作与SSE并转入更新页。游戏鉴权不以界面发布版本拒绝兼容请求。`RULESET_REVISION` 仅用于诊断。完整规则见[版本说明](../../README.md#版本限制)。
+版本源为[shared/protocol.js](../../shared/protocol.js)。游戏 API 严格校验客户端发布版本、战斗兼容版本和协议。任一不一致则返回409，停止操作与SSE，提示退出后从 GitHub 拉取完整最新版；不再自动下载客户端包。旧更新下载接口返回410。服务端热更保留战局时仍断开旧 SSE，使旧客户端重新通过版本检查。
 
-对应验证：[接口校验](../../tests/version-gate.test.js)、[更新界面及在线升级](../../tests/version-gate.spec.js)、[桌面自动更新完整验收](../../scripts/verify-desktop-update.mjs)。
+验证：[接口校验](../../tests/version-gate.test.js)、[版本提示及在线重连](../../tests/version-gate.spec.js)、[桌面流程](../../tests/desktop.electron.spec.js)。

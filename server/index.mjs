@@ -22,7 +22,7 @@ export function createGameServer(options={}){
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const appRoot=process.env.MAGIC_SIEGE_ROOT||path.resolve(base,'../..');
- const game=createGameServer({appRoot,updateDir:process.env.MAGIC_UPDATE_DIR||path.join(appRoot,'shared/updates')});
+ const game=createGameServer({appRoot});
  const socket=process.env.MAGIC_HOT_UPDATE_SOCKET;
  try{
   const control=socket?await listenHotControl(socket,game.hotUpdate):null;

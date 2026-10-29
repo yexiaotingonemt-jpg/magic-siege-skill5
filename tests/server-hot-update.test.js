@@ -10,7 +10,7 @@ import {createGameServer} from '../server/index.mjs';
 import {buildManifest,verifyRelease,manifestDigest} from '../server/release-manifest.mjs';
 import {listenHotControl} from '../server/hot-update.mjs';
 import {packDelta,stageDelta,applyDelta,controlRequest} from '../deploy/server-update.mjs';
-import {SERVER_VERSION,GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
+import {CLIENT_VERSION,SERVER_VERSION,GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
 import {git,GITHUB_REPOSITORY,GitHubSourceVerifier,prepareCommittedPackage} from '../server/source-provenance.mjs';
 
 const NEXT_VERSION=SERVER_VERSION.split('.').map((v,i)=>i===2?Number(v)+1:v).join('.');
@@ -42,13 +42,13 @@ async function fixture(t){
  await change(next,'shared/config.js',value=>value+'\ndefaults.world.initialStamina=4321;\n');
  await writeFile(path.join(next,'VERSION.json'),JSON.stringify({...version,serverVersion:NEXT_VERSION,clientVersion:NEXT_VERSION}));
  const manifest=await writeManifest(next);
- const game=createGameServer({dataDir:path.join(root,'data'),runtimeRoot:first,requireClientPackage:false,sourceVerifier});
+ const game=createGameServer({dataDir:path.join(root,'data'),runtimeRoot:first,sourceVerifier});
  await new Promise(resolve=>game.server.listen(0,'127.0.0.1',resolve));
  t.after(async()=>{for(const c of [...game.room.clients])c.res.end();game.server.closeAllConnections();await new Promise(resolve=>game.server.close(resolve));});
  const base='http://127.0.0.1:'+game.server.address().port;
  const account=await game.accounts.register({name:'热更测试',password:'isolated-test-only',side:0});
  const token=game.accounts.issue(account),player=game.room.player(account);
- const call=async(route,body)=>{const response=await fetch(base+route,{method:body?'POST':'GET',headers:{Cookie:'kc_session='+token,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});return {status:response.status,data:await response.json()};};
+ const call=async(route,body)=>{const release=(await (await fetch(base+'/api/version')).json()).clientVersion;const response=await fetch(base+route,{method:body?'POST':'GET',headers:{Cookie:'kc_session='+token,'X-Magic-Client-Version':release,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});return {status:response.status,data:await response.json()};};
  return {root,first,next,baseline,manifest,game,account,player,call,base,token,sourceVerifier};
 }
 test('保留战局热更加载整个新依赖图，保留身份、成长、冷却、对象引用与待执行闭包',async t=>{
@@ -72,15 +72,16 @@ test('保留战局热更加载整个新依赖图，保留身份、成长、冷�
  assert.deepEqual((await f.call('/api/action',{id:'before-update',type:'stamina'})).data,priorCommand.data);assert.equal(player.stamina,priorStamina);
  const response=await f.call('/api/action',{id:'same-command',type:'stamina'});assert.equal(response.data.ok,true);
 });
-test('保留模式不会打断已有 SSE，重开模式断开旧 SSE 并保留登录会话',async t=>{
+test('保留战局也断开旧 SSE 以要求拉取新版，重开模式仍保留登录会话',async t=>{
  const f=await fixture(t),abort=new AbortController();t.after(()=>abort.abort());
- const response=await fetch(f.base+'/api/events',{headers:{Cookie:'kc_session='+f.token,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION)},signal:abort.signal});
+ const response=await fetch(f.base+'/api/events',{headers:{Cookie:'kc_session='+f.token,'X-Magic-Client-Version':CLIENT_VERSION,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION)},signal:abort.signal});
  const reader=response.body.getReader();await reader.read();f.game.room.paused=true;
  const client=[...f.game.room.clients][0],oldRoom=f.game.room;let closed=false;
  const closedPromise=new Promise(resolve=>client.res.on('close',()=>{closed=true;resolve();}));
  f.player.level=8;f.player.score=99;
  await f.game.hotUpdate.update({releaseDir:f.next,baseDigest:f.baseline.digest});
- assert.equal(f.game.room,oldRoom);assert.equal(closed,false);
+ assert.equal(f.game.room,oldRoom);await closedPromise;assert.equal(closed,true);
+ const stale=await fetch(f.base+'/api/me',{headers:{Cookie:'kc_session='+f.token,'X-Magic-Client-Version':CLIENT_VERSION,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION)}});assert.equal(stale.status,409);
  const third=path.join(f.root,'releases/third');await cp(f.next,third,{recursive:true});await change(third,'shared/protocol.js',v=>v.replace("'"+NEXT_VERSION+"'","'"+FUTURE_VERSION+"'").replace("'"+NEXT_VERSION+"'","'"+FUTURE_VERSION+"'"));
  const version=JSON.parse(await readFile(path.join(third,'VERSION.json'),'utf8'));version.serverVersion=version.clientVersion=FUTURE_VERSION;await writeFile(path.join(third,'VERSION.json'),JSON.stringify(version));await writeManifest(third);
  const result=await f.game.hotUpdate.update({releaseDir:third,baseDigest:f.manifest.digest,battle:'restart'});
@@ -111,12 +112,12 @@ test('拒绝被篡改文件、过期基准、非法选项及引导文件变化',
  await writeManifest(f.next);await assert.rejects(f.game.hotUpdate.update({releaseDir:f.next,baseDigest:f.baseline.digest}),/引导文件改变/);
  assert.equal((await f.call('/api/health')).data.serverVersion,SERVER_VERSION);
 });
-test('生产默认拒绝缺少配套客户端的更新，公共 HTTP 不暴露发布接口',async t=>{
- const f=await fixture(t),game=createGameServer({dataDir:path.join(f.root,'other-data'),runtimeRoot:f.first,sourceVerifier:f.sourceVerifier,updateDir:path.join(f.root,'missing-updates')});
- await assert.rejects(game.hotUpdate.update({releaseDir:f.next,baseDigest:f.baseline.digest}),/ENOENT/);
- await new Promise(resolve=>game.server.listen(0,'127.0.0.1',resolve));await new Promise(resolve=>game.server.close(resolve));
+test('服务端发布无需客户端包，公共 HTTP 不暴露发布接口',async t=>{
+ const f=await fixture(t);
+ assert.equal((await f.game.hotUpdate.update({releaseDir:f.next,baseDigest:f.baseline.digest})).ok,true);
  assert.equal((await f.call('/api/hot-update',{releaseDir:f.next})).status,404);
 });
+
 test('等待旧请求结束后切换，拒绝并发发布，避免请求写入已废弃战局',async t=>{
  const f=await fixture(t),accounts=f.game.accounts,original=accounts.login.bind(accounts);let entered,release;
  const ready=new Promise(resolve=>entered=resolve),gate=new Promise(resolve=>release=resolve);
@@ -161,7 +162,7 @@ test('拒绝差异清单的目录穿越和未声明的删除',async t=>{
 test('Linux 本机命令完整执行差异发布、原子切换目录和读回验证',{skip:process.platform==='win32'},async t=>{
  const f=await fixture(t);await symlink(f.first,path.join(f.root,'current'),'dir');
  const socketPath=path.join(f.root,'shared/runtime/hot-update.sock');
- const game=createGameServer({dataDir:path.join(f.root,'linux-data'),runtimeRoot:f.first,sourceVerifier:f.sourceVerifier,appRoot:f.root,updateDir:path.join(f.root,'updates'),requireClientPackage:false});
+ const game=createGameServer({dataDir:path.join(f.root,'linux-data'),runtimeRoot:f.first,sourceVerifier:f.sourceVerifier,appRoot:f.root,requireClientPackage:false});
  await new Promise(resolve=>game.server.listen(0,'127.0.0.1',resolve));
  const control=await listenHotControl(socketPath,game.hotUpdate),cwd=process.cwd();
  t.after(async()=>{process.chdir(cwd);await new Promise(resolve=>control.close(resolve));game.server.closeAllConnections();await new Promise(resolve=>game.server.close(resolve));});
@@ -185,7 +186,7 @@ test('Linux 正式启动入口启用私有控制通道，崩溃残留 socket 可
  await symlink(f.first,path.join(f.root,'current'),'dir');
  let child;
  async function start(){
-  child=spawn(process.execPath,[path.join(f.first,'server/index.mjs')],{env:{...process.env,PORT:'0',HOST:'127.0.0.1',KC_DATA_DIR:path.join(f.root,'cold-data'),MAGIC_SIEGE_ROOT:f.root,MAGIC_UPDATE_DIR:path.join(f.root,'updates'),MAGIC_HOT_UPDATE_SOCKET:socketPath},stdio:['ignore','pipe','pipe']});
+  child=spawn(process.execPath,[path.join(f.first,'server/index.mjs')],{env:{...process.env,PORT:'0',HOST:'127.0.0.1',KC_DATA_DIR:path.join(f.root,'cold-data'),MAGIC_SIEGE_ROOT:f.root,MAGIC_HOT_UPDATE_SOCKET:socketPath},stdio:['ignore','pipe','pipe']});
   await new Promise((resolve,reject)=>{let stdout='',stderr='';child.stdout.on('data',chunk=>{stdout+=chunk;if(stdout.includes('hot updates enabled'))resolve();});child.stderr.on('data',chunk=>stderr+=chunk);child.once('error',reject);child.once('exit',code=>reject(Error('服务提前退出：'+code+' '+stderr)));});
  }
  t.after(async()=>{if(child&&child.exitCode===null&&child.signalCode===null){child.kill('SIGKILL');await once(child,'exit');}});

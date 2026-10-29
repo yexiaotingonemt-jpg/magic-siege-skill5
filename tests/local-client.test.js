@@ -6,7 +6,7 @@ import path from 'node:path';
 import http from 'node:http';
 import {createGameServer} from '../server/index.mjs';
 import {createLocalClient,parseServerUrl} from '../client/launcher.mjs';
-import {GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
+import {CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
 const listen=async server=>{await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));return `http://127.0.0.1:${server.address().port}`;};
 async function setup(t,{differentAssets=false}={}){
  const dir=await mkdtemp(path.join(tmpdir(),'magic-local-')),distDir=path.join(dir,'dist');
@@ -21,7 +21,7 @@ async function setup(t,{differentAssets=false}={}){
  return {game,remote,seen,bases};
 }
 async function request(base,route,body,cookie,headers={}){
- const response=await fetch(base+route,{method:body?'POST':'GET',headers:{'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),...headers,...(body?{'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},body:body?JSON.stringify(body):undefined});
+ const response=await fetch(base+route,{method:body?'POST':'GET',headers:{'X-Magic-Client-Version':CLIENT_VERSION,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),...headers,...(body?{'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},body:body?JSON.stringify(body):undefined});
  return {status:response.status,body:await response.json(),cookie:response.headers.get('set-cookie')?.split(';')[0]};
 }
 
@@ -43,7 +43,7 @@ test('仅界面与美术不同的客户端包沿用兼容版本，可登录同�
   assert.equal((await request(base,'/api/action',{type:'stamina'},login.cookie)).status,200);
   const controller=new AbortController();
   try{
-   const stream=await fetch(base+`/api/events?clientVersion=${GAME_VERSION}&protocolVersion=${PROTOCOL_VERSION}`,{headers:{Cookie:login.cookie},signal:controller.signal});
+   const stream=await fetch(base+`/api/events?releaseVersion=${CLIENT_VERSION}&clientVersion=${GAME_VERSION}&protocolVersion=${PROTOCOL_VERSION}`,{headers:{Cookie:login.cookie},signal:controller.signal});
    assert.equal(stream.status,200);const reader=stream.body.getReader();let text='';
    while(!text.includes('event: identity')){const {done,value}=await reader.read();assert.equal(done,false);text+=new TextDecoder().decode(value);}
   }finally{controller.abort();}
@@ -56,7 +56,7 @@ test('两个本地客户端登录同一远端，独立身份、命令与SSE实�
  const sa=await request(a,'/api/state',null,alice.cookie),sb=await request(b,'/api/state',null,bob.cookie);
  assert.equal(sa.body.matchId,sb.body.matchId);assert.notEqual(sa.body.playerId,sb.body.playerId);
  const controller=new AbortController();t.after(()=>controller.abort());
- const stream=await fetch(b+'/api/events',{headers:{'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),Cookie:bob.cookie},signal:controller.signal});assert.equal(stream.status,200);
+ const stream=await fetch(b+'/api/events',{headers:{'X-Magic-Client-Version':CLIENT_VERSION,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),Cookie:bob.cookie},signal:controller.signal});assert.equal(stream.status,200);
  const reader=stream.body.getReader();let text='';
  const readUntil=async predicate=>{while(!predicate(text)){const {value,done}=await reader.read();if(done)throw Error('SSE unexpectedly closed');text+=new TextDecoder().decode(value);}};
  await readUntil(text=>text.includes('event: identity')&&text.includes('data: {"matchId"'));
@@ -78,7 +78,7 @@ test('页面和美术仅从本地加载，远端拒绝静态资源，离线仍�
 test('本地入口拒绝外部来源、伪造Host与越界文件，协议不兼容给出更新提示',async t=>{
  const {bases:[a]}=await setup(t);
  assert.equal((await request(a,'/api/register',{name:'外部来源',password:'test-password',side:0},null,{Origin:'https://external.example'})).status,403);
- const fakeHostStatus=await new Promise((resolve,reject)=>http.get(a,{headers:{'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),Host:'external.example'}},res=>{res.resume();resolve(res.statusCode);}).on('error',reject));
+ const fakeHostStatus=await new Promise((resolve,reject)=>http.get(a,{headers:{'X-Magic-Client-Version':CLIENT_VERSION,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),Host:'external.example'}},res=>{res.resume();resolve(res.statusCode);}).on('error',reject));
  assert.equal(fakeHostStatus,403);
  assert.equal((await fetch(a+'/%2e%2e%5cpackage.json')).status,403);
  const user=await request(a,'/api/register',{name:'协议测试',password:'test-password',side:0});

@@ -7,7 +7,38 @@ import {createGameServer} from '../server/index.mjs';
 import {createLocalClient} from '../client/launcher.mjs';
 import {SERVER_VERSION,CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION,UPDATE_REQUIRED_CODE} from '../shared/protocol.js';
 import {checkServerVersion} from '../client/src/network.js';
-const current={'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION)};
+const current={'X-Magic-Client-Version':CLIENT_VERSION,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION)};
+
+test('发布版本缺失、落后或超前均拒绝，且不再提供客户端更新包',async t=>{
+ const {game,remote}=await setup(t);
+ for(const release of [undefined,'','0.1.0','999.0.0'])for(const route of ['register','login','me','state','action','events']){
+  const headers={...current};delete headers['X-Magic-Client-Version'];
+  if(release!==undefined)headers['X-Magic-Client-Version']=release;
+  const response=await fetch(remote+'/api/'+route,{headers});
+  assert.equal(response.status,409,`${route}/${release}`);
+  const data=await response.json();assert.equal(data.requiredClientVersion,CLIENT_VERSION);assert.match(data.error,/GitHub/);
+ }
+ for(const endpoint of ['win32-x64','win32-x64/package.zip'])for(const method of ['GET','HEAD']){
+  const response=await fetch(remote+'/api/updates/'+endpoint,{method,headers:{Range:'bytes=0-100'}});assert.equal(response.status,410);
+ }
+ assert.equal(game.accounts.rows.length,0);assert.equal(game.room.clients.size,0);
+});
+
+test('SSE发布版本参数不可缺失，所有重复参数及头均必须一致',async t=>{
+ const {game,remote}=await setup(t);
+ const suffix=`&clientVersion=${GAME_VERSION}&protocolVersion=${PROTOCOL_VERSION}`;
+ for(const release of ['', 'releaseVersion=old',`releaseVersion=${CLIENT_VERSION}&releaseVersion=old`]){
+  const response=await fetch(remote+'/api/events?'+release+suffix,{headers:{'X-Magic-Client-Version':CLIENT_VERSION}});
+  if(release===''){assert.equal(response.status,401);continue;}
+  assert.equal(response.status,409);assert.equal(game.room.clients.size,0);
+ }
+ const response=await fetch(remote+`/api/events?clientVersion=${GAME_VERSION}&protocolVersion=${PROTOCOL_VERSION}`);
+ assert.equal(response.status,409);
+ for(const value of ['', 'old', '999.0.0']){
+  const conflict=await fetch(remote+`/api/events?releaseVersion=${CLIENT_VERSION}`+suffix,{headers:{'X-Magic-Client-Version':value}});
+  assert.equal(conflict.status,409);
+ }
+});
 test('正式发布号在客户端、服务端、package与lockfile之间保持一致',async()=>{
  const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));
  const lock=JSON.parse(await readFile(new URL('../package-lock.json',import.meta.url),'utf8'));
@@ -28,14 +59,14 @@ test('健康与版本信息公开；缺失或不匹配的战斗兼容版本均�
  assert.deepEqual(await (await fetch(remote+'/api/version')).json(),{serverVersion:SERVER_VERSION,gameVersion:GAME_VERSION,clientVersion:CLIENT_VERSION,protocolVersion:PROTOCOL_VERSION});
  for(const version of [undefined,'','0.1.0','999.0.0',GAME_VERSION+'+other'])for(const route of ['register','login','me','state','action','events']){
   const isPost=['register','login','action'].includes(route);
-  const response=await fetch(remote+'/api/'+route,{method:isPost?'POST':'GET',headers:{'X-Magic-Protocol':String(PROTOCOL_VERSION),...(version!==undefined?{'X-Magic-Version':version}:{}),'Content-Type':'application/json'},body:isPost?JSON.stringify({name:'拒绝旧版',password:'test-password',side:0,type:'stamina'}):undefined});
+  const response=await fetch(remote+'/api/'+route,{method:isPost?'POST':'GET',headers:{'X-Magic-Client-Version':CLIENT_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),...(version!==undefined?{'X-Magic-Version':version}:{}),'Content-Type':'application/json'},body:isPost?JSON.stringify({name:'拒绝旧版',password:'test-password',side:0,type:'stamina'}):undefined});
   assert.equal(response.status,409,`${route}/${version}`);const error=await response.json();assert.equal(error.code,UPDATE_REQUIRED_CODE);assert.equal(error.requiredVersion,GAME_VERSION);assert.match(error.error,/更新客户端/);
  }
  assert.equal(game.accounts.rows.length,0);assert.equal(game.room.clients.size,0);assert.equal(game.room.sequence,0);
 });
 
-test('客户端只检查战斗兼容版本与协议；发布批次或诊断修订变化不触发更新',async t=>{
- let version={gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION};
+test('诊断修订变化不触发更新，客户端发布号、战斗兼容版本与协议均校验',async t=>{
+ let version={clientVersion:CLIENT_VERSION,gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION};
  t.mock.method(globalThis,'fetch',async()=>new Response(JSON.stringify(version),{headers:{'Content-Type':'application/json'}}));
  await checkServerVersion();
  for(const revision of ['ui-art-refresh','server-performance-fix']){
@@ -43,17 +74,17 @@ test('客户端只检查战斗兼容版本与协议；发布批次或诊断修�
   assert.deepEqual(await checkServerVersion(),version);
   await checkServerVersion({desktop:true});
  }
- version={gameVersion:GAME_VERSION+'-incompatible-combat',protocolVersion:PROTOCOL_VERSION};
+ version={clientVersion:CLIENT_VERSION,gameVersion:GAME_VERSION+'-incompatible-combat',protocolVersion:PROTOCOL_VERSION};
  await assert.rejects(checkServerVersion(),error=>error.code===UPDATE_REQUIRED_CODE&&error.requiredVersion===version.gameVersion);
- version={gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION+1};
+ version={clientVersion:CLIENT_VERSION,gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION+1};
  await assert.rejects(checkServerVersion(),error=>error.code===UPDATE_REQUIRED_CODE);
 });
-test('客户端发布版本独立控制桌面更新，不改变战斗兼容检查',async t=>{
+test('桌面和浏览器均严格要求客户端发布版本一致',async t=>{
  let version={clientVersion:CLIENT_VERSION,gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION};
  t.mock.method(globalThis,'fetch',async()=>new Response(JSON.stringify(version)));
  await checkServerVersion({desktop:true});
  version={...version,clientVersion:CLIENT_VERSION+'-new-ui'};
- await checkServerVersion({desktop:false});
+ await assert.rejects(checkServerVersion({desktop:false}),e=>e.code===UPDATE_REQUIRED_CODE);
  await assert.rejects(checkServerVersion({desktop:true}),e=>e.code===UPDATE_REQUIRED_CODE&&e.requiredClientVersion===version.clientVersion&&e.requiredVersion===GAME_VERSION);
  version={clientVersion:CLIENT_VERSION,gameVersion:GAME_VERSION+'-new-rules',protocolVersion:PROTOCOL_VERSION};
  for(const desktop of [false,true])await assert.rejects(checkServerVersion({desktop}),e=>e.requiredVersion===version.gameVersion);
@@ -64,7 +95,7 @@ test('同版本可注册与操作；游戏版本相同但协议不匹配仍被�
  const Cookie=registration.headers.get('set-cookie').split(';')[0];
  assert.equal((await fetch(remote+'/api/me',{headers:{...current,Cookie}})).status,200);
  for(const protocol of [undefined,'','999']){
-  const response=await fetch(remote+'/api/action',{method:'POST',headers:{'X-Magic-Version':GAME_VERSION,...(protocol!==undefined?{'X-Magic-Protocol':protocol}:{}),Cookie,'Content-Type':'application/json'},body:JSON.stringify({type:'stamina'})});assert.equal(response.status,409);
+  const response=await fetch(remote+'/api/action',{method:'POST',headers:{'X-Magic-Client-Version':CLIENT_VERSION,'X-Magic-Version':GAME_VERSION,...(protocol!==undefined?{'X-Magic-Protocol':protocol}:{}),Cookie,'Content-Type':'application/json'},body:JSON.stringify({type:'stamina'})});assert.equal(response.status,409);
  }
  assert.equal((await fetch(remote+'/api/action',{method:'POST',headers:{...current,Cookie,'Content-Type':'application/json'},body:JSON.stringify({type:'stamina'})})).status,200);
 });
@@ -75,7 +106,7 @@ test('SSE支持查询参数校验，过旧版本或冲突的头/参数不能建�
   assert.equal((await fetch(remote+'/api/events?'+query,{headers})).status,409);assert.equal(game.room.clients.size,0);
  }
  const abort=new AbortController();t.after(()=>abort.abort());
- const response=await fetch(remote+`/api/events?clientVersion=${GAME_VERSION}&protocolVersion=${PROTOCOL_VERSION}`,{headers:{Cookie},signal:abort.signal});assert.equal(response.status,200);
+ const response=await fetch(remote+`/api/events?releaseVersion=${CLIENT_VERSION}&clientVersion=${GAME_VERSION}&protocolVersion=${PROTOCOL_VERSION}`,{headers:{Cookie},signal:abort.signal});assert.equal(response.status,200);
  const reader=response.body.getReader(),decoder=new TextDecoder();let text='';
  while(!text.includes('event: identity')){const chunk=await reader.read();assert.equal(chunk.done,false);text+=decoder.decode(chunk.value,{stream:true});}
  abort.abort();

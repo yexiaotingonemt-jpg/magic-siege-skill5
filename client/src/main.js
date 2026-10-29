@@ -25,18 +25,11 @@ const $=s=>document.querySelector(s);
 let account=null,network=null,renderer=null,selection=null,sheets=null,sim=null,skillHud=null,abilityHTML='',ready=false;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function setToolNotice(message){const element=$('#toolNotice');if(element)element.textContent=message;}
-let stopUpdateListener,traitDraft;
+let traitDraft;
 function showUpdateRequired(error){
  network?.close();renderer?.game.destroy(true);network=null;renderer=null;selection=null;ready=false;
  document.body.classList.add('auth-mode');
- const automatic=!!window.magicDesktop;
- $('#app').innerHTML=`<main class="auth-stage"><section id="updateRequired" class="auth-card" role="alert"><div class="auth-crest">${uiIcon('crest')}</div><p class="auth-eyebrow">魔法王座 · 版本更新</p><h1>${automatic?'正在自动更新':'请更新客户端'}</h1><p>本机战斗兼容版本：<strong id="currentVersion">${esc(GAME_VERSION)}</strong></p><p>服务器战斗兼容版本：<strong id="requiredVersion">${esc(error.requiredVersion||'未知')}</strong></p>${automatic?`<p>客户端更新：${esc(error.currentClientVersion||CLIENT_VERSION)} → <strong id="requiredClientVersion">${esc(error.requiredClientVersion||'正在获取')}</strong></p>`:''}<p id="updateStatus">${automatic?'正在检查更新，完成后将自动重新启动游戏。':'请使用带自动更新功能的桌面客户端。'}</p><progress id="updateProgress" max="100" value="0" style="width:100%" hidden></progress><button id="retryUpdate" class="auth-primary" hidden>重试更新</button></section></main>`;
- if(automatic){
-  const render=status=>{const el=$('#updateStatus');if(!el)return;el.textContent=status.message||'正在更新…';const progress=$('#updateProgress');progress.hidden=status.phase!=='downloading';if(status.percent!=null)progress.value=status.percent;$('#retryUpdate').hidden=status.phase!=='error';};
-  stopUpdateListener?.();stopUpdateListener=window.magicDesktop.onUpdate(render);
-  $('#retryUpdate').onclick=()=>window.magicDesktop.retryUpdate().then(render);
-  window.magicDesktop.update().then(render).catch(e=>render({phase:'error',message:e.message}));
- }
+ $('#app').innerHTML=`<main class="auth-stage"><section id="updateRequired" class="auth-card" role="alert"><div class="auth-crest">${uiIcon('crest')}</div><p class="auth-eyebrow">魔法王座 · 版本更新</p><h1>请更新客户端</h1><p>本机客户端版本：<strong id="currentClientVersion">${esc(CLIENT_VERSION)}</strong></p><p>服务器要求版本：<strong id="requiredClientVersion">${esc(error.requiredClientVersion||'未知')}</strong></p><p>本机战斗兼容版本：<strong id="currentVersion">${esc(GAME_VERSION)}</strong></p><p>服务器战斗兼容版本：<strong id="requiredVersion">${esc(error.requiredVersion||'未知')}</strong></p><p id="updateStatus">请退出游戏，在 GitHub Desktop 中拉取最新版（Pull origin），完成后重新双击仓库中的“魔法王座.exe”。请完整拉取仓库，保留其中的预构建文件和运行环境。</p></section></main>`;
 
 }
 async function login(message=''){

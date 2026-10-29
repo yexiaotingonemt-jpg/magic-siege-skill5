@@ -1,8 +1,6 @@
 import {app,BrowserWindow,Menu,dialog,session,ipcMain,safeStorage} from 'electron';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {readFile,writeFile} from 'node:fs/promises';
-import {createUpdater} from './updater.mjs';
 import {createLocalClient} from '../launcher.mjs';
 import {readDesktopSettings} from './config.mjs';
 import {createLoginCredentials} from './login-credentials.mjs';
@@ -37,7 +35,7 @@ function buildMenu(){
    {label:'全屏',accelerator:'F11',click:()=>mainWindow?.setFullScreen(!mainWindow.isFullScreen())},
    {type:'separator'},{label:'退出',accelerator:'Alt+F4',click:()=>app.quit()},
   ]},
-  {label:'帮助',submenu:[{label:'关于魔法王座',click:()=>dialog.showMessageBox(mainWindow,{type:'info',title:'关于魔法王座',message:title,detail:`战斗兼容版本：${GAME_VERSION}\n本机加载游戏资源，自动下载客户端更新。`})}]},
+  {label:'帮助',submenu:[{label:'关于魔法王座',click:()=>dialog.showMessageBox(mainWindow,{type:'info',title:'关于魔法王座',message:title,detail:`战斗兼容版本：${GAME_VERSION}\n更新方式：退出游戏，在 GitHub Desktop 拉取最新版后重新启动。`})}]},
  ]));
 }
 async function boot(){
@@ -58,20 +56,11 @@ async function boot(){
  mainWindow.webContents.on('page-title-updated',event=>{event.preventDefault();mainWindow.setTitle(title);});
  mainWindow.once('ready-to-show',()=>{if(!testMode)mainWindow.show();});
  buildMenu();
- const updater=createUpdater({app,serverUrl:settings.serverUrl,window:mainWindow,getVersion:()=>CLIENT_VERSION});
- ipcMain.handle('magic:update',(event,manual)=>{if(event.sender!==mainWindow.webContents||event.senderFrame!==mainWindow.webContents.mainFrame)throw Error('Invalid update request');updater.start(manual===true);return updater.status;});
  const credentials=createLoginCredentials({directory:app.getPath('userData'),serverUrl:settings.serverUrl,safeStorage});
  const checkCredentialsSender=event=>{if(event.sender!==mainWindow.webContents||event.senderFrame!==mainWindow.webContents.mainFrame||new URL(event.senderFrame.url).origin!==origin)throw Error('Invalid credentials request');};
  ipcMain.handle('magic:login-credentials:read',event=>{checkCredentialsSender(event);return credentials.read();});
  ipcMain.handle('magic:login-credentials:save',(event,value)=>{checkCredentialsSender(event);return credentials.save(value);});
  await mainWindow.loadURL(origin+'/');
- const ackIndex=process.argv.indexOf('--update-ack');
- if(ackIndex>=0){
-  const ack=path.resolve(process.argv[ackIndex+1]||''),cache=path.join(app.getPath('userData'),'updates')+path.sep;
-  if(!ack.startsWith(cache)||path.basename(ack)!=='ready.json')throw Error('Invalid update receipt path');
-  const built=JSON.parse(await readFile(path.join(clientRoot,'dist/client-version.json'),'utf8'));if(built.gameVersion!==GAME_VERSION||built.clientVersion!==CLIENT_VERSION)throw Error('Installed client version mismatch');
-  await writeFile(ack,JSON.stringify({clientVersion:CLIENT_VERSION,gameVersion:GAME_VERSION,pid:process.pid,origin}));
- }
 }
 app.on('window-all-closed',()=>app.quit());
 app.on('before-quit',()=>stopLocal(local));

@@ -1,4 +1,4 @@
-import {GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
+import {CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp} from 'node:fs/promises';
@@ -103,7 +103,7 @@ test('领主冲锋穿越超上限敌兵时为手动终点目标预留名额且�
 });
 test('联机 target 指令仅影响当前登录英雄，同局快照同步，伪造来源无效且重复ID不重复执行',async()=>{
  const dataDir=await mkdtemp(path.join(tmpdir(),'kc5-manual-target-')),game=createGameServer({dataDir});game.room.paused=true;await new Promise(r=>game.server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+game.server.address().port;
- const call=async(route,body,cookie)=>{const res=await fetch(base+route,{method:body?'POST':'GET',headers:{'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),...(body?{'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},body:body?JSON.stringify(body):undefined});return {status:res.status,data:await res.json(),cookie:res.headers.get('set-cookie')?.split(';')[0]};};
+ const call=async(route,body,cookie)=>{const res=await fetch(base+route,{method:body?'POST':'GET',headers:{'X-Magic-Client-Version':CLIENT_VERSION,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),...(body?{'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},body:body?JSON.stringify(body):undefined});return {status:res.status,data:await res.json(),cookie:res.headers.get('set-cookie')?.split(';')[0]};};
  try{const a=await call('/api/register',{name:'手动目标进攻',password:'isolated-manual-target',side:0}),b=await call('/api/register',{name:'手动目标防守',password:'isolated-manual-target',side:1});const s=game.room.sim,p=game.room.player(game.accounts.rows[0]),q=game.room.player(game.accounts.rows[1]);p.classId=4;q.classId=3;p.stamina=q.stamina=100;const one=s.spawn(0,'ranged',0,1,0),two=s.spawn(1,'melee',0,1,0);assert.ok(s.contract(p,one.id));assert.ok(s.contract(q,two.id));Object.assign(one,{x:0,y:0});Object.assign(two,{x:0,y:3});const body={type:'target',id:'manual-same-id',args:{unitId:two.id,playerId:q.id,sourceId:two.id}};const first=await call('/api/action',body,a.cookie);assert.equal(first.data.ok,true,first.data.message);assert.equal(one.manualTargetId,two.id);assert.ok(!two.manualTargetId);const copy=await call('/api/state',null,b.cookie);assert.equal(copy.data.units.find(u=>u.id===one.id).manualTargetId,two.id);two.y=100;const duplicate=await call('/api/action',body,a.cookie);assert.deepEqual(duplicate.data,first.data);assert.equal((await call('/api/action',{...body,id:'manual-outside'},a.cookie)).data.ok,false);assert.equal((await call('/api/action',body)).status,401);
  }finally{for(const c of [...game.room.clients])c.res.end();game.server.closeAllConnections();await new Promise(r=>game.server.close(r));}
 });
