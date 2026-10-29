@@ -37,14 +37,16 @@ for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`�
   await page.locator('[data-cast="1"]').click();await page.waitForFunction(()=>__game.sim.metrics.casts>0);
   for(let n=0;n<8;n++)s.tick(.05);expect(h.linkId).toBe(victim.id);await sync();
   await page.waitForFunction(id=>__game.sim.hero().linkId===id,victim.id);
-  // Enemy has no target: the support preview and cast select lowest HP, not an old friend lock.
+  // Invalid target of target is rejected visibly without spending or cooldown.
   p.cd[1]=0;enemy.targetId=null;await sync();
-  await expect(page.locator('[data-cast="1"]')).toHaveClass(/ready/);
-  await page.locator('[data-cast="1"]').click();await page.waitForFunction(()=>__game.sim.metrics.casts===2);
-  for(let n=0;n<8;n++)s.tick(.05);expect(h.linkId).toBe(low.id);p.cd[1]=0;await sync();
+  await expect(page.locator('[data-cast="1"]')).toHaveClass(/out-of-range/);
+  const stamina=p.stamina;await page.locator('[data-cast="1"]').click();
+  await expect(page.locator('#notice')).toHaveText('范围内没有符合条件的己方目标');
+  expect(s.metrics.casts).toBe(1);expect(p.stamina).toBe(stamina);expect(p.cd[1]).toBe(0);
+  await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`invalid-support-${viewport.width}.png`)});
   await clickUnit(victim);victim.hp=0;s.tick(.05);await sync();
   await page.waitForFunction(id=>{const h=__game.sim.hero();return h.targetId===id&&h.friendlyTargetId==null&&h.manualTargetId==null;},enemy.id);
-  await expect(page.locator('[data-cast="1"]')).toHaveClass(/ready/);
+  await expect(page.locator('[data-cast="1"]')).toHaveClass(/out-of-range/);
   await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`support-target-${viewport.width}.png`)});
   await page.locator('[data-info="1"]').click();await expect(page.locator('#heroAbilityBody')).toContainText('选中敌方时改为该敌人当前攻击的友方');
   await expect(page.locator('#heroAbilityBody')).not.toContainText('须选择己方目标');

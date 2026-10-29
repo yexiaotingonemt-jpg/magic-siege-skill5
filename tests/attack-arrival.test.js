@@ -31,8 +31,8 @@ test('边界到达不提前绕过普攻冷却，冷却结束后能攻击',()=>{
 test('眩晕、施法与引导结束后恢复追击和普通攻击',()=>{
  for(const status of ['stunUntil','castUntil','channelUntil']){const {s,u,target}=arena();u[status]=.6;advance(s,.5);assert.equal(u.x,0);assert.equal(u.y,10);assert.equal(u.lastAttackAt,undefined);advance(s,5);attacked(u,target);}
 });
-test('支援职业锁定友军时仍可追击自动敌方目标并实际普攻，不友伤',()=>{
- for(const classId of [0,5]){const {s,p,u,target}=arena({classId,mode:'auto',angle:classId===0?1.1:1.7}),ally=s.spawn(u.side,'melee',0,1,0);Object.assign(ally,{x:-4,y:10,speed:0,cd:1e9,hp:1e8,maxHp:1e8});const hp=ally.hp;assert.ok(s.setManualTarget(ally.id,p));advance(s,8);attacked(u,target);assert.equal(ally.hp,hp);assert.equal(u.manualTargetId,ally.id);assert.equal(u.targetId,target.id);}
+test('选择友军后追击其敌方目标并实际普攻，不友伤',()=>{
+ for(const classId of [0,5]){const {s,p,u,target}=arena({classId,mode:'auto',angle:classId===0?1.1:1.7}),ally=s.spawn(u.side,'melee',0,1,0);Object.assign(ally,{x:-4,y:10,speed:0,cd:1e9,hp:1e8,maxHp:1e8});ally.targetId=target.id;ally.stunUntil=1e9;const hp=ally.hp;assert.ok(s.setManualTarget(ally.id,p));advance(s,8);attacked(u,target);assert.equal(ally.hp,hp);assert.equal(u.manualTargetId,ally.id);assert.equal(u.targetId,target.id);}
 });
 test('目标真实超出普攻距离时不能因为停距修复提前攻击',()=>{
  const {s,u,target}=arena();u.speed=0;target.x=u.x;target.y=u.y+u.range+.001;advance(s,1);assert.equal(u.lastAttackAt,undefined);assert.equal(target.hp,target.maxHp);

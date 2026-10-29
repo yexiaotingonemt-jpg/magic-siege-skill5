@@ -57,7 +57,7 @@ function arena(id = 4, level = 10) {
     troop(h.side, 2, 0),
     troop(h.side, -2, 0),
   ];
-  friends.forEach((u) => (u.hp *= 0.5));
+  friends.forEach((u) => {u.hp *= 0.5;u.targetId=enemy.id;});
   enemy.hero = true;
   enemy.targetId = friends[0].id;
   return { s, p, h, enemy, friends, troop, make };

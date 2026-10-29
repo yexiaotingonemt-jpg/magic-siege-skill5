@@ -23,9 +23,9 @@ test('手动目标接受20格内敌兵、敌英雄、敌塔及等距边界；立
  const {s,p,h,make,soldier}=arena();const minion=soldier(0,20),hero=make(3,0,20).h,tower=s.towers.find(t=>t.side!==h.side);Object.assign(tower,{x:0,y:20});
  for(const target of [minion,hero,tower]){const cd=h.cd;assert.equal(s.setManualTarget(target.id,p),true,s.notice);assert.equal(h.manualTargetId,target.id);assert.equal(h.targetId,target.id);assert.equal(s.choose(h).id,target.id);assert.equal(h.cd,cd);}
 });
-test('超过20格、友方、死目标、非法ID拒绝，并保留原手动目标',()=>{
+test('超过20格、死目标、非法ID拒绝，并保留原手动目标',()=>{
  const {s,p,h,soldier}=arena(),chosen=soldier(0,2),outside=soldier(0,MANUAL_TARGET_RANGE+.001),ally=soldier(0,1,h.side),dead=soldier(1,1);dead.hp=0;assert.ok(s.setManualTarget(chosen.id,p));
- for(const id of [outside.id,ally.id,dead.id,999999,null,'1',-1,NaN]){assert.equal(s.setManualTarget(id,p),false,`accepted ${id}`);assert.equal(h.manualTargetId,chosen.id);assert.equal(h.targetId,chosen.id);}
+ for(const id of [outside.id,dead.id,999999,null,'1',-1,NaN]){assert.equal(s.setManualTarget(id,p),false,`accepted ${id}`);assert.equal(h.manualTargetId,chosen.id);assert.equal(h.targetId,chosen.id);}
 });
 test('没有存活契约英雄时不能手动选择',()=>{
  const {s,p,h,soldier}=arena(),target=soldier(0,2);h.hp=0;assert.equal(s.setManualTarget(target.id,p),false);assert.equal(target.manualTargetId,undefined);
@@ -48,7 +48,7 @@ test('眩晕中选择目标不绕过无法行动状态，不清空眩晕或冷�
  const {s,p,h,soldier}=arena(),chosen=soldier(0,3);h.speed=2;h.cd=0;h.stunUntil=2;assert.ok(s.setManualTarget(chosen.id,p));const pos={x:h.x,y:h.y},hp=chosen.hp;advance(s,.5);near(h.x,pos.x);near(h.y,pos.y);near(chosen.hp,hp);assert.equal(h.stunUntil,2);
 });
 
-for(const [id,skills]of [[0,[0,2]],[2,[0,1,2,3]],[3,[0,1]],[4,[0,1,2,3]],[5,[0]]])test(`职业${id}手选敌人超距时不改选近敌、不扣费，边界内恢复施法`,()=>{
+for(const [id,skills]of [[0,[0]],[2,[0,1,2,3]],[3,[0,1]],[4,[0,1,2,3]],[5,[0]]])test(`职业${id}手选敌人超距时不改选近敌、不扣费，边界内恢复施法`,()=>{
  const {s,p,h,make}=arena(id),chosen=make(id===3?0:3,0,19).h;
  make(id===3?0:3,0,1);assert.ok(s.setManualTarget(chosen.id,p));
  for(const i of skills){
@@ -81,10 +81,10 @@ test('领主扇形朝向手动目标，目标即使同坐标或数量超限仍�
  for(const coincident of [false,true]){const {s,p,h,soldier}=arena(3),chosen=soldier(coincident?0:4,0);for(let i=0;i<8;i++)soldier(coincident?0:1+i*.1,coincident?0:.1);assert.ok(s.setManualTarget(chosen.id,p));const plan=s.castPlan(0,p);assert.ok(plan.ok);assert.equal(plan.t.id,chosen.id);assert.equal(plan.targets[0].id,chosen.id);assert.equal(plan.targets.length,plan.s.targets);}
 });
 test('自身技能与友方治疗不将敌方手动目标当作受益者',()=>{
- for(const id of [0,3,5]){const {s,p,h,make,soldier}=arena(id),chosen=soldier(0,3),ally=make(id===3?3:0,1,0).h;h.hp*=.5;ally.hp*=.5;s.debuff(ally,chosen,'moveSlow',.2,5,null,true);assert.ok(s.setManualTarget(chosen.id,p));if(id===5)assert.ok(s.setManualTarget(ally.id,p));const skills=id===0?[1,3]:id===3?[2,3]:[1,2,3];for(const i of skills){const plan=s.castPlan(i,p);assert.ok(plan.ok,plan.reason);assert.equal(plan.t.side,h.side);assert.ok(plan.targets.every(u=>u.side===h.side));assert.notEqual(plan.t.id,chosen.id);}}
+ for(const id of [0,3,5]){const {s,p,h,make,soldier}=arena(id),chosen=soldier(0,3),ally=make(id===3?3:0,1,0).h;h.hp*=.5;ally.hp*=.5;chosen.targetId=ally.id;s.debuff(ally,chosen,'moveSlow',.2,5,null,true);assert.ok(s.setManualTarget(chosen.id,p));if(id===5)assert.ok(s.setManualTarget(ally.id,p));const skills=id===0?[1,3]:id===3?[2,3]:[1,2,3];for(const i of skills){const plan=s.castPlan(i,p);assert.ok(plan.ok,plan.reason);assert.equal(plan.t.side,h.side);assert.ok(plan.targets.every(u=>u.side===h.side));assert.notEqual(plan.t.id,chosen.id);}}
 });
-test('兽人救援按手动敌英雄正在攻击的友军换位，手动小兵不改变救援类型',()=>{
- const {s,p,h,make,soldier}=arena(0),nearEnemy=make(3,0,1).h,chosen=make(3,0,4).h,allyA=make(4,1,0).h,allyB=make(5,-1,0).h;nearEnemy.targetId=allyA.id;chosen.targetId=allyB.id;assert.ok(s.setManualTarget(chosen.id,p));assert.equal(s.castPlan(2,p).t.id,allyB.id);chosen.targetId=null;assert.equal(s.castPlan(2,p).ok,false);assert.ok(s.setManualTarget(soldier(0,2).id,p));assert.equal(s.castPlan(2,p).t.id,allyA.id);
+test('兽人救援按手动敌英雄正在攻击的友军换位，无有效目标不回退其他敌人',()=>{
+ const {s,p,h,make,soldier}=arena(0),nearEnemy=make(3,0,1).h,chosen=make(3,0,4).h,allyA=make(4,1,0).h,allyB=make(5,-1,0).h;nearEnemy.targetId=allyA.id;chosen.targetId=allyB.id;assert.ok(s.setManualTarget(chosen.id,p));assert.equal(s.castPlan(2,p).t.id,allyB.id);chosen.targetId=null;assert.equal(s.castPlan(2,p).ok,false);assert.ok(s.setManualTarget(soldier(0,2).id,p));assert.equal(s.castPlan(2,p).ok,false);
 });
 test('已开始的前摇锁定原目标，切换手动目标只改变后续施法',()=>{
  const {s,p,h,soldier}=arena(4),a=soldier(0,2),b=soldier(1,3);assert.ok(s.setManualTarget(a.id,p));assert.ok(s.cast(0,p));assert.ok(s.setManualTarget(b.id,p));const ahp=a.hp,bhp=b.hp;advance(s,.4);assert.ok(a.hp<ahp);near(b.hp,bhp);p.cd[0]=0;assert.equal(s.castPlan(0,p).t.id,b.id);
@@ -106,4 +106,27 @@ test('联机 target 指令仅影响当前登录英雄，同局快照同步，伪
  const call=async(route,body,cookie)=>{const res=await fetch(base+route,{method:body?'POST':'GET',headers:{'X-Magic-Client-Version':CLIENT_VERSION,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),...(body?{'Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},body:body?JSON.stringify(body):undefined});return {status:res.status,data:await res.json(),cookie:res.headers.get('set-cookie')?.split(';')[0]};};
  try{const a=await call('/api/register',{name:'手动目标进攻',password:'isolated-manual-target',side:0}),b=await call('/api/register',{name:'手动目标防守',password:'isolated-manual-target',side:1});const s=game.room.sim,p=game.room.player(game.accounts.rows[0]),q=game.room.player(game.accounts.rows[1]);p.classId=4;q.classId=3;p.stamina=q.stamina=100;const one=s.spawn(0,'ranged',0,1,0),two=s.spawn(1,'melee',0,1,0);assert.ok(s.contract(p,one.id));assert.ok(s.contract(q,two.id));Object.assign(one,{x:0,y:0});Object.assign(two,{x:0,y:3});const body={type:'target',id:'manual-same-id',args:{unitId:two.id,playerId:q.id,sourceId:two.id}};const first=await call('/api/action',body,a.cookie);assert.equal(first.data.ok,true,first.data.message);assert.equal(one.manualTargetId,two.id);assert.ok(!two.manualTargetId);const copy=await call('/api/state',null,b.cookie);assert.equal(copy.data.units.find(u=>u.id===one.id).manualTargetId,two.id);two.y=100;const duplicate=await call('/api/action',body,a.cookie);assert.deepEqual(duplicate.data,first.data);assert.equal((await call('/api/action',{...body,id:'manual-outside'},a.cookie)).data.ok,false);assert.equal((await call('/api/action',body)).status,401);
  }finally{for(const c of [...game.room.clients])c.res.end();game.server.closeAllConnections();await new Promise(r=>game.server.close(r));}
+});
+
+for(const id of [0,2,3,4,5])test(`职业${id}敌方技能只解析当前友军的一层目标，不回退旧敌人`,()=>{
+ const {s,p,h,soldier}=arena(id),old=soldier(0,1),chosen=soldier(0,10),ally=soldier(1,1,h.side);
+ s.setManualTarget(old.id,p);ally.targetId=chosen.id;s.setManualTarget(ally.id,p);
+ const skill=id===0||id===3||id===5?0:1;
+ chosen.y=2;let plan=s.castPlan(skill,p);assert.ok(plan.ok,plan.reason);assert.equal(plan.t.id,chosen.id);
+ chosen.y=s.config.heroes[id].skills[skill].targetRange+.001;assert.equal(s.castPlan(skill,p).code,'range');
+ for(const target of [null,ally.id,h.id,999999]){
+  ally.targetId=target;const before={stamina:p.stamina,cd:[...p.cd],xp:p.xp,score:p.score};
+  assert.equal(s.castPlan(skill,p).ok,false);assert.equal(s.cast(skill,p),false);assert.match(s.notice,/目标/);
+  assert.deepEqual({stamina:p.stamina,cd:p.cd,xp:p.xp,score:p.score},before);assert.equal(h.manualTargetId,ally.id);
+ }
+});
+
+test('友方间接攻击目标死亡、越界或同阵营均清除选择并按警戒重新索敌',()=>{
+ for(const invalid of ['dead','range','ally','cycle']){
+  const {s,p,h,soldier}=arena(),old=soldier(0,15),local=soldier(0,2),ally=soldier(1,1,h.side);
+  ally.targetId=old.id;s.setManualTarget(ally.id,p);
+  if(invalid==='dead')old.hp=0;if(invalid==='range')old.y=20.001;
+  if(invalid==='ally')ally.targetId=h.id;if(invalid==='cycle')ally.targetId=ally.id;
+  s.tick(.05);assert.equal(h.targetId,local.id);assert.equal(h.manualTargetId,null);assert.equal(h.manualAttackTargetId,null);
+ }
 });
