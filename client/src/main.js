@@ -71,7 +71,6 @@ function update(){if(!ready||!sim?.player)return;selection?.sync();const p=sim.p
  $('#roomInfo').innerHTML=`<p>同局 ${sim.matchId.slice(0,8)} · 已同步 ${active.filter(p=>p.online).length} 人</p><p>阶段 ${sim.stage.number} · <span class="countdown">${Math.max(0,sim.stage.end-sim.time).toFixed(0)}秒</span> · 胜场 攻${sim.stage.wins[0]} / 守${sim.stage.wins[1]}</p>`;
  const units=sim.units.filter(u=>u.hp>0);$('#stats').textContent=`战斗${sim.time.toFixed(1)}秒 · 进攻${units.filter(u=>u.side===0).length}单位 / 防守${units.filter(u=>u.side===1).length}单位`;
  $('#feed').innerHTML=sim.logs.slice(0,4).map(t=>`<p>${esc(t)}</p>`).join('');const rankingHTML=contributionRanking(active,p.id);$('#ranking').innerHTML=rankingHTML;$('#battleRanking').innerHTML=rankingHTML;
- $('#reports').innerHTML=(sim.battleEvents||[]).slice(0,20).map(e=>'<article class="elite-report"><b>精英奖励 · '+e.time.toFixed(1)+'秒</b><p>'+esc(e.text)+'</p></article>').join('')+(sim.reports.length?sim.reports.slice(0,15).map(r=>`<article><b>${esc(r.name)} · ${classes[r.classId]} · ${r.reason}</b><p>评价${r.rating.toFixed(1)} /100 · <span class="reward">+${r.reward.toFixed(1)}积分</span></p>${r.parts.map(x=>`<small>${labels[x.key]||x.key} ${x.value.toFixed(0)} → ${x.normalized.toFixed(1)} × ${x.weight}%</small>`).join('<br>')}</article>`).join(''):'英雄阵亡或战区结束后生成评价。');
  $('#configReadout').textContent='可契约职业：'+[...availableClasses(0),...availableClasses(1)].map(id=>classes[id]).join('、');
 }
 function frame(){selection?.position();requestAnimationFrame(frame);}requestAnimationFrame(frame);
