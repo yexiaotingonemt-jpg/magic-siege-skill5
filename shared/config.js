@@ -7,6 +7,7 @@ export const availableClasses=(side,config=defaults)=>side?[3]:[0,4,5,2];
 export const contractClasses=(u,config=defaults)=>availableClasses(u.side,config).filter(id=>!u.elite&&!u.summoned&&contractType(id)===u.type);
 const skill=(power,cd,targetRange,radius=0,extra={})=>({power,cd,targetRange,radius,duration:0,cost:1,castTime:.35,levelGrowth:.2,...extra});
 export const defaults=clone(base);
+defaults.world.assistWindow=5;
 Object.assign(defaults.world,{attackBots:6,defenseBots:2,attackHpMultiplier:1,defenseHpMultiplier:1,troopHpMultiplier:1,heroHpMultiplier:1,heroHpGrowth:.02,heroAttackGrowth:.015,towerDamageExpRate:.0002,towerBreakXp:2});
 Object.assign(defaults.world,{retaliationMemory:3,retaliationLeash:14,heroPriorityDistance:1.5});
 defaults.world.skillDesignVersion=5;

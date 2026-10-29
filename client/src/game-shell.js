@@ -30,7 +30,7 @@ export const gameShell=`
    <footer aria-label="游戏导航">${[['battle','战场'],['hero','技能'],['reports','战报'],['ranking','排行']].map(([name,label])=>`<button type="button" data-nav="${name}" ${name==='battle'?'aria-current="page"':''}>${uiIcon(name)}<span>${label}</span></button>`).join('')}</footer>
    <div id="gameSheet" class="game-sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
     <section class="sheet-panel"><div class="sheet-heading"><h2 id="sheetTitle">职业技能</h2><button id="sheetClose" aria-label="关闭面板">×</button></div>
-     <div id="sheetScroll" class="sheet-scroll"><section data-sheet-section="hero"><div class="hero-sheet-heading"><b id="abilityClassName"></b><span>升级选择强化</span></div><div id="heroAbilityBody"></div></section><section data-sheet-section="reports" hidden><div id="reports"></div></section><section data-sheet-section="ranking" hidden><p class="ranking-rule">总积分：历次英雄评价累计，含当前英雄实时贡献。各职业沿用评价权重，每次契约最高100分。<br>KDA = 总积分 ÷ 累计消耗体力（契约＋施法）；未消耗时显示 —。</p><div id="ranking"></div></section></div>
+     <div id="sheetScroll" class="sheet-scroll"><section data-sheet-section="hero"><div class="hero-sheet-heading"><b id="abilityClassName"></b><span>升级选择强化</span></div><div id="heroAbilityBody"></div></section><section data-sheet-section="reports" hidden><div id="reports"></div></section><section data-sheet-section="ranking" hidden><p class="ranking-rule">总积分：伤害、原始承伤、有效治疗、小兵击杀、英雄击杀及英雄助攻按职业系数累计，另加每点消耗体力100分，无单次契约上限。<br>KDA = 总积分 ÷ 累计消耗体力（契约＋施法）；未消耗时显示 —。</p><div id="ranking"></div></section></div>
     </section>
    </div>
   </section>

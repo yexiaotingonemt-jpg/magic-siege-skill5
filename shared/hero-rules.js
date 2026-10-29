@@ -1,3 +1,4 @@
+import {recordEffectiveHeal,recordEffectiveHit} from './assist-rules.js';
 import {
   triggerTowerGuard,
   towerGuardActive,
@@ -255,6 +256,7 @@ export class HeroRules {
       });
       t.support ??= {};
       t.support[u.playerId] = this.time;
+      recordEffectiveHeal(u,t,this.time);
     }
     if (actual > 0 && !shared) {
       for (const f of [...this.fields])
@@ -329,6 +331,7 @@ export class HeroRules {
       );
       if (!t.tower) this.stat(credit, "unitDamage", sum);
       this.stat(t, "damageTaken", raw);
+      recordEffectiveHit(a,t,credit,this.time,this.config.world.assistWindow);
       if (credit?.hero) {
         t.contributors ??= {};
         t.contributors[credit.playerId] = this.time;
@@ -416,7 +419,7 @@ export class HeroRules {
     const heat = h.heat || 0;
     p.stamina -= s.cost;
     p.staminaSpent += s.cost;
-    p.score += this.config.world.castScore;
+    this.stat(h, 'staminaSpent', s.cost);
     this.addXp(p, s.cost * this.config.world.expPerStamina);
     p.cd[i] = this.time + s.cd * (h.eliteBuffs?.arcane > this.time ? 0.85 : 1);
     h.castUntil = this.time + s.castTime;
