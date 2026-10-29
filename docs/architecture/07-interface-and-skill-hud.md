@@ -12,6 +12,10 @@ client/index.html → main.js → gameShell / mountGameLayout → selection / sk
 
 施法、详情、强化选择独立触控；外侧辅助工具与游戏区分离。文案以当前五职业配置为准。
 
+升级后只更新战场右下角的“技能强化”图标及右上角待选次数，点击图标才打开选择窗口；再次升级、刷新和重连均不会自动弹窗。窗口内可连续处理积攒的强化，关闭后保留剩余次数与当前候选，选完后入口隐藏。
+
+强化卡片放大技能名称与词条名称。技能名称后的“!”为独立详情按钮，展示当前技能效果、冷却与体力消耗、该技能已选强化及次数，并列出通用强化；通用词条展示本职业定位及已选通用强化。查看详情不消耗强化次数，返回时保留候选；Esc先返回选择，再关闭窗口，详情内数字键不执行选卡。
+
 统一皮肤由 `kc-final.css` 管理：深绿面板、古铜边框、语义色及一致的控件间距；`ui-icons.js` 提供导航和资源图标。导航通过 `aria-current` 标记当前面板，关闭弹层恢复战场选中态；账号入口支持方向键切换。技能区和底部导航按实际缩放比例预留触控高度，避免消耗文字、强化选择按钮与状态栏重叠。
 
 ## 主要文件
@@ -22,6 +26,8 @@ client/index.html → main.js → gameShell / mountGameLayout → selection / sk
 | [client/src/game-shell.js](../../client/src/game-shell.js) | 启动入口可达 |
 | [client/src/game-layout.js](../../client/src/game-layout.js) | 启动入口可达 |
 | [client/src/skill-hud.js](../../client/src/skill-hud.js) | 启动入口可达 |
+| [client/src/trait-draft.js](../../client/src/trait-draft.js) | 手动强化入口、次数角标、选卡与技能详情 |
+| [client/src/trait-draft.css](../../client/src/trait-draft.css) | 强化入口、卡片与详情的响应式样式 |
 | [client/src/ability-descriptions.js](../../client/src/ability-descriptions.js) | 启动入口可达 |
 | [client/src/ability-tags.js](../../client/src/ability-tags.js) | 启动入口可达 |
 | [client/src/ability-summaries.js](../../client/src/ability-summaries.js) | 当前入口未静态引用；保留兼容/工具 |
