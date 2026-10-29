@@ -1,14 +1,14 @@
 {
-  "version": "0.5.7",
-  "serverVersion": "0.5.7",
+  "version": "0.5.8",
+  "serverVersion": "0.5.8",
   "gameVersion": "0.5.0",
   "protocolVersion": 3,
   "files": {
-    "client/prebuilt/assets/index-ABfyTKV7.css": "d36963b109fcd2a1c34e0fa294b97bb26890057aff044c7f36b18bc2ad9d0b03",
-    "client/prebuilt/assets/index-CeS-AS-x.js": "17f162d47d8159c583b1bc5dc74872f4989c98bea1880ca7ac6ae18a9dcb1478",
+    "client/prebuilt/assets/index-DVo0umE5.js": "5a219b9a542586564e7bcec0f2995cee4be7aed0743870c11a8bc68fa511b8c4",
+    "client/prebuilt/assets/index-fUU5z69s.css": "fe26fadacde98f743a6e3a69187f07e076dd5b5b78d80a57173edaa098400103",
     "client/prebuilt/assets/phaser-DFK5Ua9d.js": "f9025c1a29bc3ae097dd886ce07717b297466da1ce8f032c8294252ce6cf5cdb",
-    "client/prebuilt/client-version.json": "ea1fc2ea8e5c6c7386df10da56ca8c39a209979b56f6e9a3463bcb313749ccde",
-    "client/prebuilt/index.html": "3a5e4778bf971b9350c21367df197da0047b1009ca25341ca8f7106303d9d302",
+    "client/prebuilt/client-version.json": "1161c28d1a4122f1e85cec2dd6d4ae3a17d440c70fea8633ce64e06d5b30077b",
+    "client/prebuilt/index.html": "9b1dce4ac115361631e95275a073725f24c68f07bd08ff0f95d03cd08634142b",
     "client/desktop/config.mjs": "af3a2c715c7ea9d1af042edd7f12e4dc04cbcca1579801499c5ed02b4b4a27ef",
     "client/desktop/login-credentials.mjs": "1a6d02bf5b94b7db6b357fb68a43056f7b3b7b3159dec864a83446540d5fd358",
     "client/desktop/main.mjs": "d40388f7731891378337ec7e5d7ba56e745cfcc2173fd390946530127daba058",
@@ -16,7 +16,7 @@
     "魔法王座.exe": "1142a1c9b7ad159691d7fbb5c25c4ecd6b9ff6fb1ccbd4f4d6d01d5bf944c179",
     "client/launcher.mjs": "c2923024bfbf7051368f9ef51a6c608c01dfe3b0f219cbbd2f62033bf28e38b9",
     "client/client-config.json": "6b27adca4af8dbc3bd561c1af85471d8561026bd3c449b26a3d60d6f071937c5",
-    "shared/protocol.js": "404e73d9942ce6394ab983edd84851aa2d6c3bab6b9a67538787d38aedfa9dcd"
+    "shared/protocol.js": "70755c72b1f9af82b44047151dcb74053726eeadca11daacb257493ab71f25df"
   },
   "runtime": {
     "version": "45.1.0-win32-x64",
