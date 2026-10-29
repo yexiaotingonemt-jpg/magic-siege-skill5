@@ -1,14 +1,14 @@
 import http from 'node:http';
 import {createGunzip} from 'node:zlib';
 import {StringDecoder} from 'node:string_decoder';
-import {GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
+import {CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
 
 // Use node:http rather than fetch: fetch transparently decodes gzip and would
 // make the measured byte count describe JSON instead of network traffic.
 export function openSse(url,{cookie,encoding='gzip',onEvent=()=>{}}={}){
  return new Promise((resolve,reject)=>{
   const probe={events:[],encodedBytes:0,decodedBytes:0,error:null,ended:false};
-  const req=http.get(url,{headers:{Cookie:cookie,'Accept-Encoding':encoding,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION)}},res=>{
+  const req=http.get(url,{headers:{Cookie:cookie,'Accept-Encoding':encoding,'X-Magic-Client-Version':CLIENT_VERSION,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION)}},res=>{
    if(res.statusCode!==200){res.resume();reject(Error(`SSE HTTP ${res.statusCode}`));return;}
    probe.headers=res.headers;probe.response=res;
    const decoder=new StringDecoder('utf8');let pending='';

@@ -96,15 +96,19 @@ test('桌面版本不符：直接显示强制更新页',async()=>{
  try{client=await launch(server.base);await expect(client.page.locator('#updateRequired')).toBeVisible();await expect(client.page.locator('#requiredVersion')).toHaveText(required);await expect(client.page.locator('#authForm')).toHaveCount(0);await capture(client.app,client.page,path.join(process.env.MAGIC_QA_DIR,'desktop-update-required.png'));expect(client.errors).toEqual([]);}finally{await client?.app.close();await server.close();}
 });
 
-test('只有客户端发布版本变化也自动进入更新，不混用战斗版本',async()=>{
- const required=CLIENT_VERSION.replace(/\d+$/,n=>String(Number(n)+1)),server=await service(GAME_VERSION,required);let client;
+test('只有客户端发布版本变化也要求手动拉取，不请求更新包',async()=>{
+ const required=CLIENT_VERSION.replace(/\d+$/,n=>String(Number(n)+1)),server=await service(GAME_VERSION,required);let client;const requests=[];server.server.on('request',req=>requests.push(req.url));
  try{
   client=await launch(server.base);
   await expect(client.page.locator('#updateRequired')).toBeVisible();
   await expect(client.page.locator('#requiredVersion')).toHaveText(GAME_VERSION);
   await expect(client.page.locator('#requiredClientVersion')).toHaveText(required);
   await expect(client.page.locator('#authForm')).toHaveCount(0);
-  await expect(client.page.locator('#retryUpdate')).toBeVisible();
+  await expect(client.page.locator('#updateStatus')).toContainText('GitHub Desktop');
+  await expect(client.page.locator('#retryUpdate')).toHaveCount(0);
+  expect(await client.page.evaluate(()=>typeof window.magicDesktop.update)).toBe('undefined');
+  await capture(client.app,client.page,path.join(process.env.MAGIC_QA_DIR,'desktop-manual-pull.png'));
+  expect(requests.some(url=>url.startsWith('/api/updates/'))).toBe(false);
   expect(client.errors).toEqual([]);
  }finally{await client?.app.close();await server.close();}
 });

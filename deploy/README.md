@@ -109,24 +109,19 @@ location / {
 
 ## 玩家分发与版本更新
 
-把桌面客户端ZIP发给玩家，完整解压后双击根目录`魔法王座.exe`。Windows包附带完整桌面运行环境，玩家无需安装Node.js或浏览器，也无需运行CMD。图片和脚本留在玩家电脑上；服务器只接收API请求。不要把服务端包或账号文件发给玩家。
+玩家完整克隆或拉取 GitHub 仓库，双击仓库根目录的魔法王座.exe。无需安装 Node.js、npm 或执行构建。固定运行环境分片随 Git 拉取，首次启动在本机展开，后续复用。
 
-正式发布遵守[客户端与服务器统一版本发布约定](../docs/版本发布约定.md)：`SERVER_VERSION` 必须与 `CLIENT_VERSION` 相等。数值或服务端代码调整也同步提升两端发布号，生成配套客户端签名包并部署同版本服务器。
+客户端不自动下载或安装更新。版本不一致时禁止进入游戏，提示先退出游戏，在 GitHub Desktop 执行 Pull origin，再重新启动仓库入口。服务端不再分发完整客户端包，历史 `/api/updates/` 接口统一返回410。
 
-桌面客户端自动下载签名包、校验、安装并重新启动。两端发布号统一递增；`GAME_VERSION` 作为两端共用的战斗兼容标记，在旧客户端不兼容时提升；API/命令/快照结构不兼容时提升 `PROTOCOL_VERSION`。游戏接口校验战斗兼容标记和协议标记，客户端发布号控制自动更新。
+## 客户端手动更新发布
 
-## 桌面自动更新发布
+1. 遵守[统一版本约定](../docs/版本发布约定.md)，同步提升 SERVER_VERSION、CLIENT_VERSION 和 package/lockfile。
+2. 构建桌面包，运行 `npm run package:repository -- <桌面包目录>`，提交源码、魔法王座.exe、desktop-client.json、client/prebuilt 和需要的运行环境分片。
+3. 验证完整拉取后的仓库可直接启动，通过 PR 合入 GitHub 发布分支，再从该提交构建服务端包。取消客户端包签名与服务器上传步骤。
+4. 备份账号并部署同版本服务端；服务端增量热更继续遵守[GitHub来源与战局约定](../docs/服务端热更.md)。保留战局更新后也需断开旧 SSE，让所有客户端重新通过版本检查。
+5. 验证旧版被拦截、当前版登录与SSE正常、更新接口返回410且无客户端包下载。
 
-1. 同步提升 `shared/protocol.js` 的 `SERVER_VERSION` 与 `CLIENT_VERSION`，使用相同的新发布号；核心战斗不兼容时同时修改两端共用的战斗兼容标记。同步根 `package.json` 与 lockfile，执行测试并生成同版本的服务端包和客户端签名包。
-2. 使用仓库外的Ed25519私钥签名：设置 `MAGIC_UPDATE_SIGNING_KEY` 为私钥文件路径，运行 `node scripts/sign-desktop-update.mjs <桌面ZIP路径>`。私钥必须备份在独立的安全位置，禁止提交或上传服务器；公钥已内置于客户端与服务端。
-3. 将ZIP重命名为 `package.zip`，与生成的清单（重命名 `manifest.json`）一起上传到临时目录。核对大小、SHA-256与签名后，原子发布为 `<MAGIC_UPDATE_DIR>/<CLIENT_VERSION>/win32-x64/`。同一个客户端版本的清单和包保持不可变，新包提升客户端版本。
-4. 先发布完整更新目录，再部署服务端的目标客户端版本。`deploy/run-user-service.sh` 默认将更新目录指向 `$APP_ROOT/shared/updates`。验证公开版本、清单、Range下载与旧包自动安装。没有有效签名包时接口返回503，客户端保留当前安装并允许重试。
-
-公开接口：`GET /api/updates/win32-x64` 返回签名清单，`GET /api/updates/win32-x64/package.zip` 下载当前目标包（支持HEAD与Range续传）。无需登录或旧版请求头。清单同时绑定客户端发布版本、战斗兼容版本、协议标记、平台、架构、大小与SHA-256；使用内置公钥验证后才能安装，即使使用HTTP也拒绝篡改的包。
-
-Windows辅助进程在本机用户目录记录更新日志，暂存目录与旧包备份和安装目录同盘，失败恢复旧版；账号与登录资料不放入安装目录。首次安装需放在当前用户可写的普通文件夹。当前采用完整包自动更新，约220MB，并非运行中脚本热替换。Nginx启用时，确保 `/api/updates/` 走API代理并保留Range头。
-
-完整Windows验收：设置仓库外的 `MAGIC_UPDATE_SIGNING_KEY` 与 `MAGIC_QA_DIR`，执行 `npm run test:update -- <已解压的桌面发布目录>`。测试创建隔离安装与临时签名包，验证客户端版本单独提升时的下载、真实替换、重启、用户资料保留，以及无法启动新包时的自动回滚；测试包不得上传正式更新目录。`npm run test:desktop` 验证桌面界面和双版本入口，`npm test` 验证签名、续传与服务端兼容限制。
+`npm test` 验证发布版本校验；`npm run test:desktop` 验证桌面提示与无自动下载；浏览器版本限制测试覆盖启动、断线重连和窄屏。
 
 ## 运维检查
 
@@ -138,7 +133,7 @@ Windows辅助进程在本机用户目录记录更新日志，暂存目录与旧�
 
 ## 版本探测与接口调用
 
-`GET /api/version` 返回 `clientVersion`（目标客户端发布版）、`gameVersion`（战斗兼容版）和 `protocolVersion`，无需登录。`GET /api/health` 也包含这些信息。游戏API的 `X-Magic-Version` 必须为战斗兼容版本，`X-Magic-Protocol` 为协议标记；浏览器EventSource沿用 `clientVersion` 查询参数传递战斗兼容版本、`protocolVersion` 传递协议标记，以兼容旧包。头与参数同时存在时必须全部匹配。版本不符返回409及 `CLIENT_UPDATE_REQUIRED`，包含 `requiredVersion`（战斗）和 `requiredClientVersion`（客户端）。监控、版本探测与更新下载不受旧版请求头限制。
+`GET /api/version` 与 `/api/health` 公开返回两端发布号、战斗兼容版本和协议版本。游戏 API 要求 `X-Magic-Client-Version` 为客户端发布号、`X-Magic-Version` 为战斗兼容版本、`X-Magic-Protocol` 为协议版本。SSE 通过 releaseVersion、clientVersion（沿用历史名称，表示战斗版本）、protocolVersion 三个查询参数传递；参数与请求头同时存在时必须全部一致。任一版本缺失、落后或超前均返回409和 CLIENT_UPDATE_REQUIRED，提示手动拉取。版本查询始终可用，旧更新包接口返回410。
 
 客户端打包检查 `client/dist/client-version.json` 的客户端发布版本、战斗兼容版本与协议标记是否对应源码，不匹配则重新构建。构建和打包不自动加版本；正式发布需手动同步提升 `SERVER_VERSION` 与 `CLIENT_VERSION`，兼容性变化才提升 `GAME_VERSION`。`RULESET_REVISION` 不参与检查。
 

@@ -1,6 +1,5 @@
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {serveUpdate} from './update-feed.mjs';
 import {Accounts} from './accounts.mjs';
 import {Room} from './room.mjs';
 import {Simulation} from '../shared/simulation.js';
@@ -8,24 +7,26 @@ import {defaults,clone,validateConfig} from '../shared/config.js';
 import {createEventStream} from './event-stream.mjs';
 import {SERVER_VERSION,CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION,RULESET_REVISION,UPDATE_REQUIRED_CODE} from '../shared/protocol.js';
 const base=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-export function createGameRuntime({dataDir=process.env.KC_DATA_DIR||path.join(base,'data'),gameVersion=GAME_VERSION,clientVersion=CLIENT_VERSION,updateDir=process.env.MAGIC_UPDATE_DIR||path.join(base,'updates'),sseGzip=process.env.MAGIC_SSE_GZIP!=='0',accounts=new Accounts(dataDir),room=new Room(),limits=new Map()}={}){
+export function createGameRuntime({dataDir=process.env.KC_DATA_DIR||path.join(base,'data'),gameVersion=GAME_VERSION,clientVersion=CLIENT_VERSION,sseGzip=process.env.MAGIC_SSE_GZIP!=='0',accounts=new Accounts(dataDir),room=new Room(),limits=new Map()}={}){
  const json=(res,status,value,headers={})=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...headers});res.end(JSON.stringify(value));};
  const body=async req=>{let raw='';for await(const chunk of req){raw+=chunk;if(raw.length>131072)throw Error('请求过大');}return JSON.parse(raw||'{}');};
  const handler=async(req,res)=>{
   try{const url=new URL(req.url,'http://localhost');
    if(url.pathname==='/api/health')return json(res,200,{ok:true,version:5,serverVersion:SERVER_VERSION,gameVersion,clientVersion,protocolVersion:PROTOCOL_VERSION,revision:RULESET_REVISION,matchId:room.matchId,sequence:room.sequence,clients:room.clients.size});
    if(url.pathname==='/api/version')return json(res,200,{serverVersion:SERVER_VERSION,gameVersion,clientVersion,protocolVersion:PROTOCOL_VERSION});
-   if(url.pathname.startsWith('/api/updates/')&&await serveUpdate(req,res,url,{directory:updateDir,version:clientVersion,gameVersion,protocolVersion:PROTOCOL_VERSION}))return;
+   if(url.pathname.startsWith('/api/updates/'))return json(res,410,{error:'客户端自动更新已取消，请退出游戏并从 GitHub 拉取最新版仓库。'});
    if(url.pathname.startsWith('/api/')){
     const clientGameVersion=req.headers['x-magic-version'],clientProtocol=req.headers['x-magic-protocol'];
-    const versions=[clientGameVersion],protocols=[clientProtocol];
+    const versions=[clientGameVersion],protocols=[clientProtocol],releases=[req.headers['x-magic-client-version']];
     // EventSource cannot set custom headers; its URL carries the compiled client version.
     if(url.pathname==='/api/events'){
-     if(url.searchParams.has('clientVersion'))versions.push(url.searchParams.get('clientVersion'));
-     if(url.searchParams.has('protocolVersion'))protocols.push(url.searchParams.get('protocolVersion'));
-     if(!clientGameVersion)versions.shift();if(!clientProtocol)protocols.shift();
+     versions.push(...url.searchParams.getAll('clientVersion'));
+     protocols.push(...url.searchParams.getAll('protocolVersion'));
+     releases.push(...url.searchParams.getAll('releaseVersion'));
+     if(clientGameVersion===undefined)versions.shift();if(clientProtocol===undefined)protocols.shift();
+     if(req.headers['x-magic-client-version']===undefined)releases.shift();
     }
-    if(!versions.length||versions.some(v=>v!==gameVersion)||!protocols.length||protocols.some(v=>v!==String(PROTOCOL_VERSION)))return json(res,409,{code:UPDATE_REQUIRED_CODE,error:'战斗兼容版本与服务器不一致，正在更新客户端。',clientVersion:clientGameVersion||url.searchParams.get('clientVersion')||null,requiredVersion:gameVersion,requiredClientVersion:clientVersion,protocolVersion:PROTOCOL_VERSION});
+    if(!releases.length||releases.some(v=>v!==clientVersion)||!versions.length||versions.some(v=>v!==gameVersion)||!protocols.length||protocols.some(v=>v!==String(PROTOCOL_VERSION)))return json(res,409,{code:UPDATE_REQUIRED_CODE,error:'请更新客户端：退出游戏并从 GitHub 拉取最新版仓库后重新启动。',clientVersion:clientGameVersion||url.searchParams.get('clientVersion')||null,requiredVersion:gameVersion,requiredClientVersion:clientVersion,protocolVersion:PROTOCOL_VERSION});
     if(req.method==='POST'&&req.headers.origin&&req.headers.origin!==`http://${req.headers.host}`&&req.headers.origin!==`https://${req.headers.host}`)return json(res,403,{error:'请求来源不允许'});
     if(['/api/register','/api/login'].includes(url.pathname)&&req.method==='POST'){
      const key=req.socket.remoteAddress,now=Date.now(),entry=limits.get(key)||{count:0,until:now+60000};if(now>entry.until){entry.count=0;entry.until=now+60000;}if(++entry.count>30)return json(res,429,{error:'登录尝试过于频繁，请稍后重试'});limits.set(key,entry);

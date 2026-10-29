@@ -9,7 +9,7 @@ import {createGameServer} from '../server/index.mjs';
 import {createLocalClient} from '../client/launcher.mjs';
 import {acceptsGzip,createEventStream} from '../server/event-stream.mjs';
 import {openSse,waitFor} from '../scripts/sse-probe.mjs';
-import {GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
+import {CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
 const listen=async server=>{await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));return `http://127.0.0.1:${server.address().port}`;};
 
 async function setup(t,options={}){
@@ -54,7 +54,7 @@ test('gzip reconnect restores full config and identity; logout ends compressor a
  const next=await connect('gzip');
  assert.deepEqual(next.events.find(e=>e.type==='identity').data,identity);
  assert.ok(next.events.find(e=>e.type==='message').data.config);
- const logout=await fetch(base+'/api/logout',{method:'POST',headers:{Cookie:cookie,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),'Content-Type':'application/json'},body:'{}'});
+ const logout=await fetch(base+'/api/logout',{method:'POST',headers:{Cookie:cookie,'X-Magic-Client-Version':CLIENT_VERSION,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION),'Content-Type':'application/json'},body:'{}'});
  assert.equal(logout.status,200);await logout.json();
  await waitFor(()=>next.ended&&game.room.clients.size===0);
  assert.equal(next.error,null);
