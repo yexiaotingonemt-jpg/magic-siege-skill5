@@ -13,7 +13,7 @@
 | [05 单位契约与职业](05-contracts-and-classes.md) | 职业兵种映射、契约确认、扣费、继承生命比例 |
 | [06 自动寻路与索敌流程](06-navigation-and-targeting.md) | 嘲讽、手动锁、自动目标、反击、推进边界 |
 | [07 普通攻击流程](07-basic-attacks.md) | 射程、出手、弹道和减攻速冷却进度 |
-| [08 手动目标](08-manual-targets.md) | 20格选择、职业友方权限、敌友独立锁 |
+| [08 手动目标](08-manual-targets.md) | 20格敌友选择、目标的目标解析、无效重选 |
 | [09 技能释放公共流程](09-skill-casting.md) | 施法验证、扣费、前摇锁定与诊断账本 |
 | [10 职业与技能](10-classes-and-skills.md) | 五职业20技能及专属资源 |
 | [11 体力、经验与技能构筑](11-stamina-and-progression.md) | 体力、职业独立成长、升级、词条选择与保留 |

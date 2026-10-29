@@ -1,7 +1,7 @@
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const epsilon=1e-7;
 export const MANUAL_TARGET_RANGE=20;
-export const canSelectAllies=h=>!!h?.hero&&[0,5].includes(h.classId);
+export const canSelectAllies=h=>!!h?.hero;
 
 export function activeTaunter(sim,u){
  const target=u&&!u.tower&&u.tauntUntil>sim.time?sim.get(u.tauntId):null;
@@ -30,10 +30,17 @@ export function enemyTarget(sim,h){
  return sim.enemies(h,h.aggro??h.range).sort((a,b)=>(a.hero?0:a.tower?2:1)-(b.hero?0:b.tower?2:1)||distance(h,a)-distance(h,b)||a.id-b.id)[0]||null;
 }
 
-// Support targeting is independent from an already chosen attack target.
+// Resolve one hop only; never follow cycles or reuse an older attack lock.
+export function targetForSide(sim,h,side,chosen=manualTarget(sim,h)||enemyTarget(sim,h)){
+ if(!chosen||h.manualTargetId!=null&&!manualTarget(sim,h)&&!activeTaunter(sim,h))return null;
+ const target=chosen.side===side?chosen:sim.get(chosen.targetId);
+ return target?.side===side?target:null;
+}
+
 export function manualAttackTarget(sim,h){
  if(!h||h.hp<=0||activeTaunter(sim,h))return null;
- const target=h.manualAttackTargetId!=null?sim.get(h.manualAttackTargetId):manualTarget(sim,h);
+ const selected=manualTarget(sim,h);
+ const target=h.manualTargetId!=null?(selected?targetForSide(sim,h,1-h.side,selected):null):h.manualAttackTargetId!=null?sim.get(h.manualAttackTargetId):null;
  return target&&target.side!==h.side&&distance(h,target)<=MANUAL_TARGET_RANGE+epsilon?target:null;
 }
 
@@ -43,10 +50,10 @@ export function setManualTarget(sim,targetId,p=sim.player){
  if(activeTaunter(sim,h))return fail('嘲讽期间无法切换攻击目标');
  const target=Number.isInteger(targetId)?sim.get(targetId):null;
  if(!target)return fail('目标已离场');
- if(target.side===h.side&&!canSelectAllies(h))return fail('该职业没有可作用友方的技能');
  if(distance(h,target)>MANUAL_TARGET_RANGE+epsilon)return fail('目标超出手动锁定范围（20格）');
  h.manualTargetId=target.id;
  if(h.classId===5&&target.side===h.side)h.friendlyTargetId=target.id;
- if(target.side!==h.side){h.manualAttackTargetId=target.id;h.targetId=target.id;h.retaliationTargetId=null;h.deploying=false;}
+ const attack=manualAttackTarget(sim,h);
+ h.manualAttackTargetId=attack?.id??null;h.targetId=attack?.id??null;h.retaliationTargetId=null;h.deploying=false;
  sim.notice='';return true;
 }

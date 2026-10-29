@@ -1,7 +1,7 @@
 import {classes,contractClasses} from '../../shared/config.js';
 import {troopTitle} from './visual-theme.js';
 import {VIEW} from './battlefield.js';
-import {MANUAL_TARGET_RANGE,canSelectAllies} from '../../shared/manual-target.js';
+import {MANUAL_TARGET_RANGE} from '../../shared/manual-target.js';
 
 export function createSelection({getSim,getRenderer,onChanged}){
  let matchId=null,selectedId=null,inspectedId=null,chosenClass=null,nearby=[],anchor=null;
@@ -29,7 +29,6 @@ export function createSelection({getSim,getRenderer,onChanged}){
   if(hero){
    clear();inspectedId=u?.id??null;
    if(!u||u.hp<=0){s.notice='目标已离场';onChanged();return;}
-   if(u.side===hero.side&&!canSelectAllies(hero)){s.notice='该职业没有可作用友方的技能';onChanged();return;}
    if(Math.hypot(u.x-hero.x,u.y-hero.y)>MANUAL_TARGET_RANGE+1e-7){s.notice='目标超出手动锁定范围（20格）';onChanged();return;}
    s.notice='';
    await s.setManualTarget(u.id);
