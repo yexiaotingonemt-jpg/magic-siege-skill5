@@ -1,0 +1,34 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtempSync,writeFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
+import {EventEmitter} from 'node:events';
+import {Accounts} from '../server/accounts.mjs';
+import {Room} from '../server/room.mjs';
+test('超级权限来自独立账号ID名单，注册及登录不能伪造，重载后保留',async()=>{
+ const dir=mkdtempSync(path.join(tmpdir(),'super-account-')),accounts=new Accounts(dir);
+ const a=await accounts.register({name:'yxt',password:'test-secret',side:0,isSuperAdmin:true});
+ assert.equal(accounts.public(a).isSuperAdmin,false);
+ writeFileSync(path.join(dir,'super-accounts.json'),JSON.stringify([a.id]));
+ const token=accounts.issue(a),req={headers:{cookie:'kc_session='+token}};
+ assert.equal(accounts.get(req).isSuperAdmin,true);
+ assert.equal(new Accounts(dir).public(a).isSuperAdmin,true);
+ writeFileSync(path.join(dir,'super-accounts.json'),'[]');assert.equal(accounts.get(req).isSuperAdmin,false);
+});
+test('仅超级账号重开全局，保留连接会话及配置，清空成长且请求幂等',()=>{
+ const room=new Room(),a={id:'a',name:'yxt',side:0,isSuperAdmin:true},b={id:'b',name:'other',side:1},host={id:'host',name:'host',side:0,isHost:true};
+ const output=[];const res=new EventEmitter();res.destroyed=false;res.write=t=>output.push(t);
+ room.connect(a,res);room.player(b);const p=room.player(a);p.level=9;p.score=300;p.totalPoints=500;p.stamina=1;p.cd[0]=42;
+ room.sim.time=123;room.paused=true;room.speed=4;room.stageNumber=7;room.stageWins=[3,3];room.sim.config.world.attackBots=2;room.config=structuredClone(room.sim.config);
+ const before=room.matchId;
+ assert.equal(room.command(b,{type:'restartMatch',args:{isSuperAdmin:true},id:'bad'}).ok,false);
+ assert.equal(room.command(host,{type:'restartMatch',id:'bad'}).ok,false);assert.equal(room.matchId,before);
+ const result=room.command(a,{type:'restartMatch',id:'once'});assert.equal(result.ok,true);assert.notEqual(room.matchId,before);
+ assert.equal(room.sim.time,0);assert.equal(room.stageNumber,1);assert.deepEqual(room.stageWins,[0,0]);assert.equal(room.paused,false);assert.equal(room.speed,1);
+ const next=room.player(a);assert.equal(next.level,1);assert.equal(next.score,0);assert.equal(next.totalPoints,0);assert.equal(next.stamina,room.config.world.initialStamina);assert.deepEqual(next.cd,[0,0,0,0]);assert.equal(next.heroId,null);
+ assert.equal(room.players.size,3);assert.equal(room.clients.size,1);assert.equal(room.online.get(a.id),1);assert.equal(room.config.world.attackBots,2);
+ const match=room.matchId;assert.deepEqual(room.command(a,{type:'restartMatch',id:'once'}),result);assert.equal(room.matchId,match);
+ assert.equal(output.filter(t=>t.startsWith('event: identity')).length,2);assert.ok(!output.join('').includes('hash'));
+ next.auto=true;res.emit('close');assert.equal(next.auto,false);assert.equal(room.clients.size,0);
+});

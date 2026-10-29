@@ -1,14 +1,14 @@
 {
-  "version": "0.5.4",
-  "serverVersion": "0.5.4",
+  "version": "0.5.5",
+  "serverVersion": "0.5.5",
   "gameVersion": "0.5.0",
   "protocolVersion": 3,
   "files": {
-    "client/prebuilt/assets/index-44PiY-UG.js": "917f9afbce968846970e02d719bd011a8782ad3d8e9ecec0d050fb3bc2ce1984",
     "client/prebuilt/assets/index-BUtepezV.css": "c4977ab271eedce1a9aa81b254362ef107580df5d5c88c2be7c594634d4c747d",
+    "client/prebuilt/assets/index-TLnLgYZy.js": "397a7490058377155c4544891f0f3623e08d8425c3f7ea25751de8643cb64df8",
     "client/prebuilt/assets/phaser-DFK5Ua9d.js": "f9025c1a29bc3ae097dd886ce07717b297466da1ce8f032c8294252ce6cf5cdb",
-    "client/prebuilt/client-version.json": "62e04cb46e1b2661069e5835e4e3e60780c1d7d368bd7b5f87d6698240db8d0f",
-    "client/prebuilt/index.html": "81649e5eae2166a94d1a828b169976fca3442113f17a3ee93c5eb528296303a0",
+    "client/prebuilt/client-version.json": "a9666fe1b1f1368b24642b7d08fed6b85d9855364171382638f1f08b3521c823",
+    "client/prebuilt/index.html": "78297f6c5bfc6636fea06573e9561f4916561c2d61714f5aa6c5a313314fcc1c",
     "client/desktop/config.mjs": "af3a2c715c7ea9d1af042edd7f12e4dc04cbcca1579801499c5ed02b4b4a27ef",
     "client/desktop/login-credentials.mjs": "1a6d02bf5b94b7db6b357fb68a43056f7b3b7b3159dec864a83446540d5fd358",
     "client/desktop/main.mjs": "d40388f7731891378337ec7e5d7ba56e745cfcc2173fd390946530127daba058",
@@ -16,7 +16,7 @@
     "魔法王座.exe": "1142a1c9b7ad159691d7fbb5c25c4ecd6b9ff6fb1ccbd4f4d6d01d5bf944c179",
     "client/launcher.mjs": "c2923024bfbf7051368f9ef51a6c608c01dfe3b0f219cbbd2f62033bf28e38b9",
     "client/client-config.json": "6b27adca4af8dbc3bd561c1af85471d8561026bd3c449b26a3d60d6f071937c5",
-    "shared/protocol.js": "102bf313e06e4c277d7763b87f6ecc7887df0a3a6aad81037d2d6b8e36bd68d0"
+    "shared/protocol.js": "93fe943d6a6ec17ddd51fb8d46609a61ee29df3a0b07271641b7e05b08a30785"
   },
   "runtime": {
     "version": "45.1.0-win32-x64",
