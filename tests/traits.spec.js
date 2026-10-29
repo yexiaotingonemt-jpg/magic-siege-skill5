@@ -109,7 +109,7 @@ test("紫金品质、候选不足3项、已选构筑与真实技能说明", asyn
   );
   await expect(page.locator("[data-up]:visible")).toHaveCount(0);
 });
-test("精英特殊外观、在线广播、战报及本人Buff倒计时", async ({
+test("精英特殊外观、在线广播及本人Buff倒计时", async ({
   page,
   browser,
 }) => {
@@ -143,9 +143,7 @@ test("精英特殊外观、在线广播、战报及本人Buff倒计时", async (
     for (const target of [page, other])
       await expect(target.locator("#eliteBroadcast")).toContainText("强袭");
     await expect(page.locator("#eliteBuffs")).toContainText("30s");
-    await page.locator('[data-nav="reports"]').click();
-    await expect(page.locator("#reports")).toContainText("精英奖励");
-    await expect(page.locator("#reports")).toContainText("强袭");
+    await expect(page.locator('[data-nav="reports"], #reports')).toHaveCount(0);
     expect(errors).toEqual([]);
   } finally {
     await ctx.close();
@@ -159,7 +157,7 @@ test("桌面和窄屏选卡截图：无错误、卡片未超出游戏区域", as
   s.setClass(4, p);
   s.contract(p, u.id);
   s.addXp(p, 3);
-  p.progress[4].choices[0].options = ["F01", "F05", "F09"];
+  p.progress[4].choices[0].options = ["F09", "F01", "F05"];
   p.progress[4].traits = { F01: 2, F17: 1 };
   game.room.sequence++;
   game.room.broadcast();
@@ -169,9 +167,13 @@ test("桌面和窄屏选卡截图：无错误、卡片未超出游戏区域", as
   await page.screenshot({ path: path.join(out, "desktop-pending.png"), fullPage: true });
   await page.locator("#traitPending").click();
   await expect(page.locator(".trait-card")).toHaveCount(3);
-  await page.screenshot({
+  await expect(page.locator(".trait-category")).toHaveText([
+    "技能1：" + names[4][0], "技能2：" + names[4][1], "技能3：" + names[4][2],
+  ]);
+  expect(await page.locator("[data-trait]").evaluateAll((bs) => bs.map((b) => b.dataset.trait)))
+    .toEqual(["F01", "F05", "F09"]);
+  await page.locator(".draft-panel").screenshot({
     path: path.join(out, "desktop-draft.png"),
-    fullPage: true,
   });
   await page.locator('[data-trait-info="F01"]').click();
   await expect(page.locator("#draftSkillTitle")).toHaveText(names[4][0]);
@@ -179,9 +181,8 @@ test("桌面和窄屏选卡截图：无错误、卡片未超出游戏区域", as
   await page.locator("[data-detail-back]").click();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.waitForTimeout(250);
-  await page.screenshot({
+  await page.locator(".draft-panel").screenshot({
     path: path.join(out, "mobile-draft.png"),
-    fullPage: true,
   });
   const bounds = await page.locator(".trait-card").evaluateAll((nodes) =>
     nodes.map((n) => {

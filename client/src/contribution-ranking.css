@@ -1,7 +1,7 @@
-.game .battle-ranking{position:absolute;left:12px;bottom:12px;z-index:21;width:350px;max-width:calc(100% - 56px);border:1px solid #7f8d6e;border-radius:6px;background:#14271fee;color:var(--ui-text);box-shadow:0 3px 12px #0005;font-size:17px}
-.game .battle-ranking summary{padding:8px 10px;cursor:pointer;color:var(--ui-gold);font-weight:600}
-.game .battle-ranking summary span{float:right;font-size:15px;color:var(--ui-muted);font-weight:400}
-.game .battle-ranking-scroll{max-height:166px;overflow:auto;overscroll-behavior:contain;touch-action:pan-y}
+.game .battle-ranking{position:absolute;left:12px;top:166px;z-index:21;width:350px;max-width:calc(100% - 56px);max-height:calc(100% - 178px);display:flex;flex-direction:column;border:1px solid #7f8d6e;border-radius:6px;background:#14271fee;color:var(--ui-text);box-shadow:0 3px 12px #0005;font-size:17px}
+.game .battle-ranking-heading{flex:none;padding:8px 10px;border-bottom:1px solid var(--ui-line);color:var(--ui-gold);font-weight:600}
+.game .battle-ranking-heading span{float:right;font-size:15px;color:var(--ui-muted);font-weight:400}
+.game .battle-ranking-scroll{min-height:0;max-height:166px;overflow:auto;overscroll-behavior:contain;touch-action:pan-y}
 .game .contribution-ranking{width:100%;border-collapse:collapse;font-size:18px;font-variant-numeric:tabular-nums;table-layout:fixed}
 .game .contribution-ranking th,.game .contribution-ranking td{padding:9px 10px;border-bottom:1px solid #45554880;text-align:right}
 .game .contribution-ranking th:first-child{width:54%;text-align:left}

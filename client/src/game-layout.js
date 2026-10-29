@@ -20,7 +20,7 @@ export function createGameSheets(){
  function open(name,index=null){
   if(sheet.hidden)previous=document.activeElement;sheet.hidden=false;markActive(name);sections.forEach(e=>e.hidden=e.dataset.sheetSection!==name);
   document.querySelector('#gameViewport').scrollIntoView({block:'start'});
-  document.querySelector('#sheetTitle').textContent={hero:'职业技能',reports:'征战纪要',ranking:'功勋排行'}[name];
+  document.querySelector('#sheetTitle').textContent={hero:'职业技能',ranking:'功勋排行'}[name];
   document.querySelector('#sheetClose').focus({preventScroll:true});
   const body=document.querySelector('#sheetScroll');body.querySelectorAll('details').forEach(d=>d.open=false);body.scrollTop=0;
   if(index!=null)requestAnimationFrame(()=>{const card=document.querySelector(`[data-skill-detail="${index}"]`);if(card){const scale=document.querySelector('.game').getBoundingClientRect().width/640;body.scrollTop+=(card.getBoundingClientRect().top-body.getBoundingClientRect().top)/scale-12;}});
