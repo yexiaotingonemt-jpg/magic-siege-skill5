@@ -107,7 +107,8 @@ func run()error{
  if *waitPID>0{if e=waitForPID(uintptr(*waitPID));e!=nil{return e}}
  m,e:=prepare(root,cache,profile);if e!=nil{return e};if *only{return json.NewEncoder(os.Stdout).Encode(map[string]any{"version":m.Version,"cache":cache,"prepared":true})}
  if os.Getenv("MAGIC_DESKTOP_TEST")!="1"{if e=closeOlderWindow(m.Version);e!=nil{return e}}
- cmd:=exec.Command(filepath.Join(cache,"魔法王座.exe"));cmd.Dir=root;cmd.Env=launchEnvironment(root,profile);cmd.SysProcAttr=&syscall.SysProcAttr{HideWindow:true};return cmd.Start()
+ // The game is a GUI application: SW_HIDE suppresses its real window on Windows.
+ cmd:=exec.Command(filepath.Join(cache,"魔法王座.exe"));cmd.Dir=root;cmd.Env=launchEnvironment(root,profile);return cmd.Start()
 }
 func main(){
  runtime.LockOSThread();err:=run();if err!=nil{fmt.Fprintln(os.Stderr,err);if !strings.Contains(strings.Join(os.Args," "),"--prepare-only"){user32.NewProc("MessageBoxW").Call(0,uintptr(unsafe.Pointer(wide(err.Error()))),uintptr(unsafe.Pointer(wide("魔法王座启动失败"))),0x10)};os.Exit(1)}
