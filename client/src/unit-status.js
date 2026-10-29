@@ -1,3 +1,4 @@
+import {ELITE_BUFFS} from '../../shared/trait-effects.js';
 import {available} from '../../shared/skill-value.js';
 import {towerGuardActive,towerAllyProtection} from '../../shared/tower-guard.js';
 
@@ -7,7 +8,7 @@ const percent=n=>Math.round(n*100)+'%';
 export function indexStatusFields(sim){
  const index=new Map();
  for(const f of sim.fields){
-  if(f.until<=sim.time||f.owner.hp<=0&&!(f.kind==='dot'&&f.type==='lordScorch'))continue;
+  if(f.until<=sim.time||f.owner.hp<=0&&f.kind!=='dot')continue;
   const ids=f.kind==='link'?[f.owner.id,f.host]:f.kind==='dot'?[f.host]:f.kind==='lordBurn'?[f.owner.id]:[];
   if(f.kind==='link'&&(!sim.get(f.host)||!usable(f.value)))continue;
   if(f.kind==='dot'&&!usable(f.s?.value))continue;
@@ -30,11 +31,15 @@ export function unitStatuses(sim,u,fields=indexStatusFields(sim)){
  add('conduct','导电','negative',u.conductUntil,'处于导电状态',0,4);
  if(u.slowUntil>now&&!out.some(x=>x.id==='moveSlow'))add('moveSlow','减速','negative',u.slowUntil,'移动速度降低'+percent(1-u.slowRatio),0,1);
  const guards=(u.guards||[]).filter(g=>g.until>now&&usable(g.value));
- if(guards.length)add('guard','减伤','positive',Math.max(...guards.map(g=>g.until)),'当前伤害降低'+percent(Math.min(.8,guards.reduce((n,g)=>n+g.ratio,0))),0,1);
+ const groupedGuards=new Map();for(const g of guards)groupedGuards.set(g.kind||'guard',Math.max(groupedGuards.get(g.kind||'guard')||0,g.ratio));
+ if(guards.length)add('guard','减伤','positive',Math.max(...guards.map(g=>g.until)),'技能合计减伤'+percent(Math.min(.8,1-[...groupedGuards.values()].reduce((n,r)=>n*(1-r),1))),0,1);
  if(u.shield>0&&usable(u.shieldValue))add('shield','护盾','positive',u.shieldUntil,'剩余护盾 '+Math.ceil(Math.min(u.shield,available(u.shieldValue))),0,1);
  if(u.damageStore&&usable(u.damageStore.value))add('damageStore','蓄伤成盾','positive',u.damageStore.until,'已累计 '+Math.floor(u.damageStore.total)+' 伤害，结束按'+percent(u.damageStore.conversionRatio??1)+'转为护盾',0,2);
  add('immune','负面免疫','positive',u.immuneUntil,'免疫新的负面状态',0,0);
  if(u.lordUlt&&usable(u.lordUlt.s.value))add('lordUlt','灭军君临','positive',u.lordUlt.until,'普通攻击附带范围溅射',0,2);
+ for(const [key,until]of Object.entries(u.eliteBuffs||{}))add('elite-'+key,ELITE_BUFFS[key].name,'positive',until,ELITE_BUFFS[key].description,0,0);
+ add('immortal','不屈','positive',u.immortalUntil,'生命最低保留1',0,0);
+ for(const f of Object.values(u.hastes||{}))add('haste','攻速提升','positive',f.until,'普通攻击速度提高'+percent(f.ratio),0,2);
  if(u.heat>0)add('heat','炙热','positive',u.heatUntil,'火焰技能联动资源',u.heat,3);
  for(const f of fields.get(u.id)||[]){
   if(f.kind==='link')add('link','共生链接','positive',f.until,'与链接的友军按'+percent(f.shareRatio??1)+'共享收到的有效治疗',0,2);
