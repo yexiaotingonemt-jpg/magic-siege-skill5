@@ -1,0 +1,100 @@
+{
+  "deployment": {
+    "cutoverAtBeijing": "2026-10-29T11:22:41.918552+08:00",
+    "release": "/home/colleague/apps/magic-siege-skill5/releases/github-v0.5.2-20261029T032223Z",
+    "previous": "/home/colleague/apps/magic-siege-skill5/releases/github-v0.5.1-20261029T025134Z",
+    "backup": "/home/colleague/apps/magic-siege-skill5/shared/backups/github-v0.5.2-20261029T032223Z",
+    "pid": 3066875,
+    "serviceRecoverySeconds": 0.368,
+    "accountsBefore": 13,
+    "accountsAfter": 13,
+    "accountFileUnchanged": true,
+    "accountFileSha256": "338236cd1db413fb1bf595a57424c26f59cf89155401457b839a56edf5156b59",
+    "previousMatchId": "03c80d13-1af9-4566-931c-cd06f99ba676",
+    "health": {
+      "ok": true,
+      "version": 5,
+      "serverVersion": "0.5.2",
+      "gameVersion": "0.5.0",
+      "clientVersion": "0.5.2",
+      "protocolVersion": 3,
+      "revision": "skill5-traits-elites-ranking-20261029",
+      "matchId": "add69839-ac3c-4889-a385-9aadfa89a3c2",
+      "sequence": 0,
+      "clients": 0
+    },
+    "hotControlSocket": true,
+    "clientUpdatesDisabled": true,
+    "source": {
+      "repository": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5.git",
+      "ref": "refs/heads/main",
+      "branchHead": "f5565f52a824af5be252550c6144f5b5f2c57a4c",
+      "commit": "f5565f52a824af5be252550c6144f5b5f2c57a4c",
+      "previousCommit": "c89bd4a9cad82427d26bf1800d5b3711f570e833",
+      "verifiedAt": "2026-10-29T03:22:41.517Z"
+    },
+    "manifestDigest": "995dc934ca0ef22609f812cf33730f70c2aaff9e11c82a7d45c8010ce00b61fe",
+    "cronRestored": true
+  },
+  "productionClientAcceptance": {
+    "versions": {
+      "serverVersion": "0.5.2",
+      "gameVersion": "0.5.0",
+      "clientVersion": "0.5.2",
+      "protocolVersion": 3
+    },
+    "oldClientsRejected": [
+      409,
+      409,
+      409
+    ],
+    "updates": [
+      {
+        "endpoint": "win32-x64",
+        "method": "GET",
+        "status": 410,
+        "bytes": 98
+      },
+      {
+        "endpoint": "win32-x64",
+        "method": "HEAD",
+        "status": 410,
+        "bytes": 0
+      },
+      {
+        "endpoint": "win32-x64/package.zip",
+        "method": "GET",
+        "status": 410,
+        "bytes": 98
+      },
+      {
+        "endpoint": "win32-x64/package.zip",
+        "method": "HEAD",
+        "status": 410,
+        "bytes": 0
+      }
+    ],
+    "repositoryPrepared": true,
+    "actualDesktopLogin": true,
+    "liveSseProgressing": true,
+    "configAndPlayerLoaded": true,
+    "canvasAndLocalResources": true,
+    "autoUpdateBridgeRemoved": true,
+    "logout": true,
+    "pageErrors": [],
+    "matchId": "add69839-ac3c-4889-a385-9aadfa89a3c2"
+  },
+  "windowsTests": {
+    "unitPassed": 462,
+    "linuxOnlySkippedOnWindows": 3,
+    "browserPassed": 6,
+    "desktopPassed": 5
+  },
+  "linuxHotUpdateTests": {
+    "passed": 17,
+    "skipped": 0,
+    "exitCode": 0
+  },
+  "serverZipSha256": "1f0d54de0e3ba11f983c1971dfffdb974bd08e4a27b86110902186c4f420e26a",
+  "postLoginAccountFileUnchanged": true
+}
