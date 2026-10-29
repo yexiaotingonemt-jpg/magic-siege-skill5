@@ -167,18 +167,23 @@ export function createTraitDraft(getSim, send) {
         '技能强化</h2><p class="draft-intro">选择一项，形成你的战斗构筑 · 待选 ' +
         total +
         ' 次</p><div class="draft-cards">' +
-        choice.options
+        // Candidates are shuffled when drawn. A stable sort keeps that random
+        // order within each skill, including after reopening or reconnecting.
+        [...choice.options]
+          .sort((a, b) => (TRAIT_BY_ID[a].skill ?? 4) - (TRAIT_BY_ID[b].skill ?? 4))
           .map((id, i) => {
             const t = TRAIT_BY_ID[id],
               rank = traitRank(p, id),
               art = HERO_ART[p.classId],
-              skillName = t.skill == null ? "通用强化" : names[p.classId][t.skill],
+              skillName = t.skill == null ? "通用强化" : "技能" + (t.skill + 1) + "：" + names[p.classId][t.skill],
               icon = t.skill == null
                 ? "background-image:url('" + heroPortrait(p.classId) + "');background-size:cover;background-position:center 18%"
                 : "background-image:url('" + ART_ROOT + "/skill-icons.webp');background-size:400% 500%;background-position:" + (t.skill / 3) * 100 + "% " + (art.row / 4) * 100 + "%";
             return (
               '<article class="trait-card"><div class="trait-card-heading"><span class="trait-category">' +
-              skillName +
+              (t.skill == null
+                ? '<span class="trait-skill-number">职业强化</span><span class="trait-skill-name">通用强化</span>'
+                : '<span class="trait-skill-number">技能' + (t.skill + 1) + '：</span><span class="trait-skill-name">' + names[p.classId][t.skill] + '</span>') +
               '</span><button type="button" class="trait-info" data-trait-info="' +
               id +
               '" aria-label="查看' + skillName + '的效果和已选强化">!</button></div><button type="button" class="trait-select" data-trait="' +

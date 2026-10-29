@@ -94,7 +94,7 @@ input::placeholder {color:#81958a;opacity:1}
 .game .upgrade {border-color:#91b398;background:#315c40;color:#f2f0d7;box-shadow:0 2px 6px #0004;margin-top:6px}
 .game #notice {height:100%;line-height:max(30px,calc(20px / var(--game-scale,1)));color:#b8c8b9;border-color:#3b5141;background:#12241b;font-size:max(16px,calc(11px / var(--game-scale,1)));text-shadow:none;padding:0 16px}
 .game #notice.penalty {color:var(--penalty)}
-.game footer {height:100%;border-top:1px solid #89704b;box-shadow:none}
+.game footer {height:100%;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid #89704b;box-shadow:none}
 .game footer button {position:relative;color:#9fb09f;border-right:1px solid #5d69442f;gap:10px;text-shadow:none;border-radius:0}
 .game footer button:last-child {color:#9fb09f}
 .game footer button .ui-icon {width:25px;height:25px}
