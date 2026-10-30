@@ -1,0 +1,95 @@
+{
+  "release": "0.6.1",
+  "publishedSource": "bc0262dc81668ceca28c47e8d771f5e2e3f8f3a2",
+  "hotUpdate": {
+    "ok": true,
+    "at": "2026-10-30T02:34:42.688Z",
+    "previous": "/home/colleague/apps/magic-siege-skill5/releases/hot-a563cc3b-9c0f-4042-a019-69993c9e334d",
+    "releaseDir": "/home/colleague/apps/magic-siege-skill5/releases/hot-6c423139-1565-4874-b307-24c7aa7189da",
+    "baseDigest": "33bc3f492b2ecd5df5bb2045f2cc4fea2408effb0e0c9505dc3e7ec2f8d4938f",
+    "digest": "a6cc56d9a5e479725a4e5fdc972083369a349e27423763eb7a73063d6e136c93",
+    "source": {
+      "repository": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5.git",
+      "ref": "refs/heads/main",
+      "branchHead": "bc0262dc81668ceca28c47e8d771f5e2e3f8f3a2",
+      "commit": "bc0262dc81668ceca28c47e8d771f5e2e3f8f3a2",
+      "previousCommit": "79af0cef1bdce490fecb489920dda398a3149551",
+      "verifiedAt": "2026-10-30T02:34:42.667Z"
+    },
+    "battle": "preserve",
+    "previousMatchId": "e93ae9dd-790d-4fdc-8738-e270bad69593",
+    "matchId": "e93ae9dd-790d-4fdc-8738-e270bad69593",
+    "stateSchema": 2,
+    "accountSchema": 1,
+    "serverVersion": "0.6.1",
+    "clientVersion": "0.6.1",
+    "gameVersion": "0.6.0",
+    "protocolVersion": 3,
+    "revision": "ally-approach-skill-inspection-20261030",
+    "reloads": 6,
+    "changed": 12,
+    "removed": 0,
+    "verified": true
+  },
+  "verification": {
+    "logic": {
+      "passed": 563,
+      "skipped": 3
+    },
+    "browser": {
+      "passed": 11
+    },
+    "packagedDesktop": {
+      "passed": 7
+    },
+    "live": {
+      "health": {
+        "ok": true,
+        "version": 5,
+        "serverVersion": "0.6.1",
+        "gameVersion": "0.6.0",
+        "clientVersion": "0.6.1",
+        "protocolVersion": 3,
+        "revision": "ally-approach-skill-inspection-20261030",
+        "matchId": "e93ae9dd-790d-4fdc-8738-e270bad69593",
+        "sequence": 87090,
+        "clients": 0
+      },
+      "oldClientStatus": 409,
+      "oldSessionRetained": true,
+      "retiredUpdateStatus": 410,
+      "repositoryPrepared": true,
+      "clients": [
+        {
+          "kind": "packaged",
+          "login": true,
+          "sse": true,
+          "defaultServer": true,
+          "matchId": "e93ae9dd-790d-4fdc-8738-e270bad69593",
+          "pageErrors": []
+        },
+        {
+          "kind": "repository",
+          "login": true,
+          "sse": true,
+          "defaultServer": true,
+          "matchId": "e93ae9dd-790d-4fdc-8738-e270bad69593",
+          "pageErrors": []
+        }
+      ]
+    },
+    "installedNavigation": {
+      "installedNavigationVerified": true,
+      "approach": true,
+      "arrivalReacquiresEnemy": true
+    }
+  },
+  "backup": {
+    "directory": "/home/colleague/apps/magic-siege-skill5/shared/backups/pre-v0.6.1-20261030T023140Z",
+    "accountsSha256": "529f2ac28ebc68ae835cf5167e32c9e5673fb4def32be2c8595548f651d48601"
+  },
+  "packages": {
+    "serverZipSha256": "52ae156b68c942bf1ae61c84d51b5175e99a00305486387389ee385df48ff6d4",
+    "clientZipSha256": "8f66d462a0e56f9f0fcd8f2a0cc8420af93dae9c8e5ab8d7d121c1cd0dd3161e"
+  }
+}
