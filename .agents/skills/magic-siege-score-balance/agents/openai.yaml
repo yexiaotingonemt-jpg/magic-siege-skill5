@@ -1,0 +1,6 @@
+interface:
+  display_name: "魔法王座技能与积分联调"
+  short_description: "调整技能时同步检查五职业三等级总分、承伤占比与三种施法策略"
+  default_prompt: "使用 $magic-siege-score-balance 调整本次技能并同步校准总积分、KDA和承伤占比，报告三种施法策略的差异。"
+policy:
+  allow_implicit_invocation: true

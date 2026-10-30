@@ -12,7 +12,7 @@
     "initialStamina": 100,
     "castScore": 10,
     "scoreCap": 300,
-    "assistWindow": 10,
+    "assistWindow": 5,
     "projectileSpeed": 12,
     "expBase": 3,
     "expGrowth": 1,

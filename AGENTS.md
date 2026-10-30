@@ -1,5 +1,9 @@
 # AI 协作阅读顺序
 
+## 技能与积分同步校准
+
+调整本项目技能数值或机制、冷却、费用、英雄面板与成长、契约或积分规则时，必须使用项目技能 [.agents/skills/magic-siege-score-balance/SKILL.md](.agents/skills/magic-siege-score-balance/SKILL.md)，同步校准总积分、KDA、承伤占比，并比较不施法、最佳单技能和正常中频三种策略。运行 `npm run test:balance`，明确标准通过范围和未达项；纯美术、文案、布局修改不要求数值联调。基准报告及临时输出放在E盘项目辅助目录，不写入KC数值源目录或C盘。
+
 开始修改或发布前，先阅读本文件和 [全体协作者提交规范](CONTRIBUTING.md)，再阅读 [统一版本发布约定](docs/版本发布约定.md)；涉及正式发布时继续阅读 [部署指南](deploy/README.md)。版本发布约定是本项目发布规则的优先入口。
 
 # 全体协作者的 Git 提交规范
