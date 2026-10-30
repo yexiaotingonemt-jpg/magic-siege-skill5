@@ -40,7 +40,7 @@ export function targetForSide(sim,h,side,chosen=manualTarget(sim,h)||enemyTarget
 export function manualAttackTarget(sim,h){
  if(!h||h.hp<=0||activeTaunter(sim,h))return null;
  const selected=manualTarget(sim,h);
- const target=h.manualTargetId!=null?(selected?targetForSide(sim,h,1-h.side,selected):null):h.manualAttackTargetId!=null?sim.get(h.manualAttackTargetId):null;
+ const target=h.manualTargetId!=null?(selected?.side!==h.side?selected:null):h.manualAttackTargetId!=null?sim.get(h.manualAttackTargetId):null;
  return target&&target.side!==h.side&&distance(h,target)<=MANUAL_TARGET_RANGE+epsilon?target:null;
 }
 
@@ -52,6 +52,7 @@ export function setManualTarget(sim,targetId,p=sim.player){
  if(!target)return fail('目标已离场');
  if(distance(h,target)>MANUAL_TARGET_RANGE+epsilon)return fail('目标超出手动锁定范围（20格）');
  h.manualTargetId=target.id;
+ h.manualMoveTargetId=target.side===h.side?target.id:null;
  if(h.classId===5&&target.side===h.side)h.friendlyTargetId=target.id;
  const attack=manualAttackTarget(sim,h);
  h.manualAttackTargetId=attack?.id??null;h.targetId=attack?.id??null;h.retaliationTargetId=null;h.deploying=false;

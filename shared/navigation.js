@@ -9,12 +9,20 @@ export function chooseTarget(sim,u){
  const radius=u.aggro??u.range;
  if(u.friendlyTargetId!=null&&!friendlyTarget(sim,u))u.friendlyTargetId=null;
  const taunter=activeTaunter(sim,u);
- if(taunter){u.manualTargetId=null;u.manualAttackTargetId=null;u.friendlyTargetId=null;u.wasTaunted=true;u.retaliationTargetId=null;return taunter;}
- if(u.wasTaunted){u.wasTaunted=false;u.manualTargetId=null;u.manualAttackTargetId=null;u.targetId=null;u.retaliationTargetId=null;}
+ if(taunter){u.manualTargetId=null;u.manualMoveTargetId=null;u.manualAttackTargetId=null;u.friendlyTargetId=null;u.wasTaunted=true;u.retaliationTargetId=null;return taunter;}
+ if(u.wasTaunted){u.wasTaunted=false;u.manualTargetId=null;u.manualMoveTargetId=null;u.manualAttackTargetId=null;u.targetId=null;u.retaliationTargetId=null;}
  const selected=manualTarget(sim,u);
  const attackSelected=manualAttackTarget(sim,u);
- if(u.manualTargetId!=null&&(!selected||!attackSelected)){
-  u.manualTargetId=null;u.manualAttackTargetId=null;u.friendlyTargetId=null;u.targetId=null;u.retaliationTargetId=null;
+ if(u.manualTargetId!=null&&!selected){
+  u.manualTargetId=null;u.manualMoveTargetId=null;u.manualAttackTargetId=null;u.friendlyTargetId=null;u.targetId=null;u.retaliationTargetId=null;
+ }else if(selected?.side===u.side){
+  u.manualAttackTargetId=null;
+  // 点击友军只发起一次靠近；抵达后保留技能选择，重新执行警戒索敌。
+  if(u.manualMoveTargetId===selected.id){
+   u.targetId=null;u.retaliationTargetId=null;
+   if(!inAttackRange(u,selected))return null;
+   u.manualMoveTargetId=null;
+  }
  }else if(attackSelected){u.manualAttackTargetId=attackSelected.id;return attackSelected;}
  if(u.manualAttackTargetId!=null&&!attackSelected){u.targetId=null;u.manualAttackTargetId=null;}
  const current=sim.get(u.targetId);
@@ -35,13 +43,18 @@ export function chooseTarget(sim,u){
 export function navigate(sim,u,dt){
  if(cannotAct(u,sim.time))return null;
  const target=sim.choose(u);u.targetId=target?.id??null;
+ const friend=u.manualMoveTargetId!=null?manualTarget(sim,u):null;
  if(target){u.deploying=false;if(inAttackRange(u,target))return target;}
  if(u.tower)return null;
- const dest=target||{x:u.x,y:u.side?sim.config.world.defenseLimitY:sim.config.world.mapMaxY};
- const d=distance(u,dest),stop=target?u.range:0;
+ const dest=target||friend||{x:u.x,y:u.side?sim.config.world.defenseLimitY:sim.config.world.mapMaxY};
+ const d=distance(u,dest),stop=target||friend?u.range:0;
  const debuffSlow=Math.max(0,...sim.activeDebuffs(u,'moveSlow').map(x=>x.ratio));
  const ratio=Math.min(u.slowUntil>sim.time?u.slowRatio:1,1-debuffSlow);
  const step=Math.min(Math.max(0,d-stop),u.speed*dt*ratio);
  if(step>0){let y=u.y+(dest.y-u.y)/d*step;if(u.side===1)y=Math.max(Math.min(u.y,sim.config.world.defenseLimitY),y);sim.moveUnit(u,u.x+(dest.x-u.x)/d*step,y);}
+ if(friend&&inAttackRange(u,friend)){
+  const enemy=sim.choose(u);u.targetId=enemy?.id??null;
+  return inAttackRange(u,enemy)?enemy:null;
+ }
  return inAttackRange(u,target)?target:null;
 }

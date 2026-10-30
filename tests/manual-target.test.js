@@ -121,12 +121,12 @@ for(const id of [0,2,3,4])test(`职业${id}敌方技能只解析当前友军的�
  }
 });
 
-test('友方间接攻击目标死亡、越界或同阵营均清除选择并按警戒重新索敌',()=>{
+test('友方抵达范围后按自身警戒索敌，不受友方攻击目标失效影响',()=>{
  for(const invalid of ['dead','range','ally','cycle']){
   const {s,p,h,soldier}=arena(),old=soldier(0,15),local=soldier(0,2),ally=soldier(1,1,h.side);
   ally.targetId=old.id;s.setManualTarget(ally.id,p);
   if(invalid==='dead')old.hp=0;if(invalid==='range')old.y=20.001;
   if(invalid==='ally')ally.targetId=h.id;if(invalid==='cycle')ally.targetId=ally.id;
-  s.tick(.05);assert.equal(h.targetId,local.id);assert.equal(h.manualTargetId,null);assert.equal(h.manualAttackTargetId,null);
+  s.tick(.05);assert.equal(h.targetId,local.id);assert.equal(h.manualTargetId,ally.id);assert.equal(h.manualMoveTargetId,null);assert.equal(h.manualAttackTargetId,null);
  }
 });
