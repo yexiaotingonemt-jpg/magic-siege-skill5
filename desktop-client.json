@@ -1,14 +1,16 @@
 {
-  "version": "0.6.0",
-  "serverVersion": "0.6.0",
+  "version": "0.6.1",
+  "serverVersion": "0.6.1",
   "gameVersion": "0.6.0",
   "protocolVersion": 3,
   "files": {
-    "client/prebuilt/assets/index-CdrGCoUi.js": "b9ff8a1a0fe194cac8d417dcae75d465373e6a91113c1da2273b36826e0a31f6",
-    "client/prebuilt/assets/index-fUU5z69s.css": "fe26fadacde98f743a6e3a69187f07e076dd5b5b78d80a57173edaa098400103",
+    "client/prebuilt/assets/index-B7HWt_QE.css": "7f835374e0475a05ac188d7cb8f923107359bbf19a0d52c467c0ddf899a29359",
+    "client/prebuilt/assets/index-DZq9NpDg.js": "396149a1cfa4441b453d3645ca7e930d7fa869e2613bf6737a81629923f9eb52",
     "client/prebuilt/assets/phaser-DFK5Ua9d.js": "f9025c1a29bc3ae097dd886ce07717b297466da1ce8f032c8294252ce6cf5cdb",
-    "client/prebuilt/client-version.json": "cede9e07241b77f4bf1a4d34b55ee6271988f18cc1b4ba16d79e037ef67e69c4",
-    "client/prebuilt/index.html": "9a06569f86f60711d4b8837f8256483c670e01e9ecdd2366a0cba58f18b1251c",
+    "client/prebuilt/client-version.json": "36a2629ba2c73758ec925664d4295334b6d29b8a574c70b90fa5ae51fa77972b",
+    "client/prebuilt/index.html": "4d7cfbb8bcd444dfe17a39b8e44f084121b6b9ce77f5d6311371aafbee82f6e3",
+    "client/desktop/assets/magic-throne.ico": "89421e37f5316235335323773072230a353bffa115ff2d21827b8b1486b1b921",
+    "client/desktop/assets/magic-throne.svg": "05364641cdcc968fd02dd591fc3dc10a160528ed0aeebef16ef154b649e12e1e",
     "client/desktop/config.mjs": "af3a2c715c7ea9d1af042edd7f12e4dc04cbcca1579801499c5ed02b4b4a27ef",
     "client/desktop/login-credentials.mjs": "1a6d02bf5b94b7db6b357fb68a43056f7b3b7b3159dec864a83446540d5fd358",
     "client/desktop/main.mjs": "d40388f7731891378337ec7e5d7ba56e745cfcc2173fd390946530127daba058",
@@ -16,7 +18,7 @@
     "魔法王座.exe": "1142a1c9b7ad159691d7fbb5c25c4ecd6b9ff6fb1ccbd4f4d6d01d5bf944c179",
     "client/launcher.mjs": "c2923024bfbf7051368f9ef51a6c608c01dfe3b0f219cbbd2f62033bf28e38b9",
     "client/client-config.json": "6b27adca4af8dbc3bd561c1af85471d8561026bd3c449b26a3d60d6f071937c5",
-    "shared/protocol.js": "c827e2437b76de2b69f974170a0ba29773510038c62941e8860e305d7de29358"
+    "shared/protocol.js": "3efd2e39aaf2f0f4c46417f907d75ed9ea6f92c7a356cf731a01a8f2fcad199e"
   },
   "runtime": {
     "version": "45.1.0-win32-x64",

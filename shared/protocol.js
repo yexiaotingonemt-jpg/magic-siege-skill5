@@ -6,9 +6,9 @@ export const PROTOCOL_VERSION=3;
 // documentation-only changes keep this version; builds/packages never bump it.
 export const GAME_VERSION='0.6.0';
 // Server and desktop releases share one version; publish both together.
-export const SERVER_VERSION='0.6.0';
+export const SERVER_VERSION='0.6.1';
 // Desktop release version must match SERVER_VERSION.
-export const CLIENT_VERSION='0.6.0';
+export const CLIENT_VERSION='0.6.1';
 // Diagnostic ruleset label; changing this alone does not require a client update.
-export const RULESET_REVISION='skill5-synergy-common-traits-20261029';
+export const RULESET_REVISION='ally-approach-skill-inspection-20261030';
 export const UPDATE_REQUIRED_CODE='CLIENT_UPDATE_REQUIRED';
