@@ -30,3 +30,5 @@ export function heroPortrait(classId){
 }
 
 export const unitBarOffset=u=>u.tower?44:u.hero?(u.classId===3?86:HERO_ART[u.classId]?46:39):27;
+
+export const skillArtIndex=(id,i)=>id===2&&i>=2?5-i:id===4&&(i===1||i===2)?3-i:i;

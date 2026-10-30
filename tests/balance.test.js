@@ -49,7 +49,7 @@ test('战车最大生命百分比技能实际命中塔也经过护塔减伤',()=
  const hp=t.hp;s.resolveSkill(h,0,{...s.config.heroes[2].skills[0],value},{id:t.id,x:t.x,y:t.y},[t.id]);
  // The corrosion projectile applies 8% max HP, then final tower protection.
  s.impactSkill(s.projectiles.shift());s.time=1;s.processSkillEffects();
- near(hp-t.hp,Math.min(t.maxHp*.01,h.attack*1.5)*.5);
+ near(hp-t.hp,Math.min(t.maxHp*.008,h.attack*1.2)*.5);
 });
 test('英雄等级成长减半，升级保留生命比例，重新契约继承新属性',()=>{
  const {s}=arena(),p=s.makePlayer(0,false);p.classId=0;

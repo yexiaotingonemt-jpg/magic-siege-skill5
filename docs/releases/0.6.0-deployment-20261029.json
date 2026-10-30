@@ -1,0 +1,132 @@
+{
+  "release": "0.6.0",
+  "publishedSource": "79af0cef1bdce490fecb489920dda398a3149551",
+  "implementationPullRequest": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5/pull/15",
+  "verification": {
+    "windows": {
+      "passed": 549,
+      "failed": 0,
+      "linuxOnlySkipped": 3
+    },
+    "browser": {
+      "passed": 33,
+      "failed": 0
+    },
+    "packagedDesktop": {
+      "passed": 7,
+      "failed": 0
+    },
+    "linuxHotUpdate": {
+      "passed": 17,
+      "failed": 0
+    },
+    "repository": {
+      "manifestFiles": 13,
+      "prebuiltFiles": 5,
+      "launcherPrepared": true,
+      "actualRepositoryRuntime": true,
+      "upgradeDoesNotInterrupt": true,
+      "readOnlyDetails": true,
+      "countAndCandidatesRetained": true
+    },
+    "live": {
+      "verifiedAt": "2026-10-29T12:01:47.160Z",
+      "version": {
+        "serverVersion": "0.6.0",
+        "gameVersion": "0.6.0",
+        "clientVersion": "0.6.0",
+        "protocolVersion": 3
+      },
+      "oldClientStatus": 409,
+      "retiredUpdateStatus": 410,
+      "actualDesktopDefaultServer": true,
+      "repositoryPreparedRuntime": true,
+      "existingQaLoginLogoutReload": true,
+      "sseSameNewMatch": true,
+      "configVerified": true,
+      "errors": [],
+      "health": {
+        "ok": true,
+        "version": 5,
+        "serverVersion": "0.6.0",
+        "gameVersion": "0.6.0",
+        "clientVersion": "0.6.0",
+        "protocolVersion": 3,
+        "revision": "skill5-synergy-common-traits-20261029",
+        "matchId": "5530855e-317e-4c5e-95a1-d9d172ad6b27",
+        "sequence": 407,
+        "clients": 2
+      }
+    }
+  },
+  "packages": {
+    "desktopZipSha256": "1c5b947a74223d53bf58fed15043a3f8b238eee0be8c37e504e7786283e6a905",
+    "serverZipSha256": "2c45c51274e7f3abdf649d1b22e7fa677d9be68a2cc84667cdf7f8d7ee94de33"
+  },
+  "deployment": {
+    "deployment": {
+      "ok": true,
+      "at": "2026-10-29T12:01:12.537Z",
+      "previous": "/home/colleague/apps/magic-siege-skill5/releases/hot-6fbae2e6-c3ba-4f60-903e-8e454ca4cf8b",
+      "releaseDir": "/home/colleague/apps/magic-siege-skill5/releases/hot-a563cc3b-9c0f-4042-a019-69993c9e334d",
+      "baseDigest": "bc6562eff80cd0d91b333084baa930e9678dc5f48d5bf3f6db84732302361162",
+      "digest": "33bc3f492b2ecd5df5bb2045f2cc4fea2408effb0e0c9505dc3e7ec2f8d4938f",
+      "source": {
+        "repository": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5.git",
+        "ref": "refs/heads/main",
+        "branchHead": "79af0cef1bdce490fecb489920dda398a3149551",
+        "commit": "79af0cef1bdce490fecb489920dda398a3149551",
+        "previousCommit": "77cf41d8a4353c669a5fc3bbce7c9669d4aaa854",
+        "verifiedAt": "2026-10-29T12:01:12.510Z"
+      },
+      "battle": "restart",
+      "previousMatchId": "31607363-c8cb-40f0-a150-20da954fd3a2",
+      "matchId": "5530855e-317e-4c5e-95a1-d9d172ad6b27",
+      "stateSchema": 2,
+      "accountSchema": 1,
+      "serverVersion": "0.6.0",
+      "clientVersion": "0.6.0",
+      "gameVersion": "0.6.0",
+      "protocolVersion": 3,
+      "revision": "skill5-synergy-common-traits-20261029",
+      "reloads": 5,
+      "changed": 14,
+      "removed": 0,
+      "verified": true
+    },
+    "backup": "/home/colleague/apps/magic-siege-skill5/shared/backups/pre-v0.6.0-restart-20261029T120106Z",
+    "previousDirectory": "/home/colleague/apps/magic-siege-skill5/releases/hot-6fbae2e6-c3ba-4f60-903e-8e454ca4cf8b",
+    "currentDirectory": "/home/colleague/apps/magic-siege-skill5/releases/hot-a563cc3b-9c0f-4042-a019-69993c9e334d",
+    "pidBefore": 3119586,
+    "pidAfter": 3119586,
+    "processPreserved": true,
+    "matchPreserved": false,
+    "matchBefore": "31607363-c8cb-40f0-a150-20da954fd3a2",
+    "health": {
+      "ok": true,
+      "version": 5,
+      "serverVersion": "0.6.0",
+      "gameVersion": "0.6.0",
+      "clientVersion": "0.6.0",
+      "protocolVersion": 3,
+      "revision": "skill5-synergy-common-traits-20261029",
+      "matchId": "5530855e-317e-4c5e-95a1-d9d172ad6b27",
+      "sequence": 0,
+      "clients": 0
+    },
+    "accountsBefore": 16,
+    "accountsAfter": 16,
+    "accountSha256Before": "22d23ece627dfce8fb791671ca7b4670881f66bec5ee36f73698559e67fe5994",
+    "accountSha256After": "22d23ece627dfce8fb791671ca7b4670881f66bec5ee36f73698559e67fe5994",
+    "originalAccountsPreserved": true,
+    "cronUnchanged": true,
+    "verifiedAt": "2026-10-29T12:01:12.678017+00:00",
+    "preDeploymentSessionPreserved": true
+  },
+  "originalAccounts": {
+    "originalAccountCount": 14,
+    "currentAccountCount": 16,
+    "originalRowsUnchanged": true,
+    "sha256": "22d23ece627dfce8fb791671ca7b4670881f66bec5ee36f73698559e67fe5994"
+  }
+}

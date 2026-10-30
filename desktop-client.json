@@ -1,14 +1,14 @@
 {
-  "version": "0.5.6",
-  "serverVersion": "0.5.6",
-  "gameVersion": "0.5.0",
+  "version": "0.6.0",
+  "serverVersion": "0.6.0",
+  "gameVersion": "0.6.0",
   "protocolVersion": 3,
   "files": {
-    "client/prebuilt/assets/index-BrtTgxJw.js": "0ba44f27345b622243e1691b0e50cdfc98e19679a2aa44ccc24d5f5963360fd8",
-    "client/prebuilt/assets/index-BUtepezV.css": "c4977ab271eedce1a9aa81b254362ef107580df5d5c88c2be7c594634d4c747d",
+    "client/prebuilt/assets/index-CdrGCoUi.js": "b9ff8a1a0fe194cac8d417dcae75d465373e6a91113c1da2273b36826e0a31f6",
+    "client/prebuilt/assets/index-fUU5z69s.css": "fe26fadacde98f743a6e3a69187f07e076dd5b5b78d80a57173edaa098400103",
     "client/prebuilt/assets/phaser-DFK5Ua9d.js": "f9025c1a29bc3ae097dd886ce07717b297466da1ce8f032c8294252ce6cf5cdb",
-    "client/prebuilt/client-version.json": "b5d3cbe980076f489248cb9a6df2e01185468b4f5629a089f9bdbd0c66df2f0d",
-    "client/prebuilt/index.html": "b00d3932d57453bf2183767aae3f8fb261904ea8e24b33fc107fd54901a63547",
+    "client/prebuilt/client-version.json": "cede9e07241b77f4bf1a4d34b55ee6271988f18cc1b4ba16d79e037ef67e69c4",
+    "client/prebuilt/index.html": "9a06569f86f60711d4b8837f8256483c670e01e9ecdd2366a0cba58f18b1251c",
     "client/desktop/config.mjs": "af3a2c715c7ea9d1af042edd7f12e4dc04cbcca1579801499c5ed02b4b4a27ef",
     "client/desktop/login-credentials.mjs": "1a6d02bf5b94b7db6b357fb68a43056f7b3b7b3159dec864a83446540d5fd358",
     "client/desktop/main.mjs": "d40388f7731891378337ec7e5d7ba56e745cfcc2173fd390946530127daba058",
@@ -16,7 +16,7 @@
     "魔法王座.exe": "1142a1c9b7ad159691d7fbb5c25c4ecd6b9ff6fb1ccbd4f4d6d01d5bf944c179",
     "client/launcher.mjs": "c2923024bfbf7051368f9ef51a6c608c01dfe3b0f219cbbd2f62033bf28e38b9",
     "client/client-config.json": "6b27adca4af8dbc3bd561c1af85471d8561026bd3c449b26a3d60d6f071937c5",
-    "shared/protocol.js": "638a8d3a406da950f14acfd69b5cd2a730e381c34519cd059ee013c9fa20b413"
+    "shared/protocol.js": "c827e2437b76de2b69f974170a0ba29773510038c62941e8860e305d7de29358"
   },
   "runtime": {
     "version": "45.1.0-win32-x64",

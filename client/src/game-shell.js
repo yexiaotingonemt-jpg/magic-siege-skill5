@@ -2,6 +2,10 @@ import {uiIcon} from './ui-icons.js';
 
 export const gameShell=`
 <main class="layout">
+ <aside class="battle-ranking" aria-label="实时积分与KDA排行">
+  <div class="battle-ranking-heading">实时排行 <span>总积分 ↓ · KDA</span></div>
+  <div id="battleRanking" class="battle-ranking-scroll" tabindex="0" aria-label="战斗贡献排行榜"></div>
+ </aside>
  <div id="gameViewport" class="game-viewport">
   <section class="game awaiting-contract" aria-label="魔法王座游戏 · 640×1136">
    <header>
@@ -13,10 +17,6 @@ export const gameShell=`
    <div class="battle-wrap">
     <div id="battle"></div>
     <button id="traitPending" class="trait-pending" type="button" aria-haspopup="dialog" aria-controls="traitDraft" aria-expanded="false" aria-label="技能强化，当前可选择 0 次" hidden><span class="trait-pending-icon" aria-hidden="true">${uiIcon('enhance')}</span><span class="trait-pending-label">技能强化</span><span class="trait-pending-count" data-trait-count aria-hidden="true">0</span></button>
-    <section class="battle-ranking" aria-label="实时积分与KDA排行">
-     <div class="battle-ranking-heading">实时排行 <span>总积分 ↓ · KDA</span></div>
-     <div id="battleRanking" class="battle-ranking-scroll" tabindex="0" aria-label="战斗贡献排行榜"></div>
-    </section>
     <div class="map-rail"><span id="mapTop">王城</span><div class="map-track"><i id="mapWindow"></i></div><span id="mapBottom">营地</span></div>
     <div class="map-jumps" aria-label="战场视角"><button id="viewDefense">王城</button><button id="viewFront">交锋</button><button id="viewCamp">营地</button></div>
    </div>

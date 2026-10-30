@@ -17,6 +17,10 @@ export const VFX_PROFILES={
   ['living-bolt','灵叶飞矢 / 回流治疗',.85,.5],['symbiotic-helix','双螺旋藤带 / 双端生息',.9,.5],['sacrificial-lotus','献血凝露 / 白莲净化',1,.5],['worldtree-benediction','圣树展开 / 根脉群疗 / 落叶收束',2,.9]
  ])
 };
+// 技能换位后保留对应的原画帧，时间线使用新的技能编号。
+[VFX_PROFILES[2][2],VFX_PROFILES[2][3]]=[VFX_PROFILES[2][3],VFX_PROFILES[2][2]];
+[VFX_PROFILES[4][1],VFX_PROFILES[4][2]]=[VFX_PROFILES[4][2],VFX_PROFILES[4][1]];
+for(const profiles of Object.values(VFX_PROFILES))profiles.forEach((p,i)=>{p.skill=i;p.ultimate=i===3;});
 export const vfxProfile=(id,skill)=>VFX_PROFILES[id]?.[skill];
 // The hand-painted motifs have different silhouettes. Explicit frames preserve
 // the canopy/crown tips while excluding adjacent rows' colored edges.

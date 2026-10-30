@@ -37,7 +37,7 @@ async function fixture(t){
  const version={serverVersion:SERVER_VERSION,clientVersion:SERVER_VERSION,gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION};
  await writeFile(path.join(first,'VERSION.json'),JSON.stringify(version));const baseline=await writeManifest(first);
  await cp(first,next,{recursive:true});
- await change(next,'shared/protocol.js',value=>value.replaceAll("'"+SERVER_VERSION+"'","'"+NEXT_VERSION+"'"));
+ await change(next,'shared/protocol.js',value=>value.replace(/(export const (?:SERVER_VERSION|CLIENT_VERSION)=)'[^']+'/g,"$1'"+NEXT_VERSION+"'"));
  await change(next,'shared/hero-rules.js',value=>value.replace(/export class HeroRules\s*\{/,"export class HeroRules{\n hotUpdateProbe(){return 'new-runtime';}"));
  await change(next,'shared/config.js',value=>value+'\ndefaults.world.initialStamina=4321;\n');
  await writeFile(path.join(next,'VERSION.json'),JSON.stringify({...version,serverVersion:NEXT_VERSION,clientVersion:NEXT_VERSION}));
@@ -130,7 +130,7 @@ test('等待旧请求结束后切换，拒绝并发发布，避免请求写入�
 });
 test('战局 schema 改变仅允许重开，账号 schema 改变始终要求常规部署',async t=>{
  const f=await fixture(t);
- await change(f.next,'server/game-runtime.mjs',v=>v.replace('HOT_STATE_SCHEMA=1','HOT_STATE_SCHEMA=2'));await writeManifest(f.next);
+ await change(f.next,'server/game-runtime.mjs',v=>v.replace(/HOT_STATE_SCHEMA=\d+/,'HOT_STATE_SCHEMA=999'));await writeManifest(f.next);
  await assert.rejects(f.game.hotUpdate.update({releaseDir:f.next,baseDigest:f.baseline.digest}),/战局状态结构不兼容/);
  assert.equal((await f.game.hotUpdate.update({releaseDir:f.next,baseDigest:f.baseline.digest,battle:'restart'})).ok,true);
  const other=path.join(f.root,'releases/account-schema');await cp(f.next,other,{recursive:true});

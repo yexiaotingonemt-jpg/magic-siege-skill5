@@ -1,6 +1,6 @@
 import { RARITIES, TRAIT_BY_ID, traitRank } from "../../shared/traits.js";
 import { names } from "../../shared/config.js";
-import { HERO_ART, ART_ROOT, heroPortrait } from "./art-catalog.js";
+import { HERO_ART, ART_ROOT, heroPortrait, skillArtIndex } from "./art-catalog.js";
 import { describeAbilities } from "./ability-descriptions.js";
 
 export function createTraitDraft(getSim, send) {
@@ -103,7 +103,7 @@ export function createTraitDraft(getSim, send) {
       common = guide.owned.filter((t) => t.skill == null),
       html =
         '<div class="draft-effect"><h3>技能效果</h3><p>' +
-        (skill?.summary || guide.passiveSummary) +
+        (skill?.summary || trait.name + "：" + trait.description) +
         '</p><p class="draft-detail-meta">' +
         (skill ? skill.compactMeta + " · " + (skill.learned ? "已解锁" : "5级解锁") : guide.context) +
         '</p></div><h3>已选强化 · ' +
@@ -116,7 +116,7 @@ export function createTraitDraft(getSim, send) {
             ownedHTML(common, "尚未选择通用强化。") +
             "</div>"
           : "");
-    panel.querySelector("#draftSkillTitle").textContent = skill?.name || "通用强化";
+    panel.querySelector("#draftSkillTitle").textContent = skill?.name || "通用强化 · " + trait.name;
     if (html !== detailHTML) {
       panel.querySelector("[data-skill-detail-body]").innerHTML = html;
       detailHTML = html;
@@ -178,7 +178,7 @@ export function createTraitDraft(getSim, send) {
               skillName = t.skill == null ? "通用强化" : "技能" + (t.skill + 1) + "：" + names[p.classId][t.skill],
               icon = t.skill == null
                 ? "background-image:url('" + heroPortrait(p.classId) + "');background-size:cover;background-position:center 18%"
-                : "background-image:url('" + ART_ROOT + "/skill-icons.webp');background-size:400% 500%;background-position:" + (t.skill / 3) * 100 + "% " + (art.row / 4) * 100 + "%";
+                : "background-image:url('" + ART_ROOT + "/skill-icons.webp');background-size:400% 500%;background-position:" + (skillArtIndex(p.classId,t.skill) / 3) * 100 + "% " + (art.row / 4) * 100 + "%";
             return (
               '<article class="trait-card"><div class="trait-card-heading"><span class="trait-category">' +
               (t.skill == null

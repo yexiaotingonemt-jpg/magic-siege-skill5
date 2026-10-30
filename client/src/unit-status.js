@@ -42,9 +42,9 @@ export function unitStatuses(sim,u,fields=indexStatusFields(sim)){
  for(const f of Object.values(u.hastes||{}))add('haste','攻速提升','positive',f.until,'普通攻击速度提高'+percent(f.ratio),0,2);
  if(u.heat>0)add('heat','炙热','positive',u.heatUntil,'火焰技能联动资源',u.heat,3);
  for(const f of fields.get(u.id)||[]){
-  if(f.kind==='link')add('link','共生链接','positive',f.until,'与链接的友军按'+percent(f.shareRatio??1)+'共享收到的有效治疗',0,2);
+  if(f.kind==='link')add('link','共生链接','positive',f.until,'与链接的友军按'+percent(f.shareRatio??1)+'共享收到的有效治疗'+(f.shareDamage?'，组内平摊伤害':''),0,2);
   if(f.kind==='lordBurn')add('burnAura','火焰盾','positive',f.until,'向周围目标附加灼烧，移动与突进期间持续生效',0,2);
-  if(f.kind==='dot')add('dot',f.type==='lordScorch'?'灼烧':f.type==='corrosion'?'腐蚀':f.type==='parasite'?'寄生':'持续伤害','negative',f.until,f.type==='lordScorch'?`每秒受到${Number(f.s.power.toFixed(1))}%施法攻击力伤害，离开火焰盾范围后继续生效`:'持续承受伤害',0,2);
+  if(f.kind==='dot')add('dot',f.type==='lordScorch'?'灼烧':f.type==='corrosion'?'腐蚀':f.type==='orcDrain'?'汲血链接':f.type==='parasite'?'寄生':'持续伤害','negative',f.until,f.type==='lordScorch'?`每秒受到${Number(f.s.power.toFixed(1))}%施法攻击力伤害，离开火焰盾范围后继续生效`:'持续承受伤害',0,2);
  }
  const marks=(u.soulMarks||[]).filter(m=>m.until>=now&&sim.get(m.ownerId));
  if(marks.length)add('soulMark','焚魂烙印','mark',Math.max(...marks.map(m=>m.until)),'阵亡时为标记者提供炙热；此击杀记录不受净化影响',0,4);
