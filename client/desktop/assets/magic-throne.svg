@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+ <defs>
+  <linearGradient id="gold" x1="0" y1="0" x2=".85" y2="1">
+   <stop stop-color="#fff0bb"/><stop offset=".28" stop-color="#dbbd72"/>
+   <stop offset=".6" stop-color="#967037"/><stop offset=".82" stop-color="#e9ce89"/>
+   <stop offset="1" stop-color="#ad8544"/>
+  </linearGradient>
+  <linearGradient id="emerald" x1="0" y1="0" x2=".8" y2="1">
+   <stop stop-color="#2a5c49"/><stop offset=".45" stop-color="#143d30"/>
+   <stop offset="1" stop-color="#081e19"/>
+  </linearGradient>
+  <linearGradient id="metal" x1="0" y1="0" x2=".8" y2="1">
+   <stop stop-color="#fff0bc"/><stop offset=".46" stop-color="#d9b76b"/>
+   <stop offset="1" stop-color="#9a7337"/>
+  </linearGradient>
+  <linearGradient id="gem" x1="0" y1="0" x2="1" y2="1">
+   <stop stop-color="#d4f2cf"/><stop offset=".45" stop-color="#65c8a4"/>
+   <stop offset="1" stop-color="#185e4b"/>
+  </linearGradient>
+ </defs>
+ <path d="M256 28 442 96v144c0 111-73 193-186 244C143 433 70 351 70 240V96Z" fill="#101d18" stroke="#0b1510" stroke-width="8" stroke-linejoin="round"/>
+ <path d="M256 30 440 98v142c0 109-72 190-184 241C144 430 72 349 72 240V98Z" fill="url(#gold)"/>
+ <path d="M256 53 418 113v125c0 96-61 167-162 218C155 405 94 334 94 238V113Z" fill="url(#emerald)" stroke="#674e28" stroke-width="3"/>
+ <path d="m256 66 149 55v118c0 89-56 155-149 204-93-49-149-115-149-204V121Z" fill="none" stroke="#c9b274" stroke-opacity=".45" stroke-width="2"/>
+ <path d="m256 90 129 48v101c0 75-46 133-129 180-83-47-129-105-129-180V138Z" fill="none" stroke="#c4bc7a" stroke-opacity=".09" stroke-width="10"/>
+ <path d="m173 131 43 24 40-54 40 54 43-24-15 67H188Z" fill="url(#metal)" stroke="#76582b" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M191 195h130v19H191Z" fill="url(#gold)"/>
+ <path d="M194 230q62-18 124 0v106H194Z" fill="#204a38" stroke="url(#metal)" stroke-width="14" stroke-linejoin="round"/>
+ <path d="M216 247q40-10 80 0v67h-80Z" fill="#123427" stroke="#b49a5f" stroke-width="3"/>
+ <path d="m256 255 18 23-18 24-18-24Z" fill="url(#gem)" stroke="#e8d59b" stroke-width="3"/>
+ <path d="M150 283h38v48h136v-48h38v89H150Z" fill="url(#metal)" stroke="#795a2d" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M146 278h46v17h-46Zm174 0h46v17h-46Z" fill="url(#gold)"/>
+ <path d="M188 334h136v19H188Z" fill="#f0d896"/>
+ <path d="M170 370h29l-10 38h-35Zm143 0h29l16 38h-35Z" fill="url(#gold)"/>
+ <path d="M151 363h210v11H151Z" fill="#b38c48"/>
+ <path d="m256 425 7 8-7 8-7-8Z" fill="#d1b776"/>
+</svg>
