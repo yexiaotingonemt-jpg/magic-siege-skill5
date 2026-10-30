@@ -48,10 +48,10 @@ for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`�
   await page.waitForFunction(id=>{const h=__game.sim.hero();return h.targetId===id&&h.friendlyTargetId==null&&h.manualTargetId==null;},enemy.id);
   await expect(page.locator('[data-cast="1"]')).toHaveClass(/out-of-range/);
   await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`support-target-${viewport.width}.png`)});
-  await page.locator('[data-info="1"]').click();await expect(page.locator('#heroAbilityBody')).toContainText('选中敌方时改为该敌人当前攻击的友方');
+  await page.locator('[data-info="1"]').click();await expect(page.locator('[data-skill-detail="1"]')).toContainText('共享50%有效治疗');
   await expect(page.locator('#heroAbilityBody')).not.toContainText('须选择己方目标');
-  await page.locator('[data-ability-detail="1"] > summary').click();
-  await expect(page.locator('[data-ability-detail="1"]')).toHaveAttribute('open','');
+  await expect(page.locator('[data-skill-detail]:visible')).toHaveCount(1);
+  await expect(page.locator('[data-skill-detail="1"] [data-upgrade-id]')).toHaveCount(4);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
   await expect(page.locator('vite-error-overlay')).toHaveCount(0);expect(errors).toEqual([]);
   await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`support-description-${viewport.width}.png`)});

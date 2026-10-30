@@ -1,7 +1,6 @@
 import { classes, names } from "../../shared/config.js";
 import {
   TRAITS,
-  RARITIES,
   traitRank,
   traitSkill,
 } from "../../shared/traits.js";
@@ -134,6 +133,7 @@ export function describeAbilities(sim) {
       name: names[id][i],
       level: 1,
       learned: i < 3 || p.level >= 5,
+      upgrades: TRAITS.filter(t => t.classId === id && t.skill === i).map(t => ({...t, rank: r(t.id)})),
       summary: summaries[i] || "",
       tags: (tags[i] || []).map((text) => ({
         text,
@@ -162,60 +162,37 @@ export function describeAbilities(sim) {
       ...t,
       rank: r(t.id),
     })),
+    generalEffects: TRAITS.filter(t => t.classId === id && t.skill == null).map(t => ({...t, rank: r(t.id)})),
+    stats: [
+      ['生命值', `${f(h.hp)} / ${f(h.maxHp)}`],
+      ['攻击力', f(A)],
+      ['护甲', f(h.armor)],
+      ['普攻间隔', `${f((h.interval || c.interval) / sim.attackRate(h))} 秒`],
+      ['普攻距离', `${f(h.range ?? c.range)} 格`],
+      ['警戒范围', `${f(h.aggro ?? c.aggro ?? h.range ?? c.range)} 格`],
+      ['移动速度', `${f((h.speed ?? c.speed) * Math.min(h.slowUntil > sim.time ? h.slowRatio : 1, 1 - Math.max(0, ...sim.activeDebuffs(h, 'moveSlow').map(d => d.ratio))))} 格/秒`],
+    ],
     context:
       "英雄升级获得属性和一次强化选择；5/15/25/35级紫色，10/20/30/40级金色，替代当次蓝色。各职业29类强化；不存在技能点或统一收益截断。",
   };
 }
+const escapeHTML = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export function upgradeEffectsHTML(traits) {
+  return '<div class="upgrade-effects">' + traits.map(t =>
+    '<div class="upgrade-effect ' + (t.rank ? 'is-active' : 'is-inactive') + '" data-upgrade-id="' + t.id + '" data-active="' + !!t.rank + '">' +
+    '<div class="upgrade-effect-heading"><strong>' + escapeHTML(t.name) + '</strong><span>' + (t.rank ? '已获得 ' : '未激活 ') + t.rank + '/' + t.max + '</span></div>' +
+    '<p>' + escapeHTML(t.description) + '</p></div>'
+  ).join('') + '</div>';
+}
 export function abilityGuideHTML(g) {
-  return (
-    '<article class="ability-entry"><h3>职业定位</h3><p>' +
-    g.passiveSummary +
-    "</p></article>" +
-    g.skills
-      .map(
-        (s, i) =>
-          '<article class="ability-entry" data-skill-detail="' +
-          i +
-          '"><h3>' +
-          s.name +
-          "<small>" +
-          (s.learned ? "已解锁" : "5级解锁") +
-          "</small></h3>" +
-          abilityTagsHTML(s.tags) +
-          '<p class="ability-brief">' +
-          s.summary +
-          '</p><small class="ability-meta">' +
-          s.compactMeta +
-          '</small><details data-ability-detail="' +
-          i +
-          '"><summary>查看详情</summary><p>' +
-          s.effect +
-          "</p><small>" +
-          s.meta +
-          "</small><p>" +
-          g.context +
-          "</p></details></article>",
-      )
-      .join("") +
-    '<article class="ability-entry"><h3>已选强化 · ' +
-    g.owned.reduce((n, t) => n + t.rank, 0) +
-    '次</h3><div class="owned-traits">' +
-    (g.owned
-      .map(
-        (t) =>
-          '<p style="--trait-color:' +
-          RARITIES[t.rarity].color +
-          '">' +
-          t.name +
-          " " +
-          t.rank +
-          "/" +
-          t.max +
-          "<small>" +
-          t.description +
-          "</small></p>",
-      )
-      .join("") || "<p>升级后选择强化，逐步建立构筑。</p>") +
-    "</div></article>"
-  );
+  const skills = g.skills.map((s, i) =>
+    '<article class="ability-entry" data-ability-view="skills" data-skill-detail="' + i + '"><h3>' + s.name + '<small>' + (s.learned ? '已解锁' : '5级解锁') + '</small></h3>' +
+    abilityTagsHTML(s.tags) + '<p class="ability-brief">' + s.summary + '</p><small class="ability-meta">' + s.compactMeta + '</small>' +
+    '<h4>升级效果 <small>白色已获得 · 灰色未激活</small></h4>' + upgradeEffectsHTML(s.upgrades) + '</article>'
+  ).join('');
+  const stats = '<article class="ability-entry" data-ability-view="stats" hidden><h3>基础属性</h3><small class="ability-meta">当前属性，含等级、强化及生效中的状态</small><dl class="hero-stat-list">' +
+    g.stats.map(([name, value]) => '<div><dt>' + name + '</dt><dd>' + value + '</dd></div>').join('') + '</dl></article>';
+  const common = '<article class="ability-entry" data-ability-view="common" hidden><h3>通用效果</h3><small class="ability-meta">白色已获得 · 灰色未激活</small><h4>职业通用</h4>' +
+    upgradeEffectsHTML(g.generalEffects.filter(t => !t.common)) + '<h4>通用强化</h4>' + upgradeEffectsHTML(g.generalEffects.filter(t => t.common)) + '</article>';
+  return skills + stats + common;
 }

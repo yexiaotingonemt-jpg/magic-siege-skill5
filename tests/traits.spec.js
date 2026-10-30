@@ -103,7 +103,7 @@ test("紫金品质、候选不足3项、已选构筑与真实技能说明", asyn
   game.room.sequence++;
   game.room.broadcast();
   await page.locator('[data-nav="hero"]').click();
-  await expect(page.locator("#heroAbilityBody")).toContainText("已选强化");
+  await expect(page.locator("#heroAbilityBody")).toContainText("升级效果");
   await expect(page.locator("#heroAbilityBody")).not.toContainText(
     "统一收益上限",
   );
