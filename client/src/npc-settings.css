@@ -1,0 +1,11 @@
+.npc-settings { margin: 16px 0; padding: 14px 0; border-block: 1px solid #c5a76745; }
+.npc-settings h3 { margin: 0 0 12px; font-size: 15px; color: #f0dfad; }
+.npc-settings > label { display: grid; gap: 8px; }
+.npc-settings select { width: 100%; min-height: 38px; }
+.npc-ratio-inputs { display: grid; grid-template-columns: 1fr 20px 1fr; align-items: end; gap: 8px; margin: 12px 0; }
+.npc-ratio-inputs label { display: grid; gap: 8px; min-width: 0; }
+.npc-ratio-inputs input { width: 100%; min-width: 0; box-sizing: border-box; }
+.npc-ratio-inputs > span { text-align: center; padding-bottom: 10px; }
+.npc-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.npc-actions button { flex: 1; min-height: 40px; }
+.npc-settings p { font-size: 12px; line-height: 1.7; }

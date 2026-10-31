@@ -53,7 +53,9 @@ async function fixture(t){
 }
 test('保留战局热更加载整个新依赖图，保留身份、成长、冷却、对象引用与待执行闭包',async t=>{
  const f=await fixture(t),{game,player}=f,room=game.room,s=room.sim;
- s.contract(player,s.units.find(u=>u.side===0&&u.type==='melee').id);const hero=s.hero(player);
+ s.contract(player,s.units.find(u=>u.side===0&&u.type==='melee'&&!u.hero).id);const hero=s.hero(player);
+ // Simulate the pre-0.6.2 runtime: policy is introduced without changing existing heroes.
+ delete s.npcPolicy;const livingIds=s.units.filter(u=>u.hero&&u.hp>0).map(u=>u.id);
  player.level=4;player.score=123;player.totalPoints=42;player.cd[0]=100;
  room.paused=true;room.speed=2;s.time=12;room.stageEnd=300;s.config.world.stageDuration=777;
  const projectile={source:hero,targetId:s.towers[0].id,x:0,y:0,power:2};s.projectiles.push(projectile);
@@ -67,6 +69,7 @@ test('保留战局热更加载整个新依赖图，保留身份、成长、冷�
  assert.equal(s.projectiles[0],projectile);assert.equal(projectile.source,hero);assert.equal(player.level,4);player.level=5;assert.equal(player.progress[player.classId].level,5);
  assert.equal(player.score,123);assert.equal(player.totalPoints,42);assert.equal(player.cd[0],100);assert.equal(s.time,12);assert.equal(room.stageEnd,300);assert.equal(room.paused,true);assert.equal(room.speed,2);
  assert.equal(s.hotUpdateProbe(),'new-runtime');assert.equal(s.config.world.initialStamina,4321);assert.equal(s.config.world.stageDuration,777);
+ assert.deepEqual(s.npcPolicy,{mode:'ratio',defense:1,attack:3});assert.deepEqual(s.units.filter(u=>u.hero&&u.hp>0).map(u=>u.id),livingIds);
  s.projectiles=[];s.tick(.05);assert.equal(ran,1);assert.equal(hero.shield,123);s.tick(.05);assert.equal(ran,1);
  assert.equal((await f.call('/api/me')).status,200);assert.equal((await f.call('/api/health')).data.serverVersion,NEXT_VERSION);
  assert.deepEqual((await f.call('/api/action',{id:'before-update',type:'stamina'})).data,priorCommand.data);assert.equal(player.stamina,priorStamina);

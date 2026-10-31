@@ -3,6 +3,7 @@ import {fileURLToPath} from 'node:url';
 import {Accounts} from './accounts.mjs';
 import {Room} from './room.mjs';
 import {Simulation} from '../shared/simulation.js';
+import {DEFAULT_NPC_POLICY} from '../shared/npc-balance.js';
 import {defaults,clone,validateConfig} from '../shared/config.js';
 import {createEventStream} from './event-stream.mjs';
 import {SERVER_VERSION,CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION,RULESET_REVISION,UPDATE_REQUIRED_CODE} from '../shared/protocol.js';
@@ -77,14 +78,14 @@ export function prepareGameRuntime(options,previous,{restartBattle=false}={}){
  const room=restartBattle?new Room(nextConfig):previous.room;
  const runtime=createGameRuntime({...options,gameVersion:GAME_VERSION,clientVersion:CLIENT_VERSION,room,accounts:previous.accounts,limits:previous.limits});
  runtime.metadata.stateSchema=HOT_STATE_SCHEMA;
- const saved={roomPrototype:Object.getPrototypeOf(room),simPrototype:Object.getPrototypeOf(room.sim),accountsPrototype:Object.getPrototypeOf(previous.accounts),config:room.config,simConfig:room.sim.config,configVersion:room.configVersion,last:room.last};
+ const saved={roomPrototype:Object.getPrototypeOf(room),simPrototype:Object.getPrototypeOf(room.sim),accountsPrototype:Object.getPrototypeOf(previous.accounts),config:room.config,simConfig:room.sim.config,configVersion:room.configVersion,last:room.last,npcPolicy:room.sim.npcPolicy};
  return {runtime,commit(){
   Object.setPrototypeOf(previous.accounts,Accounts.prototype);
   Object.setPrototypeOf(room,Room.prototype);Object.setPrototypeOf(room.sim,Simulation.prototype);
-  room.config=clone(nextConfig);room.sim.config=clone(nextConfig);room.configVersion++;room.last=performance.now();
+  room.config=clone(nextConfig);room.sim.config=clone(nextConfig);room.sim.npcPolicy??={...DEFAULT_NPC_POLICY};room.configVersion++;room.last=performance.now();
  },rollback(){
   Object.setPrototypeOf(previous.accounts,saved.accountsPrototype);
   Object.setPrototypeOf(room,saved.roomPrototype);Object.setPrototypeOf(room.sim,saved.simPrototype);
-  room.config=saved.config;room.sim.config=saved.simConfig;room.configVersion=saved.configVersion;room.last=saved.last;
+  room.config=saved.config;room.sim.config=saved.simConfig;room.sim.npcPolicy=saved.npcPolicy;room.configVersion=saved.configVersion;room.last=saved.last;
  }};
 }

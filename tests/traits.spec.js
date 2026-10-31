@@ -98,7 +98,7 @@ test("紫金品质、候选不足3项、已选构筑与真实技能说明", asyn
   await expect(page.locator(".trait-card")).toHaveCount(1);
   await page.locator("[data-trait]").click();
   await expect(page.locator("#traitDraft")).toBeHidden();
-  const u = s.units.find((u) => u.side === 0 && u.type === "melee" && !u.hero);
+  const u = s.units.find((u) => u.side === 0 && !u.hero && u.type === "melee" && !u.hero);
   s.contract(p, u.id);
   game.room.sequence++;
   game.room.broadcast();
@@ -116,7 +116,7 @@ test("精英特殊外观、在线广播及本人Buff倒计时", async ({
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   const s = game.room.sim,
-    u = s.units.find((u) => u.side === 0 && u.type === "melee");
+    u = s.units.find((u) => u.side === 0 && !u.hero && u.type === "melee");
   s.contract(p, u.id);
   const h = s.hero(p);
   s.waveNumber = 2;
@@ -153,7 +153,7 @@ test("桌面和窄屏选卡截图：无错误、卡片未超出游戏区域", as
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   const s = game.room.sim,
-    u = s.units.find((u) => u.side === 0 && u.type === "ranged");
+    u = s.units.find((u) => u.side === 0 && !u.hero && u.type === "ranged");
   s.setClass(4, p);
   s.contract(p, u.id);
   s.addXp(p, 3);
@@ -209,7 +209,7 @@ test("契约前切换预览职业，可以选择该职业保留的强化", async
   s.addXp(p, 3, 5);
   game.room.sequence++;
   game.room.broadcast();
-  const u = s.units.find((u) => u.side === 0 && u.type === "ranged");
+  const u = s.units.find((u) => u.side === 0 && !u.hero && u.type === "ranged");
   await page.evaluate((id) => window.__game.selection.select(id), u.id);
   await page.locator('[data-contract-role="5"]').click();
   await expect(page.locator("#traitPending")).toBeVisible();

@@ -35,7 +35,7 @@ test('两个独立本地客户端：本地美术、远端同局、契约、刷�
    await page.evaluate(()=>{const s=__game.sim,u=s.units.find(u=>u.side===s.player.side&&!u.hero&&u.type==='melee');__game.selection.select(u.id);});
    await expect(page.locator('#contractPopover')).toBeVisible();await page.locator('#confirmContract').click();await page.waitForFunction(()=>!!__game.sim.hero());
   }
-  await a.waitForFunction(()=>__game.sim.units.filter(u=>u.hero).length===2);
+  await a.waitForFunction(()=>__game.sim.units.filter(u=>u.hero&&!__game.sim.players[u.playerId].bot).length===2);
   const identity=await b.evaluate(()=>({hero:__game.sim.hero().id,player:__game.sim.player.id}));
   await b.reload();await b.waitForFunction(()=>window.__game?.sim.hero());expect(await b.evaluate(()=>({hero:__game.sim.hero().id,player:__game.sim.player.id}))).toEqual(identity);
   offlineTestStarted=true;await contexts[1].setOffline(true);await expect(b.locator('#connection')).toContainText('重连');await contexts[1].setOffline(false);await expect(b.locator('#connection')).toHaveText('已同步',{timeout:15000});
