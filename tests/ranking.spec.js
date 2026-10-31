@@ -6,7 +6,9 @@ import {createBrowserGame} from '../scripts/browser-game-server.mjs';
 
 // Register -> live combat contribution changes -> board order and KDA update -> full ranking.
 for(const viewport of [{width:1440,height:1100},{width:1264,height:935},{width:1024,height:900},{width:390,height:844}])test(`实时总积分排行与KDA ${viewport.width}`,async({browser})=>{
- const game=await createBrowserGame({dataDir:mkdtempSync(path.join(tmpdir(),'kc-ranking-'))}),{room,server}=game,s=room.sim;room.step=()=>{};room.paused=true;
+ const game=await createBrowserGame({dataDir:mkdtempSync(path.join(tmpdir(),'kc-ranking-'))}),{room,server}=game,s=room.sim;room.paused=true;
+ // Isolate the two ranking fixtures from automatic NPC contributions.
+ s.npcPolicy={mode:'off',defense:1,attack:3};s.resetMap();for(const p of s.players)if(p.bot)p.retired=true;
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const context=await browser.newContext({viewport}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('console',msg=>{if(msg.type()==='error'&&!(msg.location().url.endsWith('/api/me')&&msg.text().includes('401')))errors.push(msg.text());});
  const sync=async()=>{room.sequence++;room.broadcast();await page.waitForFunction(n=>window.__game?.sim.sequence>=n,room.sequence);};

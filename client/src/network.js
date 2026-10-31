@@ -34,7 +34,15 @@ export function connectRoom({onState,onStatus,onIdentity,onUpdateRequired,onSnap
  const offline=()=>{connected=false;events?.close();onStatus('连接中断，正在重连…');};
  const online=()=>{if(!closed)open();};window.addEventListener('offline',offline);window.addEventListener('online',online);
  const watchdog=setInterval(()=>{if(closed)return;if(connected&&Date.now()-lastPacket>4000){connected=false;onStatus('连接中断，正在重连…');if(navigator.onLine)open();}else if(!connected&&navigator.onLine&&Date.now()-lastAttempt>=3000)open();},1000);
- const dispose=()=>{closed=true;connected=false;clearInterval(watchdog);window.removeEventListener('offline',offline);window.removeEventListener('online',online);events?.close();};
+ let checkingPermissions=false;
+ const permissionTimer=setInterval(async()=>{
+  if(closed||!connected||checkingPermissions||!identity)return;
+  checkingPermissions=true;
+  try{const current=await request('/api/me');if(!closed&&current.account.id===identity.account.id&&(current.account.isSuperAdmin!==identity.account.isSuperAdmin||current.account.isHost!==identity.account.isHost)){identity={...identity,...current};onIdentity(identity);}}
+  catch(error){if(isUpdateRequired(error))stopForUpdate(error);}
+  finally{checkingPermissions=false;}
+ },10000);
+ const dispose=()=>{closed=true;connected=false;clearInterval(permissionTimer);clearInterval(watchdog);window.removeEventListener('offline',offline);window.removeEventListener('online',online);events?.close();};
  open();
  sim.setClass=id=>{if(sim.hero())return false;previewClass=id;sim.player.classId=id;return true;};
  sim.contract=async(_p,unitId)=>{const ok=await send('contract',{unitId,classId:previewClass??sim.player.classId});if(ok&&!closed){previewClass=null;sim.notice='';try{const data=await request('/api/state');if(!closed)apply(data);}catch(error){if(isUpdateRequired(error))stopForUpdate(error);else throw error;}}return ok;};
