@@ -81,7 +81,7 @@ test('操作收到版本拒绝：显示更新页，不继续操作或出现界�
  try{
   await login(page,service.base);
   let calls=0;await page.route('**/api/action',async route=>{if(++calls>1)await new Promise(resolve=>setTimeout(resolve,200));await route.fulfill({status:409,contentType:'application/json',body:JSON.stringify({code:UPDATE_REQUIRED_CODE,error:'请更新客户端',requiredVersion:nextVersion,protocolVersion:PROTOCOL_VERSION})});});
-  await page.evaluate(()=>{document.querySelector('#addStamina').click();document.querySelector('#applyBots').click();});await expect(page.locator('#updateRequired')).toBeVisible();await expect(page.locator('#requiredVersion')).toHaveText(nextVersion);
+  await page.evaluate(()=>{document.querySelector('#addStamina').click();document.querySelector('#auto').click();});await expect(page.locator('#updateRequired')).toBeVisible();await expect(page.locator('#requiredVersion')).toHaveText(nextVersion);
   await page.waitForTimeout(350);
   await expect(page.locator('#addStamina')).toHaveCount(0);expect(service.game.room.sim.players.find(p=>p.accountId)?.stamina).toBe(100);expect(errors).toEqual([]);
  }finally{await context.close();await service.close();}

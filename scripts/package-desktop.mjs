@@ -25,7 +25,7 @@ const output=path.join(process.env.MAGIC_RELEASE_DIR?path.resolve(process.env.MA
 try{
  const source=path.join(staging,'app');await mkdir(source);
  const copy=(from,to=from)=>cp(path.join(root,from),path.join(source,to),{recursive:true});
- for(const file of ['client/dist','client/desktop','client/launcher.mjs','shared/protocol.js'])await copy(file);
+ for(const file of ['client/dist','client/desktop','client/launcher.mjs','shared/protocol.js','shared/performance-permission.js'])await copy(file);
  await mkdir(path.join(source,'client'),{recursive:true});
  await writeFile(path.join(source,'client/client-config.json'),JSON.stringify(settings,null,2)+'\n');
  await writeFile(path.join(source,'package.json'),JSON.stringify({name:'magic-siege-desktop',productName:'魔法王座',version:CLIENT_VERSION,type:'module',main:'client/desktop/main.mjs'},null,2));

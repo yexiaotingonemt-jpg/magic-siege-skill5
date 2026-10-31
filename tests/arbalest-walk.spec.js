@@ -14,7 +14,7 @@ test('弩手实机走路：八帧循环、两脚交换前后、暂停冻结及�
     await page.locator('#tabRegister').click();await page.locator('#accountName').fill('步态'+Date.now());await page.locator('#accountPassword').fill('test-password-5');await page.locator('#authSubmit').click();
     await page.waitForFunction(()=>window.__game?.renderer.game.scene.scenes[0]?.unitMotion?.report.some(r=>r.texture==='kc-arbalest-walk-attack'));
     const frames=await page.evaluate(async()=>{
-      const scene=__game.renderer.game.scene.scenes[0],id=__game.sim.units.find(u=>u.side===0&&u.type==='ranged').id,seen=new Set(),start=performance.now();
+      const scene=__game.renderer.game.scene.scenes[0],id=__game.sim.units.find(u=>u.side===0&&!u.hero&&u.type==='ranged').id,seen=new Set(),start=performance.now();
       while(performance.now()-start<1200){const r=scene.unitMotion.report.find(r=>r.unitId===id);if(r?.action==='move')seen.add(r.walkFrame);await new Promise(requestAnimationFrame);}
       return [...seen].sort();
     });
@@ -38,7 +38,7 @@ test('弩手实机走路：八帧循环、两脚交换前后、暂停冻结及�
     await page.waitForTimeout(250);
     expect(await page.evaluate(()=>__game.renderer.game.scene.scenes[0].unitMotion.report.filter(r=>r.walkFrame!=null).map(r=>[r.unitId,r.artFrame]))).toEqual(frozen);
     await page.screenshot({path:`${process.env.MAGIC_QA_DIR}/arbalest-walking.png`,fullPage:true});
-    const hit=await page.evaluate(()=>{const u=__game.sim.units.find(u=>u.side===0&&u.type==='ranged'),p=__game.renderer.screenPoint(u),r=__game.renderer.game.canvas.getBoundingClientRect();return {x:r.left+p.x/500*r.width,y:r.top+(p.y-8)/__game.renderer.game.config.height*r.height};});
+    const hit=await page.evaluate(()=>{const u=__game.sim.units.find(u=>u.side===0&&!u.hero&&u.type==='ranged'),p=__game.renderer.screenPoint(u),r=__game.renderer.game.canvas.getBoundingClientRect();return {x:r.left+p.x/500*r.width,y:r.top+(p.y-8)/__game.renderer.game.config.height*r.height};});
     await page.mouse.click(hit.x,hit.y);await expect(page.locator('#contractPopover')).toBeVisible();expect(errors).toEqual([]);
   }finally{await context.close();await new Promise(resolve=>server.close(resolve));}
 });

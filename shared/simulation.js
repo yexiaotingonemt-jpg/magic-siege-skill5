@@ -10,6 +10,7 @@ import {chooseTarget,navigate} from './navigation.js';
 import {setManualTarget} from './manual-target.js';
 import {inAttackRange,ATTACK_RANGE_EPSILON} from './attack-range.js';
 import {distributeTroops,TROOP_TYPES} from './troop-population.js';
+import {balanceNpcHeroes} from './npc-balance.js';
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const archetype=contractType;
@@ -42,14 +43,15 @@ export class Simulation extends HeroRules {
   counts.forEach((count,type)=>{for(let first=0;first<count;first+=columns){const n=Math.min(columns,count-first),positions=this.wavePositions(n);for(let i=0;i<n;i++)this.spawn(side,TROOP_TYPES[type],first+i,count,positions[i],Math.floor(first/columns)*1.2);}});
  }
  spawnWave(){
-  this.syncBots();
+  if(!this.npcPolicy)this.syncBots();
   const weights=(prefix)=>[this.config.waves[prefix+'Melee'],this.config.waves[prefix+'Ranged'],prefix==='attack'?this.config.waves.attackSiege:0];
   this.spawnRoster(0,distributeTroops(this.config.world.attackWaveSize,weights('attack')));
   this.spawnRoster(1,distributeTroops(this.config.world.defenseWaveSize,weights('defense')));
   this.waveNumber++;if(this.waveNumber%3===0)for(const side of [0,1]){const e=this.spawn(side,'melee',0,1,(this.random()-.5)*6);Object.assign(e,{elite:true,hp:12000,maxHp:12000,attack:150,interval:1.5,range:1.5,aggro:5,speed:2});}
+  balanceNpcHeroes(this);
   this.metrics.waves++;this.waveAt=this.time+this.config.world.waveInterval;this.log(`第 ${this.metrics.waves} 波系统军团入场`);
  }
- syncBots(){const wanted=[this.config.world.attackBots,this.config.world.defenseBots];for(let s=0;s<2;s++){let ps=this.players.filter(p=>p.bot&&p.side===s&&!p.retired);while(ps.length<wanted[s]){const p=this.makePlayer(s);p.classId=availableClasses(s,this.config)[ps.length%availableClasses(s,this.config).length];ps.push(p);}for(const p of ps.slice(wanted[s])){const h=this.hero(p);if(h){this.settle(h,'机器人离场');h.hp=0;}p.retired=true;}}}
+ syncBots(){if(this.npcPolicy)return;const wanted=[this.config.world.attackBots,this.config.world.defenseBots];for(let s=0;s<2;s++){let ps=this.players.filter(p=>p.bot&&p.side===s&&!p.retired);while(ps.length<wanted[s]){const p=this.makePlayer(s);p.classId=availableClasses(s,this.config)[ps.length%availableClasses(s,this.config).length];ps.push(p);}for(const p of ps.slice(wanted[s])){const h=this.hero(p);if(h){this.settle(h,'机器人离场');h.hp=0;}p.retired=true;}}}
  contract(p=this.player,id){if(!availableClasses(p.side,this.config).includes(p.classId))return this.fail(p,'该阵营不可契约此职业');if(this.hero(p))return this.fail(p,'每人只能有一名存活英雄');if(p.stamina<this.config.world.contractCost)return this.fail(p,'契约体力不足');const candidates=this.units.filter(u=>!u.hero&&!u.elite&&!u.summoned&&u.hp>0&&u.side===p.side&&u.type===archetype(p.classId)&&(!p.bot||u.id!==this.player.reservedUnitId)).sort((a,b)=>p.side?a.y-b.y:b.y-a.y);if(p.bot&&!this.hero(this.player)&&p.side===this.player.side&&!candidates.some(u=>u.id===this.player.reservedUnitId)&&!this.units.some(u=>u.id===this.player.reservedUnitId&&u.type===archetype(p.classId)))candidates.shift();const u=id?this.units.find(u=>u.id===id):candidates[0];if(!u||u.hero||u.elite||u.summoned||u.hp<=0||u.side!==p.side||u.type!==archetype(p.classId))return this.fail(p,'请选择己方合法兵种：'+({melee:'近战',ranged:'远程',siege:'攻城'}[archetype(p.classId)]));const ratio=u.hp/u.maxHp,c=this.config.heroes[p.classId],baseMaxHp=c.hp*this.config.world.heroHpMultiplier*(p.side?this.config.world.defenseHpMultiplier:this.config.world.attackHpMultiplier),maxHp=baseMaxHp*(1+this.config.world.heroHpGrowth*(p.level-1));Object.assign(u,clone(c),{hp:maxHp*ratio,maxHp,baseMaxHp,baseAttack:c.attack,attack:c.attack*(1+this.config.world.heroAttackGrowth*(p.level-1)),hero:true,classId:p.classId,playerId:p.id,stats:{},start:this.time,combatAt:null,contractAt:this.time,shield:0,rawTaken:0,heat:0,spiritAt:this.time,castUntil:0,contributors:u.contributors||{},support:{}});u.manualTargetId=null;u.manualMoveTargetId=null;u.manualAttackTargetId=null;p.heroId=u.id;p.points=0;p.builds[p.classId]=skillRanks(p.level);refreshCommonStats(this,u);p.stamina-=this.config.world.contractCost;p.staminaSpent+=this.config.world.contractCost;this.stat(u,'staminaSpent',this.config.world.contractCost);if(!p.bot)this.notice='';this.log(p.name+' 契约 '+classes[p.classId]);return true;}
  fail(p,t){if(!p.bot)this.notice=t;return false;}
  expNeeded(p,classId=p.classId){return Math.round((this.config.world.expBase+.4*(p.progress[classId].level-1))*10)/10*this.config.world.expCostMultiplier;}
@@ -79,7 +81,7 @@ export class Simulation extends HeroRules {
  choose(u){return chooseTarget(this,u);}
  tick(dt){this.time+=dt;for(const t of this.towers)if(t.hp<=0&&!t.deathDone)this.die(t);if(this.activeTowers().length===0){this.resetMap();return;}const front=this.layer;while(this.layer<2&&!this.towers.some(t=>t.layer===this.layer&&t.hp>0))this.layer++;if(this.layer!==front)this.log('防线突破：推进至第 '+(this.layer+1)+' 排');
  if(this.time>=this.waveAt)this.spawnWave();
- for(const p of this.players){if(p.retired)continue;const h=this.hero(p);if(p.bot&&!h&&this.time-p.lastBot>1){this.contract(p);p.lastBot=this.time;}if(h){if((p.auto||p.bot)&&this.time-p.lastBot>=this.config.world.botCastInterval){const i=this.chooseAutoSkill(p);if(i>=0)this.cast(i,p);p.lastBot=this.time;}if(p.bot&&p.progress[p.classId].choices?.length){const choice=prepareChoice(this,p);if(choice?.options?.length)this.chooseTrait(choice.options[0],choice.level,p);}}}
+ for(const p of this.players){if(p.retired)continue;const h=this.hero(p);if(p.bot&&!h&&!this.npcPolicy&&this.time-p.lastBot>1){this.contract(p);p.lastBot=this.time;}if(h){if((p.auto||p.bot)&&this.time-p.lastBot>=this.config.world.botCastInterval){const i=this.chooseAutoSkill(p);if(i>=0)this.cast(i,p);p.lastBot=this.time;}if(p.bot&&p.progress[p.classId].choices?.length){const choice=prepareChoice(this,p);if(choice?.options?.length)this.chooseTrait(choice.options[0],choice.level,p);}}}
 
  const ready=this.jobs.filter(j=>j.at<=this.time);this.jobs=this.jobs.filter(j=>j.at>this.time);for(const j of ready)j.run();
  this.processSkillEffects();

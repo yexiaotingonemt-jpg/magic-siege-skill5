@@ -22,7 +22,7 @@ test('普通兵真实渲染：双方视角均为己方背向前进、敌方正�
       await page.waitForFunction(()=>__game.sim.paused);
       const units=await page.evaluate(()=>{
         const s=__game.sim,report=__game.renderer.game.scene.scenes[0].unitMotion.report;
-        return report.filter(r=>!s.get(r.unitId)?.tower).map(r=>({type:s.get(r.unitId).type,side:s.get(r.unitId).side,heading:r.heading,frame:r.artFrame,texture:r.texture,action:r.action,walkFrame:r.walkFrame}));
+        return report.filter(r=>!s.get(r.unitId)?.tower&&!s.get(r.unitId)?.hero).map(r=>({type:s.get(r.unitId).type,side:s.get(r.unitId).side,heading:r.heading,frame:r.artFrame,texture:r.texture,action:r.action,walkFrame:r.walkFrame}));
       });
       for(const side of [0,1])for(const type of side?['melee','ranged']:['melee','ranged','siege']){
         const matches=units.filter(u=>u.side===side&&u.type===type);expect(matches.length).toBeGreaterThan(0);
