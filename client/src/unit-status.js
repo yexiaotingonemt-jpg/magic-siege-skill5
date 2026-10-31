@@ -9,7 +9,7 @@ export function indexStatusFields(sim){
  const index=new Map();
  for(const f of sim.fields){
   if(f.until<=sim.time||f.owner.hp<=0&&f.kind!=='dot')continue;
-  const ids=f.kind==='link'?[f.owner.id,f.host]:f.kind==='dot'?[f.host]:f.kind==='lordBurn'?[f.owner.id]:[];
+  const ids=f.kind==='link'?[f.owner.id,f.host]:['dot','currentDrain','currentCorrosion'].includes(f.kind)?[f.host]:f.kind==='lordBurn'?[f.owner.id]:[];
   if(f.kind==='link'&&(!sim.get(f.host)||!usable(f.value)))continue;
   if(f.kind==='dot'&&!usable(f.s?.value))continue;
   if(f.kind==='lordBurn'&&!usable(f.s?.value))continue;
@@ -37,6 +37,9 @@ export function unitStatuses(sim,u,fields=indexStatusFields(sim)){
  if(u.damageStore&&usable(u.damageStore.value))add('damageStore','蓄伤成盾','positive',u.damageStore.until,'已累计 '+Math.floor(u.damageStore.total)+' 伤害，结束按'+percent(u.damageStore.conversionRatio??1)+'转为护盾',0,2);
  add('immune','负面免疫','positive',u.immuneUntil,'免疫新的负面状态',0,0);
  if(u.lordUlt&&usable(u.lordUlt.s.value))add('lordUlt','灭军君临','positive',u.lordUlt.until,'普通攻击附带范围溅射',0,2);
+ if(u.currentUlt)add('lordUlt','灭军君临','positive',u.currentUlt.until,'普通攻击附带范围伤害',0,2);
+ if(u.currentShell)add('reflect','尖刺外壳','positive',u.currentShell.until,'受到攻击时按攻击者攻击力反伤',0,1);
+ if(u.currentNextHealDown)add('healingDown','单次减疗','negative',u.currentNextHealDown.until,'下一次受到治疗降低'+percent(u.currentNextHealDown.ratio),0,2);
  for(const [key,until]of Object.entries(u.eliteBuffs||{}))add('elite-'+key,ELITE_BUFFS[key].name,'positive',until,ELITE_BUFFS[key].description,0,0);
  add('immortal','不屈','positive',u.immortalUntil,'生命最低保留1',0,0);
  for(const f of Object.values(u.hastes||{}))add('haste','攻速提升','positive',f.until,'普通攻击速度提高'+percent(f.ratio),0,2);
@@ -45,9 +48,10 @@ export function unitStatuses(sim,u,fields=indexStatusFields(sim)){
   if(f.kind==='link')add('link','共生链接','positive',f.until,'与链接的友军按'+percent(f.shareRatio??1)+'共享收到的有效治疗'+(f.shareDamage?'，组内平摊伤害':''),0,2);
   if(f.kind==='lordBurn')add('burnAura','火焰盾','positive',f.until,'向周围目标附加灼烧，移动与突进期间持续生效',0,2);
   if(f.kind==='dot')add('dot',f.type==='lordScorch'?'灼烧':f.type==='corrosion'?'腐蚀':f.type==='orcDrain'?'汲血链接':f.type==='parasite'?'寄生':'持续伤害','negative',f.until,f.type==='lordScorch'?`每秒受到${Number(f.s.power.toFixed(1))}%施法攻击力伤害，离开火焰盾范围后继续生效`:'持续承受伤害',0,2);
+  if(['currentDrain','currentCorrosion'].includes(f.kind))add('dot',f.kind==='currentDrain'?'汲血连接':'腐蚀','negative',f.until,'持续承受伤害，可被净化',0,2);
  }
  const marks=(u.soulMarks||[]).filter(m=>m.until>=now&&sim.get(m.ownerId));
- if(marks.length)add('soulMark','焚魂烙印','mark',Math.max(...marks.map(m=>m.until)),'阵亡时为标记者提供炙热；此击杀记录不受净化影响',0,4);
+ if(marks.length)add('soulMark',marks.some(m=>m.current)?'焚魂标记':'焚魂烙印','mark',Math.max(...marks.map(m=>m.until)),marks.some(m=>m.current)?'攻击命中时触发附伤与炙热；可净化':'阵亡时为标记者提供炙热；此击杀记录不受净化影响',0,4);
  if(towerGuardActive(u,now))add('towerGuard','三重守护','positive',u.towerGuardUntil,'攻击3个目标，受到伤害降低50%',0,0);
  if(u.tower){const protection=towerAllyProtection(u,sim.units);if(protection.count)add('towerAllies','友军护塔','positive',Infinity,`${u.range}格内${protection.count}名友军，最终受到伤害降低${percent(protection.reduction)}`,protection.count,1);}
  for(const [id,name,until,value,detail]of [

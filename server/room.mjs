@@ -1,5 +1,6 @@
 import {Simulation} from '../shared/simulation.js';
 import {defaults,clone,availableClasses,contractClasses,validateConfig} from '../shared/config.js';
+import {isCurrentDesign,createCurrentDesignConfig} from '../shared/current-design.js';
 const snapshotReplacer=(key,value)=>['settledReport','contributors','support','attackerMemory','stats','deathDone'].includes(key)?undefined:value;
 const actorSnapshot=u=>u?{id:u.id,side:u.side,classId:u.classId,type:u.type,tower:u.tower,x:u.x,y:u.y,hp:u.hp,maxHp:u.maxHp}:undefined;
 export class Room{
@@ -34,7 +35,7 @@ export class Room{
    else if(['bots','pause','speed','refill','level','restart','config'].includes(type)){
     if(!account.isHost&&account.isSuperAdmin!==true)throw Error('仅房主或超级账号可以调整体验参数');
     if(type==='bots'){for(const key of ['attackBots','defenseBots'])if(!Number.isInteger(args[key])||args[key]<0||args[key]>50)throw Error('双方机器人数量需为0～50的整数');if(args.attackBots+args.defenseBots>99)throw Error('机器人总数最多99');Object.assign(s.config.world,{attackBots:args.attackBots,defenseBots:args.defenseBots,botMode:args.attackBots+args.defenseBots?5:4});this.config=clone(s.config);s.syncBots();this.configVersion++;}
-    if(type==='config'){const next=validateConfig(clone(args.config));if(next.world.stageDuration<60||next.world.stageRequiredLayers<1||next.world.stageRequiredLayers>3)throw Error('阶段至少60秒，目标防线为1～3排');s.config=next;this.config=clone(next);s.syncBots();this.configVersion++;}
+    if(type==='config'){const submitted=clone(args.config);if(isCurrentDesign(submitted)!==isCurrentDesign(s.config))throw Error('切换技能规则需要通过对应启动入口新建战局');const next=validateConfig(isCurrentDesign(submitted)?createCurrentDesignConfig(submitted,submitted.design):submitted);if(next.world.stageDuration<60||next.world.stageRequiredLayers<1||next.world.stageRequiredLayers>3)throw Error('阶段至少60秒，目标防线为1～3排');s.config=next;this.config=clone(next);s.syncBots();this.configVersion++;}
     if(type==='pause')this.paused=!!args.paused;
     if(type==='speed'){if(![1,2,4].includes(args.speed))throw Error('无效倍速');this.speed=args.speed;}
     if(type==='refill')p.stamina=100;

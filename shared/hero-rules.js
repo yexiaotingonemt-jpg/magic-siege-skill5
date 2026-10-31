@@ -12,6 +12,10 @@ import { adjustAttackCooldown } from "./attack-cooldown.js";
 import { available, spend, createSkillValue } from "./skill-value.js";
 import { traitRank, traitSkill } from "./traits.js";
 import { traitEffects } from "./trait-effects.js";
+import { isCurrentDesign, currentValues, currentName } from './current-design.js';
+import { currentAttackPower, currentAttackRate, addCurrentHeat, currentHeal,
+  currentRangeFailure, selectCurrentSkill, resolveCurrentSkill, impactCurrentSkill,
+  processCurrentEffects, updateCurrentUnit, chooseCurrentSkill } from './current-design-mechanics.js';
 import {
   selectSkill5,
   skill5RangeFailure,
@@ -47,6 +51,7 @@ export class HeroRules {
     return next;
   }
   attackPower(u) {
+    if(isCurrentDesign(this.config))return currentAttackPower.call(this,u);
     const low =
       u.classId === 0
         ? this.rank(u, "O18")
@@ -102,6 +107,7 @@ export class HeroRules {
       u.conductUntil = this.time + duration;
   }
   addHeat(h, n) {
+    if(isCurrentDesign(this.config))return addCurrentHeat.call(this,h,n);
     if (h?.hp > 0 && h.classId === 4) {
       const c = this.config.heroes[4].skills[0],
         before = h.heat || 0;
@@ -133,12 +139,16 @@ export class HeroRules {
       if (active) kinds.push(kind);
     for (const f of this.fields)
       if (
-        f.kind === "dot" &&
+        (f.kind === "dot" || ['currentDrain','currentCorrosion'].includes(f.kind)) &&
         f.host === u.id &&
         f.until > this.time &&
         !f.s?.uncleansable
       )
-        kinds.push(f.type);
+        kinds.push(f.type || f.kind);
+    if(isCurrentDesign(this.config)){
+      if(u.currentNextHealDown?.until>this.time)kinds.push('nextHealDown');
+      if(u.soulMarks?.some(m=>m.current&&m.until>this.time))kinds.push('soulMark');
+    }
     return new Set(kinds).size;
   }
   hasNegative(u) {
@@ -154,11 +164,35 @@ export class HeroRules {
     u.tauntId = null;
     u.stunUntil = 0;
     u.slowUntil = 0;
+    if(isCurrentDesign(this.config)){
+      u.currentNextHealDown=null;
+      if(u.soulMarks)u.soulMarks=u.soulMarks.filter(m=>!m.current);
+    }
     this.fields = this.fields.filter(
-      (f) => !(f.kind === "dot" && f.host === u.id && !f.s?.uncleansable),
+      (f) => !((f.kind === "dot" || ['currentDrain','currentCorrosion'].includes(f.kind)) && f.host === u.id && !f.s?.uncleansable),
     );
     adjustAttackCooldown(u, this.time, slow, 0);
     return count;
+  }
+  cleanseOne(u) {
+    const debuffs=Object.entries(u.debuffs||{}).filter(([,v])=>v.until>this.time);
+    const fields=this.fields.filter(f=>f.host===u.id&&f.until>this.time&&['dot','currentDrain','currentCorrosion'].includes(f.kind)&&!f.s?.uncleansable);
+    const states=['tauntUntil','stunUntil','slowUntil'].filter(k=>u[k]>this.time);
+    const options=[...debuffs.map(([key])=>()=>{delete u.debuffs[key];this.syncAttackCooldown(u);}),
+      ...fields.map(f=>()=>{this.fields=this.fields.filter(g=>g!==f);}),...states.map(key=>()=>{u[key]=0;})];
+    if(u.currentNextHealDown?.until>this.time)options.push(()=>{u.currentNextHealDown=null;});
+    for(const mark of u.soulMarks||[])if(mark.current&&mark.until>this.time)options.push(()=>{u.soulMarks=u.soulMarks.filter(m=>m!==mark);});
+    if(!options.length)return false;options[Math.floor(this.random()*options.length)]();return true;
+  }
+  dispelOne(u) {
+    const options=[];
+    for(const [key,v] of Object.entries(u.hastes||{}))if(v.until>this.time)options.push(()=>{delete u.hastes[key];});
+    for(const g of u.guards||[])if(g.until>this.time)options.push(()=>{u.guards=u.guards.filter(v=>v!==g);});
+    if(u.shieldUntil>this.time&&u.shield>0)options.push(()=>{u.shield=0;u.shieldUntil=0;});
+    if(u.heat>0)options.push(()=>{u.heat=0;u.heatUntil=0;u.heatBoostStacks=0;u.heatBoostUntil=0;});
+    if(u.currentUlt?.until>this.time)options.push(()=>{u.currentUlt=null;u.immuneUntil=0;});
+    if(u.currentShell?.until>this.time)options.push(()=>{u.currentShell=null;});
+    if(!options.length)return false;options[Math.floor(this.random()*options.length)]();return true;
   }
   interrupt(u) {
     u.castToken = (u.castToken || 0) + 1;
@@ -166,8 +200,9 @@ export class HeroRules {
     u.channelUntil = 0;
     u.skillAnimation = null;
     u.dash = null;
+    u.currentDash = null;
     this.fields = this.fields.filter(
-      (f) => !(f.kind === "runeBarrage" && f.owner.id === u.id),
+      (f) => !(['runeBarrage','currentBarrage','currentGroupHeal','currentDrain'].includes(f.kind) && f.owner.id === u.id),
     );
   }
   debuff(u, source, kind, ratio, duration, value = null, prepaid = false) {
@@ -227,6 +262,7 @@ export class HeroRules {
     u.hastes[kind] = { ratio, until: this.time + duration };
   }
   attackRate(u) {
+    if(isCurrentDesign(this.config))return currentAttackRate.call(this,u);
     const values = Object.values(u.hastes || {})
       .filter((f) => f.until > this.time)
       .map((f) => f.ratio);
@@ -242,6 +278,7 @@ export class HeroRules {
     );
   }
   heal(t, n, u, value = null, shared = false) {
+    if(isCurrentDesign(this.config))return currentHeal.call(this,t,n,u,value,shared);
     if (!t || t.hp <= 0 || t.tower) return 0;
     const down = Math.max(
       0,
@@ -324,7 +361,7 @@ export class HeroRules {
           ...links
             .map((f) => this.get(f.host))
             .filter(
-              (u) => u && Math.hypot(u.x - owner.x, u.y - owner.y) <= 12 + 1e-7,
+              (u) => u && Math.hypot(u.x - owner.x, u.y - owner.y) <= (isCurrentDesign(this.config)?Math.max(...links.filter(f=>f.host===u.id).map(f=>f.breakRange)):12) + 1e-7,
             ),
         ];
         const unique = [...new Map(members.map((u) => [u.id, u])).values()];
@@ -342,6 +379,11 @@ export class HeroRules {
     }
     if (basic) n = this.attackEffect(a, n);
     if (basic && a?.classId === 2 && t.tower) n *= a.buildingBonus || 1;
+    if(isCurrentDesign(this.config)&&a){
+      const av=currentValues(this,a,null,meta.value?.ranks);
+      if(!reflected&&!a.summoned)n*=1+(av.final_damage||0);
+      if(t.tower&&a.classId===2)n*=1+(av.building_bonus||0);
+    }
     if (t.tower && a?.classId === 2) n *= 1 + this.rank(a, "C17") * 0.1;
     const vulnerable = Math.max(
       0,
@@ -367,9 +409,15 @@ export class HeroRules {
     if (t.eliteBuffs?.fortitude > this.time) guards.set("elite", 0.15);
     guards.set("commonFinal", 0.06 * commonRank(this, t, 10));
     if (a?.tower) guards.set("commonTower", 0.1 * commonRank(this, t, 7));
+    if(isCurrentDesign(this.config)){
+      const v=currentValues(this,t);
+      guards.set('currentFinal',v.final_reduction||0);
+      if(a?.tower)guards.set('currentTower',v.tower_reduction||0);
+      if(t.classId===0)guards.set('orcPassive',(1-t.hp/t.maxHp)*this.config.design.rules.orcMissingReduction);
+    }
     let remaining = 1;
     for (const ratio of guards.values()) remaining *= 1 - ratio;
-    n *= Math.max(0.2, remaining);
+    n *= Math.max(isCurrentDesign(this.config)?0:0.2, remaining);
     if (towerGuardActive(t, this.time)) n *= 1 - TOWER_GUARD.damageReduction;
     if (t.tower) n *= 1 - towerAllyProtection(t, this.units).reduction;
     if (meta.execute) n = t.hp;
@@ -429,7 +477,7 @@ export class HeroRules {
     if (t.tower && actual > 0) {
       this.metrics.towerDamage += actual;
       triggerTowerGuard(t, this.time);
-      if (credit?.hero)
+      if (credit?.hero && !isCurrentDesign(this.config))
         this.addXp(
           this.players[credit.playerId],
           actual * this.config.world.towerDamageExpRate,
@@ -444,6 +492,8 @@ export class HeroRules {
     if (sum > 0) this.afterDamage?.(a, t, sum, basic, reflected, meta);
     if (t.hp <= 0) {
       t.lethalSkill = {
+        currentExplosion:meta.currentExplosion,
+        explosionRadius:meta.explosionRadius,
         ownerId: a?.id,
         explosive: !!meta.explosive,
         attack: meta.value?.attack || 0,
@@ -464,19 +514,19 @@ export class HeroRules {
       c = this.config.heroes[id],
       s = traitSkill(this, h, i),
       lv = p.builds[id][i];
-    if (p.level < SKILL_PROGRESSION[i].unlock)
+    if (!isCurrentDesign(this.config) && p.level < SKILL_PROGRESSION[i].unlock)
       return bad("locked", "大招在英雄5级解锁");
-    const range = skill5RangeFailure(this, h, i, s);
+    const range = isCurrentDesign(this.config)?currentRangeFailure(this,h,i,s):skill5RangeFailure(this, h, i, s);
     if (range) return range;
     if (h.stunUntil > this.time) return bad("stunned", "眩晕中，无法施法");
-    if (h.dash || h.channelUntil > this.time)
+    if (h.dash || h.currentDash || h.channelUntil > this.time)
       return bad("channel", "正在冲锋或引导");
     if (h.castUntil > this.time) return bad("casting", "正在施法");
     if (p.cd[i] > this.time) return bad("cooldown", "技能冷却中");
     if (p.stamina < s.cost) return bad("stamina", "体力不足");
-    if (id === 4 && i === 1 && (h.heat || 0) < s.heatCost)
+    if (!isCurrentDesign(this.config) && id === 4 && i === 1 && (h.heat || 0) < s.heatCost)
       return bad("heat", "需要至少1层炙热才能施加烙印");
-    const selection = selectSkill5.call(this, h, i, s);
+    const selection = isCurrentDesign(this.config)?selectCurrentSkill.call(this,h,i,s):selectSkill5.call(this, h, i, s);
     return selection.ok
       ? { code: "ready", reason: "可释放", h, c, s, lv: 1, id, ...selection }
       : selection;
@@ -486,15 +536,16 @@ export class HeroRules {
     if (!plan.ok) return this.fail(p, plan.reason);
     const { h, s, t } = plan,
       token = (h.castToken || 0) + 1;
+    const currentAttackSnapshot=isCurrentDesign(this.config)?this.attackPower(h):null;
     h.castToken = token;
     const heat = h.heat || 0;
-    if (h.classId === 4 && i === 1) {
+    if (!isCurrentDesign(this.config) && h.classId === 4 && i === 1) {
       h.heat = Math.max(0, heat - s.heatCost);
     }
     p.stamina -= s.cost;
     p.staminaSpent += s.cost;
     this.stat(h, 'staminaSpent', s.cost);
-    this.addXp(p, s.cost * this.config.world.expPerStamina);
+    this.addXp(p, s.cost * (isCurrentDesign(this.config)?1:this.config.world.expPerStamina));
     p.cd[i] = this.time + s.cd * (h.eliteBuffs?.arcane > this.time ? 0.85 : 1);
     h.castUntil = this.time + s.castTime;
     this.metrics.casts++;
@@ -513,11 +564,12 @@ export class HeroRules {
       release: h.castUntil,
     });
     const value = createSkillValue(h, s, 1, this.time);
-    value.attack = this.attackPower(h);
+    value.attack = currentAttackSnapshot??this.attackPower(h);
     value.skill = i;
     value.ranks = s.ranks;
+    if(isCurrentDesign(this.config))value.currentSkill={...s};
     // 本次消耗新获得的炙热增攻只影响后续施法，不能倒灌当前快照。
-    if (h.classId === 4 && i === 1) this.heatBoost(h, s.heatCost);
+    if (!isCurrentDesign(this.config) && h.classId === 4 && i === 1) this.heatBoost(h, s.heatCost);
     value.healProcs = 0;
     this.skillValues ??= [];
     this.skillValues.push(value);
@@ -538,14 +590,15 @@ export class HeroRules {
     });
     if (!p.bot) {
       this.notice = "";
-      this.log(p.name + " 释放「" + names[h.classId][i] + "」");
+      this.log(p.name + " 释放「" + this.configSkillName(h.classId,i) + "」");
     }
     return true;
   }
   configSkillName(id, i) {
-    return names[id][i];
+    return isCurrentDesign(this.config)?currentName(this.config,id,i):names[id][i];
   }
   resolveSkill(h, i, s, locked, ids = [], extra = {}) {
+    if(isCurrentDesign(this.config))return resolveCurrentSkill.call(this,h,i,s,locked,ids,extra);
     return resolveSkill5.call(this, h, i, s, locked, ids, extra);
   }
   dot(owner, t, type, s, duration) {
@@ -577,15 +630,19 @@ export class HeroRules {
     });
   }
   impactSkill(b) {
+    if(b.payload?.current)return impactCurrentSkill.call(this,b);
     return impactSkill4.call(this, b);
   }
   processSkillEffects() {
+    if(isCurrentDesign(this.config))return processCurrentEffects.call(this);
     return processSkill5Effects.call(this);
   }
   updateUnitEffects(u, dt = 0) {
+    if(isCurrentDesign(this.config))return updateCurrentUnit.call(this,u,dt);
     return updateSkill5Unit.call(this, u, dt);
   }
   chooseAutoSkill(p) {
+    if(isCurrentDesign(this.config))return chooseCurrentSkill.call(this,p);
     return chooseSkill5.call(this, p);
   }
 }

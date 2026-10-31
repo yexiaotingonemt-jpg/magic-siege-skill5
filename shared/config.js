@@ -1,4 +1,5 @@
 import {defaults as base,labels as baseLabels} from './base-config.js';
+import {validateCurrentDesign} from './current-design.js';
 export const clone=x=>JSON.parse(JSON.stringify(x));
 export const classes=['兽人战士','雷霆巨人','符文战车','黑暗领主','火焰法师','森林精灵','暗影刺客'];
 export const names=[['汲血链接','守护战吼','换位救援','蓄伤壁垒'],['导电电弧','远阵雷击','电弧牵引','禁疗雷云'],['腐蚀炮弹','冰霜炮弹','震荡炮弹','定点连轰'],['裂地震荡','暗影冲锋','焚身壁垒','灭军君临'],['烈焰冲击','焚魂烙印','炙热火球','天火审判'],['灵息冲击','共生链接','献生净化','生命群疗'],['蚀骨飞刃','影袭','残影回溯','环刃风暴']];
@@ -144,8 +145,9 @@ Object.assign(labels,{retaliationMemory:'受击来源记忆秒',retaliationLeash
 Object.assign(labels,{skillDesignVersion:'技能规则版本',scarDuration:'伤痕持续秒',scarCap:'伤痕层数上限',scarKnockback:'每层伤痕增加击飞格数',scarBonus:'每层伤痕伤害增幅',conductDuration:'导电持续秒',attackSpeedDown:'攻击速度降低比例',shots:'定点炮击次数',heatCap:'炙热层数上限',heatThreshold:'大火球炙热门槛',heatStep:'每增加一目标消耗的炙热层数',splashPower:'溅射总攻击力系数（%）',healingBoost:'受到治疗提升比例',debuffDuration:'命中减益持续秒'});
 Object.assign(labels,{heroKillXp:'击杀英雄经验',minionKillXp:'击杀小兵经验',attackSiege:'进攻攻城兵占比',damageTaken:'原始承伤',percentMaxHp:'目标最大生命伤害比例',heatOnDeath:'标记目标阵亡增加炙热层数',hpCost:'当前生命消耗比例',shieldDuration:'转化护盾持续秒',slowPerStack:'每层移动减速比例',slowCap:'移动减速叠层上限',slowDuration:'移动减速持续秒'});
 export function validateConfig(x){
+ if(x.design)validateCurrentDesign(x.design);
  if(x.world.maxLevel!==40)throw Error('本版英雄等级上限固定40');
- const walk=(a,b,path='')=>{if(typeof b==='number'){if(typeof a!=='number'||!Number.isFinite(a)||Math.abs(a)>1e7)throw Error(path+' 数值无效');if(a<0&&!['attackSpawnY','defenseLimitY','mapMinY','mapMaxY','defenseRallyOffset'].includes(path.split('.').at(-1)))throw Error(path+' 不能为负数');return;}if(!a||typeof a!=='object'||Array.isArray(a)!==Array.isArray(b))throw Error(path+' 配置结构不完整');for(const k of Object.keys(a))if(!Object.hasOwn(b,k)||k==='__proto__')throw Error(path+'.'+k+' 是未知字段');for(const k of Object.keys(b))walk(a[k],b[k],path+'.'+k);};walk(x,defaults);
+ const walk=(a,b,path='')=>{if(typeof b==='number'){if(typeof a!=='number'||!Number.isFinite(a)||Math.abs(a)>1e7)throw Error(path+' 数值无效');if(a<0&&!['attackSpawnY','defenseLimitY','mapMinY','mapMaxY','defenseRallyOffset'].includes(path.split('.').at(-1)))throw Error(path+' 不能为负数');return;}if(!a||typeof a!=='object'||Array.isArray(a)!==Array.isArray(b))throw Error(path+' 配置结构不完整');for(const k of Object.keys(a))if((!Object.hasOwn(b,k)&&!(path===''&&k==='design'))||k==='__proto__')throw Error(path+'.'+k+' 是未知字段');for(const k of Object.keys(b))walk(a[k],b[k],path+'.'+k);};walk(x,defaults);
  for(const k of ['waveInterval','projectileSpeed','expBase','expGrowth','expCostMultiplier','maxLevel','targetRecheckInterval'])if(x.world[k]<=0)throw Error(k+' 必须大于0');
  if(x.world.retaliationMemory<=0||x.world.retaliationMemory>10||x.world.retaliationLeash<=0||x.world.retaliationLeash>30||x.world.heroPriorityDistance>5)throw Error('受击记忆需0～10秒、反击距离0～30格、英雄距离容差0～5格');
  for(const u of [...Object.values(x.troops),...x.heroes,x.tower])if(u.hp<=0||u.interval<=0)throw Error('生命和攻击间隔必须大于0');

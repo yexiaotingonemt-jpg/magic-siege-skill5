@@ -10,6 +10,8 @@
     "test:browser": "playwright test",
     "start": "node server/index.mjs",
     "start:server": "node server/index.mjs",
+    "start:design": "node server/index.mjs --design=current",
+    "test:design": "node --test tests/current-design.test.js",
     "start:client": "electron client/desktop/main.mjs",
     "package:client": "npm run build && node scripts/package-desktop.mjs",
     "package:server": "node scripts/package-release.mjs server",

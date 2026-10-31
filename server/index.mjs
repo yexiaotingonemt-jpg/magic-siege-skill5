@@ -3,6 +3,10 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createGameRuntime} from './game-runtime.mjs';
 import {createHotUpdater,listenHotControl} from './hot-update.mjs';
+import {readFileSync} from 'node:fs';
+import {Room} from './room.mjs';
+import {defaults,validateConfig} from '../shared/config.js';
+import {createCurrentDesignConfig} from '../shared/current-design.js';
 
 const base=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 export function createGameServer(options={}){
@@ -22,7 +26,15 @@ export function createGameServer(options={}){
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const appRoot=process.env.MAGIC_SIEGE_ROOT||path.resolve(base,'../..');
- const game=createGameServer({appRoot});
+ const designFile=process.argv.find(arg=>arg.startsWith('--design-config='))?.slice('--design-config='.length);
+ let room;
+ if(designFile){const data=JSON.parse(readFileSync(designFile,'utf8'));room=new Room(validateConfig(data.world?data:createCurrentDesignConfig(defaults,data)));}
+ else if(process.argv.includes('--design=current'))room=new Room(createCurrentDesignConfig(defaults));
+ if(room?.config.design){
+  process.env.KC_DATA_DIR??='E:/Codex/Support/魔法王座/scratch/current-design-preview/data';
+  process.env.PORT??='5185';
+ }
+ const game=createGameServer({appRoot,...(room?{room}:{})});
  const socket=process.env.MAGIC_HOT_UPDATE_SOCKET;
  try{
   const control=socket?await listenHotControl(socket,game.hotUpdate):null;
