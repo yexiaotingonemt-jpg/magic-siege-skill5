@@ -1,10 +1,12 @@
+import {canRecordPerformance} from '../../shared/performance-permission.js';
+import {createPerformanceLog} from './performance-log.mjs';
 import {app,BrowserWindow,Menu,dialog,session,ipcMain,safeStorage} from 'electron';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createLocalClient} from '../launcher.mjs';
 import {readDesktopSettings} from './config.mjs';
 import {createLoginCredentials} from './login-credentials.mjs';
-import {CLIENT_VERSION,GAME_VERSION} from '../../shared/protocol.js';
+import {CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION} from '../../shared/protocol.js';
 
 const here=path.dirname(fileURLToPath(import.meta.url)),clientRoot=path.resolve(here,'..');
 const testMode=process.env.MAGIC_DESKTOP_TEST==='1';
@@ -56,8 +58,16 @@ async function boot(){
  mainWindow.webContents.on('page-title-updated',event=>{event.preventDefault();mainWindow.setTitle(title);});
  mainWindow.once('ready-to-show',()=>{if(!testMode)mainWindow.show();});
  buildMenu();
+ const performanceLog=createPerformanceLog(path.join(app.getPath('userData'),'performance-logs'));
  const credentials=createLoginCredentials({directory:app.getPath('userData'),serverUrl:settings.serverUrl,safeStorage});
  const checkCredentialsSender=event=>{if(event.sender!==mainWindow.webContents||event.senderFrame!==mainWindow.webContents.mainFrame||new URL(event.senderFrame.url).origin!==origin)throw Error('Invalid credentials request');};
+ ipcMain.handle('magic:performance:sample',async(event,value)=>{
+  checkCredentialsSender(event);if(!value?.sample||typeof value.sample.fps!=='number')throw Error('Invalid performance sample');
+  // 使用主进程会话向服务端核验，不能信任渲染进程传入的账号或超级标记。
+  const response=await gameSession.fetch(origin+'/api/me',{headers:{'X-Magic-Client-Version':CLIENT_VERSION,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION)},signal:AbortSignal.timeout(3000)});
+  if(!response.ok||!canRecordPerformance((await response.json()).account))throw Error('Performance recording requires yxt super account');
+  return performanceLog.write(value);
+ });
  ipcMain.handle('magic:login-credentials:read',event=>{checkCredentialsSender(event);return credentials.read();});
  ipcMain.handle('magic:login-credentials:save',(event,value)=>{checkCredentialsSender(event);return credentials.save(value);});
  await mainWindow.loadURL(origin+'/');
