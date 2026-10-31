@@ -1,0 +1,248 @@
+{
+  "deployedAt": "2026-10-31T03:02:23.251Z",
+  "source": {
+    "repository": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5.git",
+    "ref": "refs/heads/main",
+    "branchHead": "a8b522e07de16d5ef9d19d31292d31bde4323191",
+    "commit": "a8b522e07de16d5ef9d19d31292d31bde4323191",
+    "previousCommit": "bc0262dc81668ceca28c47e8d771f5e2e3f8f3a2",
+    "verifiedAt": "2026-10-31T03:02:23.185Z"
+  },
+  "pullRequest": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5/pull/18",
+  "backup": "/home/colleague/apps/magic-siege-skill5/shared/backups/pre-v0.6.2-20261031T030147Z",
+  "previousDirectory": "/home/colleague/apps/magic-siege-skill5/releases/hot-6c423139-1565-4874-b307-24c7aa7189da",
+  "currentDirectory": "/home/colleague/apps/magic-siege-skill5/releases/hot-1e114acc-fee1-4296-b2da-15a5aded17a8",
+  "applied": {
+    "ok": true,
+    "at": "2026-10-31T03:02:23.251Z",
+    "previous": "/home/colleague/apps/magic-siege-skill5/releases/hot-6c423139-1565-4874-b307-24c7aa7189da",
+    "releaseDir": "/home/colleague/apps/magic-siege-skill5/releases/hot-1e114acc-fee1-4296-b2da-15a5aded17a8",
+    "baseDigest": "a6cc56d9a5e479725a4e5fdc972083369a349e27423763eb7a73063d6e136c93",
+    "digest": "b978491a0007db3ea81d956f70fd9feee99f7a8df751d076520a3a9c851afa1c",
+    "source": {
+      "repository": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5.git",
+      "ref": "refs/heads/main",
+      "branchHead": "a8b522e07de16d5ef9d19d31292d31bde4323191",
+      "commit": "a8b522e07de16d5ef9d19d31292d31bde4323191",
+      "previousCommit": "bc0262dc81668ceca28c47e8d771f5e2e3f8f3a2",
+      "verifiedAt": "2026-10-31T03:02:23.185Z"
+    },
+    "battle": "preserve",
+    "previousMatchId": "e93ae9dd-790d-4fdc-8738-e270bad69593",
+    "matchId": "e93ae9dd-790d-4fdc-8738-e270bad69593",
+    "stateSchema": 2,
+    "accountSchema": 1,
+    "serverVersion": "0.6.2",
+    "clientVersion": "0.6.2",
+    "gameVersion": "0.6.0",
+    "protocolVersion": 3,
+    "revision": "npc-ratio-wave-contract-20261031",
+    "reloads": 7,
+    "changed": 8,
+    "removed": 0,
+    "verified": true
+  },
+  "before": {
+    "health": {
+      "ok": true,
+      "version": 5,
+      "serverVersion": "0.6.1",
+      "gameVersion": "0.6.0",
+      "clientVersion": "0.6.1",
+      "protocolVersion": 3,
+      "revision": "ally-approach-skill-inspection-20261030",
+      "matchId": "e93ae9dd-790d-4fdc-8738-e270bad69593",
+      "sequence": 165513,
+      "clients": 0
+    },
+    "pid": 3119586,
+    "accountHash": "529f2ac28ebc68ae835cf5167e32c9e5673fb4def32be2c8595548f651d48601",
+    "accountCount": 17,
+    "superHash": "0bd4d5e4ac1c70f9dd3bb2daae26ed30186238355e5f0979951a6b7d4bb1af11",
+    "superCount": 2
+  },
+  "after": {
+    "pid": 3119586,
+    "currentDirectory": "/home/colleague/apps/magic-siege-skill5/releases/hot-1e114acc-fee1-4296-b2da-15a5aded17a8",
+    "accountHash": "529f2ac28ebc68ae835cf5167e32c9e5673fb4def32be2c8595548f651d48601",
+    "accountCount": 17,
+    "superHash": "0bd4d5e4ac1c70f9dd3bb2daae26ed30186238355e5f0979951a6b7d4bb1af11",
+    "superCount": 2
+  },
+  "gates": {
+    "version": {
+      "status": 200,
+      "data": {
+        "serverVersion": "0.6.2",
+        "gameVersion": "0.6.0",
+        "clientVersion": "0.6.2",
+        "protocolVersion": 3
+      }
+    },
+    "health": {
+      "status": 200,
+      "data": {
+        "ok": true,
+        "version": 5,
+        "serverVersion": "0.6.2",
+        "gameVersion": "0.6.0",
+        "clientVersion": "0.6.2",
+        "protocolVersion": 3,
+        "revision": "npc-ratio-wave-contract-20261031",
+        "matchId": "e93ae9dd-790d-4fdc-8738-e270bad69593",
+        "sequence": 165698,
+        "clients": 0
+      }
+    },
+    "oldClient": {
+      "status": 409,
+      "data": {
+        "code": "CLIENT_UPDATE_REQUIRED",
+        "error": "请更新客户端：退出游戏并从 GitHub 拉取最新版仓库后重新启动。",
+        "clientVersion": "0.6.0",
+        "requiredVersion": "0.6.0",
+        "requiredClientVersion": "0.6.2",
+        "protocolVersion": 3
+      }
+    },
+    "updates": {
+      "status": 410,
+      "data": {
+        "error": "客户端自动更新已取消，请退出游戏并从 GitHub 拉取最新版仓库。"
+      }
+    }
+  },
+  "clients": [
+    {
+      "repository": false,
+      "serverUrl": "http://124.222.216.66:5183",
+      "before": {
+        "match": "e93ae9dd-790d-4fdc-8738-e270bad69593",
+        "sequence": 165546,
+        "npc": {
+          "mode": "ratio",
+          "defense": 1,
+          "attack": 3,
+          "heroes": {
+            "defense": 0,
+            "attack": 0
+          },
+          "npcs": {
+            "defense": 0,
+            "attack": 0
+          },
+          "lastCheck": null
+        }
+      },
+      "after": {
+        "match": "e93ae9dd-790d-4fdc-8738-e270bad69593",
+        "sequence": 165611,
+        "npc": {
+          "mode": "ratio",
+          "defense": 1,
+          "attack": 3,
+          "heroes": {
+            "defense": 1,
+            "attack": 3
+          },
+          "npcs": {
+            "defense": 1,
+            "attack": 3
+          },
+          "lastCheck": {
+            "wave": 75,
+            "time": 5248.450000010328,
+            "target": {
+              "defense": 1,
+              "attack": 3
+            },
+            "added": {
+              "defense": 1,
+              "attack": 3
+            },
+            "missing": {
+              "defense": 0,
+              "attack": 0
+            }
+          }
+        },
+        "connected": true
+      },
+      "pageErrors": []
+    },
+    {
+      "repository": true,
+      "serverUrl": "http://124.222.216.66:5183",
+      "before": {
+        "match": "e93ae9dd-790d-4fdc-8738-e270bad69593",
+        "sequence": 165647,
+        "npc": {
+          "mode": "ratio",
+          "defense": 1,
+          "attack": 3,
+          "heroes": {
+            "defense": 1,
+            "attack": 3
+          },
+          "npcs": {
+            "defense": 1,
+            "attack": 3
+          },
+          "lastCheck": {
+            "wave": 75,
+            "time": 5248.450000010328,
+            "target": {
+              "defense": 1,
+              "attack": 3
+            },
+            "added": {
+              "defense": 1,
+              "attack": 3
+            },
+            "missing": {
+              "defense": 0,
+              "attack": 0
+            }
+          }
+        }
+      },
+      "after": {
+        "match": "e93ae9dd-790d-4fdc-8738-e270bad69593",
+        "sequence": 165692,
+        "npc": {
+          "mode": "ratio",
+          "defense": 1,
+          "attack": 3,
+          "heroes": {
+            "defense": 1,
+            "attack": 3
+          },
+          "npcs": {
+            "defense": 1,
+            "attack": 3
+          },
+          "lastCheck": {
+            "wave": 75,
+            "time": 5248.450000010328,
+            "target": {
+              "defense": 1,
+              "attack": 3
+            },
+            "added": {
+              "defense": 1,
+              "attack": 3
+            },
+            "missing": {
+              "defense": 0,
+              "attack": 0
+            }
+          }
+        },
+        "connected": true
+      },
+      "pageErrors": []
+    }
+  ],
+  "desktopZipSha256": "606421b8fc346094fb281c17e4db7a33247e34b5a8d7ace364c610e0dd942bdd",
+  "serverZipSha256": "c526d623fc4bbb9f50862dac79d452e7552b5c99ac9405b21535dd30db12fc08"
+}
