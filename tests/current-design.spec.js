@@ -26,6 +26,19 @@ for(const width of [1440,390])for(const id of [0,4,5,2,3])test(`当前设计五�
   await page.locator('.sheet-panel').screenshot({path:path.join(process.env.MAGIC_QA_DIR,`current-passive-${id}-${width}.png`)});
   await page.locator('[data-hero-view="skills"]').click();await expect(page.locator('[data-skill-detail]:visible')).toHaveCount(4);
   if(id===4){await expect(page.locator('.sheet-panel')).toContainText('对沿途敌人额外造成150%攻击伤害');await expect(page.locator('.sheet-panel')).not.toContainText('同一目标每0.6秒');}
+  const skillPanel=page.locator('[data-hero-panel="skills"]'),tabs=page.locator('.hero-detail-tabs'),tabsTop=(await tabs.boundingBox()).y;
+  await skillPanel.evaluate(el=>{el.scrollTop=200;});const skillScroll=await skillPanel.evaluate(el=>el.scrollTop);expect(skillScroll).toBeGreaterThan(0);
+  expect((await tabs.boundingBox()).y).toBeCloseTo(tabsTop,1);
+  for(const view of ['passive','stats','common']){
+   await page.locator(`[data-hero-view="${view}"]`).click();await expect(page.locator('[data-hero-panel]:visible')).toHaveCount(1);
+   await expect(page.locator(`[data-hero-panel="${view}"]`)).toBeVisible();await expect(page.locator('[data-skill-detail]:visible')).toHaveCount(0);
+  }
+  const common=page.locator('[data-hero-panel="common"]');await common.evaluate(el=>{el.scrollTop=100;});const commonScroll=await common.evaluate(el=>el.scrollTop);
+  h.hp-=1;room.sequence++;room.broadcast();await page.waitForFunction(n=>__game.sim.sequence>=n,room.sequence);
+  expect(await common.evaluate(el=>el.scrollTop)).toBe(commonScroll);
+  await page.locator('[data-hero-view="skills"]').click();expect(await skillPanel.evaluate(el=>el.scrollTop)).toBe(skillScroll);
+  await page.locator('[data-hero-view="common"]').click();expect(await common.evaluate(el=>el.scrollTop)).toBe(commonScroll);
+  await page.locator('[data-hero-view="skills"]').click();await skillPanel.evaluate(el=>{el.scrollTop=0;});
   await page.locator('.sheet-panel').screenshot({path:path.join(process.env.MAGIC_QA_DIR,`current-skills-${id}-${width}.png`)});await page.locator('#sheetClose').click();
   for(let i=0;i<4;i++){
    s.interrupt(h);p.cd=[0,0,0,0];h.stunUntil=0;const target=id===5||id===0&&i===2?friend:enemy;
