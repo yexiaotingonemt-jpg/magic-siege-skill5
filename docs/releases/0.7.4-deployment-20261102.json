@@ -1,0 +1,102 @@
+{
+  "version": "0.7.4",
+  "gameVersion": "0.7.0",
+  "protocolVersion": 3,
+  "pr": 30,
+  "sourceCommit": "93fd929abdc73617c07d63e817d1a0e17527e682",
+  "publishedAtBeijing": "2026-11-02 18:02:09",
+  "battle": "preserve",
+  "verified": true,
+  "matchId": "4928e3e5-1cba-4292-8523-dd0aff3bf7f9",
+  "pid": 439074,
+  "changed": 4,
+  "removed": 0,
+  "digest": "7427f8698f70395fb7439bfb17b062fab0dcc2726dd5ec035531339e3570d4ab",
+  "sourceProof": {
+    "repository": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5.git",
+    "ref": "refs/heads/main",
+    "branchHead": "93fd929abdc73617c07d63e817d1a0e17527e682",
+    "commit": "93fd929abdc73617c07d63e817d1a0e17527e682",
+    "previousCommit": "fca9eb0074fb7f5de65efcda3f3c4db106640da9",
+    "verifiedAt": "2026-11-02T10:00:44.734Z"
+  },
+  "previousDir": "/home/colleague/apps/magic-siege-skill5/releases/hot-47083345-3c0f-4391-8491-f7f744e7dde7",
+  "currentDir": "/home/colleague/apps/magic-siege-skill5/releases/hot-e0ab67bc-9935-4f23-8a0a-103948c8f090",
+  "backup": "/home/colleague/apps/magic-siege-skill5/shared/backups/pre-v0.7.4-20261102T095431Z",
+  "accountsPreserved": true,
+  "accountCount": 17,
+  "superAccountCount": 2,
+  "cronPreserved": true,
+  "desktopZipSha256": "ca6d9e323d4d417eec128302e7e967f4dcb365d9a47c8349d2790e73b161693c",
+  "serverZipSha256": "3ffa18a7068d2d7d568653fd7feda396a5240c02bd42ef38faf3569c29d857b6",
+  "checks": {
+    "unitPassed": 848,
+    "unitSkipped": 3,
+    "unitFailed": 0,
+    "browserPassed": 17,
+    "innatePassivePassed": 10,
+    "desktopPassed": 8,
+    "clientFilesVerified": 16,
+    "preservePreflight": true,
+    "production": {
+      "version": {
+        "serverVersion": "0.7.4",
+        "gameVersion": "0.7.0",
+        "clientVersion": "0.7.4",
+        "protocolVersion": 3
+      },
+      "health": {
+        "ok": true,
+        "version": 5,
+        "serverVersion": "0.7.4",
+        "gameVersion": "0.7.0",
+        "clientVersion": "0.7.4",
+        "protocolVersion": 3,
+        "revision": "current-skill-design-20261102-ai-defense-floor",
+        "matchId": "4928e3e5-1cba-4292-8523-dd0aff3bf7f9",
+        "sequence": 197487,
+        "clients": 0
+      },
+      "oldClientRejected": 409,
+      "automaticUpdatesDisabled": 410,
+      "sourceConfigVerified": true,
+      "word": {
+        "name": "贯穿火球",
+        "keys": [
+          "path_damage"
+        ],
+        "values": [
+          [
+            1.5
+          ]
+        ],
+        "max": 1,
+        "rarity": "gold",
+        "description": "火球对沿途敌人额外造成相当于攻击力150%的伤害（上限1档）。"
+      },
+      "desktop": {
+        "title": "魔法王座 v0.7.4",
+        "login": true,
+        "matchId": "4928e3e5-1cba-4292-8523-dd0aff3bf7f9",
+        "sseConnected": true,
+        "sseAdvanced": true,
+        "paused": false,
+        "trait150": true,
+        "independentTabs": null,
+        "pageErrors": []
+      },
+      "repository": {
+        "title": "魔法王座 v0.7.4",
+        "login": true,
+        "matchId": "4928e3e5-1cba-4292-8523-dd0aff3bf7f9",
+        "sseConnected": true,
+        "sseAdvanced": true,
+        "paused": false,
+        "trait150": true,
+        "independentTabs": null,
+        "pageErrors": []
+      }
+    }
+  },
+  "evidence": "E:\\Codex\\Support\\魔法王座\\hero-tabs-release_20261102"
+}
