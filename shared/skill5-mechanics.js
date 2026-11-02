@@ -1,4 +1,5 @@
 import { scaleSkill4, chooseRandomTarget } from "./skill4-mechanics.js";
+import {innateRules,runeShare} from './innate-passives.js';
 import { available, spend } from "./skill-value.js";
 import {
   applyFlameShield,
@@ -731,12 +732,14 @@ export function impactSkill4(b) {
     all.forEach((u, j) =>
       applyBurn(this, h, s, u, "corrosion", 0, s.duration, {
         uncleansable: !!r("C04"),
-        scale: j ? 0.35 : 1,
+        scale: innateRules(this)?runeShare(this,all.length):j ? 0.35 : 1,
+        ...(innateRules(this)?{innateCorrosionPool:Math.min(t.maxHp*s.percentMaxHp,s.value.attack*s.tickCapPower/100)}:{}),
       }),
     );
   }
   if (s.skill === 1 && t) {
-    hit(this, h, s, t);
+    const targets=r('C08')?targetsAt(this,h,at,3,4,t):[t],share=runeShare(this,targets.length);
+    hit(this, h, s, t,s.power,share);
     if (
       this.fields.some(
         (f) =>
@@ -750,7 +753,7 @@ export function impactSkill4(b) {
         t,
         h,
         "attackSpeedDown",
-        s.attackSpeedDown,
+        s.attackSpeedDown*share,
         s.duration,
         s.value,
       );
@@ -759,19 +762,20 @@ export function impactSkill4(b) {
       for (const u of targetsAt(this, h, at, 3, 4, t).filter(
         (u) => u.id !== t.id,
       ))
-        hit(this, h, s, u, s.power, 0.25);
+        hit(this, h, s, u, s.power, innateRules(this)?share:0.25);
   }
   if (s.skill === 2) {
+    const share=runeShare(this,es.length);
     for (const u of es) {
-      hit(this, h, s, u);
+      hit(this, h, s, u,s.power,share);
       if (u.hp > 0 && !u.tower && !(u.immuneUntil > this.time)) {
         const old = { x: u.x, y: u.y },
           len = d(h, u) || 1;
         this.interrupt(u);
         this.moveUnit(
           u,
-          u.x + ((u.x - h.x) / len) * s.knockback,
-          u.y + ((u.y - h.y) / len) * s.knockback,
+          u.x + ((u.x - h.x) / len) * s.knockback*share,
+          u.y + ((u.y - h.y) / len) * s.knockback*share,
         );
         if (r("C15")) hit(this, h, s, u, d(old, u) * 60 * r("C15"));
       }
@@ -786,7 +790,7 @@ export function impactSkill4(b) {
             center,
             3,
             4,
-            s.value.attack * 4 * (1 + s.bonusDamage),
+            s.value.attack * 4 * (1 + s.bonusDamage)*runeShare(this,Math.min(4,this.enemies({...center,side:h.side},3).length)),
             s.value,
           ),
       });
@@ -851,10 +855,10 @@ export function processSkill5Effects() {
           this.damage(
             h,
             u,
-            Math.min(
+            (s.innateCorrosionPool??Math.min(
               u.maxHp * s.percentMaxHp,
               (s.value.attack * s.tickCapPower) / 100,
-            ) *
+            )) *
               (s.scale || 1) *
               (1 + (s.bonusDamage || 0)),
             false,
@@ -957,7 +961,7 @@ export function processSkill5Effects() {
           s,
           u,
           s.power,
-          (j ? 0.35 : 1) *
+          (innateRules(this)?runeShare(this,es.length):j ? 0.35 : 1) *
             (1 + f.index * 0.12 * (s.ranks?.C11 ?? this.rank(h, "C11"))),
         );
         if (u.hp > 0) {
@@ -971,7 +975,7 @@ export function processSkill5Effects() {
               u,
               h,
               "moveSlow",
-              s.slowPerStack * stacks,
+              s.slowPerStack * stacks*runeShare(this,es.length),
               s.slowDuration,
               s.value,
               true,

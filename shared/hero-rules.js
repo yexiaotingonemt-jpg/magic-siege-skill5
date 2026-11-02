@@ -1,4 +1,5 @@
 import {recordEffectiveHeal,recordEffectiveHit} from './assist-rules.js';
+import {innateRules,innateAfterDamage,innateAfterHeal} from './innate-passives.js';
 import {
   triggerTowerGuard,
   towerGuardActive,
@@ -231,13 +232,14 @@ export class HeroRules {
       .filter((f) => f.until > this.time)
       .map((f) => f.ratio);
     if (u.haste?.until > this.time) values.push(u.haste.ratio);
+    const innateHaste=u.hero&&u.classId===4&&innateRules(this)?(u.heat||0)*innateRules(this).heatHaste:0;
     values.push(0.1 * commonRank(this, u, 8));
     return (
       (1 +
         Math.min(
           0.6,
           values.reduce((a, b) => a + b, 0),
-        )) *
+        )+innateHaste) *
       Math.max(0.1, 1 - this.attackSlowRatio(u))
     );
   }
@@ -251,6 +253,7 @@ export class HeroRules {
         Math.max(0, n) *
         (1 + 0.04 * commonRank(this, t, 4)) *
         (1 - down) *
+        (t.hero&&t.classId===4&&innateRules(this)?Math.max(0,1-(t.heat||0)*innateRules(this).heatHealPenalty):1) *
         (t.healingBoostUntil > this.time ? 1 + t.healingBoost : 1),
       actual = Math.min(wanted, t.maxHp - t.hp);
     t.hp += actual;
@@ -284,6 +287,7 @@ export class HeroRules {
     }
     if (!shared)
       this.afterHeal?.(u, t, actual, Math.max(0, wanted - actual), value);
+    if(!shared)innateAfterHeal(this,u,t,actual);
     return actual;
   }
   damage(a, t, n, basic = false, reflected = false, meta = {}) {
@@ -368,6 +372,7 @@ export class HeroRules {
     guards.set("commonFinal", 0.06 * commonRank(this, t, 10));
     if (a?.tower) guards.set("commonTower", 0.1 * commonRank(this, t, 7));
     let remaining = 1;
+    if(t.hero&&t.classId===0&&innateRules(this))guards.set('innateOrc',(1-t.hp/t.maxHp)*innateRules(this).orcMissingReduction);
     for (const ratio of guards.values()) remaining *= 1 - ratio;
     n *= Math.max(0.2, remaining);
     if (towerGuardActive(t, this.time)) n *= 1 - TOWER_GUARD.damageReduction;
@@ -442,6 +447,7 @@ export class HeroRules {
         t.damageStore.total + sum,
       );
     if (sum > 0) this.afterDamage?.(a, t, sum, basic, reflected, meta);
+    if(sum>0)innateAfterDamage(this,credit,t,sum,meta);
     if (t.hp <= 0) {
       t.lethalSkill = {
         ownerId: a?.id,
