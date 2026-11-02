@@ -1,7 +1,7 @@
 // 钉钉当前技能与词条，2026-11-02逐项核对；平衡状态独立记录。
 export const CURRENT_DESIGN = {
   "enabled": true,
-  "revision": "dingtalk-20261102-verified",
+  "revision": "dingtalk-20261102-fire-path-150",
   "status": "待平衡",
   "source": "https://alidocs.dingtalk.com/i/nodes/lyQod3RxJK3vADkBslqKj1EGJkb4Mw9r",
   "skills": {
@@ -123,6 +123,7 @@ export const CURRENT_DESIGN = {
         "isolated": 0,
         "knock": 0,
         "pierce": false,
+        "path_damage": 0,
         "kill_heat": 1
       },
       {
@@ -1118,20 +1119,20 @@ export const CURRENT_DESIGN = {
       "classId": 4,
       "skill": 2,
       "name": "贯穿火球",
-      "description": "火球化为缓慢前进的巨大贯穿火球，以每秒2.5格前进12格，对沿途1.5格内的敌人造成多段伤害；同一敌人每0.6秒最多受伤1次，每段为普通火球伤害的40%（上限1档）。",
+      "description": "火球对沿途敌人额外造成相当于攻击力150%的伤害（上限1档）。",
       "max": 1,
       "rarity": "gold",
       "common": false,
       "keys": [
-        "pierce"
+        "path_damage"
       ],
       "values": [
         [
-          1
+          1.5
         ]
       ],
       "baseline": [
-        false
+        0
       ]
     },
     {
