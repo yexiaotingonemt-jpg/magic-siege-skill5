@@ -138,7 +138,7 @@ export function currentContributionParts(config,h) {
   ].map(([key,value,coefficient]) => ({key,value,coefficient,points:value*coefficient}));
 }
 const f=n=>String(Number(Number(n).toPrecision(3))), pct=n=>f(n*100)+'%';
-const units={power:'伤害／攻击力',heal:'治疗／攻击力',per_hit:'每次攻击附伤／攻击力',duration:'持续秒',targets:'目标数',range:'范围格',shots:'炮数',knock:'击退格',gap:'间隔秒',
+const units={power:'伤害／攻击力',path_damage:'沿途伤害／攻击力',heal:'治疗／攻击力',per_hit:'每次攻击附伤／攻击力',duration:'持续秒',targets:'目标数',range:'范围格',shots:'炮数',knock:'击退格',gap:'间隔秒',
   vuln:'受到伤害提高',reduction:'减伤比例',haste:'攻击速度',reflect:'有效承伤反弹',blast:'范围伤害／攻击力',taunt:'嘲讽秒',start_shield:'初始护盾／最大生命',share:'共享比例',burst:'蓄伤爆发比例',
   attack_down:'降低攻击力',bounces:'弹射人数',explode:'爆炸伤害／攻击力',heat_chance:'获得炙热概率',isolated:'单目标伤害提高',refund:'击杀返还炙热',execute:'斩杀生命阈值',
   damage_targets:'转伤目标数',twin:'额外治疗比例',attack_per_cleanse:'每个净化增攻',healing_boost:'受到治疗提高',over_shield:'过量转盾比例',counter:'治疗转伤比例',
@@ -197,7 +197,7 @@ export function describeCurrentSkill(s,rules={}) {
   if(s.classId===4){
     if(s.skill===0){add(s.attack_down,`降低目标攻击${pct(s.attack_down)}，${D}秒。`);add(s.bounces,`额外弹射${s.bounces}人，各受主伤${pct(s.secondary)}。`);add(s.explode,`击杀时爆炸造成${pct(s.explode)}攻击伤害。`);}
     if(s.skill===1){add(s.vuln,`标记目标受到伤害提高${pct(s.vuln)}。`);add(s.explode,`标记目标阵亡时爆炸造成${pct(s.explode)}攻击伤害。`);}
-    if(s.skill===2){add(s.isolated,`只命中1人时伤害提高${pct(s.isolated)}。`);add(s.knock,`命中击退${s.knock}格。`);}
+    if(s.skill===2){add(s.isolated,`只命中1人时伤害提高${pct(s.isolated)}。`);add(s.knock,`命中击退${s.knock}格。`);add(s.path_damage,`对沿途敌人额外造成${pct(s.path_damage)}攻击伤害，每名敌人一次。`);}
     if(s.skill===3){add(T>1,`额外目标承受主伤${pct(s.secondary)}。`);add(s.refund,`每击杀1人获得${s.refund}层炙热。`);add(s.execute,`结算后斩杀生命低于${pct(s.execute)}的非建筑敌人。`);}
   }
   if(s.classId===5){
@@ -218,6 +218,5 @@ export function describeCurrentSkill(s,rules={}) {
     if(s.skill===2)add(s.drag,'沿途命中的敌人拖拽至终点。');
     if(s.skill===3){add(s.shield,`获得最大生命${pct(s.shield)}护盾。`);add(s.lifesteal,`技能吸血${pct(s.lifesteal)}。`);add(s.summon,`击杀召唤${s.summon_duration}秒护卫，最多${s.summon}名。`);}
   }
-  const main=s.classId===4&&s.skill===2&&s.pierce?`巨大贯穿火球以每秒${rules.pierceSpeed}格前进${rules.pierceDistance}格，影响路径${rules.pierceRadius}格内敌人；每段${pct(s.power/100*rules.piercePower)}攻击伤害，同一目标每${rules.pierceGap}秒最多受伤1次。每击杀1人获得${s.kill_heat}层炙热。`:base;
-  return main+extra.join('');
+  return base+extra.join('');
 }

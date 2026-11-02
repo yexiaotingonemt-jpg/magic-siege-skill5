@@ -108,16 +108,22 @@ export function resolveCurrentSkill(h,i,s,locked,ids=[],extra={}) {
       this.debuff(t,h,'vulnerable',s.vuln,s.duration,s.value);
     }
     if (i===2) {
-      if (s.pierce) {
-        const len=distance(h,at)||1,r=rules(this),duration=r.pierceDistance/r.pierceSpeed;
-        const end={x:h.x+(at.x-h.x)/len*r.pierceDistance,y:h.y+(at.y-h.y)/len*r.pierceDistance};
-        const count=this.enemies(h).filter(u=>segmentDistance(u,h,end)<=r.pierceRadius).length;
-        this.fields.push({kind:'currentPierce',owner:h,s,primaryCount:count,x:h.x,y:h.y,dx:(at.x-h.x)/len,dy:(at.y-h.y)/len,
-          travel:0,last:this.time,next:{},until:this.time+duration});
-      } else for (const u of targets) {
+      // Lock every original fireball route before knockback moves its endpoint.
+      // A shared path victim receives the extra hit once across this entire cast.
+      const origin={x:h.x,y:h.y},ends=targets.map(u=>({x:u.x,y:u.y}));
+      const pathTargets=s.path_damage>0?this.enemies(h).filter(u=>ends.some(end=>segmentDistance(u,origin,end)<=rules(this).pierceRadius)):[];
+      const hitIds=new Set([...targets,...pathTargets].map(u=>u.id)),isolated=hitIds.size===1?1+s.isolated:1;
+      const baseIds=new Set(targets.map(u=>u.id));
+      for (const u of targets) {
         const before=u.hp;
-        hurt(this,h,s,u,s.power/100,targets.length===1?1+s.isolated:1);
+        hurt(this,h,s,u,s.power/100,isolated);
         knock(this,h,u,s.knock);
+        if (before>0&&u.hp<=0) this.addHeat(h,s.kill_heat);
+      }
+      for (const u of pathTargets) {
+        const before=u.hp;
+        hurt(this,h,s,u,s.path_damage,isolated);
+        if (!baseIds.has(u.id)) knock(this,h,u,s.knock);
         if (before>0&&u.hp<=0) this.addHeat(h,s.kill_heat);
       }
     }
@@ -240,6 +246,7 @@ export function processCurrentEffects() {
     if (f.kind==='link') {const u=this.get(f.host);if (!u||h.hp<=0||distance(h,u)>f.breakRange) f.until=this.time;continue;}
     if (!f.kind.startsWith('current')) continue;
     if (h.hp<=0 || (f.kind==='currentDrain'&&s.channel || ['currentGroupHeal','currentBarrage'].includes(f.kind)) && h.channelUntil<this.time-1e-7) {f.until=this.time;continue;}
+    // Finish pre-update projectiles; new fireball casts never create this field.
     if (f.kind==='currentPierce') {
       const r=rules(this),from={x:f.x,y:f.y},step=Math.min(r.pierceDistance-f.travel,(this.time-f.last)*r.pierceSpeed);
       f.last=this.time;f.x+=f.dx*step;f.y+=f.dy*step;f.travel+=step;

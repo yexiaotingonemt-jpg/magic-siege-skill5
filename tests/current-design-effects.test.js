@@ -46,9 +46,10 @@ test('火球分别命中施法者附近敌人，不要求挤在主目标周围�
  const before=[enemy.hp,b.hp,c.hp,far.hp],A=s.attackPower(h);cast(s,p,2,enemy);
  for(const [i,u]of [enemy,b,c].entries())near(before[i]-u.hp,A*2.88);near(far.hp,before[3]);
 });
-test('贯穿火球每段40%，首击不额外全额伤害，不命中路径以外单位，0.6秒防重复',()=>{
- const {s,p,h,enemy,make}=arena(4);affix(s,p,28);enemy.y=2;const outside=make(3,2,2).h,hp=enemy.hp,op=outside.hp,A=s.attackPower(h);
- cast(s,p,2,enemy);advance(s,.25);near(hp-enemy.hp,A*2.88*.4);near(outside.hp,op);const last=enemy.hp;advance(s,.3);near(enemy.hp,last);advance(s,.4);assert.ok(enemy.hp<last);
+test('沿途火球保留原伤害并追加一次150%攻击伤害，不产生持续伤害',()=>{
+ const {s,p,h,enemy}=arena(4);affix(s,p,28);const hp=enemy.hp,A=s.attackPower(h);
+ cast(s,p,2,enemy);near(hp-enemy.hp,A*(2.88+1.5));assert.ok(!s.fields.some(f=>f.kind==='currentPierce'));
+ const last=enemy.hp;advance(s,5);near(enemy.hp,last);
 });
 test('天火按层增伤而非加目标，吟唱锁定初始炙热，每击杀返六层',()=>{
  const {s,p,h,enemy,make}=arena(4);h.heat=10;const b=make(3,1,3).h,bhp=b.hp,hp=enemy.hp,A=s.attackPower(h);cast(s,p,3,enemy);
