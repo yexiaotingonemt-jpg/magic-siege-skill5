@@ -5,11 +5,13 @@ import {tmpdir} from 'node:os';
 import {createGameServer} from '../server/index.mjs';
 import {createLocalClient} from '../client/launcher.mjs';
 import {names} from '../shared/config.js';
+import {legacyLiveConfig} from '../shared/config.js';
+import {Room} from '../server/room.mjs';
 
 for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`技能单项说明、升级状态、属性和通用效果 ${viewport.width}`,async({page})=>{
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  page.on('console',message=>{if(message.type()==='error'&&!(message.location().url.endsWith('/api/me')&&message.text().includes('401')))errors.push(message.text());});
- const game=createGameServer({dataDir:mkdtempSync(path.join(process.env.MAGIC_QA_DIR||tmpdir(),'inspection-'))});
+ const game=createGameServer({dataDir:mkdtempSync(path.join(process.env.MAGIC_QA_DIR||tmpdir(),'inspection-')),room:new Room(legacyLiveConfig())});
  game.room.paused=true;await new Promise(r=>game.server.listen(0,'127.0.0.1',r));
  const client=createLocalClient({serverUrl:`http://127.0.0.1:${game.server.address().port}`,...(process.env.MAGIC_INSPECTION_DIST?{distDir:process.env.MAGIC_INSPECTION_DIST}:{})});
  await new Promise(r=>client.server.listen(0,'127.0.0.1',r));
@@ -62,6 +64,25 @@ for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`�
   await page.keyboard.press('ArrowLeft');await expect(page.locator('[data-hero-view="stats"]')).toBeFocused();
   await page.keyboard.press('Escape');await page.locator('[data-hero-open="common"]').click();await expect(page.locator('#sheetTitle')).toHaveText('通用效果');
   await page.locator('#sheetClose').click();await page.locator('[data-nav="hero"]').click();await expect(body.locator('[data-skill-detail]:visible')).toHaveCount(4);
+  // 四个分页独立显示、独立滚动；实时数据更新后仍保留各自位置。
+  const tabs=page.locator('.hero-detail-tabs'),skills=body.locator('[data-hero-panel="skills"]');
+  const tabsTop=(await tabs.boundingBox()).y;
+  await skills.evaluate(panel=>{panel.scrollTop=240;});const skillsScroll=await skills.evaluate(panel=>panel.scrollTop);expect(skillsScroll).toBeGreaterThan(0);
+  expect((await tabs.boundingBox()).y).toBeCloseTo(tabsTop,1);expect(await page.locator('#sheetScroll').evaluate(el=>el.scrollTop)).toBe(0);
+  for(const view of ['passive','stats','common']){
+   await page.locator(`[data-hero-view="${view}"]`).click();
+   await expect(body.locator('[data-hero-panel]:visible')).toHaveCount(1);
+   await expect(body.locator(`[data-hero-panel="${view}"]`)).toBeVisible();
+   await expect(body.locator(`[data-ability-view]:visible`)).toHaveCount(1);
+   expect(await body.locator(`[data-hero-panel="${view}"]`).evaluate(panel=>panel.scrollTop)).toBe(0);
+  }
+  const common=body.locator('[data-hero-panel="common"]');await common.evaluate(panel=>{panel.scrollTop=120;});
+  const commonScroll=await common.evaluate(panel=>panel.scrollTop);expect(commonScroll).toBeGreaterThan(0);
+  p.progress[4].traits.FG02=1;sync();await expect(common.locator('[data-upgrade-id="FG02"]')).toContainText('已获得 1/10');
+  expect(await common.evaluate(panel=>panel.scrollTop)).toBe(commonScroll);
+  await page.locator('[data-hero-view="skills"]').click();expect(await skills.evaluate(panel=>panel.scrollTop)).toBe(skillsScroll);
+  await page.locator('[data-hero-view="common"]').click();expect(await common.evaluate(panel=>panel.scrollTop)).toBe(commonScroll);
+  await page.locator('.sheet-panel').screenshot({path:path.join(out,`independent-tabs-${viewport.width}.png`)});
   expect(p.progress[4].traits.F01).toBe(2);expect(s.metrics.casts).toBe(0);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
   await expect(page.locator('vite-error-overlay')).toHaveCount(0);expect(errors).toEqual([]);

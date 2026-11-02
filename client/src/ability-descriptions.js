@@ -203,5 +203,7 @@ export function abilityGuideHTML(g) {
     g.stats.map(([name, value]) => '<div><dt>' + name + '</dt><dd>' + value + '</dd></div>').join('') + '</dl></article>';
   const common = '<article class="ability-entry" data-ability-view="common" hidden><h3>通用效果</h3><small class="ability-meta">白色已获得 · 灰色未激活</small><h4>职业通用</h4>' +
     upgradeEffectsHTML(g.generalEffects.filter(t => !t.common)) + '<h4>通用强化</h4>' + upgradeEffectsHTML(g.generalEffects.filter(t => t.common)) + '</article>';
-  return skills + passive + stats + common;
+  return [['skills', skills], ['passive', passive], ['stats', stats], ['common', common]].map(([view, content]) =>
+    '<section id="hero-panel-' + view + '" class="hero-detail-panel" data-hero-panel="' + view + '" role="tabpanel" aria-labelledby="hero-tab-' + view + '" tabindex="0"' + (view === 'skills' ? '' : ' hidden') + '>' + content + '</section>'
+  ).join('');
 }
