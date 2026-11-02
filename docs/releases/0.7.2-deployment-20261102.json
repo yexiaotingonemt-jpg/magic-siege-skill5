@@ -1,0 +1,73 @@
+{
+  "version": "0.7.2",
+  "gameVersion": "0.7.0",
+  "protocolVersion": 3,
+  "pr": 27,
+  "mergeCommit": "a045b17b48257bca23daa4f585042d22d46b578d",
+  "effect": "火球对沿途敌人额外造成相当于攻击力150%的伤害（上限1档）。",
+  "publishedAt": "2026-11-02T08:17:11.094Z",
+  "battle": "preserve",
+  "matchId": "032bcd63-6fcd-45ec-bfed-eab538c9f181",
+  "pid": 439074,
+  "changed": 7,
+  "removed": 0,
+  "verified": true,
+  "sourceProof": {
+    "repository": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5.git",
+    "ref": "refs/heads/main",
+    "branchHead": "a045b17b48257bca23daa4f585042d22d46b578d",
+    "commit": "a045b17b48257bca23daa4f585042d22d46b578d",
+    "previousCommit": "dd0fb860a2d17e43d822c21e4c4a1409e0a1d332",
+    "verifiedAt": "2026-11-02T08:17:11.051Z"
+  },
+  "previousDir": "/home/colleague/apps/magic-siege-skill5/releases/v0.7.0-dd0fb860-20261102",
+  "currentDir": "/home/colleague/apps/magic-siege-skill5/releases/hot-402e2cb4-b558-4ae0-9d48-ae545d810f00",
+  "backup": "/home/colleague/apps/magic-siege-skill5/shared/backups/pre-v0.7.2-20261102T080113Z",
+  "accounts": {
+    "accounts.json": {
+      "sha256": "529f2ac28ebc68ae835cf5167e32c9e5673fb4def32be2c8595548f651d48601",
+      "count": 17
+    },
+    "super-accounts.json": {
+      "sha256": "0bd4d5e4ac1c70f9dd3bb2daae26ed30186238355e5f0979951a6b7d4bb1af11",
+      "count": 2
+    }
+  },
+  "desktopZipSha256": "afaf23ec8e9e737708432fd8360a6f52e825332e5d63717610d95b8dfa19b08b",
+  "serverZipSha256": "d5ddbae9780b643c3cda31868497e0e352c8694853fe9fa787333e4adc315ae0",
+  "digest": "a569f6239c35645e33c076339d9d476e48e99ab5b74ce80fb1a7996efcb2ab7c",
+  "checks": {
+    "unitPassed": 822,
+    "unitSkipped": 3,
+    "unitFailed": 0,
+    "browserPassed": 2,
+    "versionsAligned": true,
+    "clientFilesVerified": 16,
+    "preservePreflight": true,
+    "oldClientRejected": 409,
+    "automaticUpdates": 410,
+    "desktop": {
+      "title": "魔法王座 v0.7.2",
+      "login": true,
+      "matchId": "032bcd63-6fcd-45ec-bfed-eab538c9f181",
+      "sseConnected": true,
+      "sseAdvanced": true,
+      "paused": false,
+      "trait150": true,
+      "pageErrors": []
+    },
+    "repository": {
+      "title": "魔法王座 v0.7.2",
+      "login": true,
+      "matchId": "032bcd63-6fcd-45ec-bfed-eab538c9f181",
+      "sseConnected": true,
+      "sseAdvanced": true,
+      "paused": false,
+      "trait150": true,
+      "pageErrors": []
+    },
+    "cronPreserved": true
+  },
+  "balance": "旧规则硬门禁通过；既有策略诊断与新版全局平衡待验收。本次按用户指定150%实现并发布，不宣称全局平衡通过。",
+  "evidence": "E:\\Codex\\Support\\魔法王座\\fire-path-release_20261102"
+}
