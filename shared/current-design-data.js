@@ -1,7 +1,7 @@
 // 钉钉当前技能与词条，2026-11-02逐项核对；平衡状态独立记录。
 export const CURRENT_DESIGN = {
   "enabled": true,
-  "revision": "dingtalk-20261102-verified",
+  "revision": "dingtalk-20261102-fire-path-150",
   "status": "待平衡",
   "source": "https://alidocs.dingtalk.com/i/nodes/lyQod3RxJK3vADkBslqKj1EGJkb4Mw9r",
   "skills": {
