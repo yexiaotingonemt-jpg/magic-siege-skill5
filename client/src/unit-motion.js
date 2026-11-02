@@ -71,14 +71,18 @@ export function deformUnitVertex(x,y,pose){
 
 export function createUnitMotionModel(){
  const tracks=new Map();let match,lastTime=-Infinity;const report=[];
- return {report,begin(sim){if(match!==(sim.matchId??sim)||sim.time<lastTime-.5)tracks.clear();match=sim.matchId??sim;lastTime=sim.time;report.length=0;},pose(sim,u){
+ return {report,begin(sim){if(match!==(sim.matchId??sim)||sim.time<lastTime-.5)tracks.clear();match=sim.matchId??sim;lastTime=sim.time;report.length=0;},pose(sim,u,point){
   const stamp=sim._serverTime??sim.time,old=tracks.get(u.id),delta=old?Math.hypot(u.x-old.x,u.y-old.y):0;
   let changedAt=old?.changedAt??-Infinity;
   if(old&&delta>1e-5&&delta<=Math.max(1.5,(u.speed||0)*Math.max(.05,stamp-old.stamp)*2.5))changedAt=stamp;
   if(!old&&Number.isFinite(u._renderFromX)&&Math.hypot(u.x-u._renderFromX,u.y-u._renderFromY)>1e-5)changedAt=stamp;
-  tracks.set(u.id,{x:u.x,y:u.y,stamp,changedAt});
+  const pixelDelta=point&&old?.point?Math.hypot(point.x-old.point.x,point.y-old.point.y):0;
+  let renderChangedAt=old?.renderChangedAt??changedAt;
+  if(pixelDelta>1e-4&&pixelDelta<27)renderChangedAt=sim.time;
+  tracks.set(u.id,{x:u.x,y:u.y,stamp,changedAt,renderChangedAt,point:point?{x:point.x,y:point.y}:null});
   const target=sim.get(u.targetId),targetInRange=inAttackRange(u,target);
-  const pose=unitMotionPose(u,sim.time,{moving:!targetInRange&&(u.speed||0)>0&&sim.time-changedAt<=.32,targetInRange,side:sim.player.side});
+  const moving=point&&old?.point?sim.time-renderChangedAt<=.32:sim.time-changedAt<=.32;
+  const pose=unitMotionPose(u,sim.time,{moving:!targetInRange&&(u.speed||0)>0&&moving,targetInRange,side:sim.player.side});
   return pose;
  },end(live){for(const id of tracks.keys())if(!live.has(id))tracks.delete(id);},get tracked(){return tracks.size;}};
 }
