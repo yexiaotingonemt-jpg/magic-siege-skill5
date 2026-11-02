@@ -10,6 +10,7 @@ import {createLocalClient} from '../client/launcher.mjs';
 import {acceptsGzip,createEventStream} from '../server/event-stream.mjs';
 import {openSse,waitFor} from '../scripts/sse-probe.mjs';
 import {CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
+import {Room} from '../server/room.mjs';
 const listen=async server=>{await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));return `http://127.0.0.1:${server.address().port}`;};
 
 async function setup(t,options={}){
@@ -79,4 +80,17 @@ test('compressed transport exposes encoder/socket backpressure and closes on soc
  response.destroy();await closed;assert.equal(transport.destroyed,true);
  const plain=new EventEmitter();plain.writeHead=()=>{};
  assert.equal(createEventStream({headers:{}},plain),plain);
+});
+test('暂停命令遇到背压后仍在队列恢复时发送最新快照，不等待下一次战斗tick',()=>{
+ const room=new Room(),packets=[],res=new EventEmitter();res.destroyed=false;res.writableNeedDrain=false;res.write=value=>{packets.push(value);return true;};
+ const account={id:'backpressure',name:'同步检查',side:0,isHost:true},client=room.connect(account,res),count=packets.length;
+ res.writableNeedDrain=true;assert.equal(room.command(account,{type:'pause',args:{paused:true},id:'pause'}).ok,true);assert.equal(client.pendingSnapshot,true);assert.equal(packets.length,count);
+ res.writableNeedDrain=false;res.emit('drain');const latest=JSON.parse(packets.at(-1).slice(6));assert.equal(latest.paused,true);assert.equal(latest.sequence,room.sequence);assert.equal(client.pendingSnapshot,false);
+ const sent=packets.length;res.emit('drain');assert.equal(packets.length,sent);res.emit('close');
+});
+test('压缩器与底层socket均传递drain，完整大配置不会丢失恢复通知',async()=>{
+ class Response extends Writable{writeHead(){}_write(chunk,encoding,callback){setImmediate(callback);}}
+ const response=new Response({highWaterMark:1}),transport=createEventStream({headers:{'accept-encoding':'gzip'}},response);let drained=0;
+ transport.on('drain',()=>drained++);assert.equal(transport.write('data: '+JSON.stringify({value:'x'.repeat(65536)})+'\n\n'),false);
+ await waitFor(()=>drained>0&&!transport.writableNeedDrain);const finished=new Promise(resolve=>response.once('finish',resolve));transport.end();await finished;assert.ok(drained>0);
 });

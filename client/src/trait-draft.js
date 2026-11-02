@@ -1,3 +1,4 @@
+import {isCurrentDesign,currentTraits} from '../../shared/current-design.js';
 import { RARITIES, TRAIT_BY_ID, traitRank } from "../../shared/traits.js";
 import { names } from "../../shared/config.js";
 import { HERO_ART, ART_ROOT, heroPortrait, skillArtIndex } from "./art-catalog.js";
@@ -7,6 +8,7 @@ export function createTraitDraft(getSim, send) {
   const panel = document.querySelector("#traitDraft"),
     badge = document.querySelector("#traitPending"),
     count = badge.querySelector("[data-trait-count]");
+  const traitById=id=>isCurrentDesign(getSim()?.config)?currentTraits(getSim().config).find(t=>t.id===id):TRAIT_BY_ID[id];
   let key = "",
     openedClass = null,
     busy = false,
@@ -96,7 +98,7 @@ export function createTraitDraft(getSim, send) {
   }
 
   function renderDetails(sim) {
-    const trait = TRAIT_BY_ID[detailId],
+    const trait = traitById(detailId),
       guide = describeAbilities(sim),
       skill = trait.skill == null ? null : guide.skills[trait.skill],
       owned = guide.owned.filter((t) => t.skill === trait.skill),
@@ -170,12 +172,12 @@ export function createTraitDraft(getSim, send) {
         // Candidates are shuffled when drawn. A stable sort keeps that random
         // order within each skill, including after reopening or reconnecting.
         [...choice.options]
-          .sort((a, b) => (TRAIT_BY_ID[a].skill ?? 4) - (TRAIT_BY_ID[b].skill ?? 4))
+          .sort((a, b) => (traitById(a).skill ?? 4) - (traitById(b).skill ?? 4))
           .map((id, i) => {
-            const t = TRAIT_BY_ID[id],
+            const t = traitById(id),
               rank = traitRank(p, id),
               art = HERO_ART[p.classId],
-              skillName = t.skill == null ? "通用强化" : "技能" + (t.skill + 1) + "：" + names[p.classId][t.skill],
+              skillName = t.skill == null ? "通用强化" : "技能" + (t.skill + 1) + "：" + sim.configSkillName(p.classId,t.skill),
               icon = t.skill == null
                 ? "background-image:url('" + heroPortrait(p.classId) + "');background-size:cover;background-position:center 18%"
                 : "background-image:url('" + ART_ROOT + "/skill-icons.webp');background-size:400% 500%;background-position:" + (skillArtIndex(p.classId,t.skill) / 3) * 100 + "% " + (art.row / 4) * 100 + "%";
@@ -183,7 +185,7 @@ export function createTraitDraft(getSim, send) {
               '<article class="trait-card"><div class="trait-card-heading"><span class="trait-category">' +
               (t.skill == null
                 ? '<span class="trait-skill-number">职业强化</span><span class="trait-skill-name">通用强化</span>'
-                : '<span class="trait-skill-number">技能' + (t.skill + 1) + '：</span><span class="trait-skill-name">' + names[p.classId][t.skill] + '</span>') +
+                : '<span class="trait-skill-number">技能' + (t.skill + 1) + '：</span><span class="trait-skill-name">' + sim.configSkillName(p.classId,t.skill) + '</span>') +
               '</span><button type="button" class="trait-info" data-trait-info="' +
               id +
               '" aria-label="查看' + skillName + '的效果和已选强化">!</button></div><button type="button" class="trait-select" data-trait="' +

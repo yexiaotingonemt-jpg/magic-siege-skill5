@@ -1,6 +1,6 @@
 // 独立职业被动：正式旧技能与新版开发稿分开启用，不切换主动技能、成长或KDA规则。
 export const INNATE_DEFAULTS={enabled:0,scoreScales:{"0":{"effect":1.749869,"taken":0.65},"2":{"effect":1.316463,"taken":1.0},"3":{"effect":0.894894,"taken":1.0},"4":{"effect":1.185851,"taken":1.0},"5":{"effect":0.645776,"taken":1.0}},orcMissingReduction:.25,heatHaste:.05,heatHealPenalty:.02,elfDamageHeal:.5,elfHealDamage:.5,elfRadius:4,lordMinionKills:3,lordKillHeal:.02,shareTotals:[0,1,.9,.8,.7,.6,.5]};
-export const innateRules=sim=>sim.config.innate?.enabled===1?sim.config.innate:null;
+export const innateRules=sim=>!sim.config.design?.enabled&&sim.config.innate?.enabled===1?sim.config.innate:null;
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 export function runeShare(sim,count){const r=innateRules(sim);return r&&count>0?r.shareTotals[Math.min(6,count)]/count:1;}
 export function innateAfterDamage(sim,a,t,sum,meta){

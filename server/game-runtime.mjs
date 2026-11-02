@@ -5,6 +5,7 @@ import {Room} from './room.mjs';
 import {Simulation} from '../shared/simulation.js';
 import {DEFAULT_NPC_POLICY} from '../shared/npc-balance.js';
 import {liveConfig,clone,validateConfig} from '../shared/config.js';
+import {isCurrentDesign} from '../shared/current-design.js';
 const defaults=liveConfig();
 import {createEventStream} from './event-stream.mjs';
 import {SERVER_VERSION,CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION,RULESET_REVISION,UPDATE_REQUIRED_CODE} from '../shared/protocol.js';
@@ -49,7 +50,7 @@ export function createGameRuntime({dataDir=process.env.KC_DATA_DIR||path.join(ba
 }
 
 // Increment when object layout or outstanding skill callbacks cannot be retained.
-export const HOT_STATE_SCHEMA=2;
+export const HOT_STATE_SCHEMA=3;
 export const HOT_ACCOUNT_SCHEMA=1;
 const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 function applyOverrides(prior,current,next){
@@ -74,6 +75,7 @@ export function prepareGameRuntime(options,previous,{restartBattle=false}={}){
  if(previous.metadata.accountSchema!==HOT_ACCOUNT_SCHEMA)throw Error('账号结构不兼容，需要常规部署');
  if(!restartBattle&&previous.metadata.stateSchema!==HOT_STATE_SCHEMA)throw Error('战局状态结构不兼容，请明确选择重开战局');
  if(!restartBattle&&(previous.metadata.gameVersion!==GAME_VERSION||previous.metadata.protocolVersion!==PROTOCOL_VERSION))throw Error('战斗或协议不兼容，请明确选择重开战局');
+ if(!restartBattle&&isCurrentDesign(previous.room.sim.config)!==isCurrentDesign(defaults))throw Error('技能规则改变，请明确选择重开战局');
  const nextConfig=validateConfig(restartBattle?clone(defaults):applyOverrides(previous.defaults,previous.room.sim.config,defaults));
  const probe=new Room(nextConfig);probe.sim.tick(.05);JSON.stringify(probe.snapshot());
  const room=restartBattle?new Room(nextConfig):previous.room;

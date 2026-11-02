@@ -31,7 +31,8 @@ async function writeManifest(directory){
 async function change(directory,name,replace){const file=path.join(directory,name);await writeFile(file,replace(await readFile(file,'utf8')));}
 async function fixture(t){
  const root=await mkdtemp(path.join(tmpdir(),'magic-hot-update-')),first=path.join(root,'releases/first'),next=path.join(root,'releases/next');
- t.after(()=>rm(root,{recursive:true,force:true}));await mkdir(first,{recursive:true});await git(root,['init','--bare',path.join(root,'github.git')]);
+ assert.equal(path.dirname(root),tmpdir());assert.match(path.basename(root),/^magic-hot-update-/);
+ t.after(()=>rm(root,{recursive:true,force:true,maxRetries:10,retryDelay:100}));await mkdir(first,{recursive:true});await git(root,['init','--bare',path.join(root,'github.git')]);
  const sourceVerifier=new GitHubSourceVerifier({cacheDir:path.join(root,'git-cache'),transport:path.join(root,'github.git')});
  for(const name of ['server','shared','deploy','package.json','package-lock.json','README.md'])await cp(path.join(source,name),path.join(first,name),{recursive:true});
  const version={serverVersion:SERVER_VERSION,clientVersion:SERVER_VERSION,gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION};
@@ -90,7 +91,7 @@ test('保留战局也断开旧 SSE 以要求拉取新版，重开模式仍保留
  const result=await f.game.hotUpdate.update({releaseDir:third,baseDigest:f.manifest.digest,battle:'restart'});
  await closedPromise;
  assert.notEqual(result.matchId,oldRoom.matchId);assert.equal(closed,true);assert.equal(f.game.room.sim.time,0);assert.equal(f.game.room.stageNumber,1);
- assert.equal((await f.call('/api/me')).status,200);const fresh=f.game.room.player(f.account);assert.equal(fresh.level,1);assert.equal(fresh.score,0);assert.equal(fresh.heroId,null);
+ assert.equal((await f.call('/api/me')).status,200);const fresh=f.game.room.player(f.account);assert.equal(fresh.level,0);assert.equal(fresh.score,0);assert.equal(fresh.heroId,null);
 });
 test('战斗兼容变化不能静默清场，明确重开才允许激活',async t=>{
  const f=await fixture(t),id=f.game.room.matchId;

@@ -4,7 +4,7 @@ import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {createBrowserGame} from '../scripts/browser-game-server.mjs';
 import {Room} from '../server/room.mjs';
-import {liveConfig,contractType} from '../shared/config.js';
+import {legacyLiveConfig as liveConfig,contractType} from '../shared/config.js';
 
 for(const width of [1440,390])for(const id of [0,4,5,2,3])test(`职业自带被动独立入口 ${id} / ${width}`,async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));

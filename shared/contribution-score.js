@@ -14,6 +14,7 @@ export const SCORE_COEFFICIENTS = [
   {a:.021456,b:.01006880,c:.020000,d:85.824,e:200,f:100},  // Disabled assassin: provisional mage coefficients
 ];
 export function scoreCoefficients(classId,config){
+  if(config?.design?.enabled){const c=config.design.scoreCoefficients[classId],r=config.design.rules;return {...c,d:c.a*MINION_REFERENCE_HP,e:r.heroKillPoints,f:r.heroAssistPoints};}
   const base=SCORE_COEFFICIENTS[classId],scale=config?.innate?.enabled===1?config.innate.scoreScales?.[classId]:null;
   if(!scale)return base;
   return {...base,a:base.a*scale.effect,b:base.b*scale.taken,c:base.c*scale.effect,d:base.d*scale.effect};

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Simulation} from '../shared/simulation.js';
-import {defaults,liveConfig,contractType} from '../shared/config.js';
+import {defaults,legacyLiveConfig as liveConfig,contractType} from '../shared/config.js';
 import {describeAbilities,abilityGuideHTML} from '../client/src/ability-descriptions.js';
 import {createGameRuntime,prepareGameRuntime} from '../server/game-runtime.mjs';
 import {Room} from '../server/room.mjs';
@@ -55,16 +55,16 @@ test('战车多目标真实命中使用总池均分，单目标保留全额',()=
  for(const u of targets)assert.ok(Math.abs((1e6-u.hp)-expected)<1e-7);
  assert.equal(runeShare(s,1),1);assert.equal(runeShare(s,2),.45);assert.equal(runeShare(s,6),.5/6);
 });
-test('旧战局可保留热更，英雄、积分和闭包不重置，新增被动立即可用',()=>{
+test('旧战局切换当前技能须显式重开，不得沿用旧成长、积分或技能闭包',()=>{
  const room=new Room(defaults),previous=createGameRuntime({room,dataDir:process.env.TEMP+'/innate-migration-qa'}),p=room.player({id:'migration',name:'热更',side:0});
  assert.ok(room.sim.contract(p,room.sim.spawn(0,'melee',0,1).id));const h=room.sim.hero(p);room.sim.stat(h,'heroDamage',2500);
  const earned=p.totalPoints,match=room.matchId,config=structuredClone(room.sim.config);delete config.innate;
  room.sim.config=config;room.config=structuredClone(config);previous.defaults=structuredClone(config);
  const job={at:100,run:()=>p.stamina++};room.sim.jobs.push(job);
- const update=prepareGameRuntime({dataDir:process.env.TEMP+'/innate-migration-qa'},previous);update.commit();
- assert.equal(room.matchId,match);assert.equal(room.sim.hero(p),h);assert.equal(p.totalPoints,earned);assert.equal(room.sim.jobs[0],job);assert.equal(room.sim.config.innate.enabled,1);
- h.hp=h.maxHp/2;h.armor=0;const hp=h.hp;room.sim.damage(null,h,100);assert.ok(Math.abs(hp-h.hp-87.5)<1e-8);
- room.sim.stat(h,'heroDamage',100);room.sim.settle(h,'新旧账本');const points=room.sim.ratingParts(h).reduce((sum,r)=>sum+r.points,0);assert.ok(Math.abs(points-p.totalPoints)<1e-7);
+ assert.throws(()=>prepareGameRuntime({dataDir:process.env.TEMP+'/innate-migration-qa'},previous),/明确选择重开战局/);
+ assert.equal(room.matchId,match);assert.equal(room.sim.hero(p),h);assert.equal(p.totalPoints,earned);assert.equal(room.sim.jobs[0],job);
+ const update=prepareGameRuntime({dataDir:process.env.TEMP+'/innate-migration-qa'},previous,{restartBattle:true});update.commit();
+ assert.notEqual(update.runtime.room.matchId,match);assert.equal(update.runtime.room.config.design.enabled,true);assert.equal(update.runtime.accounts,previous.accounts);assert.equal(update.runtime.room.sim.hero(),undefined);
 });
 test('被动计分在结算后仍按同配置补记，保留战报与累计账本一致',()=>{
  const {s,p,h}=arena(0);s.stat(h,'heroDamage',1000);s.settle(h,'结算');h.hp=0;p.heroId=null;p.classId=4;s.stat(h,'heroDamage',500);

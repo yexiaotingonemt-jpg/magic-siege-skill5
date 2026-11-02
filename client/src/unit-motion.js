@@ -12,7 +12,7 @@ export function unitMotionPose(u,time,{moving=false,targetInRange=false,side=0}=
  const result={style,action:'idle',phase,frame:0,attackPhase:null,dx:0,dy:0,angle:0,channels:c};
  if(u.hp<=0){result.action='dead';return result;}
  if(u.stunUntil>time){result.action='controlled';return result;}
- if(u.dash){result.action='dash';return result;}
+ if(u.dash||u.currentDash){result.action='dash';return result;}
  if(u.channelUntil>time){result.action='channel';return result;}
  if(u.skillAnimation&&time>=u.skillAnimation.start&&time<u.skillAnimation.end){result.action='skill';return result;}
  const age=u.lastAttackAt==null?Infinity:time-u.lastAttackAt,duration=style==='tower'?.48:style==='lord'?.52:style==='golem'?.46:.4;

@@ -1,6 +1,6 @@
 // Permanent engine benchmark; generated reports belong outside the repository.
 import {Simulation} from '../shared/simulation.js';
-import {defaults,liveConfig,classes,contractType,names} from '../shared/config.js';
+import {defaults,legacyLiveConfig as liveConfig,classes,contractType,names} from '../shared/config.js';
 import {prepareChoice,rarityAt} from '../shared/traits.js';
 import {contributionParts} from '../shared/contribution-score.js';
 import {writeFileSync,mkdirSync} from 'node:fs';

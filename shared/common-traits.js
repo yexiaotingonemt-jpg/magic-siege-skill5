@@ -1,3 +1,5 @@
+import { isCurrentDesign } from './current-design.js';
+import { refreshCurrentStats } from './current-design-mechanics.js';
 // 每个职业独立保存通用强化；次数是选择上限，不是抽取权重。
 const prefixes = { 0: "O", 2: "C", 3: "L", 4: "F", 5: "E" };
 export const commonId = (classId, n) =>
@@ -32,6 +34,7 @@ export const COMMON_TRAITS = [
   ],
 ];
 export function refreshCommonStats(sim, h) {
+  if (isCurrentDesign(sim.config)) return refreshCurrentStats(sim,h);
   if (!h?.hero || h.hp <= 0) return;
   const c = sim.config.heroes[h.classId],
     p = sim.players[h.playerId],

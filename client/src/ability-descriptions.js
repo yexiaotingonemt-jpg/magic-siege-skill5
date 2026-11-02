@@ -1,5 +1,7 @@
 import { classes, names } from "../../shared/config.js";
 import {describeInnate} from '../../shared/innate-passives.js';
+import { isCurrentDesign } from '../../shared/current-design.js';
+import { describeCurrentAbilities } from './current-design-descriptions.js';
 import {
   TRAITS,
   traitRank,
@@ -9,6 +11,7 @@ import { abilityTagsHTML } from "./ability-tags.js";
 const f = (n) => String(Number(Number(n || 0).toFixed(2))),
   pct = (n) => f(n * 100) + "%";
 export function describeAbilities(sim) {
+  if(isCurrentDesign(sim.config))return describeCurrentAbilities(sim);
   const p = sim.player,
     id = p.classId,
     c = sim.config.heroes[id];
