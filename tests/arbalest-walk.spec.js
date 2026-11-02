@@ -33,7 +33,7 @@ test('弩手实机走路：八帧循环、两脚交换前后、暂停冻结及�
       });
     });
     for(const [left,right]of depths){expect(left*right).toBeLessThan(0);expect(Math.abs(left)).toBeGreaterThan(3);expect(Math.abs(right)).toBeGreaterThan(3);}
-    await page.locator('#pause').click();await page.waitForFunction(()=>__game.sim.paused);
+    await page.locator('#pause').click();await page.waitForFunction(()=>__game.sim.paused);await page.evaluate(async()=>{await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame);});
     const frozen=await page.evaluate(()=>__game.renderer.game.scene.scenes[0].unitMotion.report.filter(r=>r.walkFrame!=null).map(r=>[r.unitId,r.artFrame]));
     await page.waitForTimeout(250);
     expect(await page.evaluate(()=>__game.renderer.game.scene.scenes[0].unitMotion.report.filter(r=>r.walkFrame!=null).map(r=>[r.unitId,r.artFrame]))).toEqual(frozen);

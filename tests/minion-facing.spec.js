@@ -15,16 +15,18 @@ test('普通兵真实渲染：双方视角均为己方背向前进、敌方正�
       page.on('pageerror',error=>errors.push(error.message));
       await page.goto(url);await page.locator('#tabRegister').click();await page.locator('#accountName').fill('朝向'+side+Date.now());
       await page.locator('#accountPassword').fill('test-password-5');await page.locator(`[name="side"][value="${side}"]`).check();await page.locator('#authSubmit').click();
-      await page.waitForFunction(()=>window.__game?.renderer.game.scene.scenes[0]?.unitMotion?.report.filter(r=>r.action==='move').length>=10);
+      await page.waitForFunction(()=>window.__game?.renderer.game.scene.scenes[0]?.unitMotion?.report.some(r=>r.action==='move'));
     }
     await pages[0].locator('#pause').click();await pages[0].waitForFunction(()=>__game.sim.paused);
     for(const [viewer,page] of pages.entries()){
       await page.waitForFunction(()=>__game.sim.paused);
+      for(const side of [0,1]){
+      await page.evaluate(side=>{const u=__game.sim.units.find(u=>u.side===side&&!u.hero);__game.renderer.focusUnit(u.id);},side);await page.waitForTimeout(300);
       const units=await page.evaluate(()=>{
         const s=__game.sim,report=__game.renderer.game.scene.scenes[0].unitMotion.report;
         return report.filter(r=>!s.get(r.unitId)?.tower&&!s.get(r.unitId)?.hero).map(r=>({type:s.get(r.unitId).type,side:s.get(r.unitId).side,heading:r.heading,frame:r.artFrame,texture:r.texture,action:r.action,walkFrame:r.walkFrame}));
       });
-      for(const side of [0,1])for(const type of side?['melee','ranged']:['melee','ranged','siege']){
+      for(const type of side?['melee','ranged']:['melee','ranged','siege']){
         const matches=units.filter(u=>u.side===side&&u.type===type);expect(matches.length).toBeGreaterThan(0);
         for(const u of matches){
           expect(u.heading).toBe(side===viewer?'N':'S');
@@ -33,9 +35,10 @@ test('普通兵真实渲染：双方视角均为己方背向前进、敌方正�
           expect(u.texture).toBe(u.walkFrame!=null?'kc-'+key+'-walk-'+army:'kc-minions-'+army);
         }
       }
-      await page.screenshot({path:`${process.env.MAGIC_QA_DIR}/minion-facing-side-${viewer}.png`,fullPage:true});
+      await page.screenshot({path:`${process.env.MAGIC_QA_DIR}/minion-facing-side-${viewer}-army-${side}.png`,fullPage:true});
+      }
     }
-    const page=pages[0];
+    const page=pages[0];await page.evaluate(()=>{const u=__game.sim.units.find(u=>u.side===0&&!u.hero&&u.type==='melee');__game.renderer.focusUnit(u.id);});await page.waitForTimeout(300);
     const hit=await page.evaluate(()=>{
       const u=__game.sim.units.find(u=>u.side===0&&!u.hero&&u.type==='melee'),p=__game.renderer.screenPoint(u),canvas=__game.renderer.game.canvas,r=canvas.getBoundingClientRect();
       return {x:r.left+p.x/500*r.width,y:r.top+(p.y-8)/__game.renderer.game.config.height*r.height};

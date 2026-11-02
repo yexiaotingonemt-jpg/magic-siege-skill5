@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import {createUnitMotionModel,deformUnitVertex} from './unit-motion.js';
+const DEFAULT_RIG={width:1,height:1,top:0};
 
 export function createUnitMotionView(scene){
  const model=createUnitMotionModel(),meshes=new Set(),webgl=scene.game.renderer.type===Phaser.WEBGL,ink=scene.add.graphics().setDepth(6500);
@@ -7,16 +8,20 @@ export function createUnitMotionView(scene){
   for(const vertex of mesh.vertices){vertex.motionU=vertex.x+.5;vertex.motionV=.5-vertex.y;}
   mesh.motionSamples=[[.33,.25],[.66,.25],[.33,.625],[.66,.625],[.33,.875],[.66,.875]].map(([a,b])=>mesh.vertices.reduce((best,v)=>Math.hypot(v.motionU-a,v.motionV-b)<Math.hypot(best.motionU-a,best.motionV-b)?v:best,mesh.vertices[0]));
  };
- return {report:model.report,begin(s){ink.clear();model.begin(s);},pose:(s,u)=>model.pose(s,u),
+ return {report:model.report,begin(s){ink.clear();model.begin(s);},pose:(s,u,point)=>model.pose(s,u,point),
   make(x,y,texture,frame){
    if(!webgl)return scene.add.image(x,y,texture,frame);
-   const mesh=scene.add.mesh(x,y,texture,frame);mesh.setSize(1,1).setOrtho(1,1);mesh.hideCCW=false;mesh.ignoreDirtyCache=true;
+   const mesh=scene.add.mesh(x,y,texture,frame);mesh.removeFromUpdateList();mesh.setSize(1,1).setOrtho(1,1);mesh.hideCCW=false;mesh.ignoreDirtyCache=true;
    Phaser.Geom.Mesh.GenerateGridVerts({mesh,width:1,height:1,widthSegments:6,heightSegments:8});bind(mesh);meshes.add(mesh);return mesh;
   },
   apply(sp,u,pose){
    if(sp.type==='Mesh'){
-    const f=sp.frame,samples=[];
-    for(const v of sp.vertices){const rig=sp.artRig||{width:1,height:1,top:0},sign=sp.artMirrored?-1:1,x=sign*(v.motionU-.5)/rig.width,y=(v.motionV-rig.top-rig.height/2)/rig.height,q=sp.artWalkFrame!=null?{x,y}:deformUnitVertex(x,y,pose);v.x=v.motionU-.5+sign*(q.x-x)*rig.width;v.y=-(v.motionV-.5+(q.y-y)*rig.height);v.setUVs(f.u0+(f.u1-f.u0)*v.motionU,f.v0+(f.v1-f.v0)*v.motionV);}
+    const f=sp.frame,samples=[],rig=sp.artRig||DEFAULT_RIG,sign=sp.artMirrored?-1:1,neutral=sp.artWalkFrame!=null||Object.values(pose.channels).every(n=>n===0);
+    for(const v of sp.vertices){
+     if(neutral){v.x=v.motionU-.5;v.y=.5-v.motionV;}
+     else{const x=sign*(v.motionU-.5)/rig.width,y=(v.motionV-rig.top-rig.height/2)/rig.height,q=deformUnitVertex(x,y,pose);v.x=v.motionU-.5+sign*(q.x-x)*rig.width;v.y=-(v.motionV-.5+(q.y-y)*rig.height);}
+     v.setUVs(f.u0+(f.u1-f.u0)*v.motionU,f.v0+(f.v1-f.v0)*v.motionV);
+    }
     sp.preUpdate();
     for(const v of sp.motionSamples)samples.push({u:v.motionU,v:v.motionV,x:v.vx*sp.scaleX,y:v.vy*sp.scaleY});
     sp.motionPose=pose;

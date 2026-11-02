@@ -60,7 +60,7 @@ async function boot(){
  if(diagnosticsAllowed){
  performanceMonitor=createPerformanceMonitor({getLoad:()=>({...renderer?.performanceLoad,connected:!!network?.connected}),onSample:sample=>{
   const l=sample.load;$('#performanceStatus').textContent=`${sample.fps} FPS · P95 ${sample.frameMs.p95} ms · 最长 ${sample.frameMs.max} ms · >50ms ${sample.over50ms}帧`;
-  $('#performanceFactors').textContent=`单位 ${l.units}（视野内 ${l.visibleUnits} / 英雄 ${l.heroes}）· 光效 ${l.skillEffects} / 光效贴图 ${l.vfxSprites} · 弹道 ${l.projectiles} · 飘字 ${l.combatNumbers} · 快照距今 ${sample.network.ageMs??'—'}ms`;
+  $('#performanceFactors').textContent=`单位 ${l.units}（视野内 ${l.visibleUnits} / 英雄 ${l.heroes}）· 光效 ${l.skillEffects} / 光效贴图 ${l.vfxSprites} · 弹道 ${l.projectiles} · 飘字 ${l.combatNumbers} · 快照距今 ${sample.network.ageMs??'—'}ms · 动画时钟停顿 ${sample.visualClock?.stalledMs??0}ms`;
   $('#performanceSummary').textContent=performanceMonitor.summary.map(row=>`${row.fpsBand} FPS：${row.windows?`${row.windows}段，平均单位 ${row.units.mean} / 光效 ${row.skillEffects.mean} / 弹道 ${row.projectiles.mean}`:'暂无数据'}`).join('；');
   if(window.magicDesktop?.writePerformanceSample&&!loggingFailed)window.magicDesktop.writePerformanceSample({environment:environment(),sample}).then(file=>{if(!loggingFailed)logStatus('自动日志：'+file);}).catch(()=>{loggingFailed=true;logStatus('自动写入失败，仍可导出内存日志。');});
  }});

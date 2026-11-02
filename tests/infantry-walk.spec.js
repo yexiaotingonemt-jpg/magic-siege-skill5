@@ -41,7 +41,7 @@ test('重甲兵实机步态：八帧换脚时网格和体型稳定，暂停与�
       })));
     });
     for(const [a,b] of feet){expect(Number.isFinite(a)&&Number.isFinite(b)).toBe(true);expect(a*b).toBeLessThan(0);}
-    await page.locator('#pause').click();await page.waitForFunction(()=>__game.sim.paused);
+    await page.locator('#pause').click();await page.waitForFunction(()=>__game.sim.paused);await page.evaluate(async()=>{await new Promise(requestAnimationFrame);await new Promise(requestAnimationFrame);});
     const frozen=await page.evaluate(()=>__game.renderer.game.scene.scenes[0].unitMotion.report.filter(r=>r.walkFrame!=null).map(r=>[r.unitId,r.artFrame]));
     await page.waitForTimeout(250);expect(await page.evaluate(()=>__game.renderer.game.scene.scenes[0].unitMotion.report.filter(r=>r.walkFrame!=null).map(r=>[r.unitId,r.artFrame]))).toEqual(frozen);
     await page.screenshot({path:`${process.env.MAGIC_QA_DIR}/infantry-walking.png`,fullPage:true});
