@@ -14,6 +14,7 @@ import { available, spend, createSkillValue } from "./skill-value.js";
 import { traitRank, traitSkill } from "./traits.js";
 import { traitEffects } from "./trait-effects.js";
 import { isCurrentDesign, currentValues, currentName } from './current-design.js';
+import { npcBalanceStatus } from './npc-balance.js';
 import { currentAttackPower, currentAttackRate, addCurrentHeat, currentHeal,
   currentRangeFailure, selectCurrentSkill, resolveCurrentSkill, impactCurrentSkill,
   processCurrentEffects, updateCurrentUnit, chooseCurrentSkill } from './current-design-mechanics.js';
@@ -26,6 +27,12 @@ import {
   updateSkill5Unit,
   chooseSkill5,
 } from "./skill5-mechanics.js";
+export const BOT_AI = Object.freeze({
+  castIntervalMultiplier: 1.5,
+  hesitationChance: 0.2,
+  randomSkillChance: 0.5,
+});
+
 export class HeroRules {
   rank(h, id) {
     return traitRank(this.players[h?.playerId], id);
@@ -650,9 +657,32 @@ export class HeroRules {
     if(isCurrentDesign(this.config))return updateCurrentUnit.call(this,u,dt);
     return updateSkill5Unit.call(this, u, dt);
   }
-  chooseAutoSkill(p) {
-    if(isCurrentDesign(this.config))return chooseCurrentSkill.call(this,p);
-    return chooseSkill5.call(this, p);
+  botAiSettings(p, status) {
+    if (!p.bot || p.side !== 1 || this.npcPolicy?.mode !== 'ratio') return BOT_AI;
+    const {heroes} = status ?? npcBalanceStatus(this);
+    if (!heroes.defense) return BOT_AI;
+    // Compensate for rounding down the defense count. Exact ratios retain
+    // the normal AI; at most restore the original three-second best-skill AI.
+    const policy = this.npcPolicy;
+    const surplus = Math.max(0, heroes.attack * policy.defense - heroes.defense * policy.attack);
+    const pressure = Math.min(1, surplus / (heroes.defense * policy.attack));
+    return {
+      castIntervalMultiplier: BOT_AI.castIntervalMultiplier - (BOT_AI.castIntervalMultiplier - 1) * pressure,
+      hesitationChance: BOT_AI.hesitationChance * (1 - pressure),
+      randomSkillChance: BOT_AI.randomSkillChance * (1 - pressure),
+    };
+  }
+  chooseAutoSkill(p, ai = this.botAiSettings(p)) {
+    const preferred = isCurrentDesign(this.config)
+      ? chooseCurrentSkill.call(this, p)
+      : chooseSkill5.call(this, p);
+    if (!p.bot || preferred < 0) return preferred;
+    // NPCs sometimes hesitate or use a merely legal spell instead of the best one.
+    // Use the simulation RNG so the same seed and inputs remain reproducible.
+    if (this.random() < ai.hesitationChance) return -1;
+    if (this.random() >= ai.randomSkillChance) return preferred;
+    const ready = [0, 1, 2, 3].filter(i => this.castPlan(i, p).ok);
+    return ready[Math.floor(this.random() * ready.length)] ?? -1;
   }
 }
 Object.assign(HeroRules.prototype, traitEffects);

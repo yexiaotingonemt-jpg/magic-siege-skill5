@@ -23,16 +23,43 @@ test('默认至少补成防守1:进攻3，契约费用与积分沿用玩家规�
  assert.deepEqual(state.heroes,{defense:1,attack:3});assert.deepEqual(state.npcs,state.heroes);
  for(const p of r.sim.players.filter(p=>p.bot)){assert.equal(p.stamina,97);assert.equal(p.staminaSpent,3);assert.equal(p.totalPoints,300);assert.ok(r.sim.hero(p));}
 });
-test('比例计算包含真人与NPC，只增加达到比例的最小整数人数',()=>{
+test('比例计算包含真人与NPC，进攻不足时按现有防守补足',()=>{
  const {s,human,stock}=arena();human(1);human(1);human(0);stock();balanceNpcHeroes(s);
  assert.deepEqual(npcBalanceStatus(s).heroes,{defense:2,attack:6});assert.deepEqual(npcBalanceStatus(s).npcs,{defense:0,attack:5});
  const ids=s.units.filter(u=>u.hero).map(u=>u.id);balanceNpcHeroes(s);assert.deepEqual(s.units.filter(u=>u.hero).map(u=>u.id),ids);
 });
-test('自定义2:5补到最小整组；设置比例时不删除任何存活英雄',()=>{
+test('自定义2:5按比例向下取整防守；设置比例时不删除任何存活英雄',()=>{
  const {s,human,stock}=arena({mode:'ratio',defense:2,attack:5});for(let i=0;i<3;i++)human(1);for(let i=0;i<7;i++)human(0);stock();balanceNpcHeroes(s);
- assert.deepEqual(npcBalanceStatus(s).heroes,{defense:4,attack:10});
+ assert.deepEqual(npcBalanceStatus(s).heroes,{defense:3,attack:8});
  const old=s.units.filter(u=>u.hero);s.npcPolicy={mode:'ratio',defense:1,attack:1};balanceNpcHeroes(s);
- assert.deepEqual(npcBalanceStatus(s).heroes,{defense:10,attack:10});assert.ok(old.every(u=>u.hp>0));
+ assert.deepEqual(npcBalanceStatus(s).heroes,{defense:8,attack:8});assert.ok(old.every(u=>u.hp>0));
+});
+
+for(const [attack,defense] of [[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[6,2],[7,2],[8,2],[9,3]]){
+ test(`进攻${attack}名时防守向下取整为${defense}名，重复出兵不连锁扩编`,()=>{
+  const {s,human,stock}=arena();for(let i=0;i<attack;i++)human(0);stock();
+  const expected={defense,attack:Math.max(3,attack)};
+  balanceNpcHeroes(s);assert.deepEqual(npcBalanceStatus(s).heroes,expected);
+  assert.deepEqual(s.npcLastCheck.missing,{defense:0,attack:0});
+  const ids=s.units.filter(u=>u.hero).map(u=>u.id);
+  for(let i=0;i<3;i++)s.spawnWave();
+  assert.deepEqual(npcBalanceStatus(s).heroes,expected);
+  assert.deepEqual(s.units.filter(u=>u.hero).map(u=>u.id),ids);
+ });
+}
+
+test('进攻4名维持一名防守，增加到6名才补第二名防守',()=>{
+ const {s,human,stock}=arena();for(let i=0;i<4;i++)human(0);stock();
+ balanceNpcHeroes(s);assert.deepEqual(npcBalanceStatus(s).heroes,{defense:1,attack:4});
+ human(0);s.spawnWave();assert.deepEqual(npcBalanceStatus(s).heroes,{defense:1,attack:5});
+ human(0);s.spawnWave();assert.deepEqual(npcBalanceStatus(s).heroes,{defense:2,attack:6});
+ const defender=s.units.find(u=>u.hero&&u.side===1);defender.hp=0;
+ s.spawnWave();assert.deepEqual(npcBalanceStatus(s).heroes,{defense:2,attack:6});
+});
+
+test('进攻4名但已有2名防守时保留防守并补齐6名进攻',()=>{
+ const {s,human,stock}=arena();for(let i=0;i<4;i++)human(0);human(1);human(1);stock();
+ balanceNpcHeroes(s);assert.deepEqual(npcBalanceStatus(s).heroes,{defense:2,attack:6});
 });
 test('只在出兵时补充，NPC阵亡不会在波次之间自动契约',()=>{
  const r=new Room(),s=r.sim;for(const t of s.towers)t.x=100;

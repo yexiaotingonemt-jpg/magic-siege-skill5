@@ -3,7 +3,7 @@ export const npcSettingsHTML = `<section id="npcControls" class="npc-settings" a
  <label>补充模式<select id="npcMode"><option value="ratio">按英雄比例补充</option><option value="off">无NPC · 停止后续补充</option></select></label>
  <div class="npc-ratio-inputs"><label>防守方<input id="npcDefenseRatio" type="number" min="1" max="99" step="1" value="1"></label><span>:</span><label>进攻方<input id="npcAttackRatio" type="number" min="1" max="99" step="1" value="3"></label></div>
  <div class="npc-actions"><button id="applyNpcPolicy" type="button">保存设置</button><button id="npcDefault" type="button">恢复1:3</button></div>
- <p>每次出兵按玩家与NPC英雄总数检查，只补不足一方。停止补充不会移除现有NPC。</p>
+ <p>每次出兵按玩家与NPC英雄总数检查，防守人数按比例向下取整，最少保留一组；进攻不足时按现有防守补齐。人数吃紧时防守NPC提高施法智能。停止补充不会移除现有NPC。</p>
  <p id="npcLiveCounts" role="status"></p><p id="npcPolicyStatus" role="status"></p>
 </section>`;
 
