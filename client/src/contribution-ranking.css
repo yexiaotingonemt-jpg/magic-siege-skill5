@@ -15,6 +15,30 @@
 .contribution-ranking th span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .contribution-ranking small{display:block;color:var(--ui-muted);font-size:14px;font-weight:400}
 .contribution-ranking td{color:var(--ui-gold)}
+.contribution-ranking th span{display:flex;align-items:baseline;gap:.2em}
+.contribution-ranking .ranking-player{display:inline-block;min-width:0;max-width:100%;min-height:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:inherit;font:inherit;line-height:inherit;text-align:left;text-decoration:underline;text-decoration-color:#c6b47799;text-underline-offset:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.contribution-ranking .ranking-player:hover{color:var(--ui-gold);background:none}
+.contribution-ranking .ranking-player:focus-visible{outline:2px solid var(--ui-gold);outline-offset:2px}
+.contract-player-heading{border-bottom:1px solid var(--ui-line);padding-bottom:12px}
+.contract-player-heading h3{margin:0;font-size:26px;color:var(--ui-gold)}
+.contract-player-heading p,.contract-history-note,.contract-period,.contract-kda-rule{color:var(--ui-muted);font-size:20px;line-height:1.5}
+.contract-history-note{margin:12px 0 18px}
+.contract-entry{margin:14px 0;padding:16px;border:1px solid #60745a;border-radius:6px;background:#172b255c}
+.contract-current{border-color:var(--ui-gold)}
+.contract-entry-heading{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;font-size:24px}
+.contract-entry-heading span{font-size:20px;color:var(--ui-muted)}
+.game .contract-entry-heading b{font-size:24px;font-weight:600;line-height:1.4;color:var(--ui-text)}
+.contract-period{margin:8px 0}
+.contract-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
+.contract-values dt{font-size:20px;color:var(--ui-muted)}
+.contract-values dd{margin:6px 0 0;font-size:28px;font-variant-numeric:tabular-nums;color:var(--ui-gold)}
+.contract-entry details{font-size:21px}
+.contract-entry summary{cursor:pointer;color:var(--ui-text)}
+.contract-entry table{width:100%;margin-top:12px;border-collapse:collapse;font-size:20px;font-variant-numeric:tabular-nums}
+.contract-entry th,.contract-entry td{padding:8px 2px;text-align:right;border-bottom:1px solid var(--ui-line)}
+.contract-entry th:first-child{text-align:left;font-weight:400}
+.contract-entry td{color:var(--ui-gold)}
+#contractHistoryMore,#contractHistoryRetry,#contractHistoryBack{width:100%;margin:8px 0;font-size:20px}
 .contribution-ranking .rank-self{background:#365a3d70}
 .battle-ranking .contribution-ranking{font-size:13px}
 .battle-ranking th,.battle-ranking td{padding:8px 6px}

@@ -25,13 +25,13 @@ export function createGameSheets(){
   }
  }
  function markActive(name){navigation.forEach(button=>{if(button.dataset.nav===name)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}
- function close(){sheet.hidden=true;markActive('battle');if(previous?.isConnected)previous.focus({preventScroll:true});}
+ function close(){sheet.hidden=true;markActive('battle');if(previous?.isConnected&&previous.getClientRects().length)previous.focus({preventScroll:true});else if(previous?.dataset.rankingPlayer)document.querySelector(`#battleRanking [data-ranking-player="${previous.dataset.rankingPlayer}"]`)?.focus({preventScroll:true});}
  function open(name,index=null){
   heroView=['passive','stats','common'].includes(name)?name:'skills';skillIndex=index;
   if(['passive','stats','common'].includes(name))name='hero';
   if(sheet.hidden)previous=document.activeElement;sheet.hidden=false;markActive(name);sections.forEach(e=>e.hidden=e.dataset.sheetSection!==name);
   document.querySelector('#gameViewport').scrollIntoView({block:'start'});
-  document.querySelector('#sheetTitle').textContent={hero:'职业技能',ranking:'功勋排行'}[name];
+  document.querySelector('#sheetTitle').textContent={hero:'职业技能',ranking:'功勋排行',contracts:'契约记录'}[name];
   document.querySelector('#sheetClose').focus({preventScroll:true});
   const body=document.querySelector('#sheetScroll');body.querySelectorAll('details').forEach(d=>d.open=false);body.scrollTop=0;
   refresh();

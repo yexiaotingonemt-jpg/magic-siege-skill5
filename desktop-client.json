@@ -1,14 +1,14 @@
 {
-  "version": "0.7.0",
-  "serverVersion": "0.7.0",
+  "version": "0.7.1",
+  "serverVersion": "0.7.1",
   "gameVersion": "0.7.0",
   "protocolVersion": 3,
   "files": {
-    "client/prebuilt/assets/index-aVKtUYRN.css": "dce7ee29b10b143f126553b648cc13912fd35cb95e612dac9be07aeb93d26385",
-    "client/prebuilt/assets/index-drdV25bd.js": "9015565d933d7349bfa6050e653fad8956d03d78073b72192522d9e82004f4e4",
+    "client/prebuilt/assets/index-BEOUebBD.css": "32d7a518ec24039f7561d598a4c6fad69fa0998c802e3c7259fabc7c4d873801",
+    "client/prebuilt/assets/index-xRFnjL_P.js": "c20754a145b0f277c756dba58ae92b4c37f1a14e8e681c51fa75f509b5a5a54f",
     "client/prebuilt/assets/phaser-DFK5Ua9d.js": "f9025c1a29bc3ae097dd886ce07717b297466da1ce8f032c8294252ce6cf5cdb",
-    "client/prebuilt/client-version.json": "586a01aa8541e85610f3ded7ae12c8cb62e7e400aa8e7c785015246817d84cb4",
-    "client/prebuilt/index.html": "2950de872787d0fd704e9f9fa4fb4c7f603fb7cedd9f3215acd7f542acf81b11",
+    "client/prebuilt/client-version.json": "fdbe39d302b822694a819e3b2cb25449260c7405a6c9dfc5b51fab9e2332a5a2",
+    "client/prebuilt/index.html": "f3f0d665c71d2d9a7d90b075857cb7c9ab7abaebd47cec5fc4aa797a2885d554",
     "client/desktop/assets/magic-throne.ico": "89421e37f5316235335323773072230a353bffa115ff2d21827b8b1486b1b921",
     "client/desktop/assets/magic-throne.svg": "05364641cdcc968fd02dd591fc3dc10a160528ed0aeebef16ef154b649e12e1e",
     "client/desktop/config.mjs": "af3a2c715c7ea9d1af042edd7f12e4dc04cbcca1579801499c5ed02b4b4a27ef",
@@ -19,7 +19,7 @@
     "魔法王座.exe": "1142a1c9b7ad159691d7fbb5c25c4ecd6b9ff6fb1ccbd4f4d6d01d5bf944c179",
     "client/launcher.mjs": "c2923024bfbf7051368f9ef51a6c608c01dfe3b0f219cbbd2f62033bf28e38b9",
     "client/client-config.json": "6b27adca4af8dbc3bd561c1af85471d8561026bd3c449b26a3d60d6f071937c5",
-    "shared/protocol.js": "36a8a4a21143f75d21720c7c426c3fbf6edf0c1a65bb6e5c740096fd1bfe0cd4"
+    "shared/protocol.js": "cc998adb510974a8217c27751a65fc4e96e7836d3e8fc3232bd85ef0daddb57b"
   },
   "runtime": {
     "version": "45.1.0-win32-x64",
