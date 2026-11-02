@@ -21,14 +21,14 @@ export function createGameSheets(){
   document.querySelectorAll('[data-ability-view]').forEach(card=>card.hidden=card.dataset.abilityView!==heroView||(heroView==='skills'&&skillIndex!=null&&Number(card.dataset.skillDetail)!==skillIndex));
   document.querySelectorAll('[data-hero-view]').forEach(button=>{const selected=button.dataset.heroView===heroView;button.setAttribute('aria-selected',String(selected));button.tabIndex=selected?0:-1;});
   if(!sections.find(section=>section.dataset.sheetSection==='hero')?.hidden){
-   document.querySelector('#sheetTitle').textContent=heroView==='stats'?'基础属性':heroView==='common'?'通用效果':skillIndex==null?'职业技能':document.querySelector(`[data-skill-detail="${skillIndex}"] h3`)?.childNodes[0]?.textContent||'技能说明';
+   document.querySelector('#sheetTitle').textContent=heroView==='passive'?'职业被动':heroView==='stats'?'基础属性':heroView==='common'?'通用效果':skillIndex==null?'职业技能':document.querySelector(`[data-skill-detail="${skillIndex}"] h3`)?.childNodes[0]?.textContent||'技能说明';
   }
  }
  function markActive(name){navigation.forEach(button=>{if(button.dataset.nav===name)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}
  function close(){sheet.hidden=true;markActive('battle');if(previous?.isConnected)previous.focus({preventScroll:true});}
  function open(name,index=null){
-  heroView=name==='stats'?'stats':name==='common'?'common':'skills';skillIndex=index;
-  if(name==='stats'||name==='common')name='hero';
+  heroView=['passive','stats','common'].includes(name)?name:'skills';skillIndex=index;
+  if(['passive','stats','common'].includes(name))name='hero';
   if(sheet.hidden)previous=document.activeElement;sheet.hidden=false;markActive(name);sections.forEach(e=>e.hidden=e.dataset.sheetSection!==name);
   document.querySelector('#gameViewport').scrollIntoView({block:'start'});
   document.querySelector('#sheetTitle').textContent={hero:'职业技能',ranking:'功勋排行'}[name];

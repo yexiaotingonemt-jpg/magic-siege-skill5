@@ -1,4 +1,5 @@
 import { classes, names } from "../../shared/config.js";
+import {describeInnate} from '../../shared/innate-passives.js';
 import {
   TRAITS,
   traitRank,
@@ -155,8 +156,9 @@ export function describeAbilities(sim) {
   });
   return {
     name: classes[id],
-    passive: roles[id],
-    passiveSummary: roles[id],
+    passive: describeInnate(sim,h).innatePassive||roles[id],
+    passiveSummary: describeInnate(sim,h).innatePassive||roles[id],
+    ...describeInnate(sim,h),
     skills,
     owned: TRAITS.filter((t) => t.classId === id && r(t.id)).map((t) => ({
       ...t,
@@ -185,6 +187,10 @@ export function upgradeEffectsHTML(traits) {
   ).join('') + '</div>';
 }
 export function abilityGuideHTML(g) {
+  const passive = '<article class="ability-entry" data-ability-view="passive" hidden><h3>职业自带被动</h3><small class="ability-meta">' +
+    (g.innatePassive ? '契约后自动生效，无需施放，不消耗体力' : '当前战局未启用新版职业被动') + '</small><p class="ability-brief">' +
+    escapeHTML(g.innatePassive || '当前战局使用旧版规则，未启用新版职业自带被动。') + '</p>' +
+    (g.passiveStatus ? '<p class="passive-status">' + escapeHTML(g.passiveStatus) + '</p>' : '') + '</article>';
   const skills = g.skills.map((s, i) =>
     '<article class="ability-entry" data-ability-view="skills" data-skill-detail="' + i + '"><h3>' + s.name + '<small>' + (s.learned ? '已解锁' : '5级解锁') + '</small></h3>' +
     abilityTagsHTML(s.tags) + '<p class="ability-brief">' + s.summary + '</p><small class="ability-meta">' + s.compactMeta + '</small>' +
@@ -194,5 +200,5 @@ export function abilityGuideHTML(g) {
     g.stats.map(([name, value]) => '<div><dt>' + name + '</dt><dd>' + value + '</dd></div>').join('') + '</dl></article>';
   const common = '<article class="ability-entry" data-ability-view="common" hidden><h3>通用效果</h3><small class="ability-meta">白色已获得 · 灰色未激活</small><h4>职业通用</h4>' +
     upgradeEffectsHTML(g.generalEffects.filter(t => !t.common)) + '<h4>通用强化</h4>' + upgradeEffectsHTML(g.generalEffects.filter(t => t.common)) + '</article>';
-  return skills + stats + common;
+  return skills + passive + stats + common;
 }

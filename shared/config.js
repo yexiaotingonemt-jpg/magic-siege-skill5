@@ -1,4 +1,5 @@
 import {defaults as base,labels as baseLabels} from './base-config.js';
+import {INNATE_DEFAULTS} from './innate-passives.js';
 export const clone=x=>JSON.parse(JSON.stringify(x));
 export const classes=['兽人战士','雷霆巨人','符文战车','黑暗领主','火焰法师','森林精灵','暗影刺客'];
 export const names=[['汲血链接','守护战吼','换位救援','蓄伤壁垒'],['导电电弧','远阵雷击','电弧牵引','禁疗雷云'],['腐蚀炮弹','冰霜炮弹','震荡炮弹','定点连轰'],['裂地震荡','暗影冲锋','焚身壁垒','灭军君临'],['烈焰冲击','焚魂烙印','炙热火球','天火审判'],['灵息冲击','共生链接','献生净化','生命群疗'],['蚀骨飞刃','影袭','残影回溯','环刃风暴']];
@@ -7,6 +8,8 @@ export const availableClasses=(side,config=defaults)=>side?[3]:[0,4,5,2];
 export const contractClasses=(u,config=defaults)=>availableClasses(u.side,config).filter(id=>!u.elite&&!u.summoned&&contractType(id)===u.type);
 const skill=(power,cd,targetRange,radius=0,extra={})=>({power,cd,targetRange,radius,duration:0,cost:1,castTime:.35,levelGrowth:.2,...extra});
 export const defaults=clone(base);
+defaults.innate=clone(INNATE_DEFAULTS);
+export const liveConfig=()=>{const config=clone(defaults);config.innate.enabled=1;return config;};
 defaults.world.assistWindow=5;
 Object.assign(defaults.world,{attackBots:6,defenseBots:2,attackHpMultiplier:1,defenseHpMultiplier:1,troopHpMultiplier:1,heroHpMultiplier:1,heroHpGrowth:.02,heroAttackGrowth:.015,towerDamageExpRate:.0002,towerBreakXp:2});
 Object.assign(defaults.world,{retaliationMemory:3,retaliationLeash:14,heroPriorityDistance:1.5});
@@ -144,6 +147,7 @@ Object.assign(labels,{retaliationMemory:'受击来源记忆秒',retaliationLeash
 Object.assign(labels,{skillDesignVersion:'技能规则版本',scarDuration:'伤痕持续秒',scarCap:'伤痕层数上限',scarKnockback:'每层伤痕增加击飞格数',scarBonus:'每层伤痕伤害增幅',conductDuration:'导电持续秒',attackSpeedDown:'攻击速度降低比例',shots:'定点炮击次数',heatCap:'炙热层数上限',heatThreshold:'大火球炙热门槛',heatStep:'每增加一目标消耗的炙热层数',splashPower:'溅射总攻击力系数（%）',healingBoost:'受到治疗提升比例',debuffDuration:'命中减益持续秒'});
 Object.assign(labels,{heroKillXp:'击杀英雄经验',minionKillXp:'击杀小兵经验',attackSiege:'进攻攻城兵占比',damageTaken:'原始承伤',percentMaxHp:'目标最大生命伤害比例',heatOnDeath:'标记目标阵亡增加炙热层数',hpCost:'当前生命消耗比例',shieldDuration:'转化护盾持续秒',slowPerStack:'每层移动减速比例',slowCap:'移动减速叠层上限',slowDuration:'移动减速持续秒'});
 export function validateConfig(x){
+ if(x.innate?.elfRadius<=0||x.innate?.elfRadius>30||x.innate?.shareTotals?.[1]!==1||![0,1].includes(x.innate?.enabled)||!Number.isInteger(x.innate.lordMinionKills)||x.innate.lordMinionKills<1||x.innate.shareTotals?.length!==7||x.innate.shareTotals.some(n=>!Number.isFinite(n)||n<0||n>1)||['orcMissingReduction','heatHaste','heatHealPenalty','elfDamageHeal','elfHealDamage','lordKillHeal'].some(k=>!Number.isFinite(x.innate[k])||x.innate[k]<0||x.innate[k]>=1))throw Error('职业被动配置无效');
  if(x.world.maxLevel!==40)throw Error('本版英雄等级上限固定40');
  const walk=(a,b,path='')=>{if(typeof b==='number'){if(typeof a!=='number'||!Number.isFinite(a)||Math.abs(a)>1e7)throw Error(path+' 数值无效');if(a<0&&!['attackSpawnY','defenseLimitY','mapMinY','mapMaxY','defenseRallyOffset'].includes(path.split('.').at(-1)))throw Error(path+' 不能为负数');return;}if(!a||typeof a!=='object'||Array.isArray(a)!==Array.isArray(b))throw Error(path+' 配置结构不完整');for(const k of Object.keys(a))if(!Object.hasOwn(b,k)||k==='__proto__')throw Error(path+'.'+k+' 是未知字段');for(const k of Object.keys(b))walk(a[k],b[k],path+'.'+k);};walk(x,defaults);
  for(const k of ['waveInterval','projectileSpeed','expBase','expGrowth','expCostMultiplier','maxLevel','targetRecheckInterval'])if(x.world[k]<=0)throw Error(k+' 必须大于0');

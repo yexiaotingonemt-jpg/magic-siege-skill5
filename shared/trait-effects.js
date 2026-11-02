@@ -1,4 +1,5 @@
 import { commonRank } from "./common-traits.js";
+import {innateOnKill} from './innate-passives.js';
 const near = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 export const ELITE_BUFFS = {
   hunt: { name: "狩猎恢复", description: "击杀非召唤单位恢复2%最大生命" },
@@ -125,6 +126,7 @@ export const traitEffects = {
         h.classId,
       );
     if (h.hp <= 0 || t.tower || t.summoned || h.side === t.side) return;
+    innateOnKill(this,h,t);
     if (!summonedKill && commonRank(this, h, 6))
       this.heal(
         h,

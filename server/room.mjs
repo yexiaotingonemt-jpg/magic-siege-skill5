@@ -1,10 +1,10 @@
 import {Simulation} from '../shared/simulation.js';
-import {defaults,clone,availableClasses,contractClasses,validateConfig} from '../shared/config.js';
+import {defaults,liveConfig,clone,availableClasses,contractClasses,validateConfig} from '../shared/config.js';
 import {DEFAULT_NPC_POLICY,validateNpcPolicy,npcBalanceStatus,balanceNpcHeroes} from '../shared/npc-balance.js';
-const snapshotReplacer=(key,value)=>['settledReport','contributors','support','attackerMemory','stats','deathDone'].includes(key)?undefined:value;
+const snapshotReplacer=(key,value)=>['settledReport','innateScoreBase','contributors','support','attackerMemory','stats','deathDone'].includes(key)?undefined:value;
 const actorSnapshot=u=>u?{id:u.id,side:u.side,classId:u.classId,type:u.type,tower:u.tower,x:u.x,y:u.y,hp:u.hp,maxHp:u.maxHp}:undefined;
 export class Room{
- constructor(config=defaults,npcPolicy=DEFAULT_NPC_POLICY){this.config=clone(config);this.sim=new Simulation(this.config);this.sim.player.retired=true;this.sim.player.name='战场';this.players=new Map();this.clients=new Set();this.sequence=0;this.configVersion=0;this.matchId=crypto.randomUUID();this.paused=false;this.speed=1;this.stageEnd=this.config.world.stageDuration;this.stageNumber=1;this.stageResetAt=0;this.stageWins=[0,0];this.stageReports=[];this.commandHistory=new Map();this.last=performance.now();this.acc=0;this.broadcastAt=0;this.online=new Map();this.sim.npcPolicy=validateNpcPolicy(npcPolicy);balanceNpcHeroes(this.sim);}
+ constructor(config=liveConfig(),npcPolicy=DEFAULT_NPC_POLICY){this.config=clone(config);this.sim=new Simulation(this.config);this.sim.player.retired=true;this.sim.player.name='战场';this.players=new Map();this.clients=new Set();this.sequence=0;this.configVersion=0;this.matchId=crypto.randomUUID();this.paused=false;this.speed=1;this.stageEnd=this.config.world.stageDuration;this.stageNumber=1;this.stageResetAt=0;this.stageWins=[0,0];this.stageReports=[];this.commandHistory=new Map();this.last=performance.now();this.acc=0;this.broadcastAt=0;this.online=new Map();this.sim.npcPolicy=validateNpcPolicy(npcPolicy);balanceNpcHeroes(this.sim);}
  player(account){let p=this.players.get(account.id);if(!p){p=this.sim.makePlayer(account.side,false);p.name=account.name;p.classId=availableClasses(account.side,this.config)[0];p.accountId=account.id;this.players.set(account.id,p);}p.retired=false;return p;}
  step(){const now=performance.now(),delta=Math.min(1,(now-this.last)/1000);this.last=now;if(this.clients.size&&!this.paused){this.acc+=delta*this.speed;while(this.acc>=.05){this.sim.tick(.05);this.acc-=.05;this.sequence++;this.checkStage();}}if(this.clients.size&&this.paused&&now-this.broadcastAt>=2000){this.heartbeat();this.broadcastAt=now;}else if(!this.paused&&this.clients.size&&now-this.broadcastAt>=200){this.broadcast();this.broadcastAt=now;}}
  checkStage(){const broken=this.sim.metrics.resets>this.stageResetAt||this.sim.layer>=this.config.world.stageRequiredLayers;if(!broken&&this.sim.time<this.stageEnd)return;const winner=broken?0:1;this.stageWins[winner]++;this.stageReports.unshift({stage:this.stageNumber,winner,time:this.sim.time,reward:0});this.stageReports.length=Math.min(30,this.stageReports.length);this.stageNumber++;this.stageEnd=this.sim.time+this.config.world.stageDuration;this.sim.resetMap();this.stageResetAt=this.sim.metrics.resets;}
@@ -23,6 +23,12 @@ export class Room{
   const p=this.player(account),s=this.sim,key=account.id+':'+id;if(id&&this.commandHistory.has(key))return this.commandHistory.get(key);let ok=false,message='';s.localPlayerId=p.id;s.notice='';
   try{
    if(type==='restartMatch'){if(account.isSuperAdmin!==true)throw Error('仅超级账号可以重开本局');this.restartMatch();ok=true;message='本局已重开';}
+   else if(type==='clearRanking'){
+    if(account.isSuperAdmin!==true)throw Error('仅超级账号可以清除排行榜');
+    // 贡献按事件增量记账，清零累计值即可从此刻重新统计，无需改动英雄战斗状态。
+    for(const player of s.players){player.totalPoints=0;player.staminaSpent=0;player.score=0;}
+    ok=true;message='排行榜已清除，积分与KDA从现在重新累计';
+   }
    else if(type==='npcPolicy'){if(account.isSuperAdmin!==true)throw Error('仅超级账号可以设置NPC比例');s.npcPolicy=validateNpcPolicy(args);s.npcLastCheck=null;ok=true;message=s.npcPolicy.mode==='off'?'下次出兵停止补充NPC，现有NPC继续战斗':'NPC比例已保存，下次出兵检查补足';}
    else if(type==='contract'){const u=s.get(args.unitId);if(!u||!contractClasses(u,s.config).includes(args.classId)||u.side!==account.side)throw Error('此单位不可契约为所选职业');if(!s.setClass(args.classId,p))throw Error('已有存活英雄，或职业不属于本阵营');ok=s.contract(p,u.id);}
    else if(type==='cast')ok=s.cast(args.skill,p);
