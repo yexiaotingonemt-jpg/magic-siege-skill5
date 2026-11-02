@@ -47,9 +47,13 @@ export function balanceNpcHeroes(sim) {
     sim.npcLastCheck = { wave: sim.waveNumber, time: sim.time, added: { defense: 0, attack: 0 } };
     return;
   }
-  const scale = Math.max(1, Math.ceil(status.heroes.defense / policy.defense),
-    Math.ceil(status.heroes.attack / policy.attack));
-  const target = [scale * policy.attack, scale * policy.defense];
+  // Keep existing heroes and a minimum group, but do not round attackers up
+  // into another full group just to add a defender (e.g. 1:4 stays 1:4).
+  const attackTarget = Math.max(status.heroes.attack,
+    Math.ceil(Math.max(policy.defense, status.heroes.defense) * policy.attack / policy.defense));
+  const defenseTarget = Math.max(status.heroes.defense, policy.defense,
+    Math.floor(attackTarget * policy.defense / policy.attack));
+  const target = [attackTarget, defenseTarget];
   const count = [status.heroes.attack, status.heroes.defense], added = [0, 0];
   let budget = MAX_NPC_HEROES - status.npcs.attack - status.npcs.defense;
   for (const side of [1, 0]) {

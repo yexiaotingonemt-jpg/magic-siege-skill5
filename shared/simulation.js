@@ -2,7 +2,7 @@ import {isCurrentDesign,currentStatPoints,currentContributionParts,currentValues
 import {eligibleAssists} from './assist-rules.js';
 import {statPoints,contributionParts} from './contribution-score.js';
 import {refreshCommonStats} from './common-traits.js';
-import {HeroRules,BOT_AI} from './hero-rules.js';
+import {HeroRules} from './hero-rules.js';
 import {defaults,clone,classes,contractType,availableClasses} from './config.js';
 import {TOWER_GUARD,towerGuardActive} from './tower-guard.js';
 import {planSkillUpgrade} from './skill-progression.js';
@@ -11,7 +11,7 @@ import {chooseTarget,navigate} from './navigation.js';
 import {setManualTarget} from './manual-target.js';
 import {inAttackRange,ATTACK_RANGE_EPSILON} from './attack-range.js';
 import {distributeTroops,TROOP_TYPES} from './troop-population.js';
-import {balanceNpcHeroes} from './npc-balance.js';
+import {balanceNpcHeroes,npcBalanceStatus} from './npc-balance.js';
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const archetype=contractType;
@@ -82,7 +82,25 @@ export class Simulation extends HeroRules {
  choose(u){return chooseTarget(this,u);}
  tick(dt){this.time+=dt;for(const t of this.towers)if(t.hp<=0&&!t.deathDone)this.die(t);if(this.activeTowers().length===0){this.resetMap();return;}const front=this.layer;while(this.layer<2&&!this.towers.some(t=>t.layer===this.layer&&t.hp>0))this.layer++;if(this.layer!==front)this.log('防线突破：推进至第 '+(this.layer+1)+' 排');
  if(this.time>=this.waveAt)this.spawnWave();
- for(const p of this.players){if(p.retired)continue;const h=this.hero(p);if(p.bot&&!h&&!this.npcPolicy&&this.time-p.lastBot>1){this.contract(p);p.lastBot=this.time;}if(h){const castInterval=this.config.world.botCastInterval*(p.bot?BOT_AI.castIntervalMultiplier:1);if((p.auto||p.bot)&&this.time-p.lastBot>=castInterval){const i=this.chooseAutoSkill(p);if(i>=0)this.cast(i,p);p.lastBot=this.time;}if(p.bot&&p.progress[p.classId].choices?.length){const choice=prepareChoice(this,p);if(choice?.options?.length)this.chooseTrait(choice.options[0],choice.level,p);}}}
+ const npcStatus=this.npcPolicy?.mode==='ratio'?npcBalanceStatus(this):null;
+ for(const p of this.players){
+  if(p.retired)continue;
+  const h=this.hero(p);
+  if(p.bot&&!h&&!this.npcPolicy&&this.time-p.lastBot>1){this.contract(p);p.lastBot=this.time;}
+  if(h){
+   const ai=p.bot?this.botAiSettings(p,npcStatus):null;
+   const castInterval=this.config.world.botCastInterval*(ai?.castIntervalMultiplier??1);
+   if((p.auto||p.bot)&&this.time-p.lastBot>=castInterval){
+    const i=this.chooseAutoSkill(p,ai);
+    if(i>=0)this.cast(i,p);
+    p.lastBot=this.time;
+   }
+   if(p.bot&&p.progress[p.classId].choices?.length){
+    const choice=prepareChoice(this,p);
+    if(choice?.options?.length)this.chooseTrait(choice.options[0],choice.level,p);
+   }
+  }
+ }
 
  const ready=this.jobs.filter(j=>j.at<=this.time);this.jobs=this.jobs.filter(j=>j.at>this.time);for(const j of ready)j.run();
  this.processSkillEffects();
