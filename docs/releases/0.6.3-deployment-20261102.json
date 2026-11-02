@@ -1,0 +1,104 @@
+{
+  "activatedAt": "2026-11-02T01:19:26.551Z",
+  "version": "0.6.3",
+  "source": {
+    "repository": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5.git",
+    "ref": "refs/heads/main",
+    "branchHead": "2fc22006b6cc3c09a93860bf1d4688fb031734ad",
+    "commit": "2fc22006b6cc3c09a93860bf1d4688fb031734ad",
+    "previousCommit": "a8b522e07de16d5ef9d19d31292d31bde4323191",
+    "verifiedAt": "2026-11-02T01:19:26.520Z"
+  },
+  "activation": {
+    "ok": true,
+    "at": "2026-11-02T01:19:26.551Z",
+    "previous": "/home/colleague/apps/magic-siege-skill5/releases/hot-1e114acc-fee1-4296-b2da-15a5aded17a8",
+    "releaseDir": "/home/colleague/apps/magic-siege-skill5/releases/hot-19dfaf31-40b7-4b9b-b44b-0f78026e7bab",
+    "baseDigest": "b978491a0007db3ea81d956f70fd9feee99f7a8df751d076520a3a9c851afa1c",
+    "digest": "c935e4f127af3992e2e5be575a64a8d0bf61ac2fa238190f4a91b66551bd42b9",
+    "source": {
+      "repository": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5.git",
+      "ref": "refs/heads/main",
+      "branchHead": "2fc22006b6cc3c09a93860bf1d4688fb031734ad",
+      "commit": "2fc22006b6cc3c09a93860bf1d4688fb031734ad",
+      "previousCommit": "a8b522e07de16d5ef9d19d31292d31bde4323191",
+      "verifiedAt": "2026-11-02T01:19:26.520Z"
+    },
+    "battle": "preserve",
+    "previousMatchId": "207b5f61-c3f4-42c2-9de6-feb8c1c7fcf2",
+    "matchId": "207b5f61-c3f4-42c2-9de6-feb8c1c7fcf2",
+    "stateSchema": 2,
+    "accountSchema": 1,
+    "serverVersion": "0.6.3",
+    "clientVersion": "0.6.3",
+    "gameVersion": "0.6.0",
+    "protocolVersion": 3,
+    "revision": "innate-passives-clear-ranking-20261102",
+    "reloads": 8,
+    "changed": 13,
+    "removed": 0,
+    "verified": true
+  },
+  "backup": "/home/colleague/apps/magic-siege-skill5/shared/backups/pre-v0.6.3-20261102T011551Z",
+  "accountFiles": {
+    "accounts.json": {
+      "sha256": "529f2ac28ebc68ae835cf5167e32c9e5673fb4def32be2c8595548f651d48601",
+      "count": 17
+    },
+    "super-accounts.json": {
+      "sha256": "0bd4d5e4ac1c70f9dd3bb2daae26ed30186238355e5f0979951a6b7d4bb1af11",
+      "count": 2
+    }
+  },
+  "pid": "3119586",
+  "productionSmoke": {
+    "version": {
+      "serverVersion": "0.6.3",
+      "gameVersion": "0.6.0",
+      "clientVersion": "0.6.3",
+      "protocolVersion": 3
+    },
+    "health": {
+      "ok": true,
+      "version": 5,
+      "serverVersion": "0.6.3",
+      "gameVersion": "0.6.0",
+      "clientVersion": "0.6.3",
+      "protocolVersion": 3,
+      "revision": "innate-passives-clear-ranking-20261102",
+      "matchId": "207b5f61-c3f4-42c2-9de6-feb8c1c7fcf2",
+      "sequence": 3453780,
+      "clients": 0
+    },
+    "oldClientRejected": 409,
+    "updatesDisabled": 410,
+    "desktop": {
+      "title": "魔法王座 v0.6.3",
+      "login": true,
+      "matchId": "207b5f61-c3f4-42c2-9de6-feb8c1c7fcf2",
+      "innateEnabled": true,
+      "sseAdvanced": true,
+      "super": false,
+      "clearCancelVerified": false,
+      "clearExecuted": false,
+      "passivePanelVerified": true,
+      "contractedForQa": true,
+      "pageErrors": []
+    },
+    "repository": {
+      "title": "魔法王座 v0.6.3",
+      "login": true,
+      "matchId": "207b5f61-c3f4-42c2-9de6-feb8c1c7fcf2",
+      "innateEnabled": true,
+      "sseAdvanced": true,
+      "super": true,
+      "clearCancelVerified": true,
+      "clearExecuted": false,
+      "passivePanelVerified": false,
+      "contractedForQa": false,
+      "pageErrors": []
+    }
+  },
+  "clientPackageSha256": "69a30a87db2abe1a37c6303864968e1446853d6a91b9c430dc081746c4f0bac9",
+  "serverPackageSha256": "70103233f04c9c2ecf06ab01519fa83e181b2d8cb81e05918a00f265117d86b3"
+}
