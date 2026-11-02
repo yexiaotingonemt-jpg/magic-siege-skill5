@@ -1,4 +1,5 @@
 import { COMMON_TRAITS, commonId, commonRank } from "./common-traits.js";
+import { isCurrentDesign, currentTraits, currentTraitRank, currentSkill, drawCurrentQuality } from './current-design.js';
 // Authoritative trait catalogue. Counts are selection caps, never lottery weights.
 export const RARITIES = {
   blue: { name: "蓝色", color: "#78bdff" },
@@ -199,7 +200,7 @@ for (const classId of [0, 2, 3, 4, 5])
   );
 export const TRAIT_BY_ID = Object.fromEntries(TRAITS.map((t) => [t.id, t]));
 export const traitRank = (p, id) =>
-  p?.progress?.[TRAIT_BY_ID[id]?.classId]?.traits?.[id] || 0;
+  id?.startsWith('N') ? currentTraitRank(p,id) : p?.progress?.[TRAIT_BY_ID[id]?.classId]?.traits?.[id] || 0;
 export const rarityAt = (level) =>
   level % 10 === 0 ? "gold" : level % 5 === 0 ? "purple" : "blue";
 export const skillRanks = (level) => [1, 1, 1, level >= 5 ? 1 : 0];
@@ -216,6 +217,13 @@ export function prepareChoice(sim, p, classId = p.classId) {
   const progress = p.progress[classId],
     choice = progress.choices?.[0];
   if (!choice || choice.options) return choice;
+  if (isCurrentDesign(sim.config)) {
+    const catalogue=currentTraits(sim.config,classId), available=catalogue.filter(t=>(progress.traits[t.id]||0)<t.max);
+    if (!available.some(t=>t.rarity===choice.rarity)) choice.rarity=drawCurrentQuality(sim,progress,classId);
+    const pool=available.filter(t=>t.rarity===choice.rarity).map(t=>t.id);
+    for(let j=pool.length-1;j>0;j--){const k=Math.floor(sim.random()*(j+1));[pool[j],pool[k]]=[pool[k],pool[j]];}
+    choice.options=pool.slice(0,3);return choice;
+  }
   const pool = traitCandidates(
     progress,
     classId,
@@ -232,7 +240,7 @@ export function prepareChoice(sim, p, classId = p.classId) {
 export function chooseTrait(sim, p, id, level, classId = p.classId) {
   const progress = p.progress[classId],
     choice = prepareChoice(sim, p, classId),
-    t = TRAIT_BY_ID[id];
+    t = isCurrentDesign(sim.config) ? currentTraits(sim.config,classId).find(t=>t.id===id) : TRAIT_BY_ID[id];
   if (
     !choice ||
     choice.level !== level ||
@@ -249,6 +257,7 @@ export function chooseTrait(sim, p, id, level, classId = p.classId) {
   return true;
 }
 export function traitSkill(sim, h, i) {
+  if(isCurrentDesign(sim.config))return currentSkill(sim,h,i);
   const s = { ...sim.config.heroes[h.classId].skills[i] },
     p = sim.players[h.playerId],
     r = (id) => traitRank(p, id),

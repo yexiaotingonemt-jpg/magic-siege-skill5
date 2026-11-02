@@ -29,6 +29,6 @@ export function createEventStream(req,res,{gzip=true}={}){
   get writableNeedDrain(){return res.writableNeedDrain||encoder.writableNeedDrain;},
   write(data){return encoder.write(data);},
   end(){encoder.end();},
-  on(event,listener){res.on(event,listener);return this;},
+  on(event,listener){res.on(event,listener);if(event==='drain')encoder.on(event,listener);return this;},
  };
 }

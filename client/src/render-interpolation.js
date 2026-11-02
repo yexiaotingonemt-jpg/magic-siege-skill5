@@ -18,7 +18,7 @@ export function prepareRender(entity,previous,at,{time,speed=1,paused=false,dura
  const delta=time-(previous?._renderStamp??time),distance=previous?Math.hypot(entity.x-previous.x,entity.y-previous.y):0;
  const teleport=previous&&distance>Math.max(3,maxSpeed*Math.max(.05,delta)*2.5);
  const snap=paused||!previous||teleport,prior=snap?{x:entity.x,y:entity.y,vx:0,vy:0}:renderedPosition(previous,at);
- const blocked=paused||entity.stunUntil>time||entity.castUntil>time||entity.channelUntil>time||entity.dash||(entity.lastAttackAt!=null&&time-entity.lastAttackAt<.2);
+ const blocked=paused||entity.stunUntil>time||entity.castUntil>time||entity.channelUntil>time||entity.dash||entity.currentDash||(entity.lastAttackAt!=null&&time-entity.lastAttackAt<.2);
  let vx=0,vy=0;
  if(!snap&&!blocked&&delta>0&&delta<2){vx=(entity.x-previous.x)/delta*speed/1000;vy=(entity.y-previous.y)/delta*speed/1000;}
  const velocity=Math.hypot(vx,vy),limit=maxSpeed*speed*.0015;
