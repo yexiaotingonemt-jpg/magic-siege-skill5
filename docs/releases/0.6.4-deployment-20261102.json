@@ -1,0 +1,136 @@
+{
+  "activatedAt": "2026-11-02T02:04:07.033Z",
+  "version": "0.6.4",
+  "source": {
+    "repository": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5.git",
+    "ref": "refs/heads/main",
+    "branchHead": "eb9291fc4d1fe3ef9767e8b7ff58bd3805041e51",
+    "commit": "eb9291fc4d1fe3ef9767e8b7ff58bd3805041e51",
+    "previousCommit": "2fc22006b6cc3c09a93860bf1d4688fb031734ad",
+    "verifiedAt": "2026-11-02T02:04:07.001Z"
+  },
+  "activation": {
+    "ok": true,
+    "at": "2026-11-02T02:04:07.033Z",
+    "previous": "/home/colleague/apps/magic-siege-skill5/releases/hot-19dfaf31-40b7-4b9b-b44b-0f78026e7bab",
+    "releaseDir": "/home/colleague/apps/magic-siege-skill5/releases/hot-4bd8c1a7-1854-4a5d-bc65-655c689baac6",
+    "baseDigest": "c935e4f127af3992e2e5be575a64a8d0bf61ac2fa238190f4a91b66551bd42b9",
+    "digest": "f2d7f717b9272a8af731ceb038069a9d00ca931cca78f67b6992cd36de1b30b9",
+    "source": {
+      "repository": "https://github.com/yexiaotingonemt-jpg/magic-siege-skill5.git",
+      "ref": "refs/heads/main",
+      "branchHead": "eb9291fc4d1fe3ef9767e8b7ff58bd3805041e51",
+      "commit": "eb9291fc4d1fe3ef9767e8b7ff58bd3805041e51",
+      "previousCommit": "2fc22006b6cc3c09a93860bf1d4688fb031734ad",
+      "verifiedAt": "2026-11-02T02:04:07.001Z"
+    },
+    "battle": "preserve",
+    "previousMatchId": "207b5f61-c3f4-42c2-9de6-feb8c1c7fcf2",
+    "matchId": "207b5f61-c3f4-42c2-9de6-feb8c1c7fcf2",
+    "stateSchema": 2,
+    "accountSchema": 1,
+    "serverVersion": "0.6.4",
+    "clientVersion": "0.6.4",
+    "gameVersion": "0.6.0",
+    "protocolVersion": 3,
+    "revision": "render-interpolation-culling-20261102",
+    "reloads": 9,
+    "changed": 3,
+    "removed": 0,
+    "verified": true
+  },
+  "backup": "/home/colleague/apps/magic-siege-skill5/shared/backups/pre-v0.6.4-20261102T020339Z",
+  "accountFiles": {
+    "accounts.json": {
+      "sha256": "529f2ac28ebc68ae835cf5167e32c9e5673fb4def32be2c8595548f651d48601",
+      "count": 17
+    },
+    "super-accounts.json": {
+      "sha256": "0bd4d5e4ac1c70f9dd3bb2daae26ed30186238355e5f0979951a6b7d4bb1af11",
+      "count": 2
+    }
+  },
+  "pid": "3119586",
+  "productionSmoke": {
+    "version": {
+      "serverVersion": "0.6.4",
+      "gameVersion": "0.6.0",
+      "clientVersion": "0.6.4",
+      "protocolVersion": 3
+    },
+    "health": {
+      "ok": true,
+      "version": 5,
+      "serverVersion": "0.6.4",
+      "gameVersion": "0.6.0",
+      "clientVersion": "0.6.4",
+      "protocolVersion": 3,
+      "revision": "render-interpolation-culling-20261102",
+      "matchId": "207b5f61-c3f4-42c2-9de6-feb8c1c7fcf2",
+      "sequence": 3455684,
+      "clients": 0
+    },
+    "oldClientRejected": 409,
+    "updatesDisabled": 410,
+    "desktop": {
+      "title": "魔法王座 v0.6.4",
+      "login": true,
+      "matchId": "207b5f61-c3f4-42c2-9de6-feb8c1c7fcf2",
+      "innateEnabled": true,
+      "sseAdvanced": true,
+      "battlePaused": false,
+      "unitCount": 56,
+      "super": false,
+      "clearCancelVerified": false,
+      "clearExecuted": false,
+      "passivePanelVerified": true,
+      "contractedForQa": false,
+      "visibility": {
+        "hidden": false,
+        "focused": true,
+        "state": "visible"
+      },
+      "timing": {
+        "frames": 479,
+        "mean": 16.684551148175697,
+        "p95": 18.5,
+        "max": 23.100000023841858,
+        "over50ms": 0,
+        "visualClockStalledMs": null,
+        "maxSnapshotAgeMs": 222.9000000357628
+      },
+      "pageErrors": []
+    },
+    "repository": {
+      "title": "魔法王座 v0.6.4",
+      "login": true,
+      "matchId": "207b5f61-c3f4-42c2-9de6-feb8c1c7fcf2",
+      "innateEnabled": true,
+      "sseAdvanced": true,
+      "battlePaused": false,
+      "unitCount": 53,
+      "super": true,
+      "clearCancelVerified": true,
+      "clearExecuted": false,
+      "passivePanelVerified": false,
+      "contractedForQa": false,
+      "visibility": {
+        "hidden": false,
+        "focused": true,
+        "state": "visible"
+      },
+      "timing": {
+        "frames": 479,
+        "mean": 16.682881002013023,
+        "p95": 18.599999964237213,
+        "max": 22.700000047683716,
+        "over50ms": 0,
+        "visualClockStalledMs": 0,
+        "maxSnapshotAgeMs": 226.39999997615814
+      },
+      "pageErrors": []
+    }
+  },
+  "clientPackageSha256": "0876c3c70a3a9d89d0df6c413f30676ea9609fdc6c8bbec2df90d6f4d7a246c2",
+  "serverPackageSha256": "5cbffbae56c13a85ba890c8bd0c7bc3365b4ac46a5853d668d5fc0c23ce4b3bf"
+}
