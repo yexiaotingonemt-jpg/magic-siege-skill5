@@ -7,7 +7,7 @@ import path from 'node:path';
 import {Simulation} from '../shared/simulation.js';
 import {contractType} from '../shared/config.js';
 import {createGameServer} from '../server/index.mjs';
-import {createCombatNumberModel} from '../client/src/combat-numbers.js';
+import {createCombatNumberModel,COMBAT_NUMBER_COLORS} from '../client/src/combat-numbers.js';
 
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
 const advance=(s,n)=>{const end=s.time+n;while(s.time<end-1e-8)s.tick(Math.min(.05,end-s.time));};
@@ -42,10 +42,10 @@ test('击杀飘字只记录剩余生命，目标从战场移除后仍保留命�
  const {s,p,enemy}=arena();enemy.hp=17;const pos={x:enemy.x,y:enemy.y};s.cast(0,p);advance(s,.4);
  const [e]=numbers(s);near(e.amount,17);near(e.hpDamage,17);assert.equal(s.get(enemy.id),undefined);assert.deepEqual(e.to,pos);assert.equal(e.targetId,enemy.id);
 });
-test('没有真实伤害、普通攻击、反伤和非英雄伤害均不产生技能伤害飘字',()=>{
+test('零伤害不产生飘字，普攻、反伤和小兵对英雄的伤害均有实际反馈',()=>{
  const {s,p,h,enemy,target}=arena();s.cast(0,p);s.skillValues.at(-1).limit=0;advance(s,.4);assert.deepEqual(numbers(s),[]);
  s.damage(h,enemy,100,true);s.damage(h,enemy,100);s.damage(h,enemy,100,false,true,{value:{skill:0,limit:1000,spent:0,parts:{}}});
- const soldier=target(0,0,h.side);s.damage(soldier,enemy,100,false,false,{value:{skill:0,limit:1000,spent:0,parts:{}}});assert.deepEqual(numbers(s),[]);
+ const soldier=target(0,0,h.side);s.damage(soldier,enemy,100,false,false,{value:{skill:0,limit:1000,spent:0,parts:{}}});assert.equal(numbers(s).length,4);assert.ok(numbers(s).every(e=>e.amount>0&&e.targetPlayerId===enemy.playerId));
 });
 test('群攻对每个实际命中的英雄与小兵分别生成独立事件',()=>{
  const {s,p,h,enemy,target}=arena(3),soldiers=[target(-2,-3),target(2,-3)];s.cast(0,p);advance(s,.4);
@@ -64,7 +64,7 @@ test('冲锋沿途伤害产生飘字且同一目标不重复记录',()=>{
 test('领主大招的附加伤害飘字与普通攻击主目标分开，完整持续期间附加伤害不被统一额度截断',()=>{
  const {s,p,h,enemy,target}=arena(3),extras=[target(-1,-3),target(1,-3)];s.cast(3,p);advance(s,.4);s.afterBasicAttack(h,enemy);
  assert.equal(numbers(s).length,2);for(const e of numbers(s)){assert.equal(e.skill,3);assert.ok(extras.some(u=>u.id===e.targetId));near(e.amount,h.attack*1.4);}
- s.damage(h,enemy,h.attack,true);assert.equal(numbers(s).length,2);for(let i=0;i<3;i++)s.afterBasicAttack(h,enemy);const count=numbers(s).length;s.afterBasicAttack(h,enemy);assert.equal(numbers(s).length,count+2);
+ s.damage(h,enemy,h.attack,true);assert.equal(numbers(s).length,3);for(let i=0;i<3;i++)s.afterBasicAttack(h,enemy);const count=numbers(s).length;s.afterBasicAttack(h,enemy);assert.equal(numbers(s).length,count+2);
 });
 test('来源阵亡后的在途技能炮弹仍同步原英雄身份和实际伤害',()=>{
  const {s,p,h,enemy}=arena(2);enemy.y=10;enemy.hp=enemy.maxHp=10000;s.cast(0,p);advance(s,.4);h.hp=1;s.damage(null,h,2);advance(s,2);
@@ -114,8 +114,50 @@ test('飘字总池与每目标数量均受控，目标内合并保留所有金�
  s.sequence++;s.animations.push(floatEvent(4,.6,{targetId:3}),floatEvent(5,.6,{targetId:4}));model.update(s,200);assert.equal(model.entries.length,3);assert.ok(model.stats.dropped>0);
 });
 
-test('密集同目标同阵营爆发跨来源合并，保留总金额、护盾分量和本人优先级',()=>{
+test('密集同目标爆发只合并与本人相关的来源，不混入同阵营其他人的伤害',()=>{
  const model=createCombatNumberModel(),s=floatState();model.update(s,0);s.sequence++;s.time=.15;
  s.animations=[floatEvent(1,.1,{sourceId:5,amount:10,hpDamage:8,shieldDamage:2}),floatEvent(2,.12,{sourceId:1,skill:1,amount:20,hpDamage:15,shieldDamage:5})];
- model.update(s,100);assert.equal(model.entries.length,1);const e=model.entries[0];near(e.amount,30);near(e.hpDamage,23);near(e.shieldDamage,7);assert.deepEqual(e.eventIds,[1,2]);assert.deepEqual(new Set(e.sourceIds),new Set([5,1]));assert.equal(e.priority,3);
+ model.update(s,100);assert.equal(model.entries.length,1);const e=model.entries[0];near(e.amount,20);near(e.hpDamage,15);near(e.shieldDamage,5);assert.deepEqual(e.eventIds,[2]);assert.deepEqual(e.sourceIds,[1]);assert.equal(e.priority,3);
+});
+
+
+test('四类个人飘字按归属筛选与着色，其他人之间的伤害和治疗全部隐藏',()=>{
+ const model=createCombatNumberModel(),s=floatState();s.player.id=0;model.update(s,0);s.sequence++;s.time=.1;
+ s.animations=[
+  floatEvent(1,.1,{sourcePlayerId:0}),
+  floatEvent(2,.1,{kind:'heal',sourcePlayerId:0,targetId:3}),
+  floatEvent(3,.1,{sourceId:4,sourcePlayerId:9,targetId:1,targetPlayerId:0}),
+  floatEvent(4,.1,{kind:'heal',sourceId:5,sourcePlayerId:8,targetId:1,targetPlayerId:0}),
+  floatEvent(5,.1,{sourceId:5,sourcePlayerId:8,targetId:3,side:0}),
+  floatEvent(6,.1,{kind:'heal',sourceId:5,sourcePlayerId:8,targetId:3,side:0}),
+ ];
+ model.update(s,100);assert.deepEqual(model.entries.map(e=>e.eventIds),[[1],[2],[3],[4]]);
+ assert.deepEqual(model.entries.map(e=>e.color),['#ffffff','#5aaeff','#ff5c5c','#66e28a']);
+});
+test('自己治疗自己只显示一次绿色，来源与目标未知时不误认为本人',()=>{
+ const model=createCombatNumberModel(),s=floatState();s.player.id=0;model.update(s,0);s.sequence++;s.time=.1;
+ s.animations=[floatEvent(1,.1,{kind:'heal',sourcePlayerId:0,targetId:1,targetPlayerId:0})];model.update(s,100);
+ assert.equal(model.entries.length,1);assert.equal(model.entries[0].color,COMBAT_NUMBER_COLORS.healingReceived);
+ const spectator=createCombatNumberModel(),view={...floatState(),player:{id:0,heroId:null,side:0}};spectator.update(view,0);
+ view.sequence++;view.time=.1;view.animations=[floatEvent(1,.1,{sourceId:null,sourcePlayerId:null,targetId:null,targetPlayerId:null})];spectator.update(view,100);assert.deepEqual(spectator.entries,[]);
+});
+test('伤害与治疗不合并或相抵，数量达到上限时也保持类型独立',()=>{
+ const model=createCombatNumberModel({maxPerTarget:2}),s=floatState();model.update(s,0);s.sequence++;s.time=.1;
+ s.animations=[floatEvent(1),floatEvent(2,.1,{kind:'heal'}),floatEvent(3,.11),floatEvent(4,.5,{kind:'heal',amount:30})];s.time=.5;
+ model.update(s,100);assert.equal(model.entries.length,2);assert.deepEqual(model.entries.map(e=>[e.kind,e.amount]),[['damage',20],['heal',40]]);
+ const limited=createCombatNumberModel({maxPerTarget:1});s.sequence=0;s.animations=[];limited.update(s,0);s.sequence++;s.animations=[floatEvent(1),floatEvent(2,.1,{kind:'heal'})];limited.update(s,100);
+ assert.equal(limited.entries[0].amount,10);assert.equal(limited.entries[0].kind,'damage');assert.equal(limited.stats.dropped,1);
+});
+test('英雄阵亡、重新契约与召唤物的飘字按玩家身份识别，不只依赖当前英雄ID',()=>{
+ const model=createCombatNumberModel(),s=floatState();s.player={id:0,heroId:99,side:0};model.update(s,0);s.sequence++;s.time=.1;
+ s.animations=[floatEvent(1,.1,{sourceId:88,sourcePlayerId:0}),floatEvent(2,.1,{kind:'heal',sourceId:88,sourcePlayerId:0,targetId:88,targetPlayerId:0})];model.update(s,100);
+ assert.equal(model.entries.length,2);assert.equal(model.entries[0].color,COMBAT_NUMBER_COLORS.damageDealt);assert.equal(model.entries[1].color,COMBAT_NUMBER_COLORS.healingReceived);
+});
+test('有效治疗事件只记录实际回血，满血不产生数值，伤害与召唤物保留玩家归属',()=>{
+ const {s,p,h,enemy,target}=arena(2);h.hp=h.maxHp-25;
+ near(s.heal(h,100,h),25);const heal=s.animations.find(e=>e.kind==='heal');near(heal.amount,25);assert.equal(heal.sourcePlayerId,p.id);assert.equal(heal.targetPlayerId,p.id);assert.equal(heal.targetId,h.id);
+ s.heal(h,100,h);assert.equal(s.animations.filter(e=>e.kind==='heal').length,1);
+ const summoned=target(0,0,h.side);Object.assign(summoned,{summoned:true,ownerId:h.id});s.summonOwners.set(h.id,h);
+ h.hp=0;s.units=s.units.filter(u=>u!==h);s.damage(summoned,enemy,10,true);const damage=numbers(s).at(-1);assert.equal(damage.sourceId,summoned.id);assert.equal(damage.sourcePlayerId,p.id);assert.equal(damage.targetPlayerId,enemy.playerId);
+ s.damage(null,enemy,10);assert.equal(numbers(s).at(-1).sourcePlayerId,null);assert.equal(numbers(s).at(-1).targetPlayerId,enemy.playerId);
 });

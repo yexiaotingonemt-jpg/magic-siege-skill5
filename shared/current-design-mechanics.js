@@ -345,6 +345,7 @@ export function currentHeal(t,n,u,value=null,derived=false) {
   if (t.currentNextHealDown?.until>this.time) {down=Math.max(down,t.currentNextHealDown.ratio);t.currentNextHealDown=null;}
   const wanted=n*(1+(v.healing_received||0))*heat*(1-down)*(t.healingBoostUntil>this.time?1+t.healingBoost:1),actual=Math.min(wanted,t.maxHp-t.hp);
   t.hp+=actual;spend(value,actual,'治疗');this.stat(u,'healing',actual);
+  if (actual>0) this.healthVisual('heal',u,t,{amount:actual});
   if (actual>0&&u?.hero) {recordEffectiveHeal(u,t,this.time);this.visual('healing',u,t,{skill:value?.skill??0,until:this.time+.55});}
   if (!derived) {
     for (const f of [...this.fields]) if (actual>0&&f.kind==='link'&&f.until>this.time&&f.owner.hp>0) {
