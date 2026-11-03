@@ -5,6 +5,8 @@ import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {EventEmitter} from 'node:events';
 import {Writable} from 'node:stream';
+import http from 'node:http';
+import {gunzipSync} from 'node:zlib';
 import {createGameServer} from '../server/index.mjs';
 import {createLocalClient} from '../client/launcher.mjs';
 import {acceptsGzip,createEventStream} from '../server/event-stream.mjs';
@@ -47,6 +49,18 @@ test('差量订阅经过真实Gzip和本地代理还原同局全量状态，断�
 test('gzip negotiation respects explicit q=0, wildcard and absent encodings',()=>{
  for(const header of ['gzip','br, gzip;q=0.5','GZIP; q=1','gzip ; q=1','*;q=0.8'])assert.ok(acceptsGzip(header),header);
  for(const header of [undefined,'','identity','br','gzip;q=0','gzip;q=0, *;q=1','*;q=0','gzip;q=oops','gzip;q=2'])assert.equal(acceptsGzip(header),false,header);
+});
+
+test('完整状态HTTP响应也协商Gzip，经过本地代理后与未压缩状态一致，避免挤占实时同步',async t=>{
+ const {base,cookie,game,account}=await setup(t);game.room.player(account);
+ const read=encoding=>new Promise((resolve,reject)=>{
+  http.get(base+'/api/state',{headers:{Cookie:cookie,'Accept-Encoding':encoding,'X-Magic-Client-Version':CLIENT_VERSION,'X-Magic-Version':GAME_VERSION,'X-Magic-Protocol':String(PROTOCOL_VERSION)}},res=>{
+   const chunks=[];res.on('data',chunk=>chunks.push(chunk));res.on('end',()=>resolve({status:res.statusCode,headers:res.headers,body:Buffer.concat(chunks)}));res.on('error',reject);
+  }).on('error',reject);
+ });
+ const raw=await read('identity'),gzip=await read('gzip'),declined=await read('gzip;q=0');
+ assert.equal(raw.status,200);assert.equal(gzip.headers['content-encoding'],'gzip');assert.equal(gzip.headers.vary,'Accept-Encoding');assert.equal(declined.headers['content-encoding'],undefined);
+ assert.deepEqual(JSON.parse(gunzipSync(gzip.body)),JSON.parse(raw.body));assert.deepEqual(JSON.parse(declined.body),JSON.parse(raw.body));assert.ok(gzip.body.length<raw.body.length/3);
 });
 
 test('gzip and original SSE decode to identical snapshots through local proxy; commands and idle heartbeats flush immediately',async t=>{
