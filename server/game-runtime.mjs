@@ -7,6 +7,7 @@ import {DEFAULT_NPC_POLICY} from '../shared/npc-balance.js';
 import {liveConfig,clone,validateConfig} from '../shared/config.js';
 import {isCurrentDesign} from '../shared/current-design.js';
 import {planExperienceMigration} from '../shared/experience.js';
+import {contractHistoryPage} from '../shared/contract-history.js';
 const defaults=liveConfig();
 import {createEventStream} from './event-stream.mjs';
 import {SERVER_VERSION,CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION,RULESET_REVISION,UPDATE_REQUIRED_CODE} from '../shared/protocol.js';
@@ -40,6 +41,12 @@ export function createGameRuntime({dataDir=process.env.KC_DATA_DIR||path.join(ba
     if(url.pathname==='/api/me')return json(res,200,{account:accounts.public(a),playerId:room.player(a).id});
     if(url.pathname==='/api/events'){const stream=createEventStream(req,res,{gzip:sseGzip});stream.write(': connected\n\n');room.connect(a,stream);return;}
     if(url.pathname==='/api/state')return json(res,200,{...room.snapshot(),playerId:room.player(a).id});
+    if(url.pathname==='/api/contract-history'&&req.method==='GET'){
+     const id=url.searchParams.get('playerId');if(!/^\d{1,10}$/.test(id||''))return json(res,400,{error:'请选择有效玩家'});
+     const player=room.sim.players.find(p=>p.id===Number(id));if(!player)return json(res,404,{error:'该玩家已不在本局'});
+     const before=url.searchParams.get('before');if(before!=null&&!/^(?:\d+|prior-\d+)$/.test(before))return json(res,400,{error:'契约记录游标无效'});
+     return json(res,200,{matchId:room.matchId,player:{id:player.id,name:player.name,side:player.side,classId:player.classId,bot:player.bot,online:(room.online.get(player.accountId)||0)>0},...contractHistoryPage(room.sim,player,{before})});
+    }
     if(url.pathname==='/api/action'&&req.method==='POST'){const result=room.command(a,await body(req));return json(res,result.ok?200:400,result);}
     if(url.pathname==='/api/logout'&&req.method==='POST'){accounts.logout(req);for(const c of [...room.clients])if(c.account.id===a.id)c.res.end();return json(res,200,{ok:true},{'Set-Cookie':'kc_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0'});}
     return json(res,404,{error:'接口不存在'});
