@@ -141,6 +141,7 @@ input::placeholder {color:#81958a;opacity:1}
 .game .contract-popover p {color:#b9cabb;font-size:18px;line-height:1.7}
 .game .nearby-units button {border-color:#566e53;background:#1a3025;color:#b9cabb;border-radius:5px}
 .game .nearby-units button.selected {border-color:var(--ui-accent);background:#304c37;color:#eef0dc}
+.game #contractRoles button {flex:1;min-height:var(--touch-size);white-space:nowrap}
 .game .selected-health {border-color:#5c7558;border-radius:3px;background:#0c1c14}
 .game .selected-health i {background:#8abc99}
 .game .primary {background:linear-gradient(#537956,#315138);border-color:#97ac7e;color:#f1ead5}
