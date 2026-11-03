@@ -216,7 +216,7 @@ function runeImpact(sim,h,s,at,multiplier=1,repeat=false) {
       }
     }
   }
-  if (s.skill===1&&s.self_haste) sim.haste(h,'runeFrost',s.self_haste/n,s.duration);
+  if (s.skill===1&&s.self_haste) sim.haste(h,'runeFrost',s.self_haste/n,s.self_haste_duration??s.duration);
   if (s.skill===0&&!repeat&&s.extra_chance&&sim.random()<s.extra_chance) runeImpact(sim,h,s,at,multiplier,true);
 }
 export function impactCurrentSkill(b) {runeImpact(this,b.source,b.payload,{x:b.tx,y:b.ty});}
@@ -241,7 +241,7 @@ export function processCurrentEffects() {
     while (f.tick<=this.time+1e-7 && f.tick<=f.until+1e-7 && (f.remaining==null || f.remaining>0)) {
       if (f.kind==='currentDrain') {
         const u=this.get(f.host);
-        if (!u || distance(h,u)>s.range || u.immuneUntil>this.time) {f.until=this.time;break;}
+        if (!u || distance(h,u)>(s.break_range??s.range) || u.immuneUntil>this.time) {f.until=this.time;break;}
         const n=hurt(this,h,s,u,s.power/100,f.scale,{periodic:true});this.heal(h,n*s.drain,h,s.value);
         f.tick+=1;
       } else if (f.kind==='currentCorrosion') {

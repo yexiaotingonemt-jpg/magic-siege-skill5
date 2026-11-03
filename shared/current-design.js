@@ -78,7 +78,7 @@ export function inverseQualityWeights(means) {
   return Object.fromEntries(Object.entries(means).map(([key,value]) => [key,1/value]));
 }
 export function currentTraits(config, classId) {
-  return config.design.affixes.filter(t => classId == null || t.classId === classId).map(t => ({...t, description: describeAffix(t)}));
+  return config.design.affixes.filter(t => classId == null || t.classId === classId).map(t => ({...t, description: describeAffix(t,config.design)}));
 }
 export function currentValues(sim, h, slot = null, snapshot = null) {
   if(h?.playerId==null || h.classId==null)return {};
@@ -98,6 +98,7 @@ export function currentValues(sim, h, slot = null, snapshot = null) {
 export function currentSkill(sim,h,i) {
   const base = sim.config.design.skills[h.classId][i], delta = currentValues(sim,h,i), s = {...base};
   for (const [key,value] of Object.entries(delta)) s[key] = Number(base[key] || 0)+value;
+  if (h.classId===3 && i===3) s.shield_duration=s.duration;
   s.cd *= 1-(currentValues(sim,h).cdr || 0);
   return {...s, classId:h.classId, targetRange:s.range, castTime:s.cast, power:s.power*100, healPower:(s.heal || 0)*100,
     skill:i, bonusDamage:h.eliteBuffs?.arcane > sim.time ? 0.1 : 0, ranks:{...(sim.players[h.playerId]?.progress[h.classId]?.traits || {})}};
@@ -135,7 +136,10 @@ const units={power:'伤害／攻击力',heal:'治疗／攻击力',per_hit:'每�
   damage_targets:'转伤目标数',twin:'额外治疗比例',attack_per_cleanse:'每个净化增攻',healing_boost:'受到治疗提高',over_shield:'过量转盾比例',counter:'治疗转伤比例',
   heal_down:'下次治疗降低',extra_chance:'追加攻击概率',dot_chance:'腐蚀概率',dot_hp:'每秒目标生命伤害',hp_ratio:'目标生命伤害比例',cap:'伤害上限／攻击力',attack_slow:'降低攻速',self_haste:'自身攻速增益',move_damage:'每格位移伤害／攻击力',ramp:'逐炮增伤',
   slow:'降低移速',echo:'返回波伤害比例',pull:'牵引格',death_slow:'反伤击杀降低攻速',shield:'护盾／最大生命',lifesteal:'技能吸血',summon:'护卫数量',initial_heat:'初始炙热层',heat_duration_extra:'炙热保留秒',heat_cap_extra:'炙热上限层',heat_haste_extra:'每层炙热额外攻速',heat_attack_proc:'每层获热耗热增攻',elf_damage_bonus:'治疗转伤提高',elf_extra_targets:'转伤目标数',attack_bonus:'攻击力',missing_attack:'缺血增攻',missing_lifesteal:'缺血吸血',share_relief:'减轻分担衰减',building_bonus:'对建筑伤害提高',range_bonus:'普攻距离格',hp_bonus:'最大生命',move_bonus:'移动速度',healing_received:'受到治疗提高',cdr:'冷却缩减',tower_reduction:'对塔减伤',final_reduction:'最终减伤',final_damage:'最终增伤'};
-export function describeAffix(t) {
+export function describeAffix(t,design=null) {
+  if (design && t.sourceId===55) return `自身攻击速度提高${t.values.map(row=>pct(row[0]-t.baseline[0])).join('/')}除以分担目标数，持续${design.skills[2][1].self_haste_duration}秒（上限${t.max}档）。`;
+  if (t.sourceId===75) return `开启君临时，获得相当于最大生命${t.values.map(row=>pct(row[0]-t.baseline[0])).join('/')}的护盾，持续至君临结束（上限${t.max}档）。`;
+  if (design && t.sourceId===78) return `每累计受到最大生命${pct(design.rules.lordPassiveThreshold)}的伤害，受到的伤害降低${pct(design.rules.lordPassiveReduction)}，持续${design.rules.lordPassiveDuration}秒（上限${t.max}档）。`;
   return t.keys.map((key,j) => `${units[key] || t.name}：${t.values.map(row => {
     const delta=row[j]-t.baseline[j];
     if(['immortal','pierce','split','drag','passive_dr'].includes(key))return delta?'获得此能力':'未激活';
@@ -144,7 +148,7 @@ export function describeAffix(t) {
 }
 export function describeCurrentSkill(s) {
   const P=pct(s.power/100), D=f(s.duration), T=s.targets;
-  return {0:[`汲取${D}秒，每秒${P}攻击伤害并恢复实际伤害量生命。最多${T}名目标，额外目标按${pct(s.secondary)}结算。`,
+  return {0:[`汲取${D}秒，每秒${P}攻击伤害并恢复实际伤害量生命。最多${T}名目标，额外目标按${pct(s.secondary)}结算；连接距离超过${f(s.break_range??s.range)}格时中断。`,
     `自身及附近${T}名友军减伤${pct(s.reduction)}，持续${D}秒。`,
     `与友军换位，按其缺失生命比例×${pct(s.reduction_per_lost)}获得减伤，最高${pct(s.reduction_cap)}，持续${D}秒。`,
     `记录${D}秒内实际承伤，结束按${f(s.store_gain)}倍转成${s.shield_duration}秒护盾。`],
@@ -155,11 +159,11 @@ export function describeCurrentSkill(s) {
     `净化${s.range}格内${T}名友军，每移除1个负面恢复${pct(s.heal_per_cleanse)}攻击力的生命。`,
     `自身和${T}名友军每次恢复${pct(s.heal)}攻击力生命，共${s.pulses}次，持续吟唱${D}秒。`],
     2:[`命中最多${T}人，分担前伤害为目标生命${pct(s.hp_ratio)}，上限${pct(s.cap)}自身攻击。`,
-    `命中最多${T}人，分担前${P}攻击伤害、降低${pct(s.attack_slow)}攻速${D}秒。`,
+    `命中最多${T}人，分担前${P}攻击伤害、降低${pct(s.attack_slow)}攻速${D}秒。${s.self_haste?`自身攻击速度提高${pct(s.self_haste)}除以命中人数，持续${s.self_haste_duration??s.duration}秒。`:''}`,
     `命中最多${T}人，分担前${P}攻击伤害、击退${s.knock}格。`,
-    `固定落点炮击${s.shots}次，间隔${s.gap}秒，每炮${P}攻击伤害并叠加减速。`],
+    `固定落点半径${s.radius}格内炮击${s.shots}次，间隔${s.gap}秒，每炮${P}攻击伤害并使移速降低${pct(s.slow_per)}，最多${s.slow_cap}层。`],
     3:[`震荡最多${T}名敌人，各受${P}攻击伤害、降攻${pct(s.attack_down)}，持续${D}秒。`,
     `尖刺外壳${D}秒，受到攻击向攻击者反弹其攻击力${pct(s.thorn)}的伤害。`,
     `向目标冲锋，晕眩${s.stun}秒，沿途最多${T}人各受${P}攻击伤害。`,
-    `君临${D}秒，免疫负面；普攻对主目标周围最多${T}名敌人造成${P}攻击伤害。`]}[s.classId]?.[s.skill] || '';
+    `君临${D}秒，免疫负面；普攻对主目标周围最多${T}名敌人造成${P}攻击伤害。${s.shield?`开启时获得最大生命${pct(s.shield)}的护盾，持续至君临结束。`:''}`]}[s.classId]?.[s.skill] || '';
 }

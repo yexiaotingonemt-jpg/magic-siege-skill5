@@ -8,7 +8,7 @@ export const CURRENT_DESIGN = {
     "0": [
       {
         "name": "汲血连接",
-        "description": "持续汲取目标生命3秒，每秒造成相当于攻击力150%的伤害，并恢复等量生命。",
+        "description": "持续汲取目标生命3秒，每秒造成相当于攻击力150%的伤害，并恢复等量生命；连接距离超过10格时中断。",
         "cost": 1,
         "cd": 6.0,
         "cast": 0.25,
@@ -20,7 +20,8 @@ export const CURRENT_DESIGN = {
         "drain": 1.0,
         "vuln": 0.0,
         "secondary": 0.2,
-        "channel": true
+        "channel": true,
+        "break_range": 10
       },
       {
         "name": "守护战吼",
@@ -39,7 +40,7 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "换位救援",
-        "description": "与1名友军交换位置。该友军每损失1%生命，自身获得0.5%减伤，持续2.5秒。",
+        "description": "与1名友军交换位置。该友军每损失1%生命，自身获得0.5%减伤，持续4秒。",
         "cost": 2,
         "cd": 20.0,
         "cast": 0.25,
@@ -47,7 +48,7 @@ export const CURRENT_DESIGN = {
         "radius": 3.0,
         "targets": 1,
         "power": 0.0,
-        "duration": 2.5,
+        "duration": 4,
         "reduction_per_lost": 0.5,
         "reduction_cap": 0.5,
         "heal": 0.0,
@@ -94,7 +95,7 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "焚魂标记",
-        "description": "标记1名敌人，持续3.2秒。攻击命中被标记敌人时，附加相当于攻击力100%的伤害，并有30%的概率获得1层炙热。",
+        "description": "标记1名敌人，持续5秒。攻击命中被标记敌人时，附加相当于攻击力100%的伤害，并有30%的概率获得1层炙热。",
         "cost": 1,
         "cd": 10.0,
         "cast": 0.25,
@@ -102,7 +103,7 @@ export const CURRENT_DESIGN = {
         "radius": 3.0,
         "targets": 1,
         "power": 0.0,
-        "duration": 3.2,
+        "duration": 5,
         "per_hit": 1.0,
         "heat_chance": 0.3,
         "vuln": 0.0,
@@ -177,11 +178,11 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "献生净化",
-        "description": "净化4格内最多2名友军的负面状态；每成功净化1个状态，为该友军恢复相当于攻击力256%的生命。",
+        "description": "净化6格内最多2名友军的负面状态；每成功净化1个状态，为该友军恢复相当于攻击力256%的生命。",
         "cost": 2,
         "cd": 20.0,
         "cast": 0.25,
-        "range": 4.0,
+        "range": 6,
         "radius": 3.0,
         "targets": 2,
         "power": 0.0,
@@ -245,7 +246,8 @@ export const CURRENT_DESIGN = {
         "power": 2.0,
         "duration": 8.0,
         "attack_slow": 0.15,
-        "self_haste": 0
+        "self_haste": 0,
+        "self_haste_duration": 10
       },
       {
         "name": "震荡炮弹",
@@ -264,19 +266,19 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "定点连轰",
-        "description": "向当前目标所在位置连续炮击4次，间隔0.7秒，每次造成相当于攻击力600%的伤害，并使移动速度降低6%，最多叠加3层，持续3秒。",
+        "description": "向当前目标所在位置连续炮击4次，作用半径4格，间隔0.7秒，每次造成相当于攻击力600%的伤害，并使移动速度降低30%，最多叠加3层，持续3秒。",
         "cost": 3,
         "cd": 40.0,
         "cast": 0.25,
         "range": 12.0,
-        "radius": 1.6,
+        "radius": 4,
         "targets": 1,
         "power": 6.0,
         "duration": 2.8,
         "shots": 4,
         "gap": 0.7,
         "channel": true,
-        "slow_per": 0.06,
+        "slow_per": 0.3,
         "slow_cap": 3,
         "slow_duration": 3.0,
         "ramp": 0.0
@@ -302,7 +304,7 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "尖刺外壳",
-        "description": "为自身披上尖刺外壳，持续1.2秒。期间每次受到攻击时，对攻击者反弹相当于其攻击力150%的伤害。",
+        "description": "为自身披上尖刺外壳，持续5秒。期间每次受到攻击时，对攻击者反弹相当于其攻击力150%的伤害。",
         "cost": 1,
         "cd": 10.0,
         "cast": 0.25,
@@ -310,7 +312,7 @@ export const CURRENT_DESIGN = {
         "radius": 3.0,
         "targets": 1,
         "power": 0.0,
-        "duration": 1.2,
+        "duration": 5,
         "reduction": 0.0,
         "thorn": 1.5,
         "attack_down": 0,
@@ -334,7 +336,7 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "灭军君临",
-        "description": "进入君临状态，持续3秒。期间免疫负面效果，每次普通攻击还会对主目标周围最多2名敌人造成相当于攻击力400%的伤害。",
+        "description": "进入君临状态，持续5秒。期间免疫负面效果，每次普通攻击还会对主目标周围最多2名敌人造成相当于攻击力400%的伤害。",
         "cost": 3,
         "cd": 40.0,
         "cast": 0.25,
@@ -342,9 +344,9 @@ export const CURRENT_DESIGN = {
         "radius": 7.0,
         "targets": 2,
         "power": 4.0,
-        "duration": 3.0,
+        "duration": 5,
         "shield": 0,
-        "shield_duration": 1.0,
+        "shield_duration": 5,
         "lifesteal": 0,
         "summon": 0,
         "summon_duration": 6.0
@@ -1815,7 +1817,7 @@ export const CURRENT_DESIGN = {
       "classId": 2,
       "skill": 1,
       "name": "自身攻速提升",
-      "description": "自身攻击速度提高100%除以分担目标数，持续5秒（上限1档）。",
+      "description": "自身攻击速度提高200%除以分担目标数，持续10秒（上限1档）。",
       "max": 1,
       "rarity": "blue",
       "common": false,
@@ -1824,7 +1826,7 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          1.0
+          2.0
         ]
       ],
       "baseline": [
@@ -2281,7 +2283,7 @@ export const CURRENT_DESIGN = {
       "classId": 3,
       "skill": 3,
       "name": "释放护盾",
-      "description": "君临期间获得相当于最大生命4%/8.2%的护盾（上限2档）。",
+      "description": "开启君临时，获得相当于最大生命4%/8.2%的护盾，持续至君临结束（上限2档）。",
       "max": 2,
       "rarity": "purple",
       "common": false,
@@ -2350,7 +2352,7 @@ export const CURRENT_DESIGN = {
       "classId": 3,
       "skill": null,
       "name": "累计受伤减伤",
-      "description": "每累计受到最大生命25%的伤害，受到的伤害降低8%，持续3秒（上限1档）。",
+      "description": "每累计受到最大生命10%的伤害，受到的伤害降低8%，持续5秒（上限1档）。",
       "max": 1,
       "rarity": "gold",
       "common": false,
@@ -4064,9 +4066,9 @@ export const CURRENT_DESIGN = {
     "orcMissingReduction": 0.25,
     "lordMinionKills": 3,
     "lordKillHeal": 0.02,
-    "lordPassiveThreshold": 0.25,
+    "lordPassiveThreshold": 0.1,
     "lordPassiveReduction": 0.08,
-    "lordPassiveDuration": 3,
+    "lordPassiveDuration": 5,
     "shareTotals": [
       0,
       1,

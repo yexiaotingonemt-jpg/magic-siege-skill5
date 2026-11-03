@@ -96,10 +96,14 @@ test('战车先合计衰减再均分，冰霜无腐蚀前置，减疗只消耗�
   affix(s,p,49);p.cd[0]=0;assert.ok(s.cast(0,p));advance(s,1);
   enemy.hp=enemy.maxHp-1000;near(s.heal(enemy,100,enemy),50);near(s.heal(enemy,100,enemy),100);
 });
-test('领主尖刺外壳按攻击者攻击反伤，并保留自身归属',()=>{
+test('领主尖刺外壳持续5秒，按攻击者攻击反伤并保留自身归属',()=>{
   const {s,p,h,enemy}=arena(3);assert.equal(s.configSkillName(3,1),'尖刺外壳');
+  const start=s.time,castTime=currentSkill(s,h,1).castTime;
   assert.ok(s.cast(1,p));advance(s,.3);const before=enemy.hp,A=s.attackPower(enemy);
   s.damage(enemy,h,1,true);near(before-enemy.hp,A*1.5);assert.ok(h.stats.heroDamage>0);
+  const end=h.currentShell.until;near(end-start-castTime,5);
+  s.time=end-1;const during=enemy.hp;s.damage(enemy,h,1,true);assert.ok(enemy.hp<during);
+  s.time=end;const expired=enemy.hp;s.damage(enemy,h,1,true);near(enemy.hp,expired);
 });
 test('领主固有击杀续航和随机单状态净化，积分奖励不进驱散池',()=>{
   const {s,h,enemy}=arena(3);h.hp=h.maxHp/2;
@@ -130,10 +134,68 @@ test('积分与KDA读同版配置，客户端显示服务端KDA及真实技能�
   s.config.design.skills[3][1].thorn=2;assert.ok(describeAbilities(s).skills[1].summary.includes('200%'));
 });
 test('配置拒绝无效概率、间隔和词条结构；保留钉钉尚未平衡的原值',()=>{
-  const c=createCurrentDesignConfig(defaults);assert.equal(c.design.skills[3][1].duration,1.2);assert.equal(c.design.status,'待平衡');
+  const c=createCurrentDesignConfig(defaults);assert.equal(c.design.skills[3][1].duration,5);assert.equal(c.design.status,'待平衡');
   for(const change of [x=>x.design.qualityWeights.gold=0,x=>x.design.rules.pierceGap=0,x=>x.design.affixes[0].values[0][0]=NaN]) {
     const next=clone(c);change(next);assert.throws(()=>validateConfig(next));
   }
+});
+test('远距离焚魂标记在目标轻微移动后仍有后续命中窗口',()=>{
+  const {s,p,h,enemy}=arena(4);Object.assign(h,{speed:2,cd:0});enemy.y=12;
+  s.setManualTarget(enemy.id,p);assert.ok(s.cast(1,p));advance(s,.5);enemy.y+=.1;
+  let procs=0;const damage=s.damage.bind(s);
+  s.damage=(a,t,n,basic=false,reflected=false,meta={})=>{if(a?.id===h.id&&meta.value?.skill===1&&meta.derived)procs++;return damage(a,t,n,basic,reflected,meta);};
+  advance(s,4.7);assert.ok(procs>=2,`标记只兑现${procs}次`);
+});
+test('君临在8格外开启后接敌仍能兑现强化普攻',()=>{
+  const {s,p,h,enemy,make}=arena(3);Object.assign(h,{speed:2,cd:0});enemy.y=-8;
+  const extra=make(0,.5,-8).h;extra.hp=extra.maxHp=1e7;s.setManualTarget(enemy.id,p);
+  let procs=0;const damage=s.damage.bind(s);
+  s.damage=(a,t,n,basic=false,reflected=false,meta={})=>{if(a?.id===h.id&&meta.value?.skill===3&&meta.derived)procs++;return damage(a,t,n,basic,reflected,meta);};
+  assert.ok(s.cast(3,p));advance(s,5.2);assert.ok(procs>0);
+});
+test('君临护盾在基础及两档延长窗口内保留，到期同时结束',()=>{
+  for(const rank of [0,1,2]){
+    const {s,p,h}=arena(3);affix(s,p,75);if(rank)affix(s,p,74,rank);
+    assert.ok(s.cast(3,p));advance(s,.3);const end=h.currentUlt.until;
+    near(h.shieldUntil,end);advance(s,end-s.time-.05);assert.ok(h.shield>0);
+    advance(s,.1);assert.equal(h.shield,0);assert.ok(h.currentUlt.until<=s.time);
+  }
+});
+test('救援减伤能覆盖2.8秒后才到达的攻击',()=>{
+  const {s,p,h,friend}=arena(0);friend.hp=friend.maxHp*.2;
+  s.setManualTarget(friend.id,p);assert.ok(s.cast(2,p));advance(s,2.8);
+  const before=h.hp;s.damage(null,h,1000);near(before-h.hp,600);
+});
+test('冰霜六目标自身攻速保留10秒，独立于敌方8秒减攻速',()=>{
+  const {s,p,h,enemy,make}=arena(2);for(let i=1;i<6;i++){const u=make(3,(i-3)*.3,3).h;u.hp=u.maxHp=1e7;}
+  affix(s,p,55);s.setManualTarget(enemy.id,p);assert.ok(s.cast(1,p));advance(s,1);
+  const enemyEnd=s.activeDebuffs(enemy,'attackSpeedDown')[0].until,ownEnd=h.hastes.runeFrost.until;
+  near(ownEnd-enemyEnd,2);near(s.attackRate(h),1+2/6);
+  advance(s,enemyEnd-s.time+.05);assert.equal(s.activeDebuffs(enemy,'attackSpeedDown').length,0);near(s.attackRate(h),1+2/6);
+  advance(s,ownEnd-s.time+.05);near(s.attackRate(h),1);
+});
+test('领主累计承伤10%后触发减伤，持续5秒并按时失效',()=>{
+  const {s,p,h}=arena(3);affix(s,p,78);const max=h.maxHp;
+  s.damage(null,h,max*.09);assert.ok(!(h.guards||[]).some(g=>g.kind==='lordEndurance'));
+  s.damage(null,h,max*.011);const guard=h.guards.find(g=>g.kind==='lordEndurance');assert.ok(guard);
+  advance(s,4.9);let before=h.hp;s.damage(null,h,100);near(before-h.hp,92);
+  advance(s,.2);before=h.hp;s.damage(null,h,100);near(before-h.hp,100);
+});
+test('净化无范围词条时可以救助典型前后排5格间距的友军',()=>{
+  const {s,p,friend,enemy}=arena(5);Object.assign(friend,{x:0,y:5});enemy.y=6.5;
+  s.debuff(friend,enemy,'attackDown',.2,8);s.setManualTarget(friend.id,p);assert.ok(s.cast(2,p));advance(s,.3);
+  assert.equal(s.hasNegative(friend),false);
+});
+test('汲血极限施法距离容许轻微离场，超过10格仍会断链',()=>{
+  const {s,p,h,enemy}=arena(0);enemy.y=6.5;s.setManualTarget(enemy.id,p);assert.ok(s.cast(0,p));advance(s,.5);enemy.y+=.1;
+  const before=enemy.hp;advance(s,.9);assert.ok(enemy.hp<before);const afterFirst=enemy.hp;
+  enemy.y=10.1;advance(s,2);near(enemy.hp,afterFirst);assert.ok(!s.fields.some(f=>f.kind==='currentDrain'&&f.owner.id===h.id));
+});
+test('定点连轰六炮可覆盖以2格每秒接近的移动目标',()=>{
+  const {s,p,h,enemy}=arena(2);Object.assign(enemy,{x:0,y:8,speed:2});s.setManualTarget(h.id,s.players[enemy.playerId]);
+  affix(s,p,61);s.setManualTarget(enemy.id,p);let hits=0;const damage=s.damage.bind(s);
+  s.damage=(a,t,n,basic=false,reflected=false,meta={})=>{if(a?.id===h.id&&meta.value?.skill===3&&!basic)hits++;return damage(a,t,n,basic,reflected,meta);};
+  assert.ok(s.cast(3,p));advance(s,5);assert.equal(hits,6);
 });
 test('全部词条职业实例在满档时真实施法，坐标、生命与快照保持有效',()=>{
   const config=createCurrentDesignConfig(defaults);
