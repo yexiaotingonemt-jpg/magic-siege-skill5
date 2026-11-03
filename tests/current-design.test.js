@@ -21,9 +21,9 @@ function arena(id=0,config=createCurrentDesignConfig(defaults)) {
 }
 function advance(s,seconds){for(let t=0;t<seconds-1e-7;t+=.05)s.tick(.05);}
 function affix(s,p,sourceId,rank=1){const t=currentTraits(s.config,p.classId).find(t=>t.sourceId===sourceId);assert.ok(t);p.progress[p.classId].traits[t.id]=rank;return t;}
-test('新版当前稿完整、可序列化；104条效果及五职业40次预算',()=>{
+test('新版当前稿完整、可序列化；105条效果及五职业40次预算',()=>{
   const config=createCurrentDesignConfig(defaults);validateConfig(config);
-  assert.equal(new Set(config.design.affixes.map(t=>t.sourceId)).size,104);
+  assert.equal(new Set(config.design.affixes.map(t=>t.sourceId)).size,105);
   for(const id of [0,4,5,2,3]) {
     const {s,p,h}=arena(id,config);assert.equal(p.level,0);assert.deepEqual(p.builds[id],[1,1,1,1]);
     for(const t of currentTraits(config,id)) {p.progress[id].traits[t.id]=t.max;if(t.skill!=null){const skill=currentSkill(s,h,t.skill);assert.ok(Number.isFinite(skill.power));}}
@@ -112,6 +112,31 @@ test('战车腐蚀炮弹以主目标计算总池，不同生命上限目标仍�
   Object.assign(s.config.design.skills[2][0],{hp_ratio:.1,cap:100,extra_chance:0,dot_chance:0});
   s.setManualTarget(enemy.id,p);assert.ok(s.cast(0,p));advance(s,1);
   near(1000-enemy.hp,45);near(4000-another.hp,45);
+});
+
+test('腐蚀炮弹取消攻击封顶：各等级、伤害词条档位及追加攻击沿用多人分担',()=>{
+  for(const level of [5,20,40])for(const rank of [0,1,2,3])for(const count of [1,2,6])for(const repeat of [false,true]) {
+    const {s,p,h,enemy,make}=arena(2);p.level=h.level=level;s.addXp=()=>{};refreshCurrentStats(s,h);
+    if(rank)affix(s,p,52,rank);
+    const victims=[enemy];
+    for(let i=1;i<count;i++)victims.push(make(3,i*.2,3).h);
+    victims.forEach((u,i)=>Object.assign(u,{hp:1e7*(i+1),maxHp:1e7*(i+1)}));
+    assert.equal(s.config.design.skills[2][0].cap,undefined);
+    // 已保存配置残留的旧cap不能恢复封顶。
+    Object.assign(s.config.design.skills[2][0],{cap:2,extra_chance:repeat?1:0,dot_chance:0});
+    const skill=currentSkill(s,h,0),pool=enemy.maxHp*skill.hp_ratio;
+    assert.ok(pool>s.attackPower(h)*3.5);
+    const expected=pool*s.config.design.rules.shareTotals[count]/count*(repeat?2:1);
+    const stamina=p.stamina,points=p.totalPoints;
+    s.setManualTarget(enemy.id,p);assert.ok(s.cast(0,p));advance(s,1);
+    victims.forEach((u,i)=>near(1e7*(i+1)-u.hp,expected));
+    near(h.stats.heroDamage,expected*count);near(stamina-p.stamina,1);
+    near(p.totalPoints-points,100+expected*count*s.config.design.scoreCoefficients[2].a);
+    const guide=describeAbilities(s),trait=guide.skills[0].upgrades.find(t=>t.sourceId===52);
+    assert.ok(guide.skills[0].summary.includes(`${6+rank}%`));
+    assert.ok(!guide.skills[0].summary.includes('上限'));
+    assert.ok(!trait.description.includes('攻击力'));
+  }
 });
 test('战车持续腐蚀以主目标生命快照计算，再按合计衰减均分',()=>{
   const {s,p,h,enemy,make}=arena(2),another=make(3,1,3).h;

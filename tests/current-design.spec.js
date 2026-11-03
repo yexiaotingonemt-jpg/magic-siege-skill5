@@ -31,10 +31,17 @@ for(const width of [1440,390])for(const id of [0,4,5,2,3])test(`当前设计五�
   if(id===4){await expect(page.locator('.sheet-panel')).toContainText('对沿途敌人额外造成150%攻击伤害');await expect(page.locator('.sheet-panel')).not.toContainText('同一目标每0.6秒');}
   const skillPanel=page.locator('[data-hero-panel="skills"]');
   if(id===3){
-   await expect(skillPanel).toContainText('无数量上限');await expect(skillPanel).toContainText('受到治疗降低50%，3秒');
+   await expect(skillPanel).toContainText('最多5名敌人');await expect(skillPanel).not.toContainText('无数量上限');await expect(skillPanel).toContainText('受到治疗降低50%，3秒');
+   await expect(skillPanel).toContainText('前方8格扇形');
+   await expect(skillPanel).toContainText('震荡波额外命中1/2名敌人');
    await expect(skillPanel).toContainText('尖刺外壳5秒，受到普通攻击或技能攻击');
    await expect(skillPanel).toContainText('君临5秒，免疫任何伤害及负面效果');
    await expect(skillPanel).toContainText('减少治疗效果');
+   for(const rank of [1,2,0]) {
+    p.progress[id].traits.N105_3=rank;room.sequence++;room.broadcast();
+    await page.waitForFunction(n=>__game.sim.sequence>=n,room.sequence);
+    await expect(skillPanel).toContainText(`最多${5+rank}名敌人`);
+   }
   }
   await skillPanel.evaluate(el=>{el.scrollTop=200;});const skillScroll=await skillPanel.evaluate(el=>el.scrollTop);expect(skillScroll).toBeGreaterThan(0);
   h.hp-=1;room.sequence++;room.broadcast();await page.waitForFunction(n=>__game.sim.sequence>=n,room.sequence);

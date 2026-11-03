@@ -13,7 +13,7 @@ const pass=(sim,h)=>currentValues(sim,h);
 const live=(sim,ids)=>ids.map(id=>sim.get(id)).filter(Boolean);
 const area=(sim,h,at,radius,limit,t=null)=>first(t,nearest(at,sim.enemies({...at,side:h.side},radius))).slice(0,limit);
 const emit=(sim,h,s,at,targets,kind='release')=>sim.visual(kind,h,at,{skill:s.skill,targets:targets.map(u=>({id:u.id,x:u.x,y:u.y})),haloTargets:targets.map(u=>({id:u.id})),until:sim.time+1});
-const hurt=(sim,h,s,t,power=s.power/100,scale=1,meta={})=>sim.damage(h,t,s.value.attack*power*scale*(1+(s.bonusDamage||0)),false,false,{value:s.value,area:!!s.unlimited_targets||(s.targets||1)>1,...meta});
+const hurt=(sim,h,s,t,power=s.power/100,scale=1,meta={})=>sim.damage(h,t,s.value.attack*power*scale*(1+(s.bonusDamage||0)),false,false,{value:s.value,area:(s.targets||1)>1,...meta});
 const knock=(sim,h,t,n)=>{
   if (!n || t.tower || t.immuneUntil>sim.time || t.hp<=0) return 0;
   const d=distance(h,t)||1, before={x:t.x,y:t.y};sim.interrupt(t);
@@ -54,7 +54,7 @@ export function selectCurrentSkill(h,i,s) {
   } else if (h.classId===5 && i===3) targets=[h,...this.allies(h,s.range).filter(u=>u.id!==h.id).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp||distance(h,a)-distance(h,b)).slice(0,s.targets)];
   else if (h.classId===3 && i===0) targets=first(t,nearest(h,this.enemies(h,s.range).filter(u=>{
     const len=distance(h,t)*distance(h,u);return !len || ((t.x-h.x)*(u.x-h.x)+(t.y-h.y)*(u.y-h.y))/len>=.35;
-  }))).slice(0,s.unlimited_targets?undefined:s.targets);
+  }))).slice(0,s.targets);
   else if (h.classId===4 && i===2) targets=first(t,nearest(h,this.enemies(h,s.range))).slice(0,s.targets);
   else if (h.classId===4 && i===3) targets=first(t,nearest(h,this.enemies(h,s.range))).slice(0,s.targets);
   else targets=[t];
@@ -209,7 +209,7 @@ function runeImpact(sim,h,s,at,multiplier=1,repeat=false,primaryId=null) {
   const targets=area(sim,h,at,s.radius,s.targets), n=targets.length;
   if (!n) return;
   const primary=targets.find(u=>u.id===primaryId)||targets[0];
-  const cannonPool=Math.min(primary.maxHp*s.hp_ratio,s.value.attack*s.cap);
+  const cannonPool=primary.maxHp*s.hp_ratio;
   const relief=currentValues(sim,h,null,s.value?.ranks).share_relief||0;
   const share=(n===1?1:Math.min(1,(rules(sim).shareTotals[Math.min(6,n)]||0)+relief))/n;
   emit(sim,h,s,at,targets,'impact');
