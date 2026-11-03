@@ -1,4 +1,4 @@
-import {activeTaunter,manualTarget,manualAttackTarget,friendlyTarget} from './manual-target.js';
+import {activeTaunter,manualTarget,manualAttackTarget,friendlyTarget,ALLY_APPROACH_RANGE,inAllyApproachRange} from './manual-target.js';
 import {inAttackRange} from './attack-range.js';
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const category=u=>u.hero?0:u.tower?2:1;
@@ -20,7 +20,7 @@ export function chooseTarget(sim,u){
   // 点击友军只发起一次靠近；抵达后保留技能选择，重新执行警戒索敌。
   if(u.manualMoveTargetId===selected.id){
    u.targetId=null;u.retaliationTargetId=null;
-   if(!inAttackRange(u,selected))return null;
+   if(!inAllyApproachRange(u,selected))return null;
    u.manualMoveTargetId=null;
   }
  }else if(attackSelected){u.manualAttackTargetId=attackSelected.id;return attackSelected;}
@@ -47,12 +47,12 @@ export function navigate(sim,u,dt){
  if(target){u.deploying=false;if(inAttackRange(u,target))return target;}
  if(u.tower)return null;
  const dest=target||friend||{x:u.x,y:u.side?sim.config.world.defenseLimitY:sim.config.world.mapMaxY};
- const d=distance(u,dest),stop=target||friend?u.range:0;
+ const d=distance(u,dest),stop=target?u.range:friend?ALLY_APPROACH_RANGE:0;
  const debuffSlow=Math.max(0,...sim.activeDebuffs(u,'moveSlow').map(x=>x.ratio));
  const ratio=Math.min(u.slowUntil>sim.time?u.slowRatio:1,1-debuffSlow);
  const step=Math.min(Math.max(0,d-stop),u.speed*dt*ratio);
  if(step>0){let y=u.y+(dest.y-u.y)/d*step;if(u.side===1)y=Math.max(Math.min(u.y,sim.config.world.defenseLimitY),y);sim.moveUnit(u,u.x+(dest.x-u.x)/d*step,y);}
- if(friend&&inAttackRange(u,friend)){
+ if(friend&&inAllyApproachRange(u,friend)){
   const enemy=sim.choose(u);u.targetId=enemy?.id??null;
   return inAttackRange(u,enemy)?enemy:null;
  }

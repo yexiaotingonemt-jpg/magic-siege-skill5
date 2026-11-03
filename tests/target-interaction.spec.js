@@ -55,10 +55,13 @@ for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`�
   // Clicking a distant ally first approaches it, then reacquires enemies within aggro range.
   h.castUntil=0;h.cd=0;closer.hp=0;enemy.y=h.y+10;const ally=s.spawn(0,'melee',0,1,5);Object.assign(ally,{x:5,y:h.y+8,targetId:enemy.id,stunUntil:1e9});await sync();await page.waitForTimeout(300);await clickUnit(ally);
   await expect(page.locator('#targetInfo')).toHaveAttribute('data-side','ally');await page.waitForFunction(id=>__game.sim.hero().manualTargetId===id,ally.id);expect(h.targetId).toBeNull();expect(h.manualMoveTargetId).toBe(ally.id);
-  h.castUntil=0;h.cd=0;enemy.y=h.y+10;const allyStart=h.y,enemyHp=enemy.hp;s.tick(.5);expect(h.y).toBeGreaterThan(allyStart);for(let n=0;n<160;n++)s.tick(.05);expect(enemy.hp).toBeLessThan(enemyHp);expect(h.manualTargetId).toBe(ally.id);await sync();
+  h.castUntil=0;h.cd=0;enemy.y=h.y+10;const allyStart=h.y,enemyHp=enemy.hp,lastAttack=h.lastAttackAt;s.tick(.5);expect(h.y).toBeGreaterThan(allyStart);expect(h.targetId).toBeNull();expect(h.lastAttackAt).toBe(lastAttack);
+  for(let n=0;n<160&&h.manualMoveTargetId!=null;n++)s.tick(.05);
+  expect(Math.hypot(h.x-ally.x,h.y-ally.y)).toBeCloseTo(1,6);expect(h.manualMoveTargetId).toBeNull();
+  for(let n=0;n<160;n++)s.tick(.05);expect(enemy.hp).toBeLessThan(enemyHp);expect(h.manualTargetId).toBe(ally.id);await sync();
   await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`ally-follow-attack-${viewport.width}.png`)});
   expect(h.manualMoveTargetId).toBeNull();expect(h.targetId).toBe(enemy.id);ally.targetId=null;s.tick(.05);expect(h.manualTargetId).toBe(ally.id);await sync();
-  const tower=s.towers[0];Object.assign(tower,{x:5,y:h.y+3});await sync();await page.waitForTimeout(300);await clickUnit(tower);
+  const tower=s.towers[0];Object.assign(tower,{x:h.x-5,y:h.y+3});await sync();await page.evaluate(()=>__game.renderer.focusUnit(__game.sim.hero().id));await page.waitForTimeout(350);await clickUnit(tower);
   await expect(page.locator('#targetName')).toHaveText('防御塔');
   tower.hp=0;await sync();await expect(page.locator('#targetInfo')).toBeHidden();
   await page.evaluate(()=>__game.renderer.focusUnit(__game.sim.hero().id));await page.waitForTimeout(350);await clickUnit(enemy);await expect(page.locator('#targetInfo')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('#targetInfo')).toBeHidden();

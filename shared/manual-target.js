@@ -1,6 +1,8 @@
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const epsilon=1e-7;
 export const MANUAL_TARGET_RANGE=20;
+export const ALLY_APPROACH_RANGE=1;
+export const inAllyApproachRange=(h,target)=>!!h&&!!target&&distance(h,target)<=ALLY_APPROACH_RANGE+epsilon;
 export const canSelectAllies=h=>!!h?.hero;
 
 export function activeTaunter(sim,u){

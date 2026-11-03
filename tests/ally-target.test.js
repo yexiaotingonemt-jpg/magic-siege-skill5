@@ -20,15 +20,15 @@ function arena(id=5){
 }
 function advance(s,duration){const end=s.time+duration;while(s.time<end-1e-8)s.tick(Math.min(.05,end-s.time));}
 
-test('所有职业先朝友军移动，抵达自身射程后重新警戒索敌，不追击友军的敌人',()=>{
+test('所有职业先走到友军面前1格后重新警戒索敌，不追击友军的敌人',()=>{
  for(const id of [0,2,3,4,5]){
-  const {s,p,h,troop}=arena(id),old=troop(0,16,1-h.side),enemy=troop(0,15,1-h.side),friend=troop(10,0),local=troop(10-h.range,1,1-h.side);
+  const {s,p,h,troop}=arena(id),old=troop(0,16,1-h.side),enemy=troop(0,15,1-h.side),friend=troop(10,0),local=troop(9,1,1-h.side);
   h.x=-10;h.speed=2;s.setManualTarget(old.id,p);friend.targetId=enemy.id;friend.stunUntil=1e9;
   assert.ok(s.setManualTarget(friend.id,p));assert.equal(h.manualTargetId,friend.id);assert.equal(h.manualAttackTargetId,null);
   advance(s,.2);assert.ok(h.x>-10);near(h.y,0);assert.equal(h.targetId,null);
   friend.targetId=old.id;advance(s,.2);near(h.y,0);assert.equal(h.targetId,null);
-  friend.targetId=null;advance(s,(20-h.range)/2-.4);
-  near(h.x,10-h.range);near(h.y,0);assert.equal(h.manualMoveTargetId,null);assert.equal(h.targetId,local.id);
+  friend.targetId=null;advance(s,19/2-.4);
+  near(h.x,9);near(h.y,0);assert.equal(h.manualMoveTargetId,null);assert.equal(h.targetId,local.id);
   assert.equal(h.manualTargetId,friend.id);assert.equal(h.manualAttackTargetId,null);
   friend.x=10.5;advance(s,.1);assert.equal(h.manualMoveTargetId,null);assert.equal(h.targetId,local.id);
  }
@@ -63,8 +63,8 @@ for(const [id,skills]of [[0,[1,2]],[5,[1,2,3]]])test(`职业${id}手选友军超
 test('手选友军优先脱离近敌，靠近途中不普攻，保留技能手选且不造成友伤',()=>{
  const {s,p,h,make,troop}=arena(),enemy=make(3,0,1).h,ally=troop(18,0);h.targetId=enemy.id;ally.targetId=enemy.id;ally.stunUntil=1e9;h.speed=2;h.cd=0;const before=ally.hp,enemyBefore=enemy.hp;assert.ok(s.setManualTarget(ally.id,p));assert.equal(s.choose(h),null);advance(s,1);near(h.x,2);near(h.y,0);near(ally.hp,before);near(enemy.hp,enemyBefore);assert.equal(h.manualTargetId,ally.id);assert.equal(h.targetId,null);
 });
-test('无敌人时先靠近侧方友军，抵达射程后恢复推进；再次点击可重新发起靠近',()=>{
- const {s,p,h,troop}=arena(),ally=troop(8,0);h.x=-8;h.speed=2;assert.ok(s.setManualTarget(ally.id,p));assert.equal(s.choose(h),null);advance(s,(16-h.range)/2);near(h.x,8-h.range);near(h.y,0);assert.equal(h.manualMoveTargetId,null);advance(s,.2);assert.ok(h.y>0);assert.equal(h.targetId,null);assert.equal(h.manualTargetId,ally.id);
+test('无敌人时先靠近侧方友军，抵达1格后恢复推进；再次点击可重新发起靠近',()=>{
+ const {s,p,h,troop}=arena(),ally=troop(8,0);h.x=-8;h.speed=2;assert.ok(s.setManualTarget(ally.id,p));assert.equal(s.choose(h),null);advance(s,15/2);near(h.x,7);near(h.y,0);assert.equal(h.manualMoveTargetId,null);advance(s,.2);assert.ok(h.y>0);assert.equal(h.targetId,null);assert.equal(h.manualTargetId,ally.id);
  ally.x=h.x+10;ally.y=h.y;assert.ok(s.setManualTarget(ally.id,p));const x=h.x,y=h.y;advance(s,.2);assert.ok(h.x>x);near(h.y,y);
 });
 test('友方死亡或离开20格清理手选并重新选中警戒内敌人',()=>{
@@ -81,10 +81,21 @@ test('靠近追随友军当前位置，改选敌人立即取消靠近',()=>{
  s.setManualTarget(enemy.id,p);assert.equal(h.manualMoveTargetId,null);const x=h.x;navigate(s,h,.2);assert.ok(h.x<x);assert.equal(h.targetId,enemy.id);
 });
 
-test('选择自己或恰在普攻距离内的友军立即重新警戒索敌',()=>{
+test('选择自己或恰在1格内的友军立即重新警戒索敌',()=>{
  for(const self of [false,true]){
-  const {s,p,h,troop}=arena(0),enemy=troop(0,2,1),ally=self?h:troop(h.range,0);
+  const {s,p,h,troop}=arena(0),enemy=troop(0,2,1),ally=self?h:troop(1,0);
   s.setManualTarget(ally.id,p);assert.equal(s.choose(h).id,enemy.id);assert.equal(h.manualMoveTargetId,null);near(h.x,0);near(h.y,0);
+ }
+});
+
+test('友军已在普攻射程内仍继续靠近，途中不索敌或反击，大步长也停在1格边界',()=>{
+ for(const id of [0,2,3,4,5]){
+  const {s,p,h,troop}=arena(id),ally=troop(h.range,0),enemy=troop(0,1,1-h.side);
+  h.speed=2;h.cd=0;h.attackerMemory={[enemy.id]:s.time+3};
+  s.setManualTarget(ally.id,p);assert.equal(s.choose(h),null);
+  navigate(s,h,.1);near(h.x,.2);assert.equal(h.targetId,null);assert.equal(h.manualMoveTargetId,ally.id);
+  navigate(s,h,10);near(h.x,ally.x-1);near(h.y,0);assert.equal(h.manualMoveTargetId,null);
+  assert.equal(h.manualTargetId,ally.id);assert.equal(h.manualAttackTargetId,null);
  }
 });
 
