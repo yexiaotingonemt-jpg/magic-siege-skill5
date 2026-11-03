@@ -29,7 +29,7 @@
 .contract-entry-heading span{font-size:20px;color:var(--ui-muted)}
 .game .contract-entry-heading b{font-size:24px;font-weight:600;line-height:1.4;color:var(--ui-text)}
 .contract-period{margin:8px 0}
-.contract-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}
+.contract-values{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}
 .contract-values dt{font-size:20px;color:var(--ui-muted)}
 .contract-values dd{margin:6px 0 0;font-size:28px;font-variant-numeric:tabular-nums;color:var(--ui-gold)}
 .contract-entry details{font-size:21px}
