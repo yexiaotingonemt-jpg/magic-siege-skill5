@@ -1,14 +1,14 @@
 {
-  "version": "0.7.18",
-  "serverVersion": "0.7.18",
+  "version": "0.7.19",
+  "serverVersion": "0.7.19",
   "gameVersion": "0.7.0",
   "protocolVersion": 3,
   "files": {
     "client/prebuilt/assets/index-Bl1f1TL5.css": "b6da9aa9d6bd6a6d2be12f5ae38b7cb3dc8b2abe2875a3b36788fb4a47e65c86",
-    "client/prebuilt/assets/index-suLAIKTO.js": "e762b6b6cfd71a091d1eaf6951d9aa6db101ff0395875a5c398dae002038c8c5",
+    "client/prebuilt/assets/index-CnjG6vQo.js": "91f55c84f3dfaa1245ac61be728c16378a7f13b0e702fab6b0d9222b880bbd42",
     "client/prebuilt/assets/phaser-DFK5Ua9d.js": "f9025c1a29bc3ae097dd886ce07717b297466da1ce8f032c8294252ce6cf5cdb",
-    "client/prebuilt/client-version.json": "a2e3100e716b53828a984ff53075f9432e5c4d85dda4ea31b8ca59b9199e2e01",
-    "client/prebuilt/index.html": "94974e7410341eb16803bd7a92eb52929deb66aab2982c10973805b7967dfc6c",
+    "client/prebuilt/client-version.json": "12ea0f874aa745f8cf5229e595542a2c418672c27cfedf12ff1fd131dbe9f1cb",
+    "client/prebuilt/index.html": "f2f515e6d5efdad9aa1f82ba7fb551222b29bcacffa8b8ec02d3ba379fae56b7",
     "client/desktop/assets/magic-throne.ico": "89421e37f5316235335323773072230a353bffa115ff2d21827b8b1486b1b921",
     "client/desktop/assets/magic-throne.svg": "05364641cdcc968fd02dd591fc3dc10a160528ed0aeebef16ef154b649e12e1e",
     "client/desktop/config.mjs": "af3a2c715c7ea9d1af042edd7f12e4dc04cbcca1579801499c5ed02b4b4a27ef",
@@ -19,7 +19,7 @@
     "魔法王座.exe": "1142a1c9b7ad159691d7fbb5c25c4ecd6b9ff6fb1ccbd4f4d6d01d5bf944c179",
     "client/launcher.mjs": "c2923024bfbf7051368f9ef51a6c608c01dfe3b0f219cbbd2f62033bf28e38b9",
     "client/client-config.json": "6b27adca4af8dbc3bd561c1af85471d8561026bd3c449b26a3d60d6f071937c5",
-    "shared/protocol.js": "919292dd438457917c29af275d48058a1040928bc954f960e2796e5bf31aa293"
+    "shared/protocol.js": "d4b44737219b825f1c4688eda538fc7e8eb1454251b41fa85253e1088646310f"
   },
   "runtime": {
     "version": "45.1.0-win32-x64",
