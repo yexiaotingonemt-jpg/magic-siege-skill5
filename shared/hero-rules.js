@@ -17,7 +17,7 @@ import { isCurrentDesign, currentValues, currentName } from './current-design.js
 import { npcBalanceStatus } from './npc-balance.js';
 import { currentAttackPower, currentAttackRate, addCurrentHeat, currentHeal,
   currentRangeFailure, selectCurrentSkill, resolveCurrentSkill, impactCurrentSkill,
-  processCurrentEffects, updateCurrentUnit, chooseCurrentSkill } from './current-design-mechanics.js';
+  processCurrentEffects, updateCurrentUnit, chooseCurrentSkill, reflectCurrentShell } from './current-design-mechanics.js';
 import {
   selectSkill5,
   skill5RangeFailure,
@@ -340,6 +340,12 @@ export class HeroRules {
   }
   damage(a, t, n, basic = false, reflected = false, meta = {}) {
     if (!t || t.hp <= 0 || !Number.isFinite(n) || n <= 0) return 0;
+    if (isCurrentDesign(this.config) && t.currentUlt?.until>this.time && t.currentUlt.s.damage_immune) {
+      // Immunity precedes splitting, shields, execute and damage credit. Incoming
+      // attacks can still trigger an active shell without recording damage taken.
+      reflectCurrentShell(this,a,t,reflected);
+      return 0;
+    }
     const credit = a?.summoned
       ? this.get(a.ownerId) || this.summonOwners?.get(a.ownerId) || a
       : a;

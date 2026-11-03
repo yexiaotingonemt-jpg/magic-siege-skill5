@@ -37,8 +37,8 @@ export function unitStatuses(sim,u,fields=indexStatusFields(sim)){
  if(u.damageStore&&usable(u.damageStore.value))add('damageStore','蓄伤成盾','positive',u.damageStore.until,'已累计 '+Math.floor(u.damageStore.total)+' 伤害，结束按'+percent(u.damageStore.conversionRatio??1)+'转为护盾',0,2);
  add('immune','负面免疫','positive',u.immuneUntil,'免疫新的负面状态',0,0);
  if(u.lordUlt&&usable(u.lordUlt.s.value))add('lordUlt','灭军君临','positive',u.lordUlt.until,'普通攻击附带范围溅射',0,2);
- if(u.currentUlt)add('lordUlt','灭军君临','positive',u.currentUlt.until,'普通攻击附带范围伤害',0,2);
- if(u.currentShell)add('reflect','尖刺外壳','positive',u.currentShell.until,'受到攻击时按攻击者攻击力反伤',0,1);
+ if(u.currentUlt)add('lordUlt','灭军君临','positive',u.currentUlt.until,(u.currentUlt.s.damage_immune?'免疫任何伤害及负面效果；':'')+'普通攻击附带范围伤害',0,2);
+ if(u.currentShell)add('reflect','尖刺外壳','positive',u.currentShell.until,'受到普通攻击或技能攻击时按攻击者攻击力反伤',0,1);
  if(u.currentNextHealDown)add('healingDown','单次减疗','negative',u.currentNextHealDown.until,'下一次受到治疗降低'+percent(u.currentNextHealDown.ratio),0,2);
  for(const [key,until]of Object.entries(u.eliteBuffs||{})){
   const chain=u.eliteScore,next=chain?chain.baseDuration*(3-chain.generation)/4:null;

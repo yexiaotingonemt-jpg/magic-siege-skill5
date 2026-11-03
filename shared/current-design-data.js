@@ -289,16 +289,19 @@ export const CURRENT_DESIGN = {
     "3": [
       {
         "name": "裂地震荡",
-        "description": "向前释放震荡波，命中最多3名敌人，各造成相当于攻击力380%的伤害，并使攻击力降低16%，持续2秒。",
+        "description": "向前释放震荡波，命中前方范围内所有敌人，无数量上限，各造成相当于攻击力380%的伤害，并使攻击力降低16%，持续2秒。",
         "cost": 1,
         "cd": 6.0,
         "cast": 0.25,
         "range": 10.0,
         "radius": 7.0,
         "targets": 3,
+        "unlimited_targets": true,
         "power": 3.8,
         "duration": 2.0,
         "attack_down": 0.16,
+        "healing_down": 0,
+        "healing_down_duration": 3,
         "slow": 0,
         "slow_duration": 2.5,
         "echo": 0,
@@ -306,7 +309,7 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "尖刺外壳",
-        "description": "为自身披上尖刺外壳，持续5秒。期间每次受到攻击时，对攻击者反弹相当于其攻击力150%的伤害。",
+        "description": "为自身披上尖刺外壳，持续5秒。期间每次受到普通攻击或技能攻击时，对攻击者反弹相当于其攻击力150%的伤害。",
         "cost": 1,
         "cd": 10.0,
         "cast": 0.25,
@@ -338,7 +341,7 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "灭军君临",
-        "description": "进入君临状态，持续5秒。期间免疫负面效果，每次普通攻击还会对主目标周围最多2名敌人造成相当于攻击力400%的伤害。",
+        "description": "进入君临状态，持续5秒。期间免疫任何伤害及负面效果，每次普通攻击还会对主目标周围最多2名敌人造成相当于攻击力400%的伤害。",
         "cost": 3,
         "cd": 40.0,
         "cast": 0.25,
@@ -349,6 +352,7 @@ export const CURRENT_DESIGN = {
         "duration": 5,
         "shield": 0,
         "shield_duration": 5,
+        "damage_immune": true,
         "lifesteal": 0,
         "summon": 0,
         "summon_duration": 6.0
@@ -2043,21 +2047,21 @@ export const CURRENT_DESIGN = {
       "sourceId": 65,
       "classId": 3,
       "skill": 0,
-      "name": "目标增加",
-      "description": "震荡波额外命中1名敌人（上限1档）。",
+      "name": "减少治疗效果",
+      "description": "被震荡波命中敌人受到的治疗效果降低50%，持续3秒（上限1档）。",
       "max": 1,
       "rarity": "gold",
       "common": false,
       "keys": [
-        "targets"
+        "healing_down"
       ],
       "values": [
         [
-          4.0
+          0.5
         ]
       ],
       "baseline": [
-        3
+        0
       ]
     },
     {
