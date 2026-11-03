@@ -4,11 +4,11 @@
   "gameVersion": "0.7.0",
   "protocolVersion": 3,
   "files": {
-    "client/prebuilt/assets/index-TBrXVJmu.js": "ebea4dec7ee2fa0fae5842b605070ddd8c4f824462d8c5595f9162e27277e07f",
+    "client/prebuilt/assets/index-Bmbz7xUu.js": "b9fa3bbf03dc3f56babe961b88968d93e5b51a604a93abe5afc7e64e49cad263",
     "client/prebuilt/assets/index-_wLFnwmZ.css": "12c3ca83490c3b4727c2ece3e72b1757cbf2a32b3da5e2267d8a8820fd9a1a60",
     "client/prebuilt/assets/phaser-DFK5Ua9d.js": "f9025c1a29bc3ae097dd886ce07717b297466da1ce8f032c8294252ce6cf5cdb",
     "client/prebuilt/client-version.json": "831e7a900dedfb66777682bd3d321d7a05095bd25fc62255fe3b52facc51ec36",
-    "client/prebuilt/index.html": "aebe4cab16dd0d95bc2c442f2d40b0662a274628dca8990c1deaf25332c1114d",
+    "client/prebuilt/index.html": "1c67c80d920d3a07790eca41c2c512250860481ff21840e15f0e5dd5a3db7401",
     "client/desktop/assets/magic-throne.ico": "89421e37f5316235335323773072230a353bffa115ff2d21827b8b1486b1b921",
     "client/desktop/assets/magic-throne.svg": "05364641cdcc968fd02dd591fc3dc10a160528ed0aeebef16ef154b649e12e1e",
     "client/desktop/config.mjs": "af3a2c715c7ea9d1af042edd7f12e4dc04cbcca1579801499c5ed02b4b4a27ef",

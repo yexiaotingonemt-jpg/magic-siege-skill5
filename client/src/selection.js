@@ -43,13 +43,16 @@ export function createSelection({getSim,getRenderer,onChanged}){
   if(p.y< -25||p.y>VIEW.height+25){popup.hidden=true;anchor=null;return;}
   popup.hidden=false;
   const canvas=r.game.canvas.getBoundingClientRect(),parent=popup.parentElement,wrap=parent.getBoundingClientRect(),nativeScale=wrap.width/parent.offsetWidth,width=popup.offsetWidth,scale=canvas.height/VIEW.height/nativeScale;
-  const info=el('targetInfo'),infoRect=info.getBoundingClientRect(),scroll=r.getCamera().scrollY,key=[wrap.width,canvas.width,canvas.height,canvas.left-wrap.left,canvas.top-wrap.top,infoRect.bottom,info.hidden].join(':');
+  const info=el('targetInfo'),infoRect=info.getBoundingClientRect(),scroll=r.getCamera().scrollY,key=[wrap.width,canvas.width,canvas.height,canvas.left-wrap.left,canvas.top-wrap.top,infoRect.bottom,info.hidden,el('traitPending').hidden].join(':');
   if(anchor&&Math.abs(anchor.scroll-scroll)<.5&&anchor.key===key&&anchor.height===popup.offsetHeight)return;
   const x=(canvas.left-wrap.left+p.x/VIEW.width*canvas.width)/nativeScale,y=(canvas.top-wrap.top+p.y/VIEW.height*canvas.height)/nativeScale,left=Math.max(8,Math.min(parent.clientWidth-width-8,x-width/2));
   const overlaps=!info.hidden&&left+width>(infoRect.left-wrap.left)/nativeScale&&left<(infoRect.right-wrap.left)/nativeScale,minTop=overlaps?(infoRect.bottom-wrap.top)/nativeScale+10:24;
-  popup.style.maxHeight=Math.max(80,parent.clientHeight-minTop-20)+'px';
+  const pending=el('traitPending'),pendingRect=pending.getBoundingClientRect();
+  const pendingOverlaps=!pending.hidden&&left+width>(pendingRect.left-wrap.left)/nativeScale&&left<(pendingRect.right-wrap.left)/nativeScale;
+  const bottom=pendingOverlaps?Math.min(parent.clientHeight-20,(pendingRect.top-wrap.top)/nativeScale-10):parent.clientHeight-20;
+  popup.style.maxHeight=Math.max(80,bottom-minTop)+'px';
   const height=popup.offsetHeight;let top=y-height-28*scale;if(top<minTop)top=y+28*scale;
-  popup.style.left=left+'px';popup.style.top=Math.max(minTop,Math.min(parent.clientHeight-height-20,top))+'px';anchor={scroll,key,height};
+  popup.style.left=left+'px';popup.style.top=Math.max(minTop,Math.min(bottom-height,top))+'px';anchor={scroll,key,height};
  }
  function sync(){const current=getSim().matchId;if(matchId&&matchId!==current)clear();matchId=current;syncInfo();const s=getSim(),u=unit();if(selectedId&&!u){clear();s.notice='所选单位已离场或被契约，请重新选择';return;}if(!u){popup.hidden=true;return;}el('contractRoles').hidden=contractClasses(u,getSim().config).length<2;el('contractRoles').innerHTML=contractClasses(u,getSim().config).map(id=>`<button data-contract-role="${id}" class="${id===chosenClass?'selected':''}">${classes[id]}</button>`).join('');el('selectedName').textContent=troopTitle(u)+' #'+u.id;el('selectedDetail').textContent=`可契约为 ${classes[chosenClass]} · 生命 ${Math.ceil(u.hp)} / ${Math.ceil(u.maxHp)} · 攻击 ${Number(s.attackPower(u).toFixed(2))}`;el('selectedHpBar').style.width=100*u.hp/u.maxHp+'%';el('confirmContract').textContent=`${s.player.stamina<s.config.world.contractCost?'体力不足':'契约'+classes[chosenClass]} · ϟ ${s.config.world.contractCost}`;el('confirmContract').disabled=s.player.stamina<s.config.world.contractCost;position();}
  async function select(id,ids){

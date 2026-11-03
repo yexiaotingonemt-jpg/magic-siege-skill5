@@ -4,10 +4,13 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { createBrowserGame } from "../scripts/browser-game-server.mjs";
 import { TRAITS } from "../shared/traits.js";
-import { names } from "../shared/config.js";
+import { names, legacyLiveConfig } from "../shared/config.js";
+import { Room } from "../server/room.mjs";
 let game, base, p;
 test.beforeEach(async ({ page }) => {
+  // 本文件验证旧词条目录和固定品质节点，使用显式经典规则；新版另有专项。
   game = await createBrowserGame({
+    room: new Room(legacyLiveConfig()),
     dataDir: mkdtempSync(path.join(tmpdir(), "magic-traits-ui-")),
   });
   game.room.paused = true;
@@ -204,7 +207,8 @@ test("桌面和窄屏选卡截图：无错误、卡片未超出游戏区域", as
   expect(errors).toEqual([]);
 });
 
-test("契约前切换预览职业，可以选择该职业保留的强化", async ({ page }) => {
+for (const width of [1440,390]) test(`契约前切换预览职业，强化入口不被契约弹窗遮挡 ${width}`, async ({ page }) => {
+  await page.setViewportSize({width,height:width===390?844:1100});
   const s = game.room.sim;
   s.addXp(p,s.expNeeded(p,5)-p.progress[5].xp,5);
   game.room.sequence++;
