@@ -23,8 +23,9 @@ for(const width of [1440,390])for(const id of [0,4,5,2,3])test(`职业自带被�
   const h=s.hero(p);if(id===0||id===4||id===3){h.hp=h.maxHp/2;if(id===4)s.addHeat(h,4);if(id===3)h.innateMinionKills=2;room.sequence++;room.broadcast();await expect(panel.locator('.passive-status')).toContainText({0:'被动减伤12.5%',4:'当前炙热4/6层',3:'小兵击杀进度2/3'}[id]);}
   await page.locator('.sheet-panel').screenshot({path:path.join(process.env.MAGIC_QA_DIR,`passive-${id}-${width}.png`)});
   await page.keyboard.press('Escape');await expect(page.locator('[data-hero-open="passive"]')).toBeFocused();
-  await page.locator('[data-nav="hero"]').click();await page.locator('[data-hero-view="passive"]').click();await expect(panel).toBeVisible();await expect(page.locator('[data-skill-detail]:visible')).toHaveCount(0);
-  await page.locator('[data-hero-view="skills"]').click();await expect(page.locator('[data-skill-detail]:visible')).toHaveCount(4);await expect(panel).toBeHidden();
+  await page.locator('[data-nav="hero"]').click();await expect(page.locator('[data-skill-detail]:visible')).toHaveCount(4);await expect(panel).toBeHidden();
+  await expect(page.locator('.hero-detail-tabs,[data-hero-view]')).toHaveCount(0);
+  await page.keyboard.press('Escape');await page.locator('[data-hero-open="passive"]').click();await expect(panel).toBeVisible();await expect(page.locator('[data-skill-detail]:visible')).toHaveCount(0);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);await expect(page.locator('vite-error-overlay')).toHaveCount(0);expect(errors).toEqual([]);
  }finally{await page.close();for(const c of room.clients)c.res.end();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 });
