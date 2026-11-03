@@ -24,5 +24,5 @@ export function describeCurrentAbilities(sim) {
     };}),owned:traits.filter(t=>t.rank>0),generalEffects:traits.filter(t=>t.skill==null),
     stats:[['生命值',`${f(h.hp)} / ${f(h.maxHp)}`],['攻击力',f(sim.attackPower(h))],['护甲',f(h.armor)],
       ['普攻间隔',`${f(h.interval/sim.attackRate(h))} 秒`],['普攻距离',`${f(h.range)} 格`],['警戒范围',`${f(h.aggro||c.range)} 格`],['移动速度',`${f(h.speed)} 格/秒`]],
-    context:`新版设计 · ${sim.config.design.status}。每${r.expPerLevel}点施法体力升1级，全部词条共享40次升级；契约不计经验。`};
+    context:`新版设计 · ${sim.config.design.status}。每消耗1点体力获得${r.expPerStamina}经验，包含契约；升级每级需要${r.levelUpStamina[0]}～${r.levelUpStamina.at(-1)}点体力，升满40级累计需要${r.levelUpStamina.reduce((sum,n)=>sum+n,0)}点体力，全部词条共享40次升级。`};
 }

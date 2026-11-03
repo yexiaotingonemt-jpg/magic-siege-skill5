@@ -1,4 +1,5 @@
 import { CURRENT_DESIGN } from './current-design-data.js';
+import { validateExperienceRules } from './experience.js';
 
 export const isCurrentDesign = config => config?.design?.enabled === true;
 export const designHeroIds = [0, 4, 5, 2, 3];
@@ -23,7 +24,10 @@ export function createCurrentDesignConfig(base, design = CURRENT_DESIGN) {
   config.world.contractCost = config.design.rules.contractCost;
   config.world.heroKillXp = config.world.minionKillXp = 0;
   config.world.towerDamageExpRate = config.world.towerBreakXp = 0;
-  config.world.expPerStamina = 1;
+  config.world.initialLevel = config.design.rules.initialLevel;
+  config.world.maxLevel = config.design.rules.maxLevel;
+  config.world.expPerStamina = config.design.rules.expPerStamina;
+  config.world.levelUpStamina = [...config.design.rules.levelUpStamina];
   return config;
 }
 export function validateCurrentDesign(d) {
@@ -38,8 +42,8 @@ export function validateCurrentDesign(d) {
       if(['targets','shots','pulses','bounces','damage_targets','slow_cap','summon','initial_heat','heat_cap_extra','elf_extra_targets'].includes(key)&&(!Number.isInteger(value)||value<0))throw Error('数量必须是非负整数：'+key);
     }
   };
-  if (!d.rules || d.rules.maxLevel !== 40 || d.rules.initialLevel !== 0 ||
-      !positive(d.rules.expPerLevel) || !positive(d.rules.standardStamina)) throw Error('新版成长或计分配置无效');
+  if (!d.rules || !positive(d.rules.standardStamina)) throw Error('新版成长或计分配置无效');
+  validateExperienceRules(d.rules);
   for (const value of Object.values(d.rules))
     if (!(Array.isArray(value) ? value.every(finite) : finite(value))) throw Error('新版规则数值无效');
   if (d.rules.shareTotals.length !== 7 || d.rules.shareTotals.some(x => x > 1) ||

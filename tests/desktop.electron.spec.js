@@ -55,7 +55,7 @@ test('桌面窗口：升级仅显示强化次数，详情可返回且不会消�
  try{
   client=await launch(server.base);const {app,page}=client;await register(page,'手动强化');
   const p=server.room.player(server.accounts.rows[0]),s=server.room.sim;
-  s.addXp(p,3);p.progress[0].choices[0].options=['N000_0','N004_0','N089_0'];
+  s.addXp(p,s.expNeeded(p)-p.xp);p.progress[0].choices[0].options=['N000_0','N004_0','N089_0'];
   server.room.sequence++;server.room.broadcast();
   await expect(page.locator('[data-trait-count]')).toHaveText('1');
   await expect(page.locator('#traitDraft')).toBeHidden();

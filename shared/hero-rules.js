@@ -558,10 +558,7 @@ export class HeroRules {
     if (!isCurrentDesign(this.config) && h.classId === 4 && i === 1) {
       h.heat = Math.max(0, heat - s.heatCost);
     }
-    p.stamina -= s.cost;
-    p.staminaSpent += s.cost;
-    this.stat(h, 'staminaSpent', s.cost);
-    this.addXp(p, s.cost * (isCurrentDesign(this.config)?1:this.config.world.expPerStamina));
+    this.spendStamina(p, s.cost, h);
     p.cd[i] = this.time + s.cd * (h.eliteBuffs?.arcane > this.time ? 0.85 : 1);
     h.castUntil = this.time + s.castTime;
     this.metrics.casts++;

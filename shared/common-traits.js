@@ -41,7 +41,7 @@ export function refreshCommonStats(sim, h) {
     level = p.progress[h.classId].level;
   const ratio = h.hp / h.maxHp;
   h.maxHp =
-    h.baseMaxHp * (1 + sim.config.world.heroHpGrowth * (level - 1)) +
+    h.baseMaxHp * (1 + sim.config.world.heroHpGrowth * Math.max(0, level - 1)) +
     h.baseMaxHp * 0.02 * commonRank(sim, h, 1);
   h.hp = h.maxHp * ratio;
   h.range =

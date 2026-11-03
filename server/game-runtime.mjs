@@ -6,6 +6,7 @@ import {Simulation} from '../shared/simulation.js';
 import {DEFAULT_NPC_POLICY} from '../shared/npc-balance.js';
 import {liveConfig,clone,validateConfig} from '../shared/config.js';
 import {isCurrentDesign} from '../shared/current-design.js';
+import {planExperienceMigration} from '../shared/experience.js';
 const defaults=liveConfig();
 import {createEventStream} from './event-stream.mjs';
 import {SERVER_VERSION,CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION,RULESET_REVISION,UPDATE_REQUIRED_CODE} from '../shared/protocol.js';
@@ -77,6 +78,7 @@ export function prepareGameRuntime(options,previous,{restartBattle=false}={}){
  if(!restartBattle&&(previous.metadata.gameVersion!==GAME_VERSION||previous.metadata.protocolVersion!==PROTOCOL_VERSION))throw Error('战斗或协议不兼容，请明确选择重开战局');
  if(!restartBattle&&isCurrentDesign(previous.room.sim.config)!==isCurrentDesign(defaults))throw Error('技能规则改变，请明确选择重开战局');
  const nextConfig=validateConfig(restartBattle?clone(defaults):applyOverrides(previous.defaults,previous.room.sim.config,defaults));
+ const experienceMigration=restartBattle?[]:planExperienceMigration(previous.room.sim.players,previous.room.sim.config.world,nextConfig.world);
  const probe=new Room(nextConfig);probe.sim.tick(.05);JSON.stringify(probe.snapshot());
  const room=restartBattle?new Room(nextConfig):previous.room;
  const runtime=createGameRuntime({...options,gameVersion:GAME_VERSION,clientVersion:CLIENT_VERSION,room,accounts:previous.accounts,limits:previous.limits});
@@ -86,9 +88,11 @@ export function prepareGameRuntime(options,previous,{restartBattle=false}={}){
   Object.setPrototypeOf(previous.accounts,Accounts.prototype);
   Object.setPrototypeOf(room,Room.prototype);Object.setPrototypeOf(room.sim,Simulation.prototype);
   room.config=clone(nextConfig);room.sim.config=clone(nextConfig);room.sim.npcPolicy??={...DEFAULT_NPC_POLICY};room.configVersion++;room.last=performance.now();
+  for(const change of experienceMigration)change.progress.xp=change.after;
  },rollback(){
   Object.setPrototypeOf(previous.accounts,saved.accountsPrototype);
   Object.setPrototypeOf(room,saved.roomPrototype);Object.setPrototypeOf(room.sim,saved.simPrototype);
   room.config=saved.config;room.sim.config=saved.simConfig;room.sim.npcPolicy=saved.npcPolicy;room.configVersion=saved.configVersion;room.last=saved.last;
+  for(const change of experienceMigration)change.progress.xp=change.before;
  }};
 }

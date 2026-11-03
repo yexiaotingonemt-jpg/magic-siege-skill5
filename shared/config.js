@@ -1,5 +1,6 @@
 import {defaults as base,labels as baseLabels} from './base-config.js';
 import {INNATE_DEFAULTS} from './innate-passives.js';
+import {LEVEL_UP_STAMINA,validateExperienceRules} from './experience.js';
 import {validateCurrentDesign,createCurrentDesignConfig} from './current-design.js';
 export const clone=x=>JSON.parse(JSON.stringify(x));
 export const classes=['兽人战士','雷霆巨人','符文战车','黑暗领主','火焰法师','森林精灵','暗影刺客'];
@@ -100,6 +101,7 @@ for(const id of [4,5])defaults.heroes[id].attack*=1.5;
 defaults.heroes[3].hp=72000;
 // 0.5: fixed base skills, attribute growth and level-based trait drafts.
 Object.assign(defaults.world,{maxLevel:40,expBase:3,expGrowth:1,expCostMultiplier:1,towerDamageExpRate:.00005});
+Object.assign(defaults.world,{initialLevel:0,expPerStamina:100,levelUpStamina:[...LEVEL_UP_STAMINA],heroKillXp:0,minionKillXp:0,towerDamageExpRate:0,towerBreakXp:0});
 defaults.heroes[0].skills=[skill(800,5,6.5,0,{targets:1,duration:4,vulnerability:0}),skill(0,10,6,6,{targets:3,damageReduction:.25,duration:5}),skill(0,15,14,0,{damageReduction:.35,duration:4}),skill(0,30,0,4,{duration:5,shieldDuration:8,conversionRatio:1,storeCap:.6,cost:3})];
 defaults.heroes[3].skills=[skill(320,5,10,0,{targets:5}),skill(240,10,18,2,{targets:5,dashSpeed:12,knockback:0,castTime:.7}),skill(40,15,0,5,{targets:5,duration:6,burnDuration:4,damageReduction:.35}),skill(180,30,0,4,{targets:4,duration:12,cost:3})];
 delete defaults.heroes[3].passiveHealRatio;delete defaults.heroes[3].passiveMinionKills;
@@ -148,7 +150,9 @@ Object.assign(labels,{utilityPower:'控制与净化等效攻击系数（%）',sh
 Object.assign(labels,{retaliationMemory:'受击来源记忆秒',retaliationLeash:'反击追踪最远距离格',heroPriorityDistance:'英雄优先的距离容差格',strength:'阵营名义强度预算（含射程安全性）'});
 Object.assign(labels,{skillDesignVersion:'技能规则版本',scarDuration:'伤痕持续秒',scarCap:'伤痕层数上限',scarKnockback:'每层伤痕增加击飞格数',scarBonus:'每层伤痕伤害增幅',conductDuration:'导电持续秒',attackSpeedDown:'攻击速度降低比例',shots:'定点炮击次数',heatCap:'炙热层数上限',heatThreshold:'大火球炙热门槛',heatStep:'每增加一目标消耗的炙热层数',splashPower:'溅射总攻击力系数（%）',healingBoost:'受到治疗提升比例',debuffDuration:'命中减益持续秒'});
 Object.assign(labels,{heroKillXp:'击杀英雄经验',minionKillXp:'击杀小兵经验',attackSiege:'进攻攻城兵占比',damageTaken:'原始承伤',percentMaxHp:'目标最大生命伤害比例',heatOnDeath:'标记目标阵亡增加炙热层数',hpCost:'当前生命消耗比例',shieldDuration:'转化护盾持续秒',slowPerStack:'每层移动减速比例',slowCap:'移动减速叠层上限',slowDuration:'移动减速持续秒'});
+Object.assign(labels,{initialLevel:'初始等级',levelUpStamina:'升至1～40级所需体力',expBase:'旧版升级经验基数（停用）',expGrowth:'旧版经验增长倍率（停用）',expCostMultiplier:'旧版经验倍率（停用）'});
 export function validateConfig(x){
+ validateExperienceRules(x.world);
  if(x.innate?.elfRadius<=0||x.innate?.elfRadius>30||x.innate?.shareTotals?.[1]!==1||![0,1].includes(x.innate?.enabled)||!Number.isInteger(x.innate.lordMinionKills)||x.innate.lordMinionKills<1||x.innate.shareTotals?.length!==7||x.innate.shareTotals.some(n=>!Number.isFinite(n)||n<0||n>1)||['orcMissingReduction','heatHaste','heatHealPenalty','elfDamageHeal','elfHealDamage','lordKillHeal'].some(k=>!Number.isFinite(x.innate[k])||x.innate[k]<0||x.innate[k]>=1))throw Error('职业被动配置无效');
  if(x.design)validateCurrentDesign(x.design);
  if(x.world.maxLevel!==40)throw Error('本版英雄等级上限固定40');

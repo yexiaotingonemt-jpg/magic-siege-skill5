@@ -1,4 +1,5 @@
 // 钉钉当前技能与词条，2026-11-02逐项核对；平衡状态独立记录。
+import { LEVEL_UP_STAMINA } from './experience.js';
 export const CURRENT_DESIGN = {
   "enabled": true,
   "revision": "dingtalk-20261102-fire-path-150",
@@ -4049,7 +4050,8 @@ export const CURRENT_DESIGN = {
   },
   "qualityStatus": "待按总体平均升级收益校准；当前为等权开发占位",
   "rules": {
-    "expPerLevel": 3,
+    "expPerStamina": 100,
+    "levelUpStamina": [...LEVEL_UP_STAMINA],
     "maxLevel": 40,
     "initialLevel": 0,
     "contractCost": 3,
