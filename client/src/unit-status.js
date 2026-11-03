@@ -40,7 +40,11 @@ export function unitStatuses(sim,u,fields=indexStatusFields(sim)){
  if(u.currentUlt)add('lordUlt','灭军君临','positive',u.currentUlt.until,'普通攻击附带范围伤害',0,2);
  if(u.currentShell)add('reflect','尖刺外壳','positive',u.currentShell.until,'受到攻击时按攻击者攻击力反伤',0,1);
  if(u.currentNextHealDown)add('healingDown','单次减疗','negative',u.currentNextHealDown.until,'下一次受到治疗降低'+percent(u.currentNextHealDown.ratio),0,2);
- for(const [key,until]of Object.entries(u.eliteBuffs||{}))add('elite-'+key,ELITE_BUFFS[key].name,'positive',until,ELITE_BUFFS[key].description,0,0);
+ for(const [key,until]of Object.entries(u.eliteBuffs||{})){
+  const chain=u.eliteScore,next=chain?chain.baseDuration*(3-chain.generation)/4:null;
+  const detail=key==='score'&&next!=null?`获得的积分提高20%；本次初始${chain.duration}秒；下次传递${next>0?next+'秒':'改为一次性200积分'}`:ELITE_BUFFS[key]?.description;
+  if(ELITE_BUFFS[key])add('elite-'+key,ELITE_BUFFS[key].name,'positive',until,detail,0,0);
+ }
  add('immortal','不屈','positive',u.immortalUntil,'生命最低保留1',0,0);
  for(const f of Object.values(u.hastes||{}))add('haste','攻速提升','positive',f.until,'普通攻击速度提高'+percent(f.ratio),0,2);
  if(u.heat>0)add('heat','炙热','positive',u.heatUntil,'火焰技能联动资源',u.heat,3);

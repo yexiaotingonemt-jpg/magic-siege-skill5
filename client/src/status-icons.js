@@ -1,7 +1,7 @@
 import {unitBarOffset} from './art-catalog.js';
 import {indexStatusFields,unitStatuses} from './unit-status.js';
 
-const types=['stun','taunt','moveSlow','attackSpeedDown','vulnerable','attackDown','healingDown','scar','conduct','dot','guard','shield','damageStore','immune','lordUlt','heat','link','burnAura','soulMark','towerGuard','towerAllies','reflect','skillGuard','boost','healingBoost','haste'];
+const types=['stun','taunt','moveSlow','attackSpeedDown','vulnerable','attackDown','healingDown','scar','conduct','dot','guard','shield','damageStore','immune','lordUlt','heat','link','burnAura','soulMark','towerGuard','towerAllies','reflect','skillGuard','boost','healingBoost','haste','elite-score'];
 const tones={positive:0x83bfa6,negative:0xde9795,mark:0xbfa4da};
 const line=(g,points)=>{g.beginPath();g.moveTo(...points[0]);for(const p of points.slice(1))g.lineTo(...p);g.strokePath();};
 function shield(g){line(g,[[6,6],[12,4],[18,6],[17,14],[12,19],[7,14],[6,6]]);}
@@ -10,6 +10,7 @@ function cross(g){line(g,[[12,6],[12,18]]);line(g,[[6,12],[18,12]]);}
 function arrow(g,up){const a=up?7:17,b=up?17:7;line(g,[[17,b],[17,a],[14,up?a+3:a-3]]);line(g,[[17,a],[20,up?a+3:a-3]]);}
 function glyph(g,id){
  g.lineStyle(1.7,0xf2eee0,1);g.fillStyle(0xf2eee0,1);
+ if(id==='elite-score'){g.lineStyle(1.7,0xffdf81,1);line(g,[[12,3],[14,9],[21,12],[14,14],[12,21],[10,14],[3,12],[10,9],[12,3]]);return;}
  if(['shield','guard','damageStore','immune','vulnerable','skillGuard','reflect'].includes(id)){shield(g);if(id==='guard')line(g,[[9,12],[11,14],[15,9]]);if(id==='shield')cross(g);if(id==='vulnerable')line(g,[[13,6],[10,10],[14,13],[11,17]]);if(id==='damageStore')arrow(g,false);if(id==='immune'){g.fillCircle(12,10,2);line(g,[[9,15],[12,12],[15,15]]);}if(id==='skillGuard')g.strokeCircle(12,11,3);if(id==='reflect')line(g,[[4,10],[4,5],[8,5],[6,3]]);return;}
  if(['heat','burnAura','dot'].includes(id)){flame(g);if(id==='heat')line(g,[[11,16],[13,12],[14,16]]);if(id==='burnAura')g.strokeCircle(12,12,9);if(id==='dot')line(g,[[4,20],[20,20]]);return;}
  if(id==='stun'){const p=Array.from({length:11},(_,i)=>{const a=-Math.PI/2+i*Math.PI/5,r=i%2?3.5:8;return [12+Math.cos(a)*r,12+Math.sin(a)*r];});line(g,p);return;}
