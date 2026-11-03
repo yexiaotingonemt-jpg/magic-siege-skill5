@@ -5,8 +5,25 @@ import {currentSkill,currentTraits,validateCurrentDesign} from '../shared/curren
 import {describeAbilities} from '../client/src/ability-descriptions.js';
 import {unitStatuses} from '../client/src/unit-status.js';
 
-test('裂地震荡命中超过100名合法敌人，范围外和身后目标不受影响，返回波同样无人数截断',()=>{
-  const {s,p,h,enemy,make}=arena(3);s.config.design.rules.orcMissingReduction=0;affix(s,p,67);
+test('裂地震荡8格内可施法，8格外主目标拒绝施法且不扣体力，范围外副目标不命中',()=>{
+  for(const distance of [7.9,8,8.01,9]) {
+    const {s,p,h,enemy}=arena(3);enemy.y=distance;s.setManualTarget(enemy.id,p);
+    const skill=currentSkill(s,h,0),plan=s.castPlan(0,p),stamina=p.stamina;
+    near(skill.targetRange,8);near(s.config.heroes[3].skills[0].targetRange,8);
+    assert.equal(plan.ok,distance<=8);
+    if(distance>8) {assert.equal(plan.code,'range');assert.equal(s.cast(0,p),false);near(p.stamina,stamina);}
+  }
+  const {s,p,h,enemy,make}=arena(3);s.config.design.rules.orcMissingReduction=0;
+  const edge=make(0,0,8).h,outside=make(0,0,8.01).h;
+  const hp=edge.hp,out=outside.hp,A=s.attackPower(h);cast(s,p,0,enemy);
+  near(hp-edge.hp,A*3.8);near(outside.hp,out);
+  assert.match(describeAbilities(s).skills[0].summary,/前方8格扇形/);
+});
+
+test('裂地震荡基础5人，目标词条两档升至6/7人，返回波与减益只作用于首段目标',()=>{
+ for(const rank of [0,1,2]) {
+  const {s,p,h,enemy,make}=arena(3);s.config.design.rules.orcMissingReduction=0;
+  affix(s,p,65);affix(s,p,66);affix(s,p,67);if(rank)affix(s,p,105,rank);
   const targets=[enemy];
   for(let i=0;i<105;i++) {
     const u=s.spawn(0,'melee',0,1,0);
@@ -14,10 +31,20 @@ test('裂地震荡命中超过100名合法敌人，范围外和身后目标不�
   }
   const behind=make(0,0,-3).h,far=make(0,0,11).h;
   const before=new Map([...targets,behind,far].map(u=>[u.id,u.hp])),A=s.attackPower(h);
-  assert.equal(s.castPlan(0,p).targets.length,106);cast(s,p,0,enemy);
-  for(const u of targets)near(before.get(u.id)-u.hp,A*3.8);
+  const plan=s.castPlan(0,p),hitIds=new Set(plan.targets.map(u=>u.id));
+  assert.equal(plan.targets.length,5+rank);assert.ok(hitIds.has(enemy.id));cast(s,p,0,enemy);
+  for(const u of targets) {
+    const hit=hitIds.has(u.id);near(before.get(u.id)-u.hp,hit?A*3.8:0);
+    for(const key of ['attackDown','healingDown','moveSlow'])assert.equal(s.activeDebuffs(u,key).length,hit?1:0);
+  }
   near(behind.hp,before.get(behind.id));near(far.hp,before.get(far.id));
-  advance(s,1.1);for(const u of targets)near(before.get(u.id)-u.hp,A*3.8*1.15);
+  const positions=new Map(targets.map(u=>[u.id,{x:u.x,y:u.y}]));
+  advance(s,1.1);for(const u of targets) {
+    const hit=hitIds.has(u.id);near(before.get(u.id)-u.hp,hit?A*3.8*1.15:0);
+    const old=positions.get(u.id);near(Math.hypot(u.x-old.x,u.y-old.y),hit?1.5:0);
+  }
+  const guide=describeAbilities(s);assert.match(guide.skills[0].summary,new RegExp(`最多${5+rank}名敌人`));
+ }
 });
 
 test('金色目标词条改为持续减疗50%三秒，影响多次治疗、可净化且不叠加较弱减疗',()=>{
@@ -25,7 +52,7 @@ test('金色目标词条改为持续减疗50%三秒，影响多次治疗、可�
   immune.immuneUntil=100;enemy.hp-=1000;
   near(s.heal(enemy,100,enemy),100);
   const t=affix(s,p,65);assert.equal(t.name,'减少治疗效果');assert.equal(t.rarity,'gold');assert.equal(t.max,1);
-  assert.deepEqual(t.keys,['healing_down']);assert.equal(currentSkill(s,h,0).unlimited_targets,true);
+  assert.deepEqual(t.keys,['healing_down']);assert.equal(currentSkill(s,h,0).targets,5);
   cast(s,p,0,enemy);
   for(const u of [enemy,second]) {
     near(s.heal(u,100,u),50);near(s.heal(u,100,u),50);
@@ -92,11 +119,13 @@ test('君临持续强化延长到七秒，驱散君临后立即恢复伤害',()=
 
 test('当前配置与技能说明一致，新增比例和开关拒绝非法值',()=>{
   const {s,p,h}=arena(3);affix(s,p,65);const guide=describeAbilities(s);
-  assert.match(guide.skills[0].summary,/无数量上限/);assert.match(guide.skills[0].summary,/受到治疗降低50%，3秒/);
+  assert.match(guide.skills[0].summary,/最多5名敌人/);assert.match(guide.skills[0].summary,/受到治疗降低50%，3秒/);
   assert.doesNotMatch(guide.skills[0].summary,/最多3/);
   assert.match(guide.skills[1].summary,/尖刺外壳5秒.*普通攻击或技能攻击/);
   assert.match(guide.skills[3].summary,/君临5秒.*免疫任何伤害/);
-  assert.ok(!currentTraits(s.config,3).some(t=>t.skill===0&&t.name==='目标增加'));
+  const targets=currentTraits(s.config,3).find(t=>t.skill===0&&t.name==='目标增加');
+  assert.equal(targets.id,'N105_3');assert.equal(targets.rarity,'purple');assert.equal(targets.max,2);
+  assert.match(targets.description,/额外命中1\/2名敌人/);
   assert.doesNotThrow(()=>JSON.stringify(s.config));
   for(const [slot,key,value] of [[0,'healing_down',1.1],[0,'unlimited_targets',1],[3,'damage_immune','true']]) {
     const next=structuredClone(s.config.design);next.skills[3][slot][key]=value;

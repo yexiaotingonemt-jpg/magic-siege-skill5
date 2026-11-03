@@ -93,7 +93,7 @@ test('战车落点爆炸仍均分总池，多目标不得复制合计伤害',()=
 test('战车连轰固定落点，炮数升级六次，逐炮伤害按首炮20%递增',()=>{
  const {s,p,h,enemy}=arena(2);affix(s,p,61);affix(s,p,62);const hp=enemy.hp,A=s.attackPower(h);cast(s,p,3,enemy);advance(s,4.3);near(hp-enemy.hp,A*6*(1+1.2+1.4+1.6+1.8+2));
 });
-test('领主震荡无数量上限，返回段按15%并牵引1.5格',()=>{
+test('领主震荡基础最多5人，返回段按15%并牵引1.5格',()=>{
  const {s,p,h,enemy,make}=arena(3);s.config.design.rules.orcMissingReduction=0;affix(s,p,67);enemy.hp=enemy.maxHp=100000;const b=make(0,1,3).h,c=make(0,-1,3).h,behind=make(0,0,-3).h;
  const hp=enemy.hp,bp=behind.hp,A=s.attackPower(h),y=enemy.y;cast(s,p,0,enemy);near(hp-enemy.hp,A*3.8);near(behind.hp,bp);advance(s,1.1);near(hp-enemy.hp,A*3.8*1.15);near(y-enemy.y,1.5);assert.ok(b.hp<b.maxHp&&c.hp<c.maxHp);
 });
