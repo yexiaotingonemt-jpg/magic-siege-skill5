@@ -1,3 +1,4 @@
+import {applySnapshotDelta} from '../../shared/snapshot-delta.js';
 import {prepareRender} from './render-interpolation.js';
 import {Simulation} from '../../shared/simulation.js';
 import {CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION,UPDATE_REQUIRED_CODE} from '../../shared/protocol.js';
@@ -17,17 +18,27 @@ export function connectRoom({onState,onStatus,onIdentity,onUpdateRequired,onSnap
   for(const player of sim.players)for(const key of ['level','xp','points'])Object.defineProperty(player,key,{enumerable:true,configurable:true,get(){return this.progress[this.classId][key];},set(v){this.progress[this.classId][key]=v;}});
   if(oldClass!==p.classId)sim.notice='';onState(sim);
  };
- let events,lastPacket=Date.now(),lastAttempt=0,opening=false;
+ let events,snapshotBase=null,lastPacket=Date.now(),lastAttempt=0,opening=false;
  const open=async()=>{
   if(closed||opening)return;opening=true;lastAttempt=Date.now();events?.close();connected=false;
   try{
    await checkServerVersion();if(closed)return;
-   const stream=new EventSource(`/api/events?releaseVersion=${encodeURIComponent(CLIENT_VERSION)}&clientVersion=${encodeURIComponent(GAME_VERSION)}&protocolVersion=${PROTOCOL_VERSION}`);events=stream;
+   snapshotBase=null;
+   const stream=new EventSource(`/api/events?delta=1&releaseVersion=${encodeURIComponent(CLIENT_VERSION)}&clientVersion=${encodeURIComponent(GAME_VERSION)}&protocolVersion=${PROTOCOL_VERSION}`);events=stream;
    const active=()=>!closed&&events===stream;
    stream.addEventListener('identity',e=>{if(active()){identity=JSON.parse(e.data);onIdentity(identity);}});
    stream.addEventListener('heartbeat',()=>{if(active())lastPacket=Date.now();});
    stream.onopen=()=>{if(active()){connected=true;lastPacket=Date.now();onStatus('已同步');}};
-   stream.onmessage=e=>{if(active()){lastPacket=Date.now();if(identity){if(onSnapshot){const started=performance.now();apply(JSON.parse(e.data));onSnapshot(started,performance.now()-started);}else apply(JSON.parse(e.data));}}};
+   stream.onmessage=e=>{
+    if(!active())return;lastPacket=Date.now();if(!identity)return;
+    const started=onSnapshot?performance.now():0;
+    try{snapshotBase=applySnapshotDelta(snapshotBase,JSON.parse(e.data));}
+    catch(error){connected=false;onStatus('同步状态已过期，正在重新连接…');open();return;}
+    // 插值与预选职业只修改显示副本，不能污染下一条差量消息的还原基准。
+    const state=structuredClone({...snapshotBase,config:undefined});
+    if(snapshotBase.config)state.config=snapshotBase.config;
+    apply(state);if(onSnapshot)onSnapshot(started,performance.now()-started);
+   };
    stream.onerror=()=>{if(!active())return;connected=false;onStatus('连接中断，正在重连…');checkServerVersion().catch(error=>{if(isUpdateRequired(error))stopForUpdate(error);});};
   }catch(error){if(isUpdateRequired(error))stopForUpdate(error);else if(!closed)onStatus('连接中断，正在重连…');}finally{opening=false;}
  };
