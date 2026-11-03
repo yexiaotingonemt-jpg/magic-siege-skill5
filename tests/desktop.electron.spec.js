@@ -154,3 +154,34 @@ test('只有客户端发布版本变化也要求手动拉取，不请求更新�
   expect(client.errors).toEqual([]);
  }finally{await client?.app.close();await server.close();}
 });
+
+
+test('性能诊断：仅yxt超级账号落盘，切换普通账号后不可见且IPC拒绝写入',async()=>{
+ const server=await service();let client;
+ const admin=await server.accounts.register({name:'yxt',password:'desktop-test-password',side:0});
+ await server.accounts.register({name:'ordinary',password:'desktop-test-password',side:0});
+ await writeFile(path.join(path.dirname(server.accounts.file),'super-accounts.json'),JSON.stringify([admin.id]));
+ try{
+  client=await launch(server.base);const {app,page,profile}=client;
+  const window=await app.browserWindow(page);await window.evaluate(win=>{win.show();win.focus();});
+  await page.locator('#accountName').fill('yxt');await page.locator('#accountPassword').fill('desktop-test-password');await page.locator('#authSubmit').click();
+  await expect(page.locator('#performanceStatus')).toContainText('FPS',{timeout:20000});
+  await expect(page.locator('#performanceLogStatus')).toContainText('performance.jsonl');
+  const file=path.join(profile,'performance-logs','performance.jsonl');
+  const rows=(await readFile(file,'utf8')).trim().split('\n').map(JSON.parse);
+  expect(rows.at(-1).sample.fps).toBeGreaterThan(0);expect(rows.at(-1).sample.load.units).toBeGreaterThan(0);
+  expect(rows.at(-1).environment.clientVersion).toBe(CLIENT_VERSION);
+  expect(await page.locator('#performanceLogStatus').textContent()).toContain(file);
+  await page.locator('#performanceLogStatus').scrollIntoViewIfNeeded();
+  await capture(app,page,path.join(process.env.MAGIC_QA_DIR,'performance-native.png'));
+  await page.locator('#logout').click();await expect(page.locator('#authForm')).toBeVisible();
+  await page.locator('#accountName').fill('ordinary');await page.locator('#accountPassword').fill('desktop-test-password');await page.locator('#authSubmit').click();await page.waitForFunction(()=>window.__game?.renderer.getCamera());
+  const before=await readFile(file,'utf8');await expect(page.locator('#performanceStatus')).toHaveCount(0);
+  const denied=await page.evaluate(async()=>{try{await magicDesktop.writePerformanceSample({account:{name:'yxt',isSuperAdmin:true},sample:{fps:60}});return false;}catch(e){return e.message.includes('requires yxt super account');}});
+  expect(denied).toBe(true);await page.waitForTimeout(2300);
+  expect(await page.evaluate(()=>({monitor:__game.performance,load:__game.renderer.performanceLoad}))).toEqual({monitor:null,load:null});
+  expect(await readFile(file,'utf8')).toBe(before);
+
+  expect(client.errors).toEqual([]);
+ }finally{await client?.app.close();await server.close();}
+});

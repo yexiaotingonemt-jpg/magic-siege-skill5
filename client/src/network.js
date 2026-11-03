@@ -9,7 +9,7 @@ export async function checkServerVersion(){
  return data;
 }
 const renderedPosition=(u,now)=>{if(!Number.isFinite(u?._renderFromX))return {x:u.x,y:u.y};const t=Math.max(0,Math.min(1,(now-u._renderStarted)/u._renderDuration));return {x:u._renderFromX+(u._renderToX-u._renderFromX)*t,y:u._renderFromY+(u._renderToY-u._renderFromY)*t};};
-export function connectRoom({onState,onStatus,onIdentity,onUpdateRequired}){
+export function connectRoom({onState,onStatus,onIdentity,onUpdateRequired,onSnapshot}){
  const sim=new Simulation();let identity=null,previewClass=null,reserved=null,connected=false,closed=false,lastStateAt=0;
  const stopForUpdate=error=>{if(closed)return;dispose();setTimeout(()=>onUpdateRequired?.(error),0);};
  const send=async(type,args={})=>{if(closed)return false;if(!connected){sim.notice='连接中断，正在重连';onState(sim);return false;}try{const result=await request('/api/action',{id:crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`,type,args});if(closed)return false;if(!result.ok){sim.notice=result.message||'操作未生效';onState(sim);}return result.ok;}catch(e){if(isUpdateRequired(e)){stopForUpdate(e);return false;}if(!closed){sim.notice=e.message;onState(sim);}return false;}};
@@ -27,7 +27,7 @@ export function connectRoom({onState,onStatus,onIdentity,onUpdateRequired}){
    stream.addEventListener('identity',e=>{if(active()){identity=JSON.parse(e.data);onIdentity(identity);}});
    stream.addEventListener('heartbeat',()=>{if(active())lastPacket=Date.now();});
    stream.onopen=()=>{if(active()){connected=true;lastPacket=Date.now();onStatus('已同步');}};
-   stream.onmessage=e=>{if(active()){lastPacket=Date.now();if(identity)apply(JSON.parse(e.data));}};
+   stream.onmessage=e=>{if(active()){lastPacket=Date.now();if(identity){if(onSnapshot){const started=performance.now();apply(JSON.parse(e.data));onSnapshot(started,performance.now()-started);}else apply(JSON.parse(e.data));}}};
    stream.onerror=()=>{if(!active())return;connected=false;onStatus('连接中断，正在重连…');checkServerVersion().catch(error=>{if(isUpdateRequired(error))stopForUpdate(error);});};
   }catch(error){if(isUpdateRequired(error))stopForUpdate(error);else if(!closed)onStatus('连接中断，正在重连…');}finally{opening=false;}
  };

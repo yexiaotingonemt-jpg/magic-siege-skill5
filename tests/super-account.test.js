@@ -8,7 +8,9 @@ import {Accounts} from '../server/accounts.mjs';
 import {Room} from '../server/room.mjs';
 test('超级权限来自独立账号ID名单，注册及登录不能伪造，重载后保留',async()=>{
  const dir=mkdtempSync(path.join(tmpdir(),'super-account-')),accounts=new Accounts(dir);
- const a=await accounts.register({name:'yxt',password:'test-secret',side:0,isSuperAdmin:true});
+ await accounts.register({name:'host',password:'test-secret',side:0});
+ const a=await accounts.register({name:'czy001',password:'test-secret',side:0,isSuperAdmin:true});
+ assert.equal(a.isHost,false);
  assert.equal(accounts.public(a).isSuperAdmin,false);
  writeFileSync(path.join(dir,'super-accounts.json'),JSON.stringify([a.id]));
  const token=accounts.issue(a),req={headers:{cookie:'kc_session='+token}};
