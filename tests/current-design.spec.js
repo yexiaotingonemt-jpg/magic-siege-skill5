@@ -13,6 +13,7 @@ for(const width of [1440,390])for(const id of [0,4,5,2,3])test(`当前设计五�
  s.units=[];s.waveAt=1e9;for(const t of s.towers){t.x=100;t.cd=1e9;}
  const h=s.spawn(p.side,contractType(id),0,1);expect(s.contract(p,h.id)).toBe(true);Object.assign(h,{x:0,y:0,cd:1e9,speed:0});
  if(id===4){const t=s.config.design.affixes.find(t=>t.classId===4&&t.sourceId===28);p.progress[id].traits[t.id]=1;}
+ if(id===3){const t=s.config.design.affixes.find(t=>t.classId===3&&t.sourceId===65);p.progress[id].traits[t.id]=1;}
  const enemy=s.spawn(1-p.side,'melee',0,1),friend=s.spawn(p.side,'melee',0,1);Object.assign(enemy,{x:0,y:3,hp:1e7,maxHp:1e7,speed:0,cd:1e9});Object.assign(friend,{x:1,y:0,hp:100,maxHp:10000,speed:0,cd:1e9});
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const errors=[];page.on('pageerror',e=>errors.push(e.message));
  try{
@@ -29,6 +30,12 @@ for(const width of [1440,390])for(const id of [0,4,5,2,3])test(`当前设计五�
   await expect(page.locator('[data-skill-detail]:visible')).toHaveCount(4);
   if(id===4){await expect(page.locator('.sheet-panel')).toContainText('对沿途敌人额外造成150%攻击伤害');await expect(page.locator('.sheet-panel')).not.toContainText('同一目标每0.6秒');}
   const skillPanel=page.locator('[data-hero-panel="skills"]');
+  if(id===3){
+   await expect(skillPanel).toContainText('无数量上限');await expect(skillPanel).toContainText('受到治疗降低50%，3秒');
+   await expect(skillPanel).toContainText('尖刺外壳5秒，受到普通攻击或技能攻击');
+   await expect(skillPanel).toContainText('君临5秒，免疫任何伤害及负面效果');
+   await expect(skillPanel).toContainText('减少治疗效果');
+  }
   await skillPanel.evaluate(el=>{el.scrollTop=200;});const skillScroll=await skillPanel.evaluate(el=>el.scrollTop);expect(skillScroll).toBeGreaterThan(0);
   h.hp-=1;room.sequence++;room.broadcast();await page.waitForFunction(n=>__game.sim.sequence>=n,room.sequence);
   expect(await skillPanel.evaluate(el=>el.scrollTop)).toBe(skillScroll);

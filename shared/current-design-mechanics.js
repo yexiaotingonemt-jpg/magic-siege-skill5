@@ -13,7 +13,7 @@ const pass=(sim,h)=>currentValues(sim,h);
 const live=(sim,ids)=>ids.map(id=>sim.get(id)).filter(Boolean);
 const area=(sim,h,at,radius,limit,t=null)=>first(t,nearest(at,sim.enemies({...at,side:h.side},radius))).slice(0,limit);
 const emit=(sim,h,s,at,targets,kind='release')=>sim.visual(kind,h,at,{skill:s.skill,targets:targets.map(u=>({id:u.id,x:u.x,y:u.y})),haloTargets:targets.map(u=>({id:u.id})),until:sim.time+1});
-const hurt=(sim,h,s,t,power=s.power/100,scale=1,meta={})=>sim.damage(h,t,s.value.attack*power*scale*(1+(s.bonusDamage||0)),false,false,{value:s.value,area:(s.targets||1)>1,...meta});
+const hurt=(sim,h,s,t,power=s.power/100,scale=1,meta={})=>sim.damage(h,t,s.value.attack*power*scale*(1+(s.bonusDamage||0)),false,false,{value:s.value,area:!!s.unlimited_targets||(s.targets||1)>1,...meta});
 const knock=(sim,h,t,n)=>{
   if (!n || t.tower || t.immuneUntil>sim.time || t.hp<=0) return 0;
   const d=distance(h,t)||1, before={x:t.x,y:t.y};sim.interrupt(t);
@@ -54,7 +54,7 @@ export function selectCurrentSkill(h,i,s) {
   } else if (h.classId===5 && i===3) targets=[h,...this.allies(h,s.range).filter(u=>u.id!==h.id).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp||distance(h,a)-distance(h,b)).slice(0,s.targets)];
   else if (h.classId===3 && i===0) targets=first(t,nearest(h,this.enemies(h,s.range).filter(u=>{
     const len=distance(h,t)*distance(h,u);return !len || ((t.x-h.x)*(u.x-h.x)+(t.y-h.y)*(u.y-h.y))/len>=.35;
-  }))).slice(0,s.targets);
+  }))).slice(0,s.unlimited_targets?undefined:s.targets);
   else if (h.classId===4 && i===2) targets=first(t,nearest(h,this.enemies(h,s.range))).slice(0,s.targets);
   else if (h.classId===4 && i===3) targets=first(t,nearest(h,this.enemies(h,s.range))).slice(0,s.targets);
   else targets=[t];
@@ -176,6 +176,7 @@ export function resolveCurrentSkill(h,i,s,locked,ids=[],extra={}) {
     if (i===0) {
       for (const u of targets) {
         hurt(this,h,s,u);this.debuff(u,h,'attackDown',s.attack_down,s.duration,s.value);this.debuff(u,h,'moveSlow',s.slow,s.slow_duration,s.value);
+        this.debuff(u,h,'healingDown',s.healing_down,s.healing_down_duration,s.value);
       }
       const origin={x:h.x,y:h.y};
       if (s.echo) this.jobs.push({at:this.time+rules(this).echoDelay,run:()=>{
@@ -356,6 +357,14 @@ export function currentHeal(t,n,u,value=null,derived=false) {
   }
   return actual;
 }
+export function reflectCurrentShell(sim,a,t,reflected=false) {
+  if (reflected || !a || a.side===t.side || a.hp<=0 || !(t.currentShell?.until>sim.time)) return;
+  // Both basic and skill attacks reflect; reflected hits never start another reflection.
+  const s=t.currentShell.s,attack=sim.attackPower(a);
+  sim.debuff(a,t,'attackDown',s.attack_down,s.debuff_duration,s.value);
+  sim.damage(t,a,attack*s.thorn,false,true,{value:s.value,thorn:true,derived:true});
+  if (a.hp<=0&&s.death_slow) for (const enemy of area(sim,t,a,s.radius,99)) sim.debuff(enemy,t,'attackSpeedDown',s.death_slow,s.slow_duration,s.value);
+}
 export const currentTraitEffects={
   heatBoost(h,n) {if (n<=0||!pass(this,h).heat_attack_proc) return;h.heatBoostStacks=(h.heatBoostUntil>this.time?h.heatBoostStacks||0:0)+n;h.heatBoostUntil=this.time+rules(this).heatBoostDuration;},
   afterHeal(h,t,actual,overheal,value) {
@@ -386,11 +395,7 @@ export const currentTraitEffects={
       if (friend) this.heal(friend,sum*r.elfDamageHeal,a,meta.value,true);
     }
     if (basic&&a.classId===0&&a.hp>0) this.heal(a,sum*(pass(this,a).missing_lifesteal||0)*(1-a.hp/a.maxHp),a,null,true);
-    if (!reflected && t.currentShell?.until>this.time && a.hp>0) {
-      const s=t.currentShell.s,attack=this.attackPower(a);this.debuff(a,t,'attackDown',s.attack_down,s.debuff_duration,s.value);
-      this.damage(t,a,attack*s.thorn,false,true,{value:s.value,thorn:true,derived:true});
-      if (a.hp<=0&&s.death_slow) for (const enemy of area(this,t,a,s.radius,99)) this.debuff(enemy,t,'attackSpeedDown',s.death_slow,s.slow_duration,s.value);
-    }
+    reflectCurrentShell(this,a,t,reflected);
     if (!reflected && a.hp>0) {
       const reflect=Math.max(0,...(t.guards||[]).filter(g=>g.until>this.time).map(g=>g.reflect||0));
       if (reflect) this.damage(t,a,sum*reflect,false,true,{derived:true});

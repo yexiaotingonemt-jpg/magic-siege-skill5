@@ -38,7 +38,8 @@ export function validateCurrentDesign(d) {
     for(const [key,value] of Object.entries(values)){
       if(typeof value==='number'&&!finite(value))throw Error('新版数值无效：'+key);
       if(['cdr','attack_down','attack_slow','slow','slow_per','reduction','reduction_cap','final_reduction','tower_reduction'].includes(key)&&value>=1)throw Error('比例必须小于100%：'+key);
-      if(['heat_chance','dot_chance','extra_chance','heal_down','execute','hp_ratio'].includes(key)&&value>1)throw Error('比例不能超过100%：'+key);
+      if(['heat_chance','dot_chance','extra_chance','heal_down','healing_down','execute','hp_ratio'].includes(key)&&value>1)throw Error('比例不能超过100%：'+key);
+      if(['unlimited_targets','damage_immune'].includes(key)&&typeof value!=='boolean')throw Error('开关必须是布尔值：'+key);
       if(['targets','shots','pulses','bounces','damage_targets','slow_cap','summon','initial_heat','heat_cap_extra','elf_extra_targets'].includes(key)&&(!Number.isInteger(value)||value<0))throw Error('数量必须是非负整数：'+key);
     }
   };
@@ -192,10 +193,10 @@ export function describeCurrentSkill(s,rules={}) {
     `命中最多${T}人，分担前${P}攻击伤害、降低${pct(s.attack_slow)}攻速${D}秒。`,
     `命中最多${T}人，分担前${P}攻击伤害、击退${s.knock}格。`,
     `固定落点半径${s.radius}格内炮击${s.shots}次，间隔${s.gap}秒，每炮${P}攻击伤害并使移速降低${pct(s.slow_per)}，最多${s.slow_cap}层。`],
-    3:[`震荡最多${T}名敌人，各受${P}攻击伤害、降攻${pct(s.attack_down)}，持续${D}秒。`,
-    `尖刺外壳${D}秒，受到攻击向攻击者反弹其攻击力${pct(s.thorn)}的伤害。`,
+    3:[`震荡${s.unlimited_targets?'命中前方范围内所有敌人，无数量上限':`最多${T}名敌人`}，各受${P}攻击伤害、降攻${pct(s.attack_down)}，持续${D}秒。`,
+    `尖刺外壳${D}秒，受到普通攻击或技能攻击时向攻击者反弹其攻击力${pct(s.thorn)}的伤害。`,
     `向目标冲锋，晕眩${s.stun}秒，沿途最多${T}人各受${P}攻击伤害。`,
-    `君临${D}秒，免疫负面；普攻对主目标周围最多${T}名敌人造成${P}攻击伤害。`]}[s.classId]?.[s.skill] || '';
+    `君临${D}秒，${s.damage_immune?'免疫任何伤害及负面效果':'免疫负面'}；普攻对主目标周围最多${T}名敌人造成${P}攻击伤害。`]}[s.classId]?.[s.skill] || '';
   const extra=[],add=(condition,text)=>{if(condition)extra.push(text);};
   if(s.classId===0){
     if(s.skill===0)add(s.vuln,`目标受到伤害提高${pct(s.vuln)}。`);
@@ -222,7 +223,7 @@ export function describeCurrentSkill(s,rules={}) {
     if(s.skill===3)add(s.ramp,`从第2炮起每炮增加首炮伤害的${pct(s.ramp)}。`);
   }
   if(s.classId===3){
-    if(s.skill===0){add(s.slow,`移速降低${pct(s.slow)}，${s.slow_duration}秒。`);add(s.echo,`返回波造成首段${pct(s.echo)}伤害并牵引${s.pull}格。`);}
+    if(s.skill===0){add(s.healing_down,`受到治疗降低${pct(s.healing_down)}，${s.healing_down_duration}秒。`);add(s.slow,`移速降低${pct(s.slow)}，${s.slow_duration}秒。`);add(s.echo,`返回波造成首段${pct(s.echo)}伤害并牵引${s.pull}格。`);}
     if(s.skill===1){add(s.attack_down,`攻击者降攻${pct(s.attack_down)}，${s.debuff_duration}秒。`);add(s.death_slow,`反伤击杀使周围敌人攻速降低${pct(s.death_slow)}，${s.slow_duration}秒。`);}
     if(s.skill===2)add(s.drag,'沿途命中的敌人拖拽至终点。');
     if(s.skill===3){add(s.shield,`开启时获得最大生命${pct(s.shield)}护盾，持续至君临结束。`);add(s.lifesteal,`技能吸血${pct(s.lifesteal)}。`);add(s.summon,`击杀召唤${s.summon_duration}秒护卫，最多${s.summon}名。`);}

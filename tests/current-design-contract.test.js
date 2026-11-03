@@ -17,10 +17,12 @@ const windowSkillDescriptions={
  '4:1':'标记1名敌人，持续5秒。攻击命中被标记敌人时，附加相当于攻击力100%的伤害，并有30%的概率获得1层炙热。',
  '5:2':'净化6格内最多2名友军的负面状态；每成功净化1个状态，为该友军恢复相当于攻击力256%的生命。',
  '2:3':'向当前目标所在位置连续炮击4次，作用半径4格，间隔0.7秒，每次造成相当于攻击力600%的伤害，并使移动速度降低30%，最多叠加3层，持续3秒。',
- '3:1':'为自身披上尖刺外壳，持续5秒。期间每次受到攻击时，对攻击者反弹相当于其攻击力150%的伤害。',
- '3:3':'进入君临状态，持续5秒。期间免疫负面效果，每次普通攻击还会对主目标周围最多2名敌人造成相当于攻击力400%的伤害。',
+ '3:0':'向前释放震荡波，命中前方范围内所有敌人，无数量上限，各造成相当于攻击力380%的伤害，并使攻击力降低16%，持续2秒。',
+ '3:1':'为自身披上尖刺外壳，持续5秒。期间每次受到普通攻击或技能攻击时，对攻击者反弹相当于其攻击力150%的伤害。',
+ '3:3':'进入君临状态，持续5秒。期间免疫任何伤害及负面效果，每次普通攻击还会对主目标周围最多2名敌人造成相当于攻击力400%的伤害。',
 };
 const windowAffixDescriptions={
+ 65:'被震荡波命中敌人受到的治疗效果降低50%，持续3秒（上限1档）。',
  55:'自身攻击速度提高200%除以分担目标数，持续10秒（上限1档）。',
  75:'开启君临时，获得相当于最大生命4%/8.2%的护盾，持续至君临结束（上限2档）。',
  78:'每累计受到最大生命10%的伤害，受到的伤害降低8%，持续5秒（上限1档）。',
@@ -47,7 +49,7 @@ const whole=new Set(['duration','targets','range','bounces','taunt','knock','sho
 const boolean=new Set(['immortal','pierce','split','drag','passive_dr']);
 const groups=(text,percent=false)=>[...text.split('（')[0].matchAll(/\d+(?:\.\d+)?(?:%?\/\d+(?:\.\d+)?)*%?(?:个百分点)?/g)].map(m=>m[0]).filter(t=>!percent||t.includes('%')||t.includes('个百分点')).map(t=>t.match(/\d+(?:\.\d+)?/g).map(Number));
 for(const a of design.affixes)test(`${classes[a.classId]}词条${a.sourceId}：全部档位、上限、品质对应当前源表`,()=>{
- const original=source.affixes.find(r=>r[2]===a.name&&(a.common?r[1]==='通用词条':r[0]===classes[a.classId]&&r[1]===(a.skill==null?'职业被动':design.skills[a.classId][a.skill].name)));
+ const original=source.affixes.find(r=>r[2]===(a.sourceId===65?'目标增加':a.name)&&(a.common?r[1]==='通用词条':r[0]===classes[a.classId]&&r[1]===(a.skill==null?'职业被动':design.skills[a.classId][a.skill].name)));
  const row=original&&[...original];if(row&&windowAffixDescriptions[a.sourceId])row[3]=windowAffixDescriptions[a.sourceId];
  assert.ok(row,a.id);assert.equal(clean(a.description),clean(row[3]));assert.equal(a.max,Number(row[4]));assert.equal(a.rarity,{'蓝':'blue','紫':'purple','金':'gold'}[row[5]]);
  const key=a.keys[0],id=a.sourceId,ps=groups(row[3],true),ns=groups(row[3]);let expected;
