@@ -22,7 +22,6 @@ export function createGameSheets(){
  function refresh(){
   document.querySelectorAll('[data-hero-panel]').forEach(panel=>panel.hidden=panel.dataset.heroPanel!==heroView);
   document.querySelectorAll('[data-ability-view]').forEach(card=>card.hidden=card.dataset.abilityView!==heroView||(heroView==='skills'&&skillIndex!=null&&Number(card.dataset.skillDetail)!==skillIndex));
-  document.querySelectorAll('[data-hero-view]').forEach(button=>{const selected=button.dataset.heroView===heroView;button.setAttribute('aria-selected',String(selected));button.tabIndex=selected?0:-1;});
   const panel=document.querySelector('[data-hero-panel]:not([hidden])');if(panel)panel.scrollTop=scrollPositions.get(heroView)||0;
   if(!sections.find(section=>section.dataset.sheetSection==='hero')?.hidden){
    document.querySelector('#sheetTitle').textContent=heroView==='passive'?'职业被动':heroView==='stats'?'基础属性':heroView==='common'?'通用效果':skillIndex==null?'职业技能':document.querySelector(`[data-skill-detail="${skillIndex}"] h3`)?.childNodes[0]?.textContent||'技能说明';
@@ -43,12 +42,6 @@ export function createGameSheets(){
   refresh();
  }
  document.querySelectorAll('[data-hero-open]').forEach(button=>button.onclick=()=>open(button.dataset.heroOpen));
- const tabs=[...document.querySelectorAll('[data-hero-view]')];
- tabs.forEach((button,index)=>{
-  button.id='hero-tab-'+button.dataset.heroView;button.setAttribute('aria-controls','hero-panel-'+button.dataset.heroView);
-  button.onclick=()=>{captureScroll();if(skillIndex!=null)scrollPositions.delete('skills');heroView=button.dataset.heroView;skillIndex=null;refresh();};
-  button.onkeydown=e=>{const direction=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;if(direction){e.preventDefault();const next=tabs[(index+direction+tabs.length)%tabs.length];next.click();next.focus();}};
- });
  document.querySelector('#sheetClose').onclick=close;
  sheet.addEventListener('click',e=>{if(e.target===sheet)close();});
  window.addEventListener('keydown',e=>{if(sheet.hidden)return;if(e.key==='Escape'){e.preventDefault();close();}if(e.key==='Tab'){const nodes=[...sheet.querySelectorAll('button,summary,select,input,[tabindex="0"]')].filter(n=>n.getClientRects().length&&!n.disabled),first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}});
