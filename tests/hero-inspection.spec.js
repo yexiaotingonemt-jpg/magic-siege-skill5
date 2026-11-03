@@ -4,12 +4,13 @@ import path from 'node:path';
 import {tmpdir} from 'node:os';
 import {createGameServer} from '../server/index.mjs';
 import {createLocalClient} from '../client/launcher.mjs';
-import {names} from '../shared/config.js';
+import {names,legacyLiveConfig} from '../shared/config.js';
+import {Room} from '../server/room.mjs';
 
 for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`技能单项说明、升级状态、属性和通用效果 ${viewport.width}`,async({page})=>{
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
  page.on('console',message=>{if(message.type()==='error'&&!(message.location().url.endsWith('/api/me')&&message.text().includes('401')))errors.push(message.text());});
- const game=createGameServer({dataDir:mkdtempSync(path.join(process.env.MAGIC_QA_DIR||tmpdir(),'inspection-'))});
+ const game=createGameServer({dataDir:mkdtempSync(path.join(process.env.MAGIC_QA_DIR||tmpdir(),'inspection-')),room:new Room(legacyLiveConfig())});
  game.room.paused=true;await new Promise(r=>game.server.listen(0,'127.0.0.1',r));
  const client=createLocalClient({serverUrl:`http://127.0.0.1:${game.server.address().port}`,...(process.env.MAGIC_INSPECTION_DIST?{distDir:process.env.MAGIC_INSPECTION_DIST}:{})});
  await new Promise(r=>client.server.listen(0,'127.0.0.1',r));

@@ -31,7 +31,8 @@ async function writeManifest(directory){
 async function change(directory,name,replace){const file=path.join(directory,name);await writeFile(file,replace(await readFile(file,'utf8')));}
 async function fixture(t){
  const root=await mkdtemp(path.join(tmpdir(),'magic-hot-update-')),first=path.join(root,'releases/first'),next=path.join(root,'releases/next');
- t.after(()=>rm(root,{recursive:true,force:true}));await mkdir(first,{recursive:true});await git(root,['init','--bare',path.join(root,'github.git')]);
+ assert.equal(path.dirname(root),tmpdir());assert.match(path.basename(root),/^magic-hot-update-/);
+ t.after(()=>rm(root,{recursive:true,force:true,maxRetries:10,retryDelay:100}));await mkdir(first,{recursive:true});await git(root,['init','--bare',path.join(root,'github.git')]);
  const sourceVerifier=new GitHubSourceVerifier({cacheDir:path.join(root,'git-cache'),transport:path.join(root,'github.git')});
  for(const name of ['server','shared','deploy','package.json','package-lock.json','README.md'])await cp(path.join(source,name),path.join(first,name),{recursive:true});
  const version={serverVersion:SERVER_VERSION,clientVersion:SERVER_VERSION,gameVersion:GAME_VERSION,protocolVersion:PROTOCOL_VERSION};

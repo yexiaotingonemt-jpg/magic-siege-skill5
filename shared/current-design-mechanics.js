@@ -3,7 +3,6 @@ import { recordEffectiveHeal } from './assist-rules.js';
 import { targetForSide } from './manual-target.js';
 import { segmentDistance } from './lord-flame-shield.js';
 import { spend } from './skill-value.js';
-import {grantEliteScore,transferEliteScore} from './elite-score.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const nearest=(at,units)=>units.sort((a,b)=>distance(at,a)-distance(at,b)||a.id-b.id);
@@ -20,11 +19,19 @@ const knock=(sim,h,t,n)=>{
   sim.moveUnit(t,t.x+(t.x-h.x)/d*n,t.y+(t.y-h.y)/d*n);
   return distance(t,before);
 };
+function currentTarget(sim,h,i,s){
+  const friendly=h.classId===5||h.classId===0&&i===2,side=friendly?h.side:1-h.side;
+  const chosen=targetForSide(sim,h,side);
+  if(chosen&&(!friendly||!chosen.tower&&!((h.classId===5&&i===1||h.classId===0&&i===2)&&chosen.id===h.id)))return chosen;
+  if(friendly)return sim.allies(h,s.range).filter(u=>!u.tower&&!((h.classId===5&&i===1||h.classId===0&&i===2)&&u.id===h.id))
+    .sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp||distance(h,a)-distance(h,b)||a.id-b.id)[0]||null;
+  return sim.enemies(h,s.range).sort((a,b)=>(a.hero?0:a.tower?2:1)-(b.hero?0:b.tower?2:1)||distance(h,a)-distance(h,b)||a.id-b.id)[0]||null;
+}
 export function currentRangeFailure(sim,h,i,s) {
-  if (h.classId===3 && (i===1||i===3) || h.classId===0 && (i===1||i===3) || h.classId===5 && i===3) return null;
+  if (h.classId===3 && (i===1||i===3) || h.classId===0 && (i===1||i===3) || h.classId===5 && (i===2||i===3)) return null;
   const friendly=h.classId===5 || h.classId===0 && i===2;
-  const t=targetForSide(sim,h,friendly?h.side:1-h.side);
-  if (!t) return {ok:false,code:'target',reason:friendly?'请选择己方目标':'请选择敌方目标'};
+  const t=currentTarget(sim,h,i,s);
+  if (!t) return {ok:false,code:'target',reason:friendly?'范围内没有己方目标':'范围内没有敌方目标'};
   if (friendly && (t.tower || (i===1 && h.classId===5 || i===2 && h.classId===0) && t.id===h.id))
     return {ok:false,code:'wrong-target',reason:'请选择其他己方单位'};
   if (distance(h,t)>s.targetRange+1e-7) return {ok:false,code:'range',reason:'目标太远'};
@@ -32,21 +39,22 @@ export function currentRangeFailure(sim,h,i,s) {
 }
 export function selectCurrentSkill(h,i,s) {
   const friendly=h.classId===5 || h.classId===0 && i===2;
-  let t=targetForSide(this,h,friendly?h.side:1-h.side), targets=[];
+  let t=currentTarget(this,h,i,s), targets=[];
   const selfSkill=h.classId===3 && (i===1||i===3) || h.classId===0 && (i===1||i===3) || h.classId===5 && i===3;
   if (selfSkill) t=h;
+  if(h.classId===5&&i===2&&!t)t=h;
   if (!t) return {ok:false,code:'target',reason:'范围内没有有效目标'};
   if (h.classId===0 && i===0) targets=area(this,h,t,s.radius,s.targets,t);
   else if (h.classId===0 && i===1) targets=[h,...nearest(h,this.allies(h,s.radius).filter(u=>u.id!==h.id)).slice(0,s.targets)];
   else if (h.classId===5 && i===2) {
-    targets=first(this.hasNegative(t)?t:null,nearest(h,this.allies(h,s.range).filter(u=>this.hasNegative(u)))).slice(0,s.targets);
+    const candidates=nearest(h,this.allies(h,s.range).filter(u=>this.hasNegative(u)));
+    targets=first(candidates.find(u=>u.id===t.id),candidates).slice(0,s.targets);
     if (!targets.length) return {ok:false,code:'target',reason:'没有需要净化的友军'};
   } else if (h.classId===5 && i===3) targets=[h,...this.allies(h,s.range).filter(u=>u.id!==h.id).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp||distance(h,a)-distance(h,b)).slice(0,s.targets)];
-  else if (h.classId===3 && i===0) targets=area(this,h,t,s.radius,s.targets,t).filter(u=>{
-    if(distance(h,u)>s.range)return false;
+  else if (h.classId===3 && i===0) targets=first(t,nearest(h,this.enemies(h,s.range).filter(u=>{
     const len=distance(h,t)*distance(h,u);return !len || ((t.x-h.x)*(u.x-h.x)+(t.y-h.y)*(u.y-h.y))/len>=.35;
-  });
-  else if (h.classId===4 && i===2) targets=area(this,h,t,s.radius,s.targets,t);
+  }))).slice(0,s.targets);
+  else if (h.classId===4 && i===2) targets=first(t,nearest(h,this.enemies(h,s.range))).slice(0,s.targets);
   else if (h.classId===4 && i===3) targets=first(t,nearest(h,this.enemies(h,s.range))).slice(0,s.targets);
   else targets=[t];
   return {ok:true,t,targets,manualTargetId:t?.id};
@@ -100,16 +108,22 @@ export function resolveCurrentSkill(h,i,s,locked,ids=[],extra={}) {
       this.debuff(t,h,'vulnerable',s.vuln,s.duration,s.value);
     }
     if (i===2) {
-      if (s.pierce) {
-        const len=distance(h,at)||1,r=rules(this),duration=r.pierceDistance/r.pierceSpeed;
-        const end={x:h.x+(at.x-h.x)/len*r.pierceDistance,y:h.y+(at.y-h.y)/len*r.pierceDistance};
-        const count=this.enemies(h).filter(u=>segmentDistance(u,h,end)<=r.pierceRadius).length;
-        this.fields.push({kind:'currentPierce',owner:h,s,primaryCount:count,x:h.x,y:h.y,dx:(at.x-h.x)/len,dy:(at.y-h.y)/len,
-          travel:0,last:this.time,next:{},until:this.time+duration});
-      } else for (const u of targets) {
+      // Lock every original fireball route before knockback moves its endpoint.
+      // A shared path victim receives the extra hit once across this entire cast.
+      const origin={x:h.x,y:h.y},ends=targets.map(u=>({x:u.x,y:u.y}));
+      const pathTargets=s.path_damage>0?this.enemies(h).filter(u=>ends.some(end=>segmentDistance(u,origin,end)<=rules(this).pierceRadius)):[];
+      const hitIds=new Set([...targets,...pathTargets].map(u=>u.id)),isolated=hitIds.size===1?1+s.isolated:1;
+      const baseIds=new Set(targets.map(u=>u.id));
+      for (const u of targets) {
         const before=u.hp;
-        hurt(this,h,s,u,s.power/100,targets.length===1?1+s.isolated:1);
+        hurt(this,h,s,u,s.power/100,isolated);
         knock(this,h,u,s.knock);
+        if (before>0&&u.hp<=0) this.addHeat(h,s.kill_heat);
+      }
+      for (const u of pathTargets) {
+        const before=u.hp;
+        hurt(this,h,s,u,s.path_damage,isolated);
+        if (!baseIds.has(u.id)) knock(this,h,u,s.knock);
         if (before>0&&u.hp<=0) this.addHeat(h,s.kill_heat);
       }
     }
@@ -211,7 +225,10 @@ function runeImpact(sim,h,s,at,multiplier=1,repeat=false,primaryId=null) {
       if (s.skill===2) {
         const moved=knock(sim,h,u,s.knock*share);
         if (moved && s.move_damage) hurt(sim,h,s,u,s.move_damage,moved);
-        if (moved && s.blast) {const center={x:u.x,y:u.y};sim.jobs.push({at:sim.time+rules(sim).explosionDelay,run:()=>sim.explode(h,center,s.radius,6,s.value.attack*s.blast*share,s.value)});}
+        if (moved && s.blast) {const center={x:u.x,y:u.y};sim.jobs.push({at:sim.time+rules(sim).explosionDelay,run:()=>{
+          const victims=area(sim,h,center,s.radius,6);
+          for(const victim of victims)hurt(sim,h,s,victim,s.blast,share/victims.length,{derived:true});
+        }});}
       }
       if (s.skill===3 && u.hp>0) {
         const old=u.debuffs?.[h.id+':moveSlow'],stacks=Math.min(s.slow_cap,old?.until>sim.time?(old.stacks||1)+1:1);
@@ -219,7 +236,7 @@ function runeImpact(sim,h,s,at,multiplier=1,repeat=false,primaryId=null) {
       }
     }
   }
-  if (s.skill===1&&s.self_haste) sim.haste(h,'runeFrost',s.self_haste/n,s.self_haste_duration??s.duration);
+  if (s.skill===1&&s.self_haste) sim.haste(h,'runeFrost',s.self_haste/n,s.haste_duration);
   if (s.skill===0&&!repeat&&s.extra_chance&&sim.random()<s.extra_chance) runeImpact(sim,h,s,at,multiplier,true,primaryId);
 }
 export function impactCurrentSkill(b) {runeImpact(this,b.source,b.payload,{x:b.tx,y:b.ty},1,false,b.targetId);}
@@ -229,22 +246,13 @@ export function processCurrentEffects() {
     if (f.kind==='link') {const u=this.get(f.host);if (!u||h.hp<=0||distance(h,u)>f.breakRange) f.until=this.time;continue;}
     if (!f.kind.startsWith('current')) continue;
     if (h.hp<=0 || (f.kind==='currentDrain'&&s.channel || ['currentGroupHeal','currentBarrage'].includes(f.kind)) && h.channelUntil<this.time-1e-7) {f.until=this.time;continue;}
+    // Finish pre-update projectiles; new fireball casts never create this field.
     if (f.kind==='currentPierce') {
       const r=rules(this),from={x:f.x,y:f.y},step=Math.min(r.pierceDistance-f.travel,(this.time-f.last)*r.pierceSpeed);
       f.last=this.time;f.x+=f.dx*step;f.y+=f.dy*step;f.travel+=step;
       for (const u of this.enemies({...f,side:h.side}).filter(u=>segmentDistance(u,from,f)<=r.pierceRadius)) {
         if ((f.next[u.id]||0)>this.time) continue;
-        if (!f.initialHit) {
-          const firstTargets=area(this,h,u,s.radius,s.targets,u);
-          f.initialHit=true;f.isolated=f.primaryCount===1&&firstTargets.length===1;
-          for (const target of firstTargets) {
-            const before=target.hp;hurt(this,h,s,target,s.power/100,f.isolated?1+s.isolated:1);
-            knock(this,h,target,s.knock);f.next[target.id]=this.time+r.pierceGap;
-            if (before>0&&target.hp<=0) this.addHeat(h,s.kill_heat);
-          }
-          continue;
-        }
-        const before=u.hp;hurt(this,h,s,u,s.power/100,r.piercePower*(f.isolated?1+s.isolated:1));
+        const before=u.hp;hurt(this,h,s,u,s.power/100,r.piercePower*(f.primaryCount===1?1+s.isolated:1));
         knock(this,h,u,s.knock);f.next[u.id]=this.time+r.pierceGap;
         if (before>0&&u.hp<=0) this.addHeat(h,s.kill_heat);
       }
@@ -254,7 +262,7 @@ export function processCurrentEffects() {
     while (f.tick<=this.time+1e-7 && f.tick<=f.until+1e-7 && (f.remaining==null || f.remaining>0)) {
       if (f.kind==='currentDrain') {
         const u=this.get(f.host);
-        if (!u || distance(h,u)>(s.break_range??s.range) || u.immuneUntil>this.time) {f.until=this.time;break;}
+        if (!u || distance(h,u)>s.range || u.immuneUntil>this.time) {f.until=this.time;break;}
         const n=hurt(this,h,s,u,s.power/100,f.scale,{periodic:true});this.heal(h,n*s.drain,h,s.value);
         f.tick+=1;
       } else if (f.kind==='currentCorrosion') {
@@ -309,7 +317,7 @@ export function currentAttackPower(u) {
   const bonus=(v.attack_bonus||0)+(v.missing_attack||0)*(1-u.hp/u.maxHp)+
     (u.heatBoostUntil>this.time?Math.min(r.heatAttackCap,(u.heatBoostStacks||0)*(v.heat_attack_proc||0)):0);
   const down=Math.max(0,...this.activeDebuffs(u,'attackDown').map(d=>d.ratio));
-  return base*(1+bonus)*(u.boostUntil>this.time?1+u.attackBoost:1)*(u.eliteBuffs?.assault>this.time?1.2:1)*(1-down);
+  return base*(1+bonus+(u.boostUntil>this.time?u.attackBoost||0:0)+(u.eliteBuffs?.assault>this.time?.2:0))*(1-down);
 }
 export function currentAttackRate(u) {
   const v=pass(this,u),heat=u.classId===4?(u.heat||0)*(rules(this).heatHaste+(v.heat_haste_extra||0)):0;
@@ -351,7 +359,10 @@ export const currentTraitEffects={
   afterHeal(h,t,actual,overheal,value) {
     if (h?.classId!==5) return;
     const s=value?.currentSkill,r=rules(this),v=currentValues(this,h,null,value?.ranks);
-    if (s?.skill===3&&overheal>0&&s.over_shield) this.shield(t,Math.min(t.maxHp*s.shield_cap,overheal*s.over_shield),h,s.shield_duration,value);
+    if (s?.skill===3&&overheal>0&&s.over_shield) {
+      const previous=t.shieldUntil>this.time&&t.shieldOwner===h.id&&t.shieldValue?.currentSkill?.skill===3?t.shield||0:0;
+      this.shield(t,Math.min(t.maxHp*s.shield_cap,previous+overheal*s.over_shield),h,s.shield_duration,value);
+    }
     if (actual<=0) return;
     const count=(s?.skill===0?s.damage_targets:1)+(v.elf_extra_targets||0);
     for (const enemy of area(this,h,t,r.elfConvertRadius,count)) {
@@ -374,8 +385,8 @@ export const currentTraitEffects={
     }
     if (basic&&a.classId===0&&a.hp>0) this.heal(a,sum*(pass(this,a).missing_lifesteal||0)*(1-a.hp/a.maxHp),a,null,true);
     if (!reflected && t.currentShell?.until>this.time && a.hp>0) {
-      const s=t.currentShell.s;this.debuff(a,t,'attackDown',s.attack_down,s.debuff_duration,s.value);
-      this.damage(t,a,this.attackPower(a)*s.thorn,false,true,{value:s.value,thorn:true,derived:true});
+      const s=t.currentShell.s,attack=this.attackPower(a);this.debuff(a,t,'attackDown',s.attack_down,s.debuff_duration,s.value);
+      this.damage(t,a,attack*s.thorn,false,true,{value:s.value,thorn:true,derived:true});
       if (a.hp<=0&&s.death_slow) for (const enemy of area(this,t,a,s.radius,99)) this.debuff(enemy,t,'attackSpeedDown',s.death_slow,s.slow_duration,s.value);
     }
     if (!reflected && a.hp>0) {
@@ -410,8 +421,7 @@ export const currentTraitEffects={
         Object.assign(u,{x:h.x,y:h.y,summoned:true,ownerId:h.id,expiresAt:this.time+ult.s.summon_duration,hp:r.summonHp,maxHp:r.summonHp,attack:r.summonAttack,interval:r.summonInterval,range:1.5,speed:2,deploying:false});
       }
     }
-    if(t.elite)grantEliteScore(this,h);
-    else if(t.hero)transferEliteScore(this,h,t);
+    if(t.elite)this.eliteReward(h,this.players[h.playerId]);
   },
   onUnitDeath(t) {
     const killed=t.lethalSkill;

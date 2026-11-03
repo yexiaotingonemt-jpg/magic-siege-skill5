@@ -1,14 +1,14 @@
 {
-  "version": "0.6.2",
-  "serverVersion": "0.6.2",
-  "gameVersion": "0.6.0",
+  "version": "0.7.8",
+  "serverVersion": "0.7.8",
+  "gameVersion": "0.7.0",
   "protocolVersion": 3,
   "files": {
-    "client/prebuilt/assets/index-BkNRqetp.css": "c6633b9f9f19cc52ece5041e048a464933d5051fbd84ad52624c032ba74d9330",
-    "client/prebuilt/assets/index-Cf7Y0DdR.js": "54136cf155f2d342ec23cebd83cee95b7712bdce89d7dd97c95df984fcea8717",
+    "client/prebuilt/assets/index-B1jm1j3A.js": "25403567e5dac5919ad19c7f4fb2b08c5eb5a2a4eefb3dd24ebe302fc2ab2457",
+    "client/prebuilt/assets/index-Oz-STwCx.css": "a64bdd15acd5595fe57e094827815440be61d14d0c6a27145c41b7efa811cca5",
     "client/prebuilt/assets/phaser-DFK5Ua9d.js": "f9025c1a29bc3ae097dd886ce07717b297466da1ce8f032c8294252ce6cf5cdb",
-    "client/prebuilt/client-version.json": "106402d5df5b0da8413bede48c97585c38810072e808f736ff0aa807d71f869b",
-    "client/prebuilt/index.html": "65fb043de6f83fbd574ec13322ac6e0b9de6917c2757bdce1372501e40849c24",
+    "client/prebuilt/client-version.json": "6377eebf0c581dcfde5ab1918b44be98f72efab5fd433311082d362ec02764a1",
+    "client/prebuilt/index.html": "73c80c84192aa80c5754586272927b54b75d20a46442d21f5a05e33466ae8036",
     "client/desktop/assets/magic-throne.ico": "89421e37f5316235335323773072230a353bffa115ff2d21827b8b1486b1b921",
     "client/desktop/assets/magic-throne.svg": "05364641cdcc968fd02dd591fc3dc10a160528ed0aeebef16ef154b649e12e1e",
     "client/desktop/config.mjs": "af3a2c715c7ea9d1af042edd7f12e4dc04cbcca1579801499c5ed02b4b4a27ef",
@@ -19,7 +19,7 @@
     "魔法王座.exe": "1142a1c9b7ad159691d7fbb5c25c4ecd6b9ff6fb1ccbd4f4d6d01d5bf944c179",
     "client/launcher.mjs": "c2923024bfbf7051368f9ef51a6c608c01dfe3b0f219cbbd2f62033bf28e38b9",
     "client/client-config.json": "6b27adca4af8dbc3bd561c1af85471d8561026bd3c449b26a3d60d6f071937c5",
-    "shared/protocol.js": "60e52d0444e2d7c548c083bdec3be7934977748dda3bdd400ea4d45d7c147f04"
+    "shared/protocol.js": "c5d44fa427e509d59bf7d045fe023ff0f239c698153f5dffea7800ce389cdc33"
   },
   "runtime": {
     "version": "45.1.0-win32-x64",

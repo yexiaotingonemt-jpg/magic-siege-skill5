@@ -1,4 +1,5 @@
 import { classes, names } from "../../shared/config.js";
+import {describeInnate} from '../../shared/innate-passives.js';
 import { isCurrentDesign } from '../../shared/current-design.js';
 import { describeCurrentAbilities } from './current-design-descriptions.js';
 import {
@@ -158,8 +159,9 @@ export function describeAbilities(sim) {
   });
   return {
     name: classes[id],
-    passive: roles[id],
-    passiveSummary: roles[id],
+    passive: describeInnate(sim,h).innatePassive||roles[id],
+    passiveSummary: describeInnate(sim,h).innatePassive||roles[id],
+    ...describeInnate(sim,h),
     skills,
     owned: TRAITS.filter((t) => t.classId === id && r(t.id)).map((t) => ({
       ...t,

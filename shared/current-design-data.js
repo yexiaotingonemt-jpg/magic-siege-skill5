@@ -1,15 +1,15 @@
-// 钉钉当前稿的可调开发参数；尚未通过战斗与计分平衡验收。
+// 钉钉当前技能与词条，2026-11-02逐项核对；平衡状态独立记录。
 import { LEVEL_UP_STAMINA } from './experience.js';
 export const CURRENT_DESIGN = {
   "enabled": true,
-  "revision": "dingtalk-20261031-current",
+  "revision": "dingtalk-20261102-fire-path-150",
   "status": "待平衡",
   "source": "https://alidocs.dingtalk.com/i/nodes/lyQod3RxJK3vADkBslqKj1EGJkb4Mw9r",
   "skills": {
     "0": [
       {
         "name": "汲血连接",
-        "description": "持续汲取目标生命3秒，每秒造成相当于攻击力150%的伤害，并恢复等量生命；连接距离超过10格时中断。",
+        "description": "持续汲取目标生命3秒，每秒造成相当于攻击力150%的伤害，并恢复等量生命。",
         "cost": 1,
         "cd": 6.0,
         "cast": 0.25,
@@ -21,8 +21,7 @@ export const CURRENT_DESIGN = {
         "drain": 1.0,
         "vuln": 0.0,
         "secondary": 0.2,
-        "channel": true,
-        "break_range": 10
+        "channel": true
       },
       {
         "name": "守护战吼",
@@ -41,7 +40,7 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "换位救援",
-        "description": "与1名友军交换位置。该友军每损失1%生命，自身获得0.5%减伤，持续4秒。",
+        "description": "与1名友军交换位置。该友军每损失1%生命，自身获得0.5%减伤，持续2.5秒。",
         "cost": 2,
         "cd": 20.0,
         "cast": 0.25,
@@ -49,7 +48,7 @@ export const CURRENT_DESIGN = {
         "radius": 3.0,
         "targets": 1,
         "power": 0.0,
-        "duration": 4,
+        "duration": 2.5,
         "reduction_per_lost": 0.5,
         "reduction_cap": 0.5,
         "heal": 0.0,
@@ -89,14 +88,14 @@ export const CURRENT_DESIGN = {
         "duration": 4.0,
         "attack_down": 0.0,
         "bounces": 0,
-        "secondary": 0.4,
+        "secondary": 0.35,
         "explode": 0.0,
         "heat_cap": 10,
         "heat_duration": 10.0
       },
       {
         "name": "焚魂标记",
-        "description": "标记1名敌人，持续5秒。攻击命中被标记敌人时，附加相当于攻击力100%的伤害，并有30%的概率获得1层炙热。",
+        "description": "标记1名敌人，持续3.2秒。攻击命中被标记敌人时，附加相当于攻击力100%的伤害，并有30%的概率获得1层炙热。",
         "cost": 1,
         "cd": 10.0,
         "cast": 0.25,
@@ -104,7 +103,7 @@ export const CURRENT_DESIGN = {
         "radius": 3.0,
         "targets": 1,
         "power": 0.0,
-        "duration": 5,
+        "duration": 3.2,
         "per_hit": 1.0,
         "heat_chance": 0.3,
         "vuln": 0.0,
@@ -125,6 +124,7 @@ export const CURRENT_DESIGN = {
         "isolated": 0,
         "knock": 0,
         "pierce": false,
+        "path_damage": 0,
         "kill_heat": 1
       },
       {
@@ -179,11 +179,11 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "献生净化",
-        "description": "净化6格内最多2名友军的负面状态；每成功净化1个状态，为该友军恢复相当于攻击力256%的生命。",
+        "description": "净化4格内最多2名友军的负面状态；每成功净化1个状态，为该友军恢复相当于攻击力256%的生命。",
         "cost": 2,
         "cd": 20.0,
         "cast": 0.25,
-        "range": 6,
+        "range": 4.0,
         "radius": 3.0,
         "targets": 2,
         "power": 0.0,
@@ -248,7 +248,7 @@ export const CURRENT_DESIGN = {
         "duration": 8.0,
         "attack_slow": 0.15,
         "self_haste": 0,
-        "self_haste_duration": 10
+        "haste_duration": 5
       },
       {
         "name": "震荡炮弹",
@@ -267,19 +267,19 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "定点连轰",
-        "description": "向当前目标所在位置连续炮击4次，作用半径4格，间隔0.7秒，每次造成相当于攻击力600%的伤害，并使移动速度降低30%，最多叠加3层，持续3秒。",
+        "description": "向当前目标所在位置连续炮击4次，间隔0.7秒，每次造成相当于攻击力600%的伤害，并使移动速度降低6%，最多叠加3层，持续3秒。",
         "cost": 3,
         "cd": 40.0,
         "cast": 0.25,
         "range": 12.0,
-        "radius": 4,
+        "radius": 1.6,
         "targets": 1,
         "power": 6.0,
         "duration": 2.8,
         "shots": 4,
         "gap": 0.7,
         "channel": true,
-        "slow_per": 0.3,
+        "slow_per": 0.06,
         "slow_cap": 3,
         "slow_duration": 3.0,
         "ramp": 0.0
@@ -305,7 +305,7 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "尖刺外壳",
-        "description": "为自身披上尖刺外壳，持续5秒。期间每次受到攻击时，对攻击者反弹相当于其攻击力150%的伤害。",
+        "description": "为自身披上尖刺外壳，持续1.2秒。期间每次受到攻击时，对攻击者反弹相当于其攻击力150%的伤害。",
         "cost": 1,
         "cd": 10.0,
         "cast": 0.25,
@@ -313,7 +313,7 @@ export const CURRENT_DESIGN = {
         "radius": 3.0,
         "targets": 1,
         "power": 0.0,
-        "duration": 5,
+        "duration": 1.2,
         "reduction": 0.0,
         "thorn": 1.5,
         "attack_down": 0,
@@ -337,7 +337,7 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "灭军君临",
-        "description": "进入君临状态，持续5秒。期间免疫负面效果，每次普通攻击还会对主目标周围最多2名敌人造成相当于攻击力400%的伤害。",
+        "description": "进入君临状态，持续3秒。期间免疫负面效果，每次普通攻击还会对主目标周围最多2名敌人造成相当于攻击力400%的伤害。",
         "cost": 3,
         "cd": 40.0,
         "cast": 0.25,
@@ -345,9 +345,9 @@ export const CURRENT_DESIGN = {
         "radius": 7.0,
         "targets": 2,
         "power": 4.0,
-        "duration": 5,
+        "duration": 3.0,
         "shield": 0,
-        "shield_duration": 5,
+        "shield_duration": 1.0,
         "lifesteal": 0,
         "summon": 0,
         "summon_duration": 6.0
@@ -417,13 +417,13 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          1.628
+          1.6280000000000001
         ],
         [
-          1.7560000000000002
+          1.756
         ],
         [
-          1.8840000000000001
+          1.884
         ],
         [
           2.012
@@ -501,7 +501,7 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          3
+          3.0
         ]
       ],
       "baseline": [
@@ -523,7 +523,7 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          0.3
+          0.30000000000000004
         ],
         [
           0.4
@@ -548,10 +548,10 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          3
+          3.0
         ],
         [
-          4
+          4.0
         ]
       ],
       "baseline": [
@@ -820,7 +820,7 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          3.456
+          3.4560000000000004
         ],
         [
           3.712
@@ -829,10 +829,10 @@ export const CURRENT_DESIGN = {
           3.968
         ],
         [
-          4.224
+          4.220000000000001
         ],
         [
-          4.4799999999999995
+          4.48
         ]
       ],
       "baseline": [
@@ -879,10 +879,10 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          1
+          1.0
         ],
         [
-          2
+          2.0
         ]
       ],
       "baseline": [
@@ -929,13 +929,13 @@ export const CURRENT_DESIGN = {
           1.256
         ],
         [
-          1.5119999999999998
+          1.512
         ],
         [
-          1.7679999999999996
+          1.768
         ],
         [
-          2.024
+          2.02
         ],
         [
           2.2800000000000002
@@ -1007,7 +1007,7 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          1.2800000000000002
+          1.28
         ]
       ],
       "baseline": [
@@ -1035,10 +1035,10 @@ export const CURRENT_DESIGN = {
           3.6480000000000006
         ],
         [
-          4.032
+          4.03
         ],
         [
-          4.4159999999999995
+          4.42
         ],
         [
           4.800000000000001
@@ -1085,7 +1085,7 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          4
+          4.0
         ]
       ],
       "baseline": [
@@ -1120,20 +1120,20 @@ export const CURRENT_DESIGN = {
       "classId": 4,
       "skill": 2,
       "name": "贯穿火球",
-      "description": "火球化为缓慢前进的巨大贯穿火球，以每秒2.5格前进12格，对沿途1.5格内的敌人造成多段伤害；同一敌人每0.6秒最多受伤1次，每段为普通火球伤害的40%（上限1档）。",
+      "description": "火球对沿途敌人额外造成相当于攻击力150%的伤害（上限1档）。",
       "max": 1,
       "rarity": "gold",
       "common": false,
       "keys": [
-        "pierce"
+        "path_damage"
       ],
       "values": [
         [
-          1
+          1.5
         ]
       ],
       "baseline": [
-        false
+        0
       ]
     },
     {
@@ -1160,10 +1160,10 @@ export const CURRENT_DESIGN = {
           11.75
         ],
         [
-          13.000000000000002
+          13.0
         ],
         [
-          14.250000000000002
+          14.25
         ]
       ],
       "baseline": [
@@ -1185,10 +1185,10 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          2
+          2.0
         ],
         [
-          3
+          3.0
         ]
       ],
       "baseline": [
@@ -1210,7 +1210,7 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          6.0
+          6
         ]
       ],
       "baseline": [
@@ -1257,13 +1257,13 @@ export const CURRENT_DESIGN = {
           2.72
         ],
         [
-          3.04
+          3.0400000000000005
         ],
         [
           3.3600000000000003
         ],
         [
-          3.6799999999999997
+          3.6800000000000006
         ],
         [
           4.0
@@ -1288,10 +1288,10 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          2
+          2.0
         ],
         [
-          3
+          3.0
         ]
       ],
       "baseline": [
@@ -1385,10 +1385,10 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          2
+          2.0
         ],
         [
-          3
+          3.0
         ]
       ],
       "baseline": [
@@ -1482,10 +1482,10 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          3
+          3.0
         ],
         [
-          4
+          4.0
         ]
       ],
       "baseline": [
@@ -1551,19 +1551,19 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          1.8880000000000003
+          1.8880000000000001
         ],
         [
           2.096
         ],
         [
-          2.304
+          2.3040000000000003
         ],
         [
           2.5120000000000005
         ],
         [
-          2.7200000000000006
+          2.72
         ]
       ],
       "baseline": [
@@ -1585,10 +1585,10 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          4
+          4.0
         ],
         [
-          5
+          5.0
         ]
       ],
       "baseline": [
@@ -1638,7 +1638,7 @@ export const CURRENT_DESIGN = {
           0.1
         ],
         [
-          0.15000000000000002
+          0.15
         ]
       ],
       "baseline": [
@@ -1742,7 +1742,7 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          0.07,
+          0.06999999999999999,
           2.5
         ],
         [
@@ -1777,10 +1777,10 @@ export const CURRENT_DESIGN = {
           2.6
         ],
         [
-          3.1999999999999997
+          3.2
         ],
         [
-          3.8000000000000003
+          3.8
         ]
       ],
       "baseline": [
@@ -1818,7 +1818,7 @@ export const CURRENT_DESIGN = {
       "classId": 2,
       "skill": 1,
       "name": "自身攻速提升",
-      "description": "自身攻击速度提高200%除以分担目标数，持续10秒（上限1档）。",
+      "description": "自身攻击速度提高100%除以分担目标数，持续5秒（上限1档）。",
       "max": 1,
       "rarity": "blue",
       "common": false,
@@ -1827,7 +1827,7 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          2.0
+          1.0
         ]
       ],
       "baseline": [
@@ -1980,7 +1980,7 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          6
+          6.0
         ]
       ],
       "baseline": [
@@ -2024,10 +2024,10 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          4.130239999999999
+          4.13
         ],
         [
-          4.391360000000001
+          4.391
         ],
         [
           4.76
@@ -2052,7 +2052,7 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          4
+          4.0
         ]
       ],
       "baseline": [
@@ -2196,13 +2196,13 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          3.4979199999999997
+          3.498
         ],
         [
-          4.071999999999999
+          4.07
         ],
         [
-          4.5680000000000005
+          4.57
         ]
       ],
       "baseline": [
@@ -2224,7 +2224,7 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          4
+          4.0
         ]
       ],
       "baseline": [
@@ -2284,7 +2284,7 @@ export const CURRENT_DESIGN = {
       "classId": 3,
       "skill": 3,
       "name": "释放护盾",
-      "description": "开启君临时，获得相当于最大生命4%/8.2%的护盾，持续至君临结束（上限2档）。",
+      "description": "君临期间获得相当于最大生命4%/8.2%的护盾（上限2档）。",
       "max": 2,
       "rarity": "purple",
       "common": false,
@@ -2296,7 +2296,7 @@ export const CURRENT_DESIGN = {
           0.04
         ],
         [
-          0.082
+          0.08199999999999999
         ]
       ],
       "baseline": [
@@ -2353,7 +2353,7 @@ export const CURRENT_DESIGN = {
       "classId": 3,
       "skill": null,
       "name": "累计受伤减伤",
-      "description": "每累计受到最大生命10%的伤害，受到的伤害降低8%，持续5秒（上限1档）。",
+      "description": "每累计受到最大生命25%的伤害，受到的伤害降低8%，持续3秒（上限1档）。",
       "max": 1,
       "rarity": "gold",
       "common": false,
@@ -2525,7 +2525,7 @@ export const CURRENT_DESIGN = {
       ],
       "values": [
         [
-          1
+          1.0
         ]
       ],
       "baseline": [
@@ -4068,9 +4068,9 @@ export const CURRENT_DESIGN = {
     "orcMissingReduction": 0.25,
     "lordMinionKills": 3,
     "lordKillHeal": 0.02,
-    "lordPassiveThreshold": 0.1,
+    "lordPassiveThreshold": 0.25,
     "lordPassiveReduction": 0.08,
-    "lordPassiveDuration": 5,
+    "lordPassiveDuration": 3,
     "shareTotals": [
       0,
       1,

@@ -2,10 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {EventEmitter} from 'node:events';
 import {Room} from '../server/room.mjs';
-import {defaults} from '../shared/config.js';
-import {createCurrentDesignConfig} from '../shared/current-design.js';
+import {defaults,liveConfig} from '../shared/config.js';
 
-for(const [name,config] of [['经典',defaults],['新版',createCurrentDesignConfig(defaults)]])test(`${name}清除排行榜：超级权限、全部玩家、战局保留、同步和幂等`,()=>{
+for(const [name,config] of [['经典',defaults],['正式被动',liveConfig()]])test(`${name}清除排行榜：超级权限、全部玩家、战局保留、同步和幂等`,()=>{
  const room=new Room(config),admin={id:'admin',name:'超级',side:0,isSuperAdmin:true},host={id:'host',name:'房主',side:0,isHost:true},other={id:'other',name:'离线',side:1};
  const packets=[],res=new EventEmitter();res.destroyed=false;res.write=t=>packets.push(t);room.connect(admin,res);
  const p=room.player(admin);room.player(host);room.player(other);

@@ -85,7 +85,7 @@ test('两账号HTTP快照拥有同一技能伤害事件，重复读取不重新�
   const actors=game.accounts.rows.map((a,i)=>{const p=game.room.player(a);p.classId=i?3:4;p.level=6;p.builds[p.classId]=[1,1,1,1];const h=s.spawn(p.side,contractType(p.classId),0,1,0);assert.ok(s.contract(p,h.id));Object.assign(h,{x:0,y:i?3:0,cd:1e9,speed:0,hp:1e5,maxHp:1e5});return {p,h};});
   assert.ok((await call('/api/action',{id:crypto.randomUUID(),type:'cast',args:{skill:0}},clients[0].cookie)).data.ok);advance(s,.4);
   const snapshots=await Promise.all(clients.map(c=>call('/api/state',null,c.cookie)));const es=snapshots.map(r=>r.data.animations.filter(e=>e.kind==='damage'));
-  assert.equal(es[0].length,1);assert.deepEqual(es[0],es[1]);near(es[0][0].amount,actors[0].h.attack*4.5);
+  assert.equal(es[0].length,1);assert.deepEqual(es[0],es[1]);near(es[0][0].amount,actors[0].h.attack*3.2);
   const repeated=(await call('/api/state',null,clients[0].cookie)).data.animations.filter(e=>e.kind==='damage');assert.deepEqual(repeated,es[0]);
  }finally{for(const c of [...game.room.clients])c.res.end();game.server.closeAllConnections();await new Promise(r=>game.server.close(r));}
 });

@@ -55,22 +55,22 @@ test('桌面窗口：升级仅显示强化次数，详情可返回且不会消�
  try{
   client=await launch(server.base);const {app,page}=client;await register(page,'手动强化');
   const p=server.room.player(server.accounts.rows[0]),s=server.room.sim;
-  s.addXp(p,s.expNeeded(p)-p.xp);p.progress[0].choices[0].options=['O01','O05','O17'];
+  s.addXp(p,s.expNeeded(p)-p.xp);p.progress[0].choices[0].options=['N000_0','N004_0','N089_0'];
   server.room.sequence++;server.room.broadcast();
   await expect(page.locator('[data-trait-count]')).toHaveText('1');
   await expect(page.locator('#traitDraft')).toBeHidden();
   await page.locator('#traitPending').click();
   await expect(page.locator('#traitDraft')).toBeVisible();
-  await page.locator('[data-trait-info="O01"]').click();
+  await page.locator('[data-trait-info="N000_0"]').click();
   await expect(page.locator('[data-skill-detail-body]')).toContainText('技能效果');
   await expect(page.locator('[data-skill-detail-body]')).toContainText('该技能尚未选择强化');
   await capture(app,page,path.join(process.env.MAGIC_QA_DIR,'desktop-trait-details.png'));
   await page.keyboard.press('1');expect(p.progress[0].choices).toHaveLength(1);
   await page.locator('[data-detail-back]').click();
-  await page.locator('[data-trait="O01"]').click();
+  await page.locator('[data-trait="N000_0"]').click();
   await expect(page.locator('#traitDraft')).toBeHidden();
   await expect(page.locator('#traitPending')).toBeHidden();
-  expect(p.progress[0].traits.O01).toBe(1);expect(client.errors).toEqual([]);
+  expect(p.progress[0].traits.N000_0).toBe(1);expect(client.errors).toEqual([]);
  }finally{await client?.app.close();await server.close();}
 });
 test('桌面EXE独立窗口：本机资源、登录契约、关闭退出、重启保留会话',async()=>{

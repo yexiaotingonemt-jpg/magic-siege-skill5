@@ -4,11 +4,11 @@ export const PROTOCOL_VERSION=3;
 // Bump only when combat rules, shared data or other server-facing behavior would
 // become inconsistent with existing clients. UI, art, launcher, deployment and
 // documentation-only changes keep this version; builds/packages never bump it.
-export const GAME_VERSION='0.6.0';
+export const GAME_VERSION='0.7.0';
 // Server and desktop releases share one version; publish both together.
-export const SERVER_VERSION='0.6.2';
+export const SERVER_VERSION='0.7.8';
 // Desktop release version must match SERVER_VERSION.
-export const CLIENT_VERSION='0.6.2';
+export const CLIENT_VERSION='0.7.8';
 // Diagnostic ruleset label; changing this alone does not require a client update.
-export const RULESET_REVISION='npc-ratio-wave-contract-20261031';
+export const RULESET_REVISION='stamina-experience-includes-contract-20261103';
 export const UPDATE_REQUIRED_CODE='CLIENT_UPDATE_REQUIRED';

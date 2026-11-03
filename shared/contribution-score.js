@@ -13,15 +13,21 @@ export const SCORE_COEFFICIENTS = [
   {a:.02563300,b:.00886480,c:.06392070,d:102.5320,e:200,f:100}, // Elf
   {a:.021456,b:.01006880,c:.020000,d:85.824,e:200,f:100},  // Disabled assassin: provisional mage coefficients
 ];
-export function statPoints(classId,key,value){
-  const c=SCORE_COEFFICIENTS[classId];
+export function scoreCoefficients(classId,config){
+  if(config?.design?.enabled){const c=config.design.scoreCoefficients[classId],r=config.design.rules;return {...c,d:c.a*MINION_REFERENCE_HP,e:r.heroKillPoints,f:r.heroAssistPoints};}
+  const base=SCORE_COEFFICIENTS[classId],scale=config?.innate?.enabled===1?config.innate.scoreScales?.[classId]:null;
+  if(!scale)return base;
+  return {...base,a:base.a*scale.effect,b:base.b*scale.taken,c:base.c*scale.effect,d:base.d*scale.effect};
+}
+export function statPoints(classId,key,value,config){
+  const c=scoreCoefficients(classId,config);
   const coefficient={heroDamage:c.a,minionDamage:c.a,buildingDamage:c.a,
     damageTaken:c.b,healing:c.c,minionKillHealth:c.d/MINION_REFERENCE_HP,
     heroKills:c.e,heroAssists:c.f,staminaSpent:STAMINA_POINTS}[key]??0;
   return value*coefficient;
 }
-export function contributionParts(h){
-  const c=SCORE_COEFFICIENTS[h.classId],s=h.stats||{};
+export function contributionParts(h,config){
+  const c=scoreCoefficients(h.classId,config),s=h.stats||{};
   return [
     {key:'damage',value:(s.heroDamage||0)+(s.minionDamage||0)+(s.buildingDamage||0),coefficient:c.a},
     {key:'damageTaken',value:s.damageTaken||0,coefficient:c.b},
@@ -30,5 +36,5 @@ export function contributionParts(h){
     {key:'heroKills',value:s.heroKills||0,coefficient:c.e},
     {key:'heroAssists',value:s.heroAssists||0,coefficient:c.f},
     {key:'staminaSpent',value:s.staminaSpent||0,coefficient:STAMINA_POINTS},
-  ].map(p=>({...p,points:p.value*p.coefficient}));
+  ].map(p=>{const prior=h.innateScoreBase?.[p.key];return {...p,points:prior?prior.points+(p.value-prior.value)*p.coefficient:p.value*p.coefficient};});
 }

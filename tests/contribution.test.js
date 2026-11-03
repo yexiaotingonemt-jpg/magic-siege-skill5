@@ -1,3 +1,4 @@
+import {scoreCoefficients} from '../shared/contribution-score.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Simulation} from '../shared/simulation.js';
@@ -21,7 +22,7 @@ test('无消耗效率为空，阶段和施法奖励不混入贡献，重建保�
  s.contract(p,s.units.find(u=>u.side===0&&u.type==='melee'&&!u.hero).id);s.stat(s.hero(p),'heroDamage',2500);s.resetMap();near(p.totalPoints,451.68125);assert.equal(p.staminaSpent,3);s.resetMap();near(p.totalPoints,451.68125);
 });
 test('SSE快照输出实时贡献和实际体力，不依赖客户端推算',()=>{
- const r=new Room(),p=r.player({id:'ranking-test',name:'贡献',side:0});r.sim.contract(p,r.sim.units.find(u=>u.side===0&&u.type==='melee'&&!u.hero).id);r.sim.stat(r.sim.hero(p),'heroDamage',2500);const row=r.snapshot().players.find(x=>x.id===p.id);near(row.totalPoints,451.68125);assert.equal(row.staminaSpent,3);near(row.kda,451.68125/3);
+ const r=new Room(),p=r.player({id:'ranking-test',name:'贡献',side:0});r.sim.contract(p,r.sim.units.find(u=>u.side===0&&u.type==='melee'&&!u.hero).id);r.sim.stat(r.sim.hero(p),'heroDamage',2500);const row=r.snapshot().players.find(x=>x.id===p.id);const expected=300+2500*scoreCoefficients(p.classId,r.sim.config).a;near(row.totalPoints,expected);assert.equal(row.staminaSpent,3);near(row.kda,(expected-300)/21);assert.equal(row.kdaMode,'battle');
 });
 test('排行榜按贡献稳定排序，过滤退役并转义名字，零消耗显示横线',()=>{
  const html=contributionRanking([{id:1,name:'<甲>',classId:0,side:0,totalPoints:20,score:0,staminaSpent:4},{id:2,name:'乙',classId:4,side:0,totalPoints:10,score:9999,staminaSpent:0},{id:3,name:'退役',retired:true,classId:0,totalPoints:100}],1);

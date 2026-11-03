@@ -1,6 +1,6 @@
 // Permanent engine benchmark; generated reports belong outside the repository.
 import {Simulation} from '../shared/simulation.js';
-import {defaults,classes,contractType,names} from '../shared/config.js';
+import {defaults,legacyLiveConfig as liveConfig,classes,contractType,names} from '../shared/config.js';
 import {prepareChoice,rarityAt} from '../shared/traits.js';
 import {contributionParts} from '../shared/contribution-score.js';
 import {writeFileSync,mkdirSync} from 'node:fs';
@@ -10,7 +10,7 @@ import {SCORE_COEFFICIENTS} from '../shared/contribution-score.js';
 import {pathToFileURL} from 'node:url';
 const ids=[0,2,3,4,5];
 export function run(id,level,mask,focus='hero',build='base',duration=60,options={}){
- const s=new Simulation(defaults,987654);s.units=[];s.players=[];s.logs=[];s.reports=[];s.waveAt=1e9;s.spawnWave=()=>{};s.addXp=()=>{};
+ const s=new Simulation(process.argv.includes('--legacy')?defaults:liveConfig(),987654);s.units=[];s.players=[];s.logs=[];s.reports=[];s.waveAt=1e9;s.spawnWave=()=>{};s.addXp=()=>{};
  for(const t of s.towers){t.y=1000;t.cd=Infinity;t.speed=0;}
  const side=id===3?1:0,p=s.makePlayer(side,false);p.classId=id;p.level=level;p.stamina=10000;
  if(build!=='base')for(let l=2;l<=level;l++){p.progress[id].choices.push({level:l,rarity:rarityAt(l)});const choice=prepareChoice(s,p,id);if(!s.chooseTrait(choice.options[0],l,p,id))throw Error('Invalid trait build');}
@@ -50,7 +50,7 @@ export function run(id,level,mask,focus='hero',build='base',duration=60,options=
   if(h.hp<=0)throw Error(`Exposure fixture killed ${classes[id]}`);
  }
  const points=p.totalPoints,spent=p.staminaSpent;
- return {id,name:classes[id],level,mask,policy:mask?Array.from({length:4},(_,i)=>mask&(1<<i)?String(i+1):'').filter(Boolean).join('+'):'不施法',focus,build,duration,casts,castCosts,contractSpent,spent,points,kda:points/spent,pointsPerSecond:points/duration,combatPoints:points-100*spent,combatPerSecond:(points-100*spent)/duration,stats:{...h.stats},parts:contributionParts(h),traits,hpFloor,failed};
+ return {id,name:classes[id],level,mask,policy:mask?Array.from({length:4},(_,i)=>mask&(1<<i)?String(i+1):'').filter(Boolean).join('+'):'不施法',focus,build,duration,casts,castCosts,contractSpent,spent,points,kda:points/spent,pointsPerSecond:points/duration,combatPoints:points-100*spent,combatPerSecond:(points-100*spent)/duration,stats:{...h.stats},parts:contributionParts(h,s.config),traits,hpFloor,failed};
 }
 
 export function audit(){
@@ -80,7 +80,7 @@ export function audit(){
    policies.push({name:r.name,id:r.id,level,build,focus,normal:compare(r),idle:compare(idle),solo:compare(solo),high:compare(fast),expectedOrder:idle.kda>=solo.kda&&solo.kda>=r.kda,mediumTotalOrder:r.points>solo.points&&r.points>idle.points,highSoloTotalHigher:fast.points>r.points});
   }
  }
- return {schema:1,config:defaults,coefficients:SCORE_COEFFICIENTS,failures,standardPassed:failures.length===0,scope:'无词条英雄优先三个标准节点；其他场景与三策略必须另读未达项',policyOrderUnmet:policies.filter(p=>!p.expectedOrder).length,mediumTotalOrderUnmet:policies.filter(p=>!p.mediumTotalOrder).length,highSoloTotalHigher:policies.filter(p=>p.highSoloTotalHigher).length,groups,policies,medium,high};
+ return {schema:1,config:process.argv.includes('--legacy')?defaults:liveConfig(),coefficients:SCORE_COEFFICIENTS,failures,standardPassed:failures.length===0,scope:'无词条英雄优先三个标准节点；其他场景与三策略必须另读未达项',policyOrderUnmet:policies.filter(p=>!p.expectedOrder).length,mediumTotalOrderUnmet:policies.filter(p=>!p.mediumTotalOrder).length,highSoloTotalHigher:policies.filter(p=>p.highSoloTotalHigher).length,groups,policies,medium,high};
 }
 
 function markdown(data){

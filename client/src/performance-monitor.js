@@ -9,8 +9,8 @@ export function summarizePerformance(samples){
  });
 }
 export function createPerformanceMonitor({getLoad=()=>({}),onSample=()=>{},now=()=>performance.now(),wall=()=>new Date().toISOString(),interval=2000,limit=300}={}){
- const samples=[];let last=null,start=null,frames=[],stages={},peaks={},worst=null,snapshots=[],lastSnapshot=null,snapshotGaps=[],matchId;
- const reset=()=>{last=null;start=null;frames=[];stages={};peaks={};worst=null;snapshots=[];snapshotGaps=[];};
+ const samples=[];let last=null,start=null,frames=[],stages={},peaks={},worst=null,snapshots=[],lastSnapshot=null,snapshotGaps=[],matchId,visualTime=null,stalledMs=0,stalledFrames=0;
+ const reset=()=>{last=null;start=null;frames=[];stages={};peaks={};worst=null;snapshots=[];snapshotGaps=[];visualTime=null;stalledMs=0;stalledFrames=0;};
  return {
   reset,
   stage(name,ms){if(last!==null&&Number.isFinite(ms)&&ms>=0){const values=stages[name]??=[];if(values.length<10000)values.push(ms);}},
@@ -21,16 +21,17 @@ export function createPerformanceMonitor({getLoad=()=>({}),onSample=()=>{},now=(
    if(matchId!==load.matchId){reset();lastSnapshot=null;matchId=load.matchId;}
    if(last===null){last=at;start=at;return;}
    const delta=at-last;last=at;if(delta<=0)return;frames.push(delta);
+   if(!load.paused&&Number.isFinite(load.visualTime)){if(visualTime!==null&&Math.abs(load.visualTime-visualTime)<1e-7){stalledMs+=delta;stalledFrames++;}visualTime=load.visualTime;}else visualTime=null;
    for(const [key,value]of Object.entries(load))if(typeof value==='number'&&Number.isFinite(value))peaks[key]=Math.max(peaks[key]??-Infinity,value);
    if(!worst||delta>worst.ms)worst={ms:round(delta),load:{...load}};
    if(at-start<interval&&frames.length<10000)return;
    const elapsed=at-start,sample={at:wall(),durationMs:round(elapsed),frames:frames.length,fps:round(frames.length*1000/elapsed),frameMs:stats(frames),over33ms:frames.filter(n=>n>33.34).length,over50ms:frames.filter(n=>n>50).length,over100ms:frames.filter(n=>n>100).length,stages:Object.fromEntries(Object.entries(stages).map(([key,v])=>[key,stats(v)])),network:{snapshots:snapshots.length,applyMs:stats(snapshots),gapMs:stats(snapshotGaps),ageMs:lastSnapshot===null?null:round(at-lastSnapshot)},load:{...load},peakLoad:peaks,worstFrame:worst};
-   samples.push(sample);if(samples.length>limit)samples.shift();
+   sample.visualClock={stalledMs:round(stalledMs),stalledFrames};samples.push(sample);if(samples.length>limit)samples.shift();
    reset();last=at;start=at;onSample(sample);return sample;
   },
   get latest(){return samples.at(-1)||null;},
   get summary(){return summarizePerformance(samples);},
-  report(environment={}){return {schemaVersion:1,exportedAt:wall(),environment,notes:['前台 Phaser 帧间隔；隐藏/失焦窗口恢复后重新计时。暂停战局仍统计绘制。','stages 是主线程各段耗时，不包含 GPU 执行时间；未直接测量 GPU/Draw Calls。','load 为窗口末帧，peakLoad 为窗口峰值，worstFrame.load 为最长帧间隔结束时的负载。','FPS 分组展示关联，不代表单位或光效是已证实的根因。网络 gap 包含传输、主线程排队及服务端发送间隔。'],summary:summarizePerformance(samples),samples:[...samples]};},
+  report(environment={}){return {schemaVersion:1,exportedAt:wall(),environment,notes:['前台 Phaser 帧间隔；隐藏/失焦窗口恢复后重新计时。暂停战局仍统计绘制。','stages 是主线程各段耗时，不包含 GPU 执行时间；未直接测量 GPU/Draw Calls。','visualClock仅记录显示时钟停止推进，不把正常单位停步计为卡顿；不等同GPU呈现测量。','load 为窗口末帧，peakLoad 为窗口峰值，worstFrame.load 为最长帧间隔结束时的负载。','FPS 分组展示关联，不代表单位或光效是已证实的根因。网络 gap 包含传输、主线程排队及服务端发送间隔。'],summary:summarizePerformance(samples),samples:[...samples]};},
   now,
  };
 }

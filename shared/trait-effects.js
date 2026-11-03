@@ -1,4 +1,5 @@
 import { commonRank } from "./common-traits.js";
+import {innateOnKill} from './innate-passives.js';
 import { isCurrentDesign } from './current-design.js';
 import { currentTraitEffects } from './current-design-mechanics.js';
 import {grantEliteScore,transferEliteScore} from './elite-score.js';
@@ -129,6 +130,7 @@ export const traitEffects = {
         h.classId,
       );
     if (h.hp <= 0 || t.tower || t.summoned || h.side === t.side) return;
+    innateOnKill(this,h,t);
     if (!summonedKill && commonRank(this, h, 6))
       this.heal(
         h,
