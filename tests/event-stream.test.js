@@ -11,6 +11,7 @@ import {acceptsGzip,createEventStream} from '../server/event-stream.mjs';
 import {openSse,waitFor} from '../scripts/sse-probe.mjs';
 import {CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION} from '../shared/protocol.js';
 import {Room} from '../server/room.mjs';
+import {applySnapshotDelta} from '../shared/snapshot-delta.js';
 const listen=async server=>{await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));return `http://127.0.0.1:${server.address().port}`;};
 
 async function setup(t,options={}){
@@ -25,8 +26,23 @@ async function setup(t,options={}){
   for(const server of [local.server,game.server]){server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
   await rm(directory,{recursive:true,force:true});
  });
- return {game,base,account,cookie,async connect(encoding){const probe=await openSse(base+'/api/events',{cookie,encoding});probes.push(probe);await waitFor(()=>probe.events.some(e=>e.type==='message'));return probe;}};
+ return {game,base,account,cookie,async connect(encoding,delta=false){const probe=await openSse(base+'/api/events'+(delta?'?delta=1':''),{cookie,encoding});probes.push(probe);await waitFor(()=>probe.events.some(e=>e.type==='message'));return probe;}};
 }
+
+test('差量订阅经过真实Gzip和本地代理还原同局全量状态，断线后重新发送完整基准',async t=>{
+ const {game,account,connect}=await setup(t),full=await connect('gzip'),delta=await connect('gzip',true);
+ for(let i=0;i<8;i++){game.room.sim.tick(.05);game.room.sequence++;game.room.broadcast();await new Promise(resolve=>setTimeout(resolve,5));}
+ const result=game.room.command(account,{type:'pause',args:{paused:true},id:'delta-pause'});
+ await waitFor(()=>[full,delta].every(probe=>probe.events.some(e=>e.type==='message'&&e.data.sequence===result.sequence)));
+ const fullStates=new Map(full.events.filter(e=>e.type==='message').map(e=>[e.data.sequence,e.data]));let state,matched=0;
+ for(const event of delta.events.filter(e=>e.type==='message')){
+  state=applySnapshotDelta(state,event.data);const expected=fullStates.get(state.sequence);if(!expected)continue;
+  assert.deepEqual({...state,config:undefined},{...expected,config:undefined});matched++;
+ }
+ assert.ok(matched>=8);assert.ok(delta.events.some(e=>e.data.delta));assert.equal(state.paused,true);
+ delta.close();await waitFor(()=>game.room.clients.size===1);const reconnected=await connect('gzip',true);
+ const initial=reconnected.events.find(e=>e.type==='message').data;assert.ok(initial.config);assert.equal(initial.delta,undefined);assert.equal(initial.matchId,state.matchId);
+});
 
 test('gzip negotiation respects explicit q=0, wildcard and absent encodings',()=>{
  for(const header of ['gzip','br, gzip;q=0.5','GZIP; q=1','gzip ; q=1','*;q=0.8'])assert.ok(acceptsGzip(header),header);

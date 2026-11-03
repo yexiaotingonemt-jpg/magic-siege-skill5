@@ -39,7 +39,7 @@ export function createGameRuntime({dataDir=process.env.KC_DATA_DIR||path.join(ba
     }
     const a=accounts.get(req);if(!a)return json(res,401,{error:'请先登录账号'});
     if(url.pathname==='/api/me')return json(res,200,{account:accounts.public(a),playerId:room.player(a).id});
-    if(url.pathname==='/api/events'){const stream=createEventStream(req,res,{gzip:sseGzip});stream.write(': connected\n\n');room.connect(a,stream);return;}
+    if(url.pathname==='/api/events'){const stream=createEventStream(req,res,{gzip:sseGzip});stream.write(': connected\n\n');room.connect(a,stream,{delta:url.searchParams.get('delta')==='1'});return;}
     if(url.pathname==='/api/state')return json(res,200,{...room.snapshot(),playerId:room.player(a).id});
     if(url.pathname==='/api/contract-history'&&req.method==='GET'){
      const id=url.searchParams.get('playerId');if(!/^\d{1,10}$/.test(id||''))return json(res,400,{error:'请选择有效玩家'});
