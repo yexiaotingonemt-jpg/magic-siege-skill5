@@ -84,6 +84,7 @@ for (const id of [0, 2, 3, 4, 5])
   test("职业" + id + "完整1→40级：31蓝4紫4金、上限及扩展金色池三选一", () => {
     const { s, p } = arena(id, 1);
     s.addXp(p, 30000);
+    s.damage(null, s.hero(p), 1e9);
     const counts = { blue: 0, purple: 0, gold: 0 },
       gold = [];
     while (p.progress[id].choices.length) {
@@ -122,6 +123,7 @@ test("候选稳定，拒绝伪造、跨职业和过期选择，不能重抽", ()
   assert.equal(s.chooseTrait("L01", 2, p), false);
   assert.deepEqual(p.progress[4].choices[0], choice);
   const id = choice.options[0];
+  s.damage(null, s.hero(p), 1e9);
   assert.ok(s.chooseTrait(id, 2, p));
   assert.equal(s.chooseTrait(id, 2, p), false);
   assert.equal(p.progress[4].traits[id], 1);
@@ -130,9 +132,10 @@ test("阵亡、重新契约与阶段重建保留职业构筑及待选队列", ()
   const { s, p, h } = arena(4, 1);
   s.addXp(p, s.expNeeded(p) - p.xp);
   const choice = p.progress[4].choices[0];
-  s.chooseTrait(choice.options[0], choice.level, p);
-  const saved = structuredClone(p.progress[4]);
+  assert.equal(s.chooseTrait(choice.options[0], choice.level, p), false);
   s.damage(null, h, 1e9);
+  assert.ok(s.chooseTrait(choice.options[0], choice.level, p));
+  const saved = structuredClone(p.progress[4]);
   const u = s.spawn(0, "ranged", 0, 1, 0);
   assert.ok(s.contract(p, u.id));
   saved.xp += s.config.world.contractCost * s.config.world.expPerStamina;

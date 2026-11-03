@@ -238,6 +238,8 @@ export function prepareChoice(sim, p, classId = p.classId) {
   return choice;
 }
 export function chooseTrait(sim, p, id, level, classId = p.classId) {
+  if (sim.hero(p) || p.progress[classId]?.choices?.[0]?.available === false)
+    return sim.fail(p, "契约期间不能强化，请在本次阵亡后、下次契约前选择");
   const progress = p.progress[classId],
     choice = prepareChoice(sim, p, classId),
     t = isCurrentDesign(sim.config) ? currentTraits(sim.config,classId).find(t=>t.id===id) : TRAIT_BY_ID[id];

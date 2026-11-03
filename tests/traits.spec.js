@@ -162,6 +162,7 @@ test("桌面和窄屏选卡截图：无错误、卡片未超出游戏区域", as
   s.addXp(p,s.expNeeded(p)-p.xp);
   p.progress[4].choices[0].options = ["F09", "F01", "F05"];
   p.progress[4].traits = { F01: 2, F17: 1 };
+  s.damage(null,s.hero(p),1e9);
   game.room.sequence++;
   game.room.broadcast();
   await expect(page.locator("#traitPending")).toBeVisible();

@@ -33,6 +33,7 @@ export function createTraitDraft(getSim, send) {
   }
 
   badge.onclick = () => {
+    if (badge.disabled) return;
     priorFocus = document.activeElement;
     openedClass = getSim().player.classId;
     panel.hidden = false;
@@ -44,7 +45,7 @@ export function createTraitDraft(getSim, send) {
   async function select(id) {
     const sim = getSim(),
       choice = sim.player.progress[sim.player.classId].choices?.[0];
-    if (!choice || busy || submittedKey === key || detailId) return;
+    if (!choice || sim.hero() || choice.available === false || busy || submittedKey === key || detailId) return;
     const attemptKey = key;
     busy = true;
     render();
@@ -144,9 +145,13 @@ export function createTraitDraft(getSim, send) {
       choice = progress?.choices?.[0],
       total = progress?.choices?.length || 0;
     badge.hidden = !choice;
+    const lockedByContract = !!sim?.hero() || choice?.available === false;
+    badge.disabled = lockedByContract;
+    badge.querySelector('.trait-pending-label').textContent = lockedByContract ? '阵亡后强化' : '技能强化';
+    badge.title = lockedByContract ? '次数已累计，本次阵亡后、下次契约前可选择强化' : '可连续选择累计的强化次数';
     count.textContent = String(total);
-    badge.setAttribute("aria-label", "技能强化，当前可选择 " + total + " 次");
-    if (!choice || (!panel.hidden && openedClass !== p.classId)) {
+    badge.setAttribute("aria-label", lockedByContract ? "已累计强化 " + total + " 次，阵亡后可选择" : "技能强化，当前可选择 " + total + " 次");
+    if (!choice || lockedByContract || (!panel.hidden && openedClass !== p.classId)) {
       hide();
       submittedKey = "";
       return;
@@ -208,7 +213,7 @@ export function createTraitDraft(getSim, send) {
           .join("") +
         '</div><p class="draft-note">' +
         (choice.options.length < 3 ? "剩余可选 " + choice.options.length + " 项。" : "") +
-        '强化随职业保留，阵亡不会丢失。战场仍在继续。</p><p data-draft-error role="alert"></p></section>' +
+        '次数可累积，强化随职业保留；重新契约后须等本次阵亡才能继续选择。</p><p data-draft-error role="alert"></p></section>' +
         '<section class="draft-skill-view" hidden><div class="draft-heading"><span>技能详情</span><button type="button" data-detail-back>返回强化选择 ×</button></div><h2 id="draftSkillTitle"></h2><div data-skill-detail-body></div></section>';
       panel.querySelector("[data-defer]").onclick = hide;
       panel.querySelector("[data-detail-back]").onclick = closeDetails;

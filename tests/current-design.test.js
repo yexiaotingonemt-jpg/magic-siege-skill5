@@ -166,7 +166,7 @@ test('当前负面可被净化，免疫会阻止标记和持续腐蚀',()=>{
   assert.ok(s.cast(1,p));advance(s,.3);assert.equal(enemy.soulMarks.length,0);
 });
 test('品质先抽统一权重，再选可用词条，满档品质退出可选池',()=>{
-  const {s,p}=arena(0),progress=p.progress[0];s.addXp(p,30000);
+  const {s,p,h}=arena(0),progress=p.progress[0];s.addXp(p,30000);s.damage(null,h,1e9);
   assert.equal(p.level,40);assert.equal(progress.choices.length,40);
   while(progress.choices.length){const choice=prepareChoice(s,p);assert.ok(choice.options.length);assert.ok(s.chooseTrait(choice.options[0],choice.level,p));}
   assert.equal(Object.values(progress.traits).reduce((a,b)=>a+b,0),40);
