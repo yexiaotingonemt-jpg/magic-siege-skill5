@@ -90,7 +90,7 @@ test('保留战局也断开旧 SSE 以要求拉取新版，重开模式仍保留
  const result=await f.game.hotUpdate.update({releaseDir:third,baseDigest:f.manifest.digest,battle:'restart'});
  await closedPromise;
  assert.notEqual(result.matchId,oldRoom.matchId);assert.equal(closed,true);assert.equal(f.game.room.sim.time,0);assert.equal(f.game.room.stageNumber,1);
- assert.equal((await f.call('/api/me')).status,200);const fresh=f.game.room.player(f.account);assert.equal(fresh.level,1);assert.equal(fresh.score,0);assert.equal(fresh.heroId,null);
+ assert.equal((await f.call('/api/me')).status,200);const fresh=f.game.room.player(f.account);assert.equal(fresh.level,0);assert.equal(fresh.score,0);assert.equal(fresh.heroId,null);
 });
 test('战斗兼容变化不能静默清场，明确重开才允许激活',async t=>{
  const f=await fixture(t),id=f.game.room.matchId;

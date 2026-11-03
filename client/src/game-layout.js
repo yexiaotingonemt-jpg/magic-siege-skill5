@@ -17,33 +17,33 @@ export function mountGameLayout(){
 export function createGameSheets(){
  const sheet=document.querySelector('#gameSheet'),sections=[...document.querySelectorAll('[data-sheet-section]')];let previous=null;
  const navigation=[...document.querySelectorAll('[data-nav]')];let heroView='skills',skillIndex=null;
+ const scrollPositions=new Map();
+ function captureScroll(){const panel=document.querySelector('[data-hero-panel]:not([hidden])');if(panel)scrollPositions.set(panel.dataset.heroPanel,panel.scrollTop);}
  function refresh(){
+  document.querySelectorAll('[data-hero-panel]').forEach(panel=>panel.hidden=panel.dataset.heroPanel!==heroView);
   document.querySelectorAll('[data-ability-view]').forEach(card=>card.hidden=card.dataset.abilityView!==heroView||(heroView==='skills'&&skillIndex!=null&&Number(card.dataset.skillDetail)!==skillIndex));
-  document.querySelectorAll('[data-hero-view]').forEach(button=>{const selected=button.dataset.heroView===heroView;button.setAttribute('aria-selected',String(selected));button.tabIndex=selected?0:-1;});
+  const panel=document.querySelector('[data-hero-panel]:not([hidden])');if(panel)panel.scrollTop=scrollPositions.get(heroView)||0;
   if(!sections.find(section=>section.dataset.sheetSection==='hero')?.hidden){
-   document.querySelector('#sheetTitle').textContent=heroView==='stats'?'基础属性':heroView==='common'?'通用效果':skillIndex==null?'职业技能':document.querySelector(`[data-skill-detail="${skillIndex}"] h3`)?.childNodes[0]?.textContent||'技能说明';
+   document.querySelector('#sheetTitle').textContent=heroView==='passive'?'职业被动':heroView==='stats'?'基础属性':heroView==='common'?'通用效果':skillIndex==null?'职业技能':document.querySelector(`[data-skill-detail="${skillIndex}"] h3`)?.childNodes[0]?.textContent||'技能说明';
   }
  }
  function markActive(name){navigation.forEach(button=>{if(button.dataset.nav===name)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}
  function close(){sheet.hidden=true;markActive('battle');if(previous?.isConnected)previous.focus({preventScroll:true});}
  function open(name,index=null){
-  heroView=name==='stats'?'stats':name==='common'?'common':'skills';skillIndex=index;
-  if(name==='stats'||name==='common')name='hero';
+  scrollPositions.clear();
+  heroView=['passive','stats','common'].includes(name)?name:'skills';skillIndex=index;
+  if(['passive','stats','common'].includes(name))name='hero';
   if(sheet.hidden)previous=document.activeElement;sheet.hidden=false;markActive(name);sections.forEach(e=>e.hidden=e.dataset.sheetSection!==name);
+  sheet.classList.toggle('is-hero-sheet',name==='hero');
   document.querySelector('#gameViewport').scrollIntoView({block:'start'});
   document.querySelector('#sheetTitle').textContent={hero:'职业技能',ranking:'功勋排行'}[name];
   document.querySelector('#sheetClose').focus({preventScroll:true});
-  const body=document.querySelector('#sheetScroll');body.querySelectorAll('details').forEach(d=>d.open=false);body.scrollTop=0;
+  const body=document.querySelector('#sheetScroll');body.querySelectorAll('details').forEach(d=>d.open=false);body.scrollTop=0;body.querySelectorAll('[data-hero-panel]').forEach(panel=>panel.scrollTop=0);
   refresh();
  }
  document.querySelectorAll('[data-hero-open]').forEach(button=>button.onclick=()=>open(button.dataset.heroOpen));
- const tabs=[...document.querySelectorAll('[data-hero-view]')];
- tabs.forEach((button,index)=>{
-  button.onclick=()=>{heroView=button.dataset.heroView;skillIndex=null;refresh();document.querySelector('#sheetScroll').scrollTop=0;};
-  button.onkeydown=e=>{const direction=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;if(direction){e.preventDefault();const next=tabs[(index+direction+tabs.length)%tabs.length];next.click();next.focus();}};
- });
  document.querySelector('#sheetClose').onclick=close;
  sheet.addEventListener('click',e=>{if(e.target===sheet)close();});
  window.addEventListener('keydown',e=>{if(sheet.hidden)return;if(e.key==='Escape'){e.preventDefault();close();}if(e.key==='Tab'){const nodes=[...sheet.querySelectorAll('button,summary,select,input,[tabindex="0"]')].filter(n=>n.getClientRects().length&&!n.disabled),first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}});
- return {open,close,refresh,get active(){return !sheet.hidden;}};
+ return {open,close,refresh,captureScroll,get active(){return !sheet.hidden;}};
 }

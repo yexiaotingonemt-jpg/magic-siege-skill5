@@ -4,6 +4,7 @@ export const gameShell=`
 <main class="layout">
  <aside class="battle-ranking" aria-label="实时积分与KDA排行">
   <div class="battle-ranking-heading">实时排行 <span>总积分 ↓ · KDA</span></div>
+  <div id="rankingControls" class="ranking-controls" hidden><button id="clearRanking" type="button">清除排行榜</button><p id="rankingNotice" role="status"></p></div>
   <div id="battleRanking" class="battle-ranking-scroll" tabindex="0" aria-label="战斗贡献排行榜"></div>
  </aside>
  <div id="gameViewport" class="game-viewport">
@@ -22,7 +23,7 @@ export const gameShell=`
    </div>
    <section class="hero-hud" aria-label="英雄状态">
     <div class="portrait" id="portrait"></div>
-    <div class="hero-copy"><b id="heroName"></b><span id="hpLabel"></span><div class="bar"><i id="hpbar"></i></div><div class="xp"><i id="xpbar"></i></div><small id="xpLabel"></small><div class="hero-inspect-row"><small id="attackLabel" class="hero-attack" hidden></small><div class="hero-inspect-actions"><button type="button" data-hero-open="stats" aria-label="查看基础属性">属性</button><button type="button" data-hero-open="common" aria-label="查看通用效果">通用</button></div></div><span id="eliteBuffs" class="elite-buffs"></span></div>
+    <div class="hero-copy"><b id="heroName"></b><span id="hpLabel"></span><div class="bar"><i id="hpbar"></i></div><div class="xp"><i id="xpbar"></i></div><small id="xpLabel"></small><div class="hero-inspect-row"><small id="attackLabel" class="hero-attack" hidden></small><div class="hero-inspect-actions"><button type="button" data-hero-open="passive" aria-label="查看职业被动">被动</button><button type="button" data-hero-open="stats" aria-label="查看基础属性">属性</button><button type="button" data-hero-open="common" aria-label="查看通用效果">通用</button></div></div><span id="eliteBuffs" class="elite-buffs"></span></div>
     <div class="contract-guide" aria-hidden="true"><span><i>1</i>点选士兵</span>${uiIcon('chevron')}<span><i>2</i>确认契约</span>${uiIcon('chevron')}<span><i>3</i>释放技能</span></div>
    </section>
    <div id="skills" class="skills" aria-label="英雄技能" hidden></div>
@@ -30,7 +31,7 @@ export const gameShell=`
    <footer aria-label="游戏导航">${[['battle','战场'],['hero','技能'],['ranking','排行']].map(([name,label])=>`<button type="button" data-nav="${name}" ${name==='battle'?'aria-current="page"':''}>${uiIcon(name)}<span>${label}</span></button>`).join('')}</footer>
    <div id="gameSheet" class="game-sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
     <section class="sheet-panel"><div class="sheet-heading"><h2 id="sheetTitle">职业技能</h2><button id="sheetClose" aria-label="关闭面板">×</button></div>
-     <div id="sheetScroll" class="sheet-scroll"><section data-sheet-section="hero"><div class="hero-sheet-heading"><b id="abilityClassName"></b></div><div class="hero-detail-tabs" role="tablist" aria-label="英雄信息"><button type="button" role="tab" data-hero-view="skills" aria-selected="true">技能</button><button type="button" role="tab" data-hero-view="stats" aria-selected="false">基础属性</button><button type="button" role="tab" data-hero-view="common" aria-selected="false">通用效果</button></div><div id="heroAbilityBody"></div></section><section data-sheet-section="ranking" hidden><p class="ranking-rule">总积分：伤害、原始承伤、有效治疗、小兵击杀、英雄击杀及英雄助攻按职业系数累计，另加每点消耗体力100分，无单次契约上限。<br>KDA = 总积分 ÷ 累计消耗体力（契约＋施法）；未消耗时显示 —。</p><div id="ranking"></div></section></div>
+     <div id="sheetScroll" class="sheet-scroll"><section data-sheet-section="hero"><div class="hero-sheet-heading"><b id="abilityClassName"></b></div><div id="heroAbilityBody"></div></section><section data-sheet-section="ranking" hidden><p class="ranking-rule">总积分：伤害、原始承伤、有效治疗、小兵击杀、英雄击杀及英雄助攻按职业系数累计，另加每点消耗体力100分，无单次契约上限。<br>KDA = 总积分 ÷ 累计消耗体力（契约＋施法）；未消耗时显示 —。</p><div id="ranking"></div></section></div>
     </section>
    </div>
   </section>

@@ -24,6 +24,12 @@ export class Room{
   const p=this.player(account),s=this.sim,key=account.id+':'+id;if(id&&this.commandHistory.has(key))return this.commandHistory.get(key);let ok=false,message='';s.localPlayerId=p.id;s.notice='';
   try{
    if(type==='restartMatch'){if(account.isSuperAdmin!==true)throw Error('仅超级账号可以重开本局');this.restartMatch();ok=true;message='本局已重开';}
+   else if(type==='clearRanking'){
+    if(account.isSuperAdmin!==true)throw Error('仅超级账号可以清除排行榜');
+    // 贡献按事件增量记账，清零累计值即可从此刻重新统计，无需改动英雄战斗状态。
+    for(const player of s.players){player.totalPoints=0;player.staminaSpent=0;player.score=0;}
+    ok=true;message='排行榜已清除，积分与KDA从现在重新累计';
+   }
    else if(type==='npcPolicy'){if(account.isSuperAdmin!==true)throw Error('仅超级账号可以设置NPC比例');s.npcPolicy=validateNpcPolicy(args);s.npcLastCheck=null;ok=true;message=s.npcPolicy.mode==='off'?'下次出兵停止补充NPC，现有NPC继续战斗':'NPC比例已保存，下次出兵检查补足';}
    else if(type==='contract'){const u=s.get(args.unitId);if(!u||!contractClasses(u,s.config).includes(args.classId)||u.side!==account.side)throw Error('此单位不可契约为所选职业');if(!s.setClass(args.classId,p))throw Error('已有存活英雄，或职业不属于本阵营');ok=s.contract(p,u.id);}
    else if(type==='cast')ok=s.cast(args.skill,p);

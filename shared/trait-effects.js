@@ -1,8 +1,10 @@
 import { commonRank } from "./common-traits.js";
 import { isCurrentDesign } from './current-design.js';
 import { currentTraitEffects } from './current-design-mechanics.js';
+import {grantEliteScore,transferEliteScore} from './elite-score.js';
 const near = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 export const ELITE_BUFFS = {
+  score: {name:'积分 +20%',description:'获得的积分提高20%；被敌方英雄击杀后传递，每次减少初始时长的1/4，不足1/4时改为一次性200积分'},
   hunt: { name: "狩猎恢复", description: "击杀非召唤单位恢复2%最大生命" },
   assault: { name: "强袭", description: "攻击力提高20%" },
   arcane: {
@@ -166,6 +168,7 @@ export const traitEffects = {
       });
     }
     if (t.elite) this.eliteReward(h,p);
+    else if (t.hero) transferEliteScore(this,h,t);
   },
   onUnitDeath(t) {
     const killed = t.lethalSkill;
@@ -262,30 +265,7 @@ export const traitEffects = {
     }
   },
 };
-traitEffects.eliteReward=function(h,p){
-      const keys = Object.keys(ELITE_BUFFS),
-        buff = keys[Math.floor(this.random() * keys.length)];
-      h.eliteBuffs ??= {};
-      h.eliteBuffs[buff] = this.time + 30;
-      const text =
-        p.name +
-        " 击杀精英，获得「" +
-        ELITE_BUFFS[buff].name +
-        "」30秒：" +
-        ELITE_BUFFS[buff].description;
-      this.battleEvents ??= [];
-      this.battleEvents.unshift({
-        id: ++this.battleEventId,
-        time: this.time,
-        text,
-        buff,
-        heroId: h.id,
-        until: this.time + 6,
-      });
-      this.battleEvents.length = Math.min(100, this.battleEvents.length);
-      this.log(text);
-      this.visual("eliteReward", h, h, { until: this.time + 1.5, buff });
-};
+traitEffects.eliteReward=function(h){grantEliteScore(this,h);};
 
 for(const [key,fn] of Object.entries(currentTraitEffects)){
   const legacy=traitEffects[key];

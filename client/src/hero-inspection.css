@@ -2,9 +2,11 @@
 .hero-inspect-actions {display:flex;gap:8px}
 .game .hero-inspect-actions button {font-size:16px;line-height:22px;padding:1px 10px;border-color:#607963;background:#20372b;box-shadow:none;text-shadow:none}
 .game.awaiting-contract .hero-inspect-actions {display:none}
-.hero-detail-tabs {display:flex;gap:8px;border-bottom:1px solid #53634688;padding-bottom:14px}
-.game .hero-detail-tabs button {flex:1;font-size:max(19px,calc(13px / var(--game-scale,1)));padding:10px 6px;background:#12271d;border:1px solid #536346;color:#a2afa6;box-shadow:none;text-shadow:none}
-.game .hero-detail-tabs button[aria-selected="true"] {background:#304a38;border-color:#a8b994;color:#fff}
+.game .is-hero-sheet .sheet-scroll {display:flex;overflow:hidden;padding:18px 22px 0}
+.is-hero-sheet [data-sheet-section="hero"] {display:flex;flex-direction:column;flex:1;min-width:0;min-height:0}
+.is-hero-sheet .hero-sheet-heading {flex-shrink:0}
+.is-hero-sheet #heroAbilityBody {display:flex;flex:1;min-height:0;overflow:hidden}
+.hero-detail-panel {flex:1;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#667653 #14291e;padding-bottom:24px}
 .game .ability-entry h4 {display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin:22px 0 10px;font-size:22px;color:#ecdfbb}
 .game .ability-entry h4 small {font-size:16px;font-weight:400;color:#aab5ae}
 .upgrade-effect {padding:16px 0;border-top:1px solid #53634666;--effect-text:#fff}

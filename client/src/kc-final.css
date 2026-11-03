@@ -77,6 +77,11 @@ input::placeholder {color:#81958a;opacity:1}
 .game .skill.out-of-range em {color:#ffd6d6;border-color:#c75c5c}
 .game .target-info {position:absolute;z-index:20;top:12px;right:44px;width:320px;max-width:calc(100% - 160px);padding:10px 14px;border:1px solid #aa716b;border-radius:6px;background:#172b25ed;box-shadow:0 3px 12px #0005;pointer-events:none;color:#e8e5d8;font-size:max(17px,calc(11px / var(--game-scale,1)));line-height:1.55;font-variant-numeric:tabular-nums}
 .game .target-info[hidden] {display:none}
+.game .target-tabs {position:relative;display:flex;gap:5px;overflow-x:auto;overscroll-behavior:contain;pointer-events:auto;margin:0 0 8px;padding:0 0 6px;scrollbar-width:thin;scrollbar-color:#71836c #10231b;touch-action:pan-x}
+.game .target-tabs button {flex:0 0 auto;max-width:100%;min-height:max(30px,calc(28px / var(--game-scale,1)));padding:3px 8px;border:1px solid #516756;border-radius:4px;background:#10231b;color:#b9c9bb;font:inherit;font-size:.9em;line-height:1.4;white-space:nowrap;box-shadow:none;text-shadow:none}
+.game .target-tabs button[data-side="enemy"] {color:#efaaa3}
+.game .target-tabs button[aria-selected="true"] {border-color:#d1bd84;background:#344735;color:#ffebba;box-shadow:inset 0 -2px #d1bd84}
+.game .target-tabs button:focus-visible {outline:2px solid #f6dfa0;outline-offset:-3px}
 .game .target-info[data-side="ally"] {border-color:#719e82}
 .game .target-heading {display:flex;align-items:baseline;gap:10px}
 .game .target-heading small {flex-shrink:0;color:#f2a39b;font-size:inherit}
@@ -130,7 +135,7 @@ input::placeholder {color:#81958a;opacity:1}
 .game #reports article b {color:var(--ui-text)}
 .game #reports small {font-size:18px}
 .game .uncontracted-skills {border:1px dashed #627052;padding:30px 24px;border-radius:6px;color:var(--ui-muted);font-size:22px}
-.game .contract-popover {background-color:#172b25;padding:20px}
+.game .contract-popover {background-color:#172b25;padding:20px;overflow-y:auto}
 .game .contract-popover h3 {font:600 26px "Microsoft YaHei",sans-serif;color:var(--ui-text);padding-right:calc(var(--touch-size) + 8px)}
 .game .contract-popover>small {color:var(--ui-gold)}
 .game .contract-popover p {color:#b9cabb;font-size:18px;line-height:1.7}

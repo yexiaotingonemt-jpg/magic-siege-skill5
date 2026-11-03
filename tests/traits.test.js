@@ -31,6 +31,7 @@ function arena(id = 4, level = 10) {
     p.stamina = 10000;
     const h = s.spawn(p.side, contractType(classId), 0, 1, x);
     assert.ok(s.contract(p, h.id));
+    p.xp = 0; // 固定等级机制测试从空经验开始，避免契约经验意外触发升级。
     Object.assign(h, { x, y, speed: 0, cd: 1e9 });
     return { p, h };
   };
@@ -82,7 +83,7 @@ test("145类词条覆盖五职业，库存78蓝14紫8金且ID唯一", () => {
 for (const id of [0, 2, 3, 4, 5])
   test("职业" + id + "完整1→40级：31蓝4紫4金、上限及扩展金色池三选一", () => {
     const { s, p } = arena(id, 1);
-    s.addXp(p, 10000);
+    s.addXp(p, 30000);
     const counts = { blue: 0, purple: 0, gold: 0 },
       gold = [];
     while (p.progress[id].choices.length) {
@@ -116,7 +117,7 @@ test("技能1/2/3初始可用、大招5级解锁；升级保留血量比例", ()
 });
 test("候选稳定，拒绝伪造、跨职业和过期选择，不能重抽", () => {
   const { s, p } = arena(4, 1);
-  s.addXp(p, 3);
+  s.addXp(p, s.expNeeded(p) - p.xp);
   const choice = structuredClone(p.progress[4].choices[0]);
   assert.equal(s.chooseTrait("L01", 2, p), false);
   assert.deepEqual(p.progress[4].choices[0], choice);
@@ -127,13 +128,14 @@ test("候选稳定，拒绝伪造、跨职业和过期选择，不能重抽", ()
 });
 test("阵亡、重新契约与阶段重建保留职业构筑及待选队列", () => {
   const { s, p, h } = arena(4, 1);
-  s.addXp(p, 10);
+  s.addXp(p, s.expNeeded(p) - p.xp);
   const choice = p.progress[4].choices[0];
   s.chooseTrait(choice.options[0], choice.level, p);
   const saved = structuredClone(p.progress[4]);
   s.damage(null, h, 1e9);
   const u = s.spawn(0, "ranged", 0, 1, 0);
   assert.ok(s.contract(p, u.id));
+  saved.xp += s.config.world.contractCost * s.config.world.expPerStamina;
   assert.deepEqual(p.progress[4], saved);
   s.resetMap();
   assert.deepEqual(p.progress[4], saved);
@@ -144,7 +146,7 @@ test("服务端选择指令幂等，伪造来源无法替他人选择", () => {
     b = { id: "b", name: "乙", side: 0 };
   const p = room.player(a),
     q = room.player(b);
-  room.sim.addXp(p, 3);
+  room.sim.addXp(p, room.sim.expNeeded(p) - p.xp);
   const choice = p.progress[0].choices[0],
     cmd = {
       type: "chooseTrait",
@@ -177,15 +179,15 @@ test("每三波双方各加一名精英，重建后重新计波，精英不可�
   s.spawnWave();
   assert.equal(s.units.filter((u) => u.elite).length, 2);
 });
-for (const [i, buff] of ["hunt", "assault", "arcane", "fortitude"].entries())
-  test("精英随机奖励" + buff + "广播及战报可序列化，30秒到期", () => {
+for (const [i, buff] of ["score"].entries())
+  test("精英积分奖励" + buff + "广播及战报可序列化，30秒到期", () => {
     const { s, p, h, enemy } = arena();
     enemy.elite = true;
     enemy.hero = false;
     s.random = () => i / 4 + 0.01;
     s.damage(h, enemy, 1e9);
     assert.equal(h.eliteBuffs[buff], 30);
-    assert.match(s.battleEvents[0].text, /精英/);
+    assert.match(s.battleEvents[0].text, /特殊怪物/);
     assert.equal(s.battleEvents[0].buff, buff);
     assert.equal(s.battleEvents.length, 1);
     s.die(enemy, h);
@@ -443,7 +445,7 @@ test("高等级完整构筑长战斗无递归爆炸、非法坐标或不受控�
   const s = new Simulation(c);
   s.player.retired = true;
   for (const p of s.players.filter((p) => p.bot)) {
-    s.addXp(p, 10000);
+    s.addXp(p, 30000);
     while (p.progress[p.classId].choices.length) {
       const choice = p.progress[p.classId].choices[0];
       s.chooseTrait(choice.options[0], choice.level, p);
@@ -604,7 +606,7 @@ test("没有合法敌人时不无限储存治疗反击的完整触发", () => {
 
 test("无英雄时可处理预览职业的待选，存活时不能替其他职业选择", () => {
   const { s, p, h } = arena(0, 1);
-  s.addXp(p, 3, 5);
+  s.addXp(p, s.expNeeded(p, 5) - p.progress[5].xp, 5);
   const choice = p.progress[5].choices[0],
     id = choice.options[0];
   assert.equal(s.chooseTrait(id, choice.level, p, 5), false);

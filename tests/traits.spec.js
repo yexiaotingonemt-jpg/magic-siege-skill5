@@ -31,7 +31,7 @@ test("升级仅提示次数，积攒、稍后选择与重连均不自动弹窗�
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   const s = game.room.sim;
-  s.addXp(p, 3);
+  s.addXp(p,s.expNeeded(p)-p.xp);
   game.room.sequence++;
   game.room.broadcast();
   await expect(page.locator("[data-trait-count]")).toHaveText("1");
@@ -141,7 +141,7 @@ test("精英特殊外观、在线广播及本人Buff倒计时", async ({
     game.room.sequence++;
     game.room.broadcast();
     for (const target of [page, other])
-      await expect(target.locator("#eliteBroadcast")).toContainText("强袭");
+      await expect(target.locator("#eliteBroadcast")).toContainText("积分 +20%");
     await expect(page.locator("#eliteBuffs")).toContainText("30s");
     await expect(page.locator('[data-nav="reports"], #reports')).toHaveCount(0);
     expect(errors).toEqual([]);
@@ -156,7 +156,7 @@ test("桌面和窄屏选卡截图：无错误、卡片未超出游戏区域", as
     u = s.units.find((u) => u.side === 0 && !u.hero && u.type === "ranged");
   s.setClass(4, p);
   s.contract(p, u.id);
-  s.addXp(p, 3);
+  s.addXp(p,s.expNeeded(p)-p.xp);
   p.progress[4].choices[0].options = ["F09", "F01", "F05"];
   p.progress[4].traits = { F01: 2, F17: 1 };
   game.room.sequence++;
@@ -206,7 +206,7 @@ test("桌面和窄屏选卡截图：无错误、卡片未超出游戏区域", as
 
 test("契约前切换预览职业，可以选择该职业保留的强化", async ({ page }) => {
   const s = game.room.sim;
-  s.addXp(p, 3, 5);
+  s.addXp(p,s.expNeeded(p,5)-p.progress[5].xp,5);
   game.room.sequence++;
   game.room.broadcast();
   const u = s.units.find((u) => u.side === 0 && !u.hero && u.type === "ranged");
@@ -228,7 +228,7 @@ test("契约前切换预览职业，可以选择该职业保留的强化", async
 
 test("感叹号独立查看当前技能效果和已选强化，查看或按数字均不会误选", async ({ page }) => {
   const s = game.room.sim;
-  s.addXp(p, 3);
+  s.addXp(p,s.expNeeded(p)-p.xp);
   const progress = p.progress[0];
   progress.traits = { O01: 2, O02: 1, O05: 1, O17: 1 };
   progress.choices[0].options = ["O01", "O05", "O17"];
@@ -271,7 +271,7 @@ test("感叹号独立查看当前技能效果和已选强化，查看或按数�
 
 test("查看无已选强化的技能，并在拒绝选择后保留次数和重试入口", async ({ page }) => {
   const s = game.room.sim;
-  s.addXp(p, 3);
+  s.addXp(p,s.expNeeded(p)-p.xp);
   p.progress[0].choices[0].options = ["O01", "O05", "O17"];
   game.room.sequence++;
   game.room.broadcast();

@@ -437,6 +437,8 @@ export class HeroRules {
         Math.max(0, n - absorbed),
       ),
       sum = actual + absorbed;
+    // Credit the final hit while the target still owns its live score buff.
+    if(sum>0)this.stat(t, "damageTaken", raw);
     t.hp -= actual;
     spend(meta.value, sum, "伤害");
     if (sum > 0) {
@@ -451,7 +453,6 @@ export class HeroRules {
         sum,
       );
       if (!t.tower) this.stat(credit, "unitDamage", sum);
-      this.stat(t, "damageTaken", raw);
       recordEffectiveHit(a,t,credit,this.time,this.config.world.assistWindow);
       if (credit?.hero) {
         t.contributors ??= {};
@@ -549,10 +550,7 @@ export class HeroRules {
     if (!isCurrentDesign(this.config) && h.classId === 4 && i === 1) {
       h.heat = Math.max(0, heat - s.heatCost);
     }
-    p.stamina -= s.cost;
-    p.staminaSpent += s.cost;
-    this.stat(h, 'staminaSpent', s.cost);
-    this.addXp(p, s.cost * (isCurrentDesign(this.config)?1:this.config.world.expPerStamina));
+    this.spendStamina(p, s.cost, h);
     p.cd[i] = this.time + s.cd * (h.eliteBuffs?.arcane > this.time ? 0.85 : 1);
     h.castUntil = this.time + s.castTime;
     this.metrics.casts++;

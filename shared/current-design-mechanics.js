@@ -3,6 +3,7 @@ import { recordEffectiveHeal } from './assist-rules.js';
 import { targetForSide } from './manual-target.js';
 import { segmentDistance } from './lord-flame-shield.js';
 import { spend } from './skill-value.js';
+import {grantEliteScore,transferEliteScore} from './elite-score.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const nearest=(at,units)=>units.sort((a,b)=>distance(at,a)-distance(at,b)||a.id-b.id);
@@ -188,19 +189,21 @@ function currentGroupHeal(sim,h,s,targets) {
       sim.damage(h,enemy,actual*s.counter,false,false,{value:s.value,derived:true});
   }
 }
-function runeImpact(sim,h,s,at,multiplier=1,repeat=false) {
+function runeImpact(sim,h,s,at,multiplier=1,repeat=false,primaryId=null) {
   const targets=area(sim,h,at,s.radius,s.targets), n=targets.length;
   if (!n) return;
+  const primary=targets.find(u=>u.id===primaryId)||targets[0];
+  const cannonPool=Math.min(primary.maxHp*s.hp_ratio,s.value.attack*s.cap);
   const relief=currentValues(sim,h,null,s.value?.ranks).share_relief||0;
   const share=(n===1?1:Math.min(1,(rules(sim).shareTotals[Math.min(6,n)]||0)+relief))/n;
   emit(sim,h,s,at,targets,'impact');
   for (const u of targets) {
     if (s.skill===0) {
-      sim.damage(h,u,Math.min(u.maxHp*s.hp_ratio,s.value.attack*s.cap)*share*multiplier*(1+(s.bonusDamage||0)),false,false,{value:s.value});
-      if (s.heal_down && !(u.immuneUntil>sim.time)) u.currentNextHealDown={ratio:s.heal_down,until:sim.time+s.debuff_duration};
+      sim.damage(h,u,cannonPool*share*multiplier*(1+(s.bonusDamage||0)),false,false,{value:s.value});
+      if (s.heal_down && !(u.immuneUntil>sim.time)) u.currentNextHealDown={ratio:s.heal_down*share,until:sim.time+s.debuff_duration};
       if (s.dot_chance && sim.random()<s.dot_chance && !(u.immuneUntil>sim.time)) {
         sim.fields=sim.fields.filter(f=>!(f.kind==='currentCorrosion'&&f.host===u.id&&f.owner.id===h.id));
-        sim.fields.push({kind:'currentCorrosion',owner:h,host:u.id,s,share,tick:sim.time+1,until:sim.time+s.duration});
+        sim.fields.push({kind:'currentCorrosion',owner:h,host:u.id,s,share,power:primary.maxHp*s.dot_hp*share,tick:sim.time+1,until:sim.time+s.duration});
       }
     } else {
       hurt(sim,h,s,u,s.power/100,share*multiplier);
@@ -216,10 +219,10 @@ function runeImpact(sim,h,s,at,multiplier=1,repeat=false) {
       }
     }
   }
-  if (s.skill===1&&s.self_haste) sim.haste(h,'runeFrost',s.self_haste/n,s.duration);
-  if (s.skill===0&&!repeat&&s.extra_chance&&sim.random()<s.extra_chance) runeImpact(sim,h,s,at,multiplier,true);
+  if (s.skill===1&&s.self_haste) sim.haste(h,'runeFrost',s.self_haste/n,s.self_haste_duration??s.duration);
+  if (s.skill===0&&!repeat&&s.extra_chance&&sim.random()<s.extra_chance) runeImpact(sim,h,s,at,multiplier,true,primaryId);
 }
-export function impactCurrentSkill(b) {runeImpact(this,b.source,b.payload,{x:b.tx,y:b.ty});}
+export function impactCurrentSkill(b) {runeImpact(this,b.source,b.payload,{x:b.tx,y:b.ty},1,false,b.targetId);}
 export function processCurrentEffects() {
   for (const f of [...this.fields]) {
     const h=f.owner,s=f.s;
@@ -231,7 +234,17 @@ export function processCurrentEffects() {
       f.last=this.time;f.x+=f.dx*step;f.y+=f.dy*step;f.travel+=step;
       for (const u of this.enemies({...f,side:h.side}).filter(u=>segmentDistance(u,from,f)<=r.pierceRadius)) {
         if ((f.next[u.id]||0)>this.time) continue;
-        const before=u.hp;hurt(this,h,s,u,s.power/100,r.piercePower*(f.primaryCount===1?1+s.isolated:1));
+        if (!f.initialHit) {
+          const firstTargets=area(this,h,u,s.radius,s.targets,u);
+          f.initialHit=true;f.isolated=f.primaryCount===1&&firstTargets.length===1;
+          for (const target of firstTargets) {
+            const before=target.hp;hurt(this,h,s,target,s.power/100,f.isolated?1+s.isolated:1);
+            knock(this,h,target,s.knock);f.next[target.id]=this.time+r.pierceGap;
+            if (before>0&&target.hp<=0) this.addHeat(h,s.kill_heat);
+          }
+          continue;
+        }
+        const before=u.hp;hurt(this,h,s,u,s.power/100,r.piercePower*(f.isolated?1+s.isolated:1));
         knock(this,h,u,s.knock);f.next[u.id]=this.time+r.pierceGap;
         if (before>0&&u.hp<=0) this.addHeat(h,s.kill_heat);
       }
@@ -241,12 +254,12 @@ export function processCurrentEffects() {
     while (f.tick<=this.time+1e-7 && f.tick<=f.until+1e-7 && (f.remaining==null || f.remaining>0)) {
       if (f.kind==='currentDrain') {
         const u=this.get(f.host);
-        if (!u || distance(h,u)>s.range || u.immuneUntil>this.time) {f.until=this.time;break;}
+        if (!u || distance(h,u)>(s.break_range??s.range) || u.immuneUntil>this.time) {f.until=this.time;break;}
         const n=hurt(this,h,s,u,s.power/100,f.scale,{periodic:true});this.heal(h,n*s.drain,h,s.value);
         f.tick+=1;
       } else if (f.kind==='currentCorrosion') {
         const u=this.get(f.host);if (!u) {f.until=this.time;break;}
-        if (!(u.immuneUntil>this.time)) this.damage(h,u,u.maxHp*s.dot_hp*f.share*(1+(s.bonusDamage||0)),false,false,{value:s.value,periodic:true});
+        if (!(u.immuneUntil>this.time)) this.damage(h,u,f.power*(1+(s.bonusDamage||0)),false,false,{value:s.value,periodic:true});
         f.tick+=1;
       } else if (f.kind==='currentBarrage') {
         runeImpact(this,h,s,f,1+f.index*s.ramp);f.index++;f.remaining--;f.tick+=s.gap;
@@ -314,6 +327,7 @@ export function refreshCurrentStats(sim,h) {
   const multiplier=sim.config.world.heroHpMultiplier*(h.side?sim.config.world.defenseHpMultiplier:sim.config.world.attackHpMultiplier);
   h.maxHp=c.hp*multiplier*(1+c.hpGrowth*level)*(1+(v.hp_bonus||0));h.hp=h.maxHp*ratio;
   h.attack=c.attack*(1+c.attackGrowth*level);h.range=c.range+(v.range_bonus||0);h.speed=c.speed*(1+(v.move_bonus||0));
+  h.aggro=Math.max(sim.config.heroes[h.classId].aggro||c.range,h.range);
 }
 export function currentHeal(t,n,u,value=null,derived=false) {
   if (!t||t.hp<=0||t.tower||!Number.isFinite(n)||n<=0) return 0;
@@ -396,7 +410,8 @@ export const currentTraitEffects={
         Object.assign(u,{x:h.x,y:h.y,summoned:true,ownerId:h.id,expiresAt:this.time+ult.s.summon_duration,hp:r.summonHp,maxHp:r.summonHp,attack:r.summonAttack,interval:r.summonInterval,range:1.5,speed:2,deploying:false});
       }
     }
-    if(t.elite)this.eliteReward(h,this.players[h.playerId]);
+    if(t.elite)grantEliteScore(this,h);
+    else if(t.hero)transferEliteScore(this,h,t);
   },
   onUnitDeath(t) {
     const killed=t.lethalSkill;

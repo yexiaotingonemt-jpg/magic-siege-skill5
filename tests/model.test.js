@@ -5,7 +5,7 @@ import {defaults,clone,contractType,availableClasses,contractClasses} from '../s
 import {describeAbilities} from '../client/src/ability-descriptions.js';
 import {unitStatuses,indexStatusFields} from '../client/src/unit-status.js';
 const ids=[0,2,3,4,5],near=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
-function arena(id=0){const s=new Simulation();s.units=[];s.players[0].retired=true;s.waveAt=1e9;s.populationAt=1e9;for(const t of s.towers)t.x=100;function make(classId,x,y){const side=classId===3?1:0,p=s.makePlayer(side,false);p.classId=classId;p.level=6;p.builds[classId]=[1,1,1,1];const u=s.spawn(side,contractType(classId),0,1,x);assert.ok(s.contract(p,u.id));Object.assign(u,{x,y,hp:u.maxHp,cd:1e9,speed:0});return {p,h:u};}const {p,h}=make(id,0,0);s.localPlayerId=p.id;const enemy=make(id===3?0:3,0,3).h;enemy.hp=enemy.maxHp=1e7;const allies=[make(id===3?3:0,2,0).h,make(id===3?3:4,-2,0).h];for(const u of allies)u.hp=u.maxHp*.4;enemy.targetId=allies[0].id;for(const u of allies)u.targetId=enemy.id;if(id===5)s.setManualTarget(allies[0].id,p);return {s,p,h,enemy,allies,make};}
+function arena(id=0){const s=new Simulation();s.units=[];s.players[0].retired=true;s.waveAt=1e9;s.populationAt=1e9;for(const t of s.towers)t.x=100;function make(classId,x,y){const side=classId===3?1:0,p=s.makePlayer(side,false);p.classId=classId;p.level=6;p.builds[classId]=[1,1,1,1];const u=s.spawn(side,contractType(classId),0,1,x);assert.ok(s.contract(p,u.id));p.xp=0;Object.assign(u,{x,y,hp:u.maxHp,cd:1e9,speed:0});return {p,h:u};}const {p,h}=make(id,0,0);s.localPlayerId=p.id;const enemy=make(id===3?0:3,0,3).h;enemy.hp=enemy.maxHp=1e7;const allies=[make(id===3?3:0,2,0).h,make(id===3?3:4,-2,0).h];for(const u of allies)u.hp=u.maxHp*.4;enemy.targetId=allies[0].id;for(const u of allies)u.targetId=enemy.id;if(id===5)s.setManualTarget(allies[0].id,p);return {s,p,h,enemy,allies,make};}
 function advance(s,time){for(let end=s.time+time;s.time<end-1e-8;)s.tick(Math.min(.05,end-s.time));}
 for(const id of ids)for(let skill=0;skill<4;skill++)test(`职业${id} 技能${skill+1}：可施放、有限值、描述`,()=>{const {s,p,h,enemy,allies}=arena(id);enemy.targetId=allies[0].id;if(id===4&&skill===1)s.addHeat(h,1);if(id===5&&skill===2)s.debuff(allies[0],enemy,'attackDown',.2,5);const before=p.stamina;assert.ok(s.cast(skill,p),s.notice);advance(s,1.5);assert.equal(p.stamina,before-s.config.heroes[id].skills[skill].cost);for(const u of s.units)for(const key of ['x','y','hp'])assert.ok(Number.isFinite(u[key]));assert.ok(describeAbilities(s).skills[skill].summary.length>5);for(const value of s.skillValues)assert.ok(value.limit==null&&Number.isFinite(value.spent));});
 test('只有详细表的4进攻职业、1防守职业可以契约',()=>{assert.deepEqual(availableClasses(0),[0,4,5,2]);assert.deepEqual(availableClasses(1),[3]);assert.deepEqual(contractClasses({side:0,type:'melee'}),[0]);assert.deepEqual(contractClasses({side:0,type:'ranged'}),[4,5]);assert.deepEqual(contractClasses({side:1,type:'ranged'}),[]);assert.equal(defaults.world.attackBots+defaults.world.defenseBots,0);});
@@ -40,9 +40,9 @@ test('索敌不再比较接敌数，同类按最近距离选择',()=>{const {s,h
 test('被攻击且警戒内无目标时反击，攻击者失效后恢复前进',()=>{const {s,h,enemy}=arena(0);enemy.y=8;s.damage(enemy,h,100);const t=s.choose(h);assert.equal(t.id,enemy.id);h.targetId=t.id;assert.equal(s.choose(h).id,enemy.id);s.time=4;assert.equal(s.choose(h),null);});
 test('嘲讽结束自动解除强制目标并重选，控制时不普通移动或攻击',()=>{const {s,h,enemy}=arena(0),u=s.spawn(1,'melee',0,1,0);u.y=2;h.tauntId=u.id;h.tauntUntil=1;h.targetId=s.choose(h).id;s.time=2;assert.equal(s.choose(h).id,enemy.id);h.speed=2;h.stunUntil=5;h.cd=0;const y=h.y,hp=enemy.hp;advance(s,1);near(h.y,y);near(enemy.hp,hp);});
 test('无目标前进至配置边界停止，并继续搜索后来出现的目标',()=>{const {s,h}=arena(0);s.units=s.units.filter(u=>u.side===0);h.y=s.config.world.mapMaxY-.1;h.speed=2;advance(s,1);near(h.y,s.config.world.mapMaxY);const e=s.spawn(1,'melee',0,1,h.x);e.y=h.y-2;e.cd=1e9;e.speed=0;advance(s,.1);assert.equal(h.targetId,e.id);});
-test('击杀单位获得经验，不同职业等级、经验和技能加点分别保留',()=>{const {s,p,h}=arena(0),old=p.xp;s.damage(h,s.spawn(1,'melee',0,1,0),1e9);near(p.xp-old,s.config.world.minionKillXp);const level=p.level,xp=p.xp,build=[...p.builds[0]];s.damage(null,h,1e9);assert.ok(s.setClass(4,p));assert.equal(p.level,1);assert.equal(p.xp,0);s.setClass(0,p);assert.equal(p.level,level);near(p.xp,xp);assert.deepEqual(p.builds[0],build);});
+test('击杀不加经验，不同职业等级、经验和技能加点分别保留',()=>{const {s,p,h}=arena(0),old=p.xp;s.damage(h,s.spawn(1,'melee',0,1,0),1e9);near(p.xp-old,s.config.world.minionKillXp);const level=p.level,xp=p.xp,build=[...p.builds[0]];s.damage(null,h,1e9);assert.ok(s.setClass(4,p));assert.equal(p.level,0);assert.equal(p.xp,0);s.setClass(0,p);assert.equal(p.level,level);near(p.xp,xp);assert.deepEqual(p.builds[0],build);});
 
-for(const kind of ['hero','minion','tower'])test(`阵亡战车在途击杀${kind}：经验只归来源职业，升级不改变新英雄`,()=>{
+for(const kind of ['hero','minion','tower'])test(`阵亡战车在途击杀${kind}：不额外奖励经验，不改变新英雄`,()=>{
  const {s,p,h,enemy}=arena(2);enemy.x=50;
  const target=kind==='hero'?enemy:kind==='tower'?s.towers[0]:s.spawn(1,'melee',0,1,0);
  Object.assign(target,{x:0,y:10,hp:1,maxHp:10000,cd:1e9,speed:0});h.targetId=target.id;s.setManualTarget(target.id,p);
@@ -50,9 +50,9 @@ for(const kind of ['hero','minion','tower'])test(`阵亡战车在途击杀${kind
  const old=p.progress[2],level=old.level,needed=s.expNeeded(p,2);old.xp=needed-.001;
  s.damage(null,h,1e9);assert.ok(s.setClass(4,p));const next=s.spawn(0,'ranged',0,1,0);assert.ok(s.contract(p,next.id));Object.assign(next,{x:0,y:-10,speed:0,cd:1e9});
  const progress=structuredClone(p.progress[4]),attributes={hp:next.hp,maxHp:next.maxHp,attack:next.attack};
- advance(s,2.5);assert.ok(target.hp<=0);assert.equal(old.level,level+1);
+ advance(s,2.5);assert.ok(target.hp<=0);assert.equal(old.level,level);
  const reward=kind==='hero'?s.config.world.heroKillXp:kind==='minion'?s.config.world.minionKillXp:s.config.world.towerBreakXp+s.config.world.towerDamageExpRate;
- near(old.xp,reward-.001);assert.deepEqual(p.progress[4],progress);assert.deepEqual({hp:next.hp,maxHp:next.maxHp,attack:next.attack},attributes);
+ assert.equal(reward,0);near(old.xp,needed-.001);assert.deepEqual(p.progress[4],progress);assert.deepEqual({hp:next.hp,maxHp:next.maxHp,attack:next.attack},attributes);
 });
 test('来源职业的延迟升级可更新重新契约的同职业英雄',()=>{
  const {s,p,h}=arena(2);s.damage(null,h,1e9);const next=s.spawn(0,'siege',0,1,0);assert.ok(s.contract(p,next.id));next.hp=next.maxHp*.5;

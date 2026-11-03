@@ -28,7 +28,7 @@ test('仅超级账号重开全局，保留连接会话及配置，清空成长�
  assert.equal(room.command(host,{type:'restartMatch',id:'bad'}).ok,false);assert.equal(room.matchId,before);
  const result=room.command(a,{type:'restartMatch',id:'once'});assert.equal(result.ok,true);assert.notEqual(room.matchId,before);
  assert.equal(room.sim.time,0);assert.equal(room.stageNumber,1);assert.deepEqual(room.stageWins,[0,0]);assert.equal(room.paused,false);assert.equal(room.speed,1);
- const next=room.player(a);assert.equal(next.level,1);assert.equal(next.score,0);assert.equal(next.totalPoints,0);assert.equal(next.stamina,room.config.world.initialStamina);assert.deepEqual(next.cd,[0,0,0,0]);assert.equal(next.heroId,null);
+ const next=room.player(a);assert.equal(next.level,0);assert.equal(next.score,0);assert.equal(next.totalPoints,0);assert.equal(next.stamina,room.config.world.initialStamina);assert.deepEqual(next.cd,[0,0,0,0]);assert.equal(next.heroId,null);
  assert.equal(room.players.size,3);assert.equal(room.clients.size,1);assert.equal(room.online.get(a.id),1);assert.equal(room.config.world.attackBots,2);
  const match=room.matchId;assert.deepEqual(room.command(a,{type:'restartMatch',id:'once'}),result);assert.equal(room.matchId,match);
  assert.equal(output.filter(t=>t.startsWith('event: identity')).length,2);assert.ok(!output.join('').includes('hash'));

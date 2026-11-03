@@ -50,10 +50,10 @@ const principles = `# 0.6.0 升级词条、连携技能与精英兵
 ## 公共规则
 
 - 四技能费用固定1／1／2／3体力，基础冷却6／10／22／42秒。初始开放1、2、3，大招5级解锁；不分技能等级，不分配技能点。
-- 等级上限40，1→40共31蓝、4紫、4金；5／15／25／35级紫色，10／20／30／40级金色，高品质替代当次蓝色。
+- 初始0级、等级上限40，0→40共32蓝、4紫、4金；5／15／25／35级紫色，10／20／30／40级金色，高品质替代当次蓝色。
 - 每个职业29类词条：16蓝、7紫、6金；次数库存78／14／8。类别等概率且同次不重复，次数只表示可选上限。候选不足3项显示实际数量。断线不重抽，按顺序处理待选。
 - 升级只显示强化图标和待选次数，点击后选择；感叹号查看当前效果与已选强化。通用词条详情直接展示其效果。
-- 经验与基础施法积分按实际消耗体力计算，1体力=1经验和10基础积分。升级需求为3+0.4×(当前等级−1)，达到40级累计需求413.4经验；击杀和推塔经验另计。高费技能不会因每次操作积分相同而吃亏。
+- 每实际消耗1点体力获得100经验，包含契约和施法；失败操作、补充体力、击杀及塔伤不提供经验。0级起步、40级封顶，按整数阶梯升级：升至1～7级每级5体力，8～14级6体力，15～20级7体力，21～26级8体力，27～33级9体力，34～40级10体力。累计300体力、30000经验升满，升级余量保留。基础积分沿用当前计分规则。
 - 主目标优先玩家选中目标；支援技能优先所选友方，选中敌人时解析该敌人攻击的友方目标。无效或超距拒绝且不扣费。次级目标受各技能局部人数与范围约束。
 - 生命每级+2%基础生命，攻击每级+1.5%基础攻击。升级和生命词条保持当前生命比例；职业分别保存成长与构筑。
 - 不恢复旧2000%／6000%统一收益截断。各技能按人数、跳数、持续时间、实际位移及明确转化规则结算。
@@ -125,15 +125,25 @@ fs.writeFileSync("docs/rules/15-traits-and-elites.md", rule);
 // 现有数值表采用四列字段表，按相同职责分别展开静态配置。
 let table =
   "# 魔法王座当前数值配置 · 0.6.0\n\n规则、145类词条及平衡依据见[升级词条、连携技能与精英兵](rules/15-traits-and-elites.md)。以下由当前静态默认配置生成，不记录玩家运行状态。攻击系数100表示100%攻击，普通比例0.35表示35%；时间秒、距离格。\n\n";
+function progressionTable() {
+  const w=defaults.world;
+  let total=0;
+  let text="## 经验升级曲线\n\n每实际消耗1点体力获得"+w.expPerStamina+"经验，包含契约和施法。0级起步，升级余量保留。\n\n| 升至等级 | 本级体力 | 本级经验 | 累计体力 |\n|---|---:|---:|---:|\n";
+  w.levelUpStamina.forEach((cost,index)=>{total+=cost;text+=`| ${index+1} | ${cost} | ${cost*w.expPerStamina} | ${total} |\n`;});
+  return text+"\n";
+}
 function section(title, obj, prefix) {
   table += `## ${title}\n\n| 字段名 | 说明 | 字段类型 | 备注 |\n|---|---|---|---|\n`;
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === "number")
       table += `| ${prefix}.${key} | ${labels[key] || key} | digit | 当前值：${value} |\n`;
+    else if (key === "levelUpStamina" && Array.isArray(value))
+      table += `| ${prefix}.${key} | ${labels[key]}；数组下标0对应升至1级 | array | ${value.length}项，见下方经验升级曲线 |\n`;
   }
   table += "\n";
 }
 section("全局", defaults.world, "world");
+table += progressionTable();
 for (const [type, value] of Object.entries(defaults.troops))
   section("士兵 " + type, value, "troops." + type);
 section("防御塔", defaults.tower, "tower");
