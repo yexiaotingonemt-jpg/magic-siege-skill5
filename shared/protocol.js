@@ -10,5 +10,5 @@ export const SERVER_VERSION='0.7.17';
 // Desktop release version must match SERVER_VERSION.
 export const CLIENT_VERSION='0.7.17';
 // Diagnostic ruleset label; changing this alone does not require a client update.
-export const RULESET_REVISION='ally-approach-20261103';
+export const RULESET_REVISION='dark-lord-design-20261103';
 export const UPDATE_REQUIRED_CODE='CLIENT_UPDATE_REQUIRED';

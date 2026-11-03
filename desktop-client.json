@@ -19,7 +19,7 @@
     "魔法王座.exe": "1142a1c9b7ad159691d7fbb5c25c4ecd6b9ff6fb1ccbd4f4d6d01d5bf944c179",
     "client/launcher.mjs": "c2923024bfbf7051368f9ef51a6c608c01dfe3b0f219cbbd2f62033bf28e38b9",
     "client/client-config.json": "6b27adca4af8dbc3bd561c1af85471d8561026bd3c449b26a3d60d6f071937c5",
-    "shared/protocol.js": "725fd7c9c53a3156fac5f7f6f8fb7af9b4d0665c8114840a1f3eb10ba769235e"
+    "shared/protocol.js": "bc938641e0f7672ceec14b80dc8cc2ff38b69035cecce5a7dc5c5121c805a32c"
   },
   "runtime": {
     "version": "45.1.0-win32-x64",
