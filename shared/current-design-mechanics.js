@@ -3,6 +3,7 @@ import { recordEffectiveHeal } from './assist-rules.js';
 import { targetForSide } from './manual-target.js';
 import { segmentDistance } from './lord-flame-shield.js';
 import { spend } from './skill-value.js';
+import {grantEliteScore,transferEliteScore} from './elite-score.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const nearest=(at,units)=>units.sort((a,b)=>distance(at,a)-distance(at,b)||a.id-b.id);
@@ -421,7 +422,8 @@ export const currentTraitEffects={
         Object.assign(u,{x:h.x,y:h.y,summoned:true,ownerId:h.id,expiresAt:this.time+ult.s.summon_duration,hp:r.summonHp,maxHp:r.summonHp,attack:r.summonAttack,interval:r.summonInterval,range:1.5,speed:2,deploying:false});
       }
     }
-    if(t.elite)this.eliteReward(h,this.players[h.playerId]);
+    if(t.elite)grantEliteScore(this,h);
+    else if(t.hero)transferEliteScore(this,h,t);
   },
   onUnitDeath(t) {
     const killed=t.lethalSkill;

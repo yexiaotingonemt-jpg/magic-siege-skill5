@@ -36,5 +36,7 @@ export function contributionParts(h,config){
     {key:'heroKills',value:s.heroKills||0,coefficient:c.e},
     {key:'heroAssists',value:s.heroAssists||0,coefficient:c.f},
     {key:'staminaSpent',value:s.staminaSpent||0,coefficient:STAMINA_POINTS},
+    {key:'eliteScoreBonus',value:s.eliteScoreBonus||0,coefficient:1},
+    {key:'eliteScoreBounty',value:s.eliteScoreBounty||0,coefficient:1},
   ].map(p=>{const prior=h.innateScoreBase?.[p.key];return {...p,points:prior?prior.points+(p.value-prior.value)*p.coefficient:p.value*p.coefficient};});
 }

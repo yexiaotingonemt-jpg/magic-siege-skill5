@@ -445,6 +445,8 @@ export class HeroRules {
         Math.max(0, n - absorbed),
       ),
       sum = actual + absorbed;
+    // Credit the final hit while the target still owns its live score buff.
+    if(sum>0)this.stat(t, "damageTaken", raw);
     t.hp -= actual;
     spend(meta.value, sum, "伤害");
     if (sum > 0) {
@@ -459,7 +461,6 @@ export class HeroRules {
         sum,
       );
       if (!t.tower) this.stat(credit, "unitDamage", sum);
-      this.stat(t, "damageTaken", raw);
       recordEffectiveHit(a,t,credit,this.time,this.config.world.assistWindow);
       if (credit?.hero) {
         t.contributors ??= {};

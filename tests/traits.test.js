@@ -179,15 +179,15 @@ test("每三波双方各加一名精英，重建后重新计波，精英不可�
   s.spawnWave();
   assert.equal(s.units.filter((u) => u.elite).length, 2);
 });
-for (const [i, buff] of ["hunt", "assault", "arcane", "fortitude"].entries())
-  test("精英随机奖励" + buff + "广播及战报可序列化，30秒到期", () => {
+for (const [i, buff] of ["score"].entries())
+  test("精英积分奖励" + buff + "广播及战报可序列化，30秒到期", () => {
     const { s, p, h, enemy } = arena();
     enemy.elite = true;
     enemy.hero = false;
     s.random = () => i / 4 + 0.01;
     s.damage(h, enemy, 1e9);
     assert.equal(h.eliteBuffs[buff], 30);
-    assert.match(s.battleEvents[0].text, /精英/);
+    assert.match(s.battleEvents[0].text, /特殊怪物/);
     assert.equal(s.battleEvents[0].buff, buff);
     assert.equal(s.battleEvents.length, 1);
     s.die(enemy, h);

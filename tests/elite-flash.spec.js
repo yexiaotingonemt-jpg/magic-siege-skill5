@@ -1,0 +1,61 @@
+import {test,expect} from '@playwright/test';
+import {mkdtempSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
+import {createGameServer} from '../server/index.mjs';
+import {createLocalClient} from '../client/launcher.mjs';
+import {Room} from '../server/room.mjs';
+import {defaults} from '../shared/config.js';
+import {createCurrentDesignConfig} from '../shared/current-design.js';
+
+for(const width of [1440,390])test(`特殊怪物与积分英雄闪光、继承及过期 / ${width}`,async({page})=>{
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  page.on('console',m=>{if(m.type()==='error'&&!(m.location().url.endsWith('/api/me')&&m.text().includes('401')))errors.push(m.text());});
+  const room=new Room(createCurrentDesignConfig(defaults),{mode:'off',defense:1,attack:3});room.paused=true;
+  const game=createGameServer({dataDir:mkdtempSync(path.join(tmpdir(),'elite-flash-')),room});
+  await new Promise(r=>game.server.listen(0,'127.0.0.1',r));
+  const local=createLocalClient({serverUrl:`http://127.0.0.1:${game.server.address().port}`,...(process.env.MAGIC_FLASH_DIST?{distDir:process.env.MAGIC_FLASH_DIST}:{})});
+  await new Promise(r=>local.server.listen(0,'127.0.0.1',r));
+  const account=await game.accounts.register({name:'闪光验证'+width,password:'flash-test-password',side:0});
+  const s=room.sim,p=room.player(account);s.units=[];s.contract(p,s.spawn(0,'melee',0,1).id);const h=s.hero(p);
+  const elite=Object.assign(s.spawn(1,'melee',0,1),{elite:true,x:h.x+4,y:h.y+2});
+  const flashReport=()=>page.evaluate(()=>window.__game?.renderer.game.scene.getScenes(true)[0]?.eliteFlash?.report||[]);
+  const broadcast=()=>{room.sequence++;room.broadcast();};
+  try {
+    await page.setViewportSize({width,height:width===390?844:1100});
+    await page.goto(`http://127.0.0.1:${local.server.address().port}`);await expect(page).toHaveTitle(/魔法王座/);
+    await page.locator('#accountName').fill(account.name);await page.locator('#accountPassword').fill('flash-test-password');await page.locator('#authSubmit').click();
+    await page.waitForFunction(()=>window.__game?.renderer.getCamera());await page.locator('#locate').click();
+    await page.waitForFunction(()=>!window.__game.renderer.game.scene.getScenes(true)[0].cameras.main.panEffect.isRunning);
+    await expect.poll(async()=> (await flashReport()).some(r=>r.unitId===elite.id)).toBe(true);
+    await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`flash-monster-${width}.png`)});
+    s.damage(h,elite,1e9);broadcast();
+    await expect(page.locator('#eliteBuffs')).toContainText('积分 +20% 30s');
+    const buffBox=await page.locator('#eliteBuffs').boundingBox(),hpBox=await page.locator('#hpLabel').boundingBox();
+    expect(buffBox.y).toBeGreaterThanOrEqual(hpBox.y+hpBox.height);
+    await expect.poll(async()=> (await flashReport()).some(r=>r.unitId===h.id&&!r.elite)).toBe(true);
+    const statuses=()=>page.evaluate(()=>window.__game.renderer.game.scene.getScenes(true)[0].statusIcons.report);
+    await expect.poll(async()=> (await statuses()).some(r=>r.id==='elite-score')).toBe(true);
+    const status=(await statuses()).find(r=>r.id==='elite-score');
+    const canvas=page.locator('#battle canvas'),box=await canvas.boundingBox(),camera=await page.evaluate(()=>window.__game.renderer.getCamera());
+    await page.mouse.click(box.x+(status.x+status.size/2)*box.width/500,box.y+(status.y+status.size/2-camera.scrollY)*box.height/500);
+    await expect.poll(()=>page.evaluate(()=>window.__game.renderer.game.scene.getScenes(true)[0].children.getByName('unit-status-tooltip').text)).toContain('下次传递22.5秒');
+    await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`flash-hero-${width}.png`)});
+    await page.reload();await expect(page.locator('#eliteBuffs')).toContainText('积分 +20% 30s');
+    await page.waitForFunction(()=>window.__game?.renderer.getCamera());
+    const enemyPlayer=s.makePlayer(1,false);s.contract(enemyPlayer,s.spawn(1,'melee',0,1).id);const next=s.hero(enemyPlayer);next.x=h.x;next.y=h.y+1;
+    s.time=29.9;s.damage(next,h,1e9);broadcast();
+    await expect(page.locator('#eliteBroadcast')).toContainText('22.5秒');
+    await expect.poll(async()=> (await flashReport()).some(r=>r.unitId===next.id)).toBe(true);
+    s.time=next.eliteBuffs.score;broadcast();
+    await expect.poll(async()=> (await flashReport()).length).toBe(0);
+    await expect.poll(async()=> (await statuses()).some(r=>r.id==='elite-score')).toBe(false);
+    await expect(page.locator('vite-error-overlay')).toHaveCount(0);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    expect(errors).toEqual([]);
+  } finally {
+    await page.close();for(const c of room.clients)c.res.end();
+    local.server.closeAllConnections();game.server.closeAllConnections();
+    await Promise.all([new Promise(r=>local.server.close(r)),new Promise(r=>game.server.close(r))]);
+  }
+});
