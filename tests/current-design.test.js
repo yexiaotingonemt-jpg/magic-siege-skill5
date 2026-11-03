@@ -5,7 +5,7 @@ import {Simulation} from '../shared/simulation.js';
 import {createCurrentDesignConfig,currentSkill,currentTraits,currentValues,inverseQualityWeights} from '../shared/current-design.js';
 import {prepareChoice,traitRank} from '../shared/traits.js';
 import {describeAbilities} from '../client/src/ability-descriptions.js';
-import {contributionRanking} from '../client/src/contribution-ranking.js';
+import {contributionRanking,formatRankingNumber} from '../client/src/contribution-ranking.js';
 import {Room} from '../server/room.mjs';
 import {refreshCurrentStats} from '../shared/current-design-mechanics.js';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
@@ -150,7 +150,7 @@ test('品质先抽统一权重，再选可用词条，满档品质退出可选�
 test('积分与KDA读同版配置，客户端显示服务端KDA及真实技能说明',()=>{
   const {s,p,h}=arena(3);s.stat(h,'heroDamage',1000);s.stat(h,'minionKillHealth',4000);
   const c=s.config.design.scoreCoefficients[3],B=5000*c.a,stats=s.contribution(p);near(stats.kda,B/21);
-  near(stats.totalPoints,300+B);assert.ok(contributionRanking([{...p,...stats}],p.id).includes(stats.kda.toFixed(2)));
+  near(stats.totalPoints,300+B);assert.ok(contributionRanking([{...p,...stats}],p.id).includes(formatRankingNumber(stats.kda)));
   const guide=describeAbilities(s);assert.equal(guide.skills[1].name,'尖刺外壳');assert.ok(guide.skills.every(s=>s.learned));
   s.config.design.skills[3][1].thorn=2;assert.ok(describeAbilities(s).skills[1].summary.includes('200%'));
 });

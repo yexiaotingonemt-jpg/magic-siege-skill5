@@ -4,7 +4,7 @@ export function mountGameLayout(){
  const resize=()=>{
   const availableWidth=document.documentElement.clientWidth,availableHeight=document.documentElement.clientHeight;
   const desktop=availableWidth>=1040,tablet=availableWidth>=700;
-  const padding=desktop?48:tablet?32:0,sideWidth=desktop?652:tablet?248:0;
+  const padding=desktop?48:tablet?32:0,sideWidth=desktop?712:tablet?288:0;
   const width=Math.max(280,Math.min(640,availableWidth-sideWidth,(availableHeight-padding)*640/1136));
   const scale=width/640;viewport.style.width=width+'px';viewport.style.height=1136*scale+'px';
   game.style.transform=`scale(${scale})`;document.documentElement.style.setProperty('--game-scale',scale);

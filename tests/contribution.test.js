@@ -26,5 +26,5 @@ test('SSE快照输出实时贡献和实际体力，不依赖客户端推算',()=
 });
 test('排行榜按贡献稳定排序，过滤退役并转义名字，零消耗显示横线',()=>{
  const html=contributionRanking([{id:1,name:'<甲>',classId:0,side:0,totalPoints:20,score:0,staminaSpent:4},{id:2,name:'乙',classId:4,side:0,totalPoints:10,score:9999,staminaSpent:0},{id:3,name:'退役',retired:true,classId:0,totalPoints:100}],1);
- assert.ok(html.indexOf('&lt;甲&gt;')<html.indexOf('乙'));assert.ok(!html.includes('退役'));assert.ok(html.includes('5.00'));assert.ok(html.includes('—'));assert.ok(html.includes('rank-self'));
+ assert.ok(html.indexOf('&lt;甲&gt;')<html.indexOf('乙'));assert.ok(!html.includes('退役'));assert.ok(html.includes('>5</td>'));assert.ok(html.includes('—'));assert.ok(html.includes('rank-self'));
 });

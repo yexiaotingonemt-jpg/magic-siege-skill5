@@ -14,7 +14,7 @@
 .contribution-ranking tbody th{font-weight:400}
 .contribution-ranking th span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .contribution-ranking small{display:block;color:var(--ui-muted);font-size:14px;font-weight:400}
-.contribution-ranking td{color:var(--ui-gold)}
+.contribution-ranking td{color:var(--ui-gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .contribution-ranking th span{display:flex;align-items:baseline;gap:.2em}
 .contribution-ranking .ranking-player{display:inline-block;min-width:0;max-width:100%;min-height:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:inherit;font:inherit;line-height:inherit;text-align:left;text-decoration:underline;text-decoration-color:#c6b47799;text-underline-offset:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
 .contribution-ranking .ranking-player:hover{color:var(--ui-gold);background:none}
@@ -41,21 +41,21 @@
 #contractHistoryMore,#contractHistoryRetry,#contractHistoryBack{width:100%;margin:8px 0;font-size:20px}
 .contribution-ranking .rank-self{background:#365a3d70}
 .battle-ranking .contribution-ranking{font-size:13px}
-.battle-ranking th,.battle-ranking td{padding:8px 6px}
-.battle-ranking .contribution-ranking th:first-child{width:52%}
+.battle-ranking th,.battle-ranking td{padding:8px 10px}
+.battle-ranking .contribution-ranking th:first-child{width:50%}
 .battle-ranking .contribution-ranking small{font-size:11px}
 .battle-ranking .contribution-ranking thead th{font-size:11px;white-space:nowrap}
 .game .ranking-rule{font-size:17px;line-height:1.7;color:var(--ui-muted)}
 
 /* Center the complete ranking / battlefield / tools composition. */
-.layout{display:grid;grid-template-columns:240px auto 340px;align-items:start;justify-content:center;gap:20px;width:fit-content;max-width:none;margin:0 auto;padding:24px 16px}
+.layout{display:grid;grid-template-columns:300px auto 340px;align-items:start;justify-content:center;gap:20px;width:fit-content;max-width:none;margin:0 auto;padding:24px 16px}
 .layout>.dev-tools{min-width:0;width:100%}
 @media(min-width:700px) and (max-width:1039px){
- .layout{grid-template-columns:200px auto;gap:16px;padding:16px}
+ .layout{grid-template-columns:240px auto;gap:16px;padding:16px}
  .layout>.dev-tools{grid-column:1/-1;padding:0;max-width:none}
  .battle-ranking{top:16px}
  .battle-ranking .contribution-ranking{font-size:12px}
- .battle-ranking th,.battle-ranking td{padding:8px 4px}
+ .battle-ranking th,.battle-ranking td{padding:8px 6px}
 }
 @media(max-width:699px){
  .layout{grid-template-columns:minmax(0,1fr);gap:16px;padding:0;width:100%;max-width:640px}
