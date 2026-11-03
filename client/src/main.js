@@ -1,7 +1,6 @@
 import {isCurrentDesign,currentValues} from '../../shared/current-design.js';
 import './npc-settings.css';
 import {npcSettingsHTML,createNpcSettings} from './npc-settings.js';
-import {isCurrentDesign,currentValues} from '../../shared/current-design.js';
 import {canRecordPerformance} from '../../shared/performance-permission.js';
 import {createPerformanceMonitor} from './performance-monitor.js';
 import './style.css';

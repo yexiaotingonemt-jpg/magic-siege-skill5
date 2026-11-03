@@ -82,9 +82,9 @@ test('精灵群疗立即及每秒三次，过量盾最高15%，停止吟唱取�
  p.cd[3]=0;friend.hp=1;cast(s,p,3);const hp=friend.hp;s.interrupt(h);advance(s,2.1);near(friend.hp,hp);
 });
 function shell(s,h,i){const skill=currentSkill(s,h,i);skill.value={attack:s.attackPower(h),spent:0,parts:{},skill:i,ranks:skill.ranks,currentSkill:{...skill}};return skill;}
-test('战车冰霜额外攻速按人数均分，持续严格5秒，敌方减速保留8秒',()=>{
+test('战车冰霜额外攻速200%按人数均分，持续10秒，敌方减速保留8秒',()=>{
  const {s,p,h,enemy,make}=arena(2);affix(s,p,55);make(3,1,3);const sk=shell(s,h,1);impactCurrentSkill.call(s,{source:h,payload:sk,tx:enemy.x,ty:enemy.y,targetId:enemy.id});
- near(s.attackRate(h),1.5);near(s.attackSlowRatio(enemy),.15*.9/2);s.time+=5.01;near(s.attackRate(h),1);assert.ok(s.attackSlowRatio(enemy)>0);
+ near(s.attackRate(h),2);near(s.attackSlowRatio(enemy),.15*.9/2);s.time+=8.01;near(s.attackRate(h),2);near(s.attackSlowRatio(enemy),0);s.time+=2;near(s.attackRate(h),1);
 });
 test('战车落点爆炸仍均分总池，多目标不得复制合计伤害',()=>{
  const {s,p,h,enemy,make}=arena(2);affix(s,p,59);const b=make(3,.5,3).h,A=s.attackPower(h);const sk=shell(s,h,2);impactCurrentSkill.call(s,{source:h,payload:sk,tx:enemy.x,ty:enemy.y,targetId:enemy.id});

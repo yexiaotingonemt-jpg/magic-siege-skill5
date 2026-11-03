@@ -189,7 +189,7 @@ export function describeCurrentSkill(s,rules={}) {
     `净化${s.range}格内${T}名友军，每移除1个负面恢复${pct(s.heal_per_cleanse)}攻击力的生命。`,
     `自身和${T}名友军每次恢复${pct(s.heal)}攻击力生命，共${s.pulses}次，持续吟唱${D}秒。`],
     2:[`命中最多${T}人，分担前伤害为目标生命${pct(s.hp_ratio)}，上限${pct(s.cap)}自身攻击。`,
-    `命中最多${T}人，分担前${P}攻击伤害、降低${pct(s.attack_slow)}攻速${D}秒。${s.self_haste?`自身攻击速度提高${pct(s.self_haste)}除以命中人数，持续${s.self_haste_duration??s.duration}秒。`:''}`,
+    `命中最多${T}人，分担前${P}攻击伤害、降低${pct(s.attack_slow)}攻速${D}秒。`,
     `命中最多${T}人，分担前${P}攻击伤害、击退${s.knock}格。`,
     `固定落点半径${s.radius}格内炮击${s.shots}次，间隔${s.gap}秒，每炮${P}攻击伤害并使移速降低${pct(s.slow_per)}，最多${s.slow_cap}层。`],
     3:[`震荡最多${T}名敌人，各受${P}攻击伤害、降攻${pct(s.attack_down)}，持续${D}秒。`,
