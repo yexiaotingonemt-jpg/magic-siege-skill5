@@ -140,6 +140,7 @@ export function currentContributionParts(config,h) {
     ['damageTaken',s.damageTaken||0,c.b],['healing',s.healing||0,c.c],
     ['minionKillHealth',s.minionKillHealth||0,c.a],['heroKills',s.heroKills||0,r.heroKillPoints],
     ['heroAssists',s.heroAssists||0,r.heroAssistPoints],['staminaSpent',s.staminaSpent||0,r.staminaPoints],
+    ['eliteScoreBonus',s.eliteScoreBonus||0,1],['eliteScoreBounty',s.eliteScoreBounty||0,1],
   ].map(([key,value,coefficient]) => ({key,value,coefficient,points:value*coefficient}));
 }
 const f=n=>String(Number(Number(n).toPrecision(3))), pct=n=>f(n*100)+'%';

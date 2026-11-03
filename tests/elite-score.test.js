@@ -25,7 +25,7 @@ for(const [mode,config] of [['经典',defaults],['当前稿',createCurrentDesign
       // Kill immediately before expiry: the next generation still gets its full duration.
       s.time=carrier.eliteBuffs.score-.01;
       const p=s.players[next.playerId],before=p.totalPoints;
-      const pointsFor=(key,n)=>config.design?currentStatPoints(config,next.classId,key,n):statPoints(next.classId,key,n);
+      const pointsFor=(key,n)=>config.design?currentStatPoints(config,next.classId,key,n):statPoints(next.classId,key,n,config);
       const ordinaryKillPoints=pointsFor('heroDamage',carrier.hp)+pointsFor('heroKills',1);
       kill(next,carrier);
       if(generation<4){near(next.eliteBuffs.score-s.time,30*(4-generation)/4);assert.equal(next.eliteScore.generation,generation);}
@@ -72,7 +72,7 @@ for(const [mode,config] of [['经典',defaults],['当前稿',createCurrentDesign
     const {s,hero,kill}=arena(config),victim=hero(0),h=hero(1);
     grantEliteScore(s,victim,10,3);grantEliteScore(s,h);
     const p=s.players[h.playerId],before=p.totalPoints;
-    const pointsFor=(key,n)=>config.design?currentStatPoints(config,h.classId,key,n):statPoints(h.classId,key,n);
+    const pointsFor=(key,n)=>config.design?currentStatPoints(config,h.classId,key,n):statPoints(h.classId,key,n,config);
     const ordinary=pointsFor('heroDamage',victim.hp)+pointsFor('heroKills',1);
     const summon=Object.assign(s.spawn(1,'melee',0,1),{summoned:true,ownerId:h.id});
     kill(summon,victim);near(p.totalPoints-before,ordinary*1.2+200);
