@@ -1,5 +1,6 @@
 import path from 'node:path';
 import {gzipSync} from 'node:zlib';
+import {createEgressBudget} from './egress.mjs';
 import {fileURLToPath} from 'node:url';
 import {Accounts} from './accounts.mjs';
 import {Room} from './room.mjs';
@@ -14,10 +15,11 @@ import {createEventStream,acceptsGzip} from './event-stream.mjs';
 import {SERVER_VERSION,CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION,RULESET_REVISION,UPDATE_REQUIRED_CODE} from '../shared/protocol.js';
 const base=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 export function createGameRuntime({dataDir=process.env.KC_DATA_DIR||path.join(base,'data'),gameVersion=GAME_VERSION,clientVersion=CLIENT_VERSION,sseGzip=process.env.MAGIC_SSE_GZIP!=='0',accounts=new Accounts(dataDir),room=new Room(),limits=new Map()}={}){
+ const egress=createEgressBudget();
  const json=(res,status,value,headers={})=>{
   const text=JSON.stringify(value),compressed=text.length>=1024&&acceptsGzip(res.req?.headers['accept-encoding']);
   res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','Vary':'Accept-Encoding',...(compressed?{'Content-Encoding':'gzip'}:{}),...headers});
-  res.end(compressed?gzipSync(text,{level:1}):text);
+  egress.end(res,compressed?gzipSync(text,{level:1}):text);
  };
  const body=async req=>{let raw='';for await(const chunk of req){raw+=chunk;if(raw.length>131072)throw Error('请求过大');}return JSON.parse(raw||'{}');};
  const handler=async(req,res)=>{
@@ -44,7 +46,7 @@ export function createGameRuntime({dataDir=process.env.KC_DATA_DIR||path.join(ba
     }
     const a=accounts.get(req);if(!a)return json(res,401,{error:'请先登录账号'});
     if(url.pathname==='/api/me')return json(res,200,{account:accounts.public(a),playerId:room.player(a).id});
-    if(url.pathname==='/api/events'){const stream=createEventStream(req,res,{gzip:sseGzip});stream.write(': connected\n\n');room.connect(a,stream,{delta:url.searchParams.get('delta')==='1'});return;}
+    if(url.pathname==='/api/events'){const stream=createEventStream(req,res,{gzip:sseGzip,egress});stream.write(': connected\n\n');room.connect(a,stream,{delta:url.searchParams.get('delta')==='1'});return;}
     if(url.pathname==='/api/state')return json(res,200,{...room.snapshot(),playerId:room.player(a).id});
     if(url.pathname==='/api/contract-history'&&req.method==='GET'){
      const id=url.searchParams.get('playerId');if(!/^\d{1,10}$/.test(id||''))return json(res,400,{error:'请选择有效玩家'});
