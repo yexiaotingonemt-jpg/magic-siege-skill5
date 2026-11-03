@@ -27,7 +27,7 @@ for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`�
   for(const p of [page,other]){
    await expect(p.locator('#score')).toHaveText('0.0');
    await p.waitForFunction(()=>__game.sim.players.every(p=>p.totalPoints===0&&p.staminaSpent===0));
-   for(const cell of await p.locator('#battleRanking tbody td:nth-child(2)').all())await expect(cell).toHaveText('0.0');
+   for(const cell of await p.locator('#battleRanking tbody td:nth-child(2)').all())await expect(cell).toHaveText('0');
    await p.locator('[data-nav="ranking"]').click();await expect(p.locator('#ranking')).toBeVisible();await expect(p.locator('#ranking')).toContainText('离线排行');await p.locator('#sheetClose').click();
   }
   expect(player.stamina).toBe(prior.stamina);expect(player.heroId).toBe(prior.heroId);expect(room.matchId).toBe(prior.matchId);expect(room.paused).toBe(true);
