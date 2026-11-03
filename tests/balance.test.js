@@ -54,7 +54,7 @@ test('战车最大生命百分比技能实际命中塔也经过护塔减伤',()=
 test('英雄等级成长减半，升级保留生命比例，重新契约继承新属性',()=>{
  const {s}=arena(),p=s.makePlayer(0,false);p.classId=0;
  const h=s.spawn(0,'melee',0,1,0);assert.ok(s.contract(p,h.id));h.hp=h.maxHp*.4;
- for(let i=1;i<30;i++)s.addXp(p,s.expNeeded(p)-p.xp);
+ while(p.level<30)s.addXp(p,s.expNeeded(p)-p.xp);
  near(h.maxHp,16000*1.58);near(h.attack,200*1.435);near(h.hp/h.maxHp,.4);
  h.hp=0;const next=s.spawn(0,'melee',0,1,0);assert.ok(s.contract(p,next.id));
  near(next.maxHp,h.maxHp);near(next.attack,h.attack);

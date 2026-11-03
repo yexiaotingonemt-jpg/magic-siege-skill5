@@ -38,8 +38,8 @@ test('五职业20技能0级可用，实际体力及经验按施法累计',()=>{
     if(id===5&&i===2)s.debuff(friend,enemy,'attackDown',.2,20);
     const old=p.stamina,skill=currentSkill(s,h,i);
     assert.ok(s.cast(i,p),`${id}:${i} ${s.notice}`);advance(s,skill.castTime+Math.max(1,skill.duration||0)+.2);
-    near(old-p.stamina,skill.cost);assert.equal(p.level,Math.floor(skill.cost/3));
-    assert.ok(p.progress[id].choices.length===Math.floor(skill.cost/3));
+    near(old-p.stamina,skill.cost);assert.equal(p.level,Math.floor((3+skill.cost)/5));near(p.xp,((3+skill.cost)%5)*100);
+    assert.ok(p.progress[id].choices.length===Math.floor((3+skill.cost)/5));
   }
 });
 test('词条各档相对基础，不逐档复利；修改基础配置后沿用增量',()=>{
@@ -137,7 +137,7 @@ test('当前负面可被净化，免疫会阻止标记和持续腐蚀',()=>{
   assert.ok(s.cast(1,p));advance(s,.3);assert.equal(enemy.soulMarks.length,0);
 });
 test('品质先抽统一权重，再选可用词条，满档品质退出可选池',()=>{
-  const {s,p}=arena(0),progress=p.progress[0];s.addXp(p,120);
+  const {s,p}=arena(0),progress=p.progress[0];s.addXp(p,30000);
   assert.equal(p.level,40);assert.equal(progress.choices.length,40);
   while(progress.choices.length){const choice=prepareChoice(s,p);assert.ok(choice.options.length);assert.ok(s.chooseTrait(choice.options[0],choice.level,p));}
   assert.equal(Object.values(progress.traits).reduce((a,b)=>a+b,0),40);

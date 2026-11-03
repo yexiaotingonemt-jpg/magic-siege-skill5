@@ -13,7 +13,7 @@ import {navigate} from '../shared/navigation.js';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
 function arena(id=5){
  const s=new Simulation();s.units=[];s.players[0].retired=true;s.waveAt=s.populationAt=1e9;for(const t of s.towers){t.x=100;t.cd=1e9;}
- const make=(classId,x=0,y=0)=>{const p=s.makePlayer(classId===3?1:0,false);p.classId=classId;p.level=6;p.builds[classId]=[1,1,1,1];p.stamina=100;const h=s.spawn(p.side,contractType(classId),0,1,x);assert.ok(s.contract(p,h.id));Object.assign(h,{x,y,hp:1e6,maxHp:1e7,speed:0,cd:1e9});return {p,h};};
+ const make=(classId,x=0,y=0)=>{const p=s.makePlayer(classId===3?1:0,false);p.classId=classId;p.level=6;p.builds[classId]=[1,1,1,1];p.stamina=100;const h=s.spawn(p.side,contractType(classId),0,1,x);assert.ok(s.contract(p,h.id));p.xp=0;Object.assign(h,{x,y,hp:1e6,maxHp:1e7,speed:0,cd:1e9});return {p,h};};
  const {p,h}=make(id);s.localPlayerId=p.id;
  const troop=(x,y,side=h.side)=>{const u=s.spawn(side,'melee',0,1,x);Object.assign(u,{x,y,hp:1e6,maxHp:1e7,speed:0,cd:1e9});return u;};
  return {s,p,h,make,troop};

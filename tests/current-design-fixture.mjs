@@ -7,7 +7,7 @@ export function arena(id=0,config=createCurrentDesignConfig(defaults)) {
  const s=new Simulation(config,123);s.units=[];s.player.retired=true;s.waveAt=1e9;
  for(const t of s.towers){t.x=100;t.cd=1e9;}
  const make=(id,x=0,y=0)=>{const p=s.makePlayer(id===3?1:0,false);p.classId=id;p.stamina=10000;
-  const h=s.spawn(p.side,contractType(id),0,1,x);assert.ok(s.contract(p,h.id));Object.assign(h,{x,y,cd:1e9,speed:0});return {p,h};};
+  const h=s.spawn(p.side,contractType(id),0,1,x);assert.ok(s.contract(p,h.id));p.xp=0;Object.assign(h,{x,y,cd:1e9,speed:0});return {p,h};};
  const {p,h}=make(id),enemy=make(id===3?0:3,0,3).h,friend=make(id===3?3:0,1,0).h;
  enemy.hp=enemy.maxHp=1e7;friend.hp=friend.maxHp/2;
  h.targetId=enemy.id;friend.targetId=enemy.id;enemy.targetId=h.id;s.localPlayerId=p.id;
