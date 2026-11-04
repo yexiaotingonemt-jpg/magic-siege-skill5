@@ -403,7 +403,7 @@ export const currentTraitEffects={
     const ult=a.currentUlt;
     if (ult?.until>this.time&&!reflected&&!basic&&!a.summoned&&a.hp>0&&ult.s.lifesteal) this.heal(a,sum*ult.s.lifesteal,a,ult.s.value,true);
     if (basic && !reflected) {
-      for (const mark of [...(t.soulMarks||[])]) if (mark.current&&mark.until>this.time&&t.hp>0) {
+      for (const mark of [...(t.soulMarks||[])]) if (mark.current&&mark.ownerId===a.id&&mark.until>this.time&&t.hp>0) {
         const owner=this.get(mark.ownerId);if (!owner) continue;
         hurt(this,owner,mark.s,t,mark.s.per_hit,1,{derived:true});if (this.random()<mark.s.heat_chance) this.addHeat(owner,1);
       }

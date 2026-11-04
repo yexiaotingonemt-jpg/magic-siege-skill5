@@ -182,7 +182,7 @@ export function describeCurrentSkill(s,rules={}) {
     `自身及附近${T}名友军减伤${pct(s.reduction)}，持续${D}秒。`,
     `与友军换位，按其缺失生命比例×${pct(s.reduction_per_lost)}获得减伤，最高${pct(s.reduction_cap)}，持续${D}秒。`,
     `记录${D}秒内实际承伤，结束按${f(s.store_gain)}倍转成${s.shield_duration}秒护盾。`],
-    4:[`造成${P}攻击伤害，获得1层炙热。`, `标记${D}秒，每次攻击命中附加${pct(s.per_hit)}攻击伤害，有${pct(s.heat_chance)}概率获得炙热。`,
+    4:[`造成${P}攻击伤害，获得1层炙热。`, `标记${D}秒，自身每次普攻命中被标记敌人时附加${pct(s.per_hit)}攻击伤害，有${pct(s.heat_chance)}概率获得炙热。`,
     `最多${T}名敌人各受${P}攻击伤害；每击杀1名获得${s.kill_heat}层炙热。`,
     `消耗全部炙热，造成${P}攻击伤害，每层使本次伤害提高${pct(s.heat_damage)}，最多${T}名目标。`],
     5:[`恢复${pct(s.heal)}攻击力的生命，并按有效治疗触发职业转伤。`, `链接${T}名友军${D}秒，共享${pct(s.share)}有效治疗。`,
