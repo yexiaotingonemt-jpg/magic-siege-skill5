@@ -100,5 +100,6 @@ function update(){if(!ready||!sim?.player)return;const hudStart=performanceMonit
  performanceMonitor?.stage('hud',performance.now()-hudStart);
  $('#configReadout').textContent='可契约职业：'+[...availableClasses(0),...availableClasses(1)].map(id=>classes[id]).join('、');
 }
-function frame(){selection?.position();requestAnimationFrame(frame);}requestAnimationFrame(frame);
+let lastSkillTimingAt=0;
+function frame(at){selection?.position();if(ready&&at-lastSkillTimingAt>=50){skillHud?.updateTiming(sim);lastSkillTimingAt=at;}requestAnimationFrame(frame);}requestAnimationFrame(frame);
 try{await checkServerVersion();const me=await request('/api/me');account=me.account;await boot();}catch(error){if(isUpdateRequired(error))showUpdateRequired(error);else login(error.message==='请先登录账号'?'':error.message);}
