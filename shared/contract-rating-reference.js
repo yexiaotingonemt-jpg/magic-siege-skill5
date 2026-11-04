@@ -1,8 +1,8 @@
 // One shared curve for every class. Equal-weight samples of all five classes,
 // current rules, 60 seconds, 18 casting stamina + 3 contract stamina.
 // Reproduction and scope: docs/rules/12-ratings-and-scores.md.
-export const LEVEL_RATING_REVISION='equal-level-20261103';
-export const LEVEL_RATING_CONFIG_SHA256='0707d129141f3f0da5754ecea284a4f27e35ad0a7a803be450832404d8eee24a';
+export const LEVEL_RATING_REVISION='equal-level-owner-check-20261104';
+export const LEVEL_RATING_CONFIG_SHA256='321ce9f48180a01ef6e239dba7ea16295e5eb06086da5f5979f2d4d6ef519d09';
 export const LEVEL_KDA_REFERENCE=Object.freeze([
   {level:0,kda:139.20219856503257},
   {level:5,kda:166.10222021700102},

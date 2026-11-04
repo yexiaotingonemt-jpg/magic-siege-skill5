@@ -31,10 +31,27 @@ test('火法弹射严格为主伤35%，技能击杀爆炸只结算一次',()=>{
  cast(s,p,0,enemy);near(old[0]-enemy.hp,A*3.2);near(old[1]-b.hp,A*3.2*.35);near(old[2]-c.hp,A*3.2*.35);
  const f=arena(4);affix(f.s,f.p,19);const next=f.make(3,1,3).h;f.enemy.hp=1;const hp=next.hp;cast(f.s,f.p,0,f.enemy);near(hp-next.hp,f.s.attackPower(f.h)*1.92);
 });
-test('火法无炙热也可标记，友军普攻触发附伤获热，目标死亡不沿用旧版返三层',()=>{
+test('火法无炙热也可标记，仅施法者普攻触发附伤获热，目标死亡不返三层',()=>{
  const {s,p,h,enemy,friend}=arena(4);h.heat=0;affix(s,p,22);const hp=enemy.hp,A=s.attackPower(h);cast(s,p,1,enemy);near(enemy.hp,hp);near(h.heat,0);
- s.damage(friend,enemy,100,true);near(hp-enemy.hp,100+A);near(h.heat,1);
- enemy.hp=1;s.damage(friend,enemy,100,true);near(h.heat,1);
+ s.damage(friend,enemy,100,true);near(hp-enemy.hp,100);near(h.heat,0);
+ s.damage(h,enemy,100);near(hp-enemy.hp,200);near(h.heat,0);
+ s.damage(h,enemy,100,true);near(hp-enemy.hp,300+A);near(h.heat,1);
+ enemy.hp=1;s.damage(h,enemy,100,true);near(h.heat,1);
+});
+
+test('同一目标的多个焚魂标记只响应各自施法者普攻，到期不再触发',()=>{
+ const {s,p,h,enemy,make}=arena(4),other=make(4,1,0);h.heat=other.h.heat=0;
+ affix(s,p,22);affix(s,other.p,22);cast(s,p,1,enemy);cast(s,other.p,1,enemy);
+ let hp=enemy.hp;s.damage(h,enemy,100,true);near(hp-enemy.hp,100+s.attackPower(h));near(h.heat,1);near(other.h.heat,0);
+ hp=enemy.hp;s.damage(other.h,enemy,100,true);near(hp-enemy.hp,100+s.attackPower(other.h));near(h.heat,1);near(other.h.heat,1);
+ advance(s,5.1);hp=enemy.hp;s.damage(h,enemy,100,true);near(hp-enemy.hp,100);near(h.heat,1);
+});
+
+test('焚魂标记自身普攻基础获热概率保持30%',()=>{
+ for(const [roll,heat] of [[.299,1],[.3,0]]){
+  const {s,p,h,enemy}=arena(4);h.heat=0;cast(s,p,1,enemy);s.random=()=>roll;
+  const hp=enemy.hp;s.damage(h,enemy,100,true);near(hp-enemy.hp,100+s.attackPower(h));near(h.heat,heat);
+ }
 });
 test('火球零层炙热即命中三人，各288%，直接击杀每人返一层',()=>{
  const {s,p,h,enemy,make}=arena(4);const b=make(3,1,3).h,c=make(3,-1,3).h;h.heat=0;const A=s.attackPower(h),old=[enemy.hp,b.hp,c.hp];
