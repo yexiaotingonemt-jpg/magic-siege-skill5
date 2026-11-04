@@ -1,14 +1,14 @@
 {
-  "version": "0.7.21",
-  "serverVersion": "0.7.21",
+  "version": "0.7.22",
+  "serverVersion": "0.7.22",
   "gameVersion": "0.7.0",
   "protocolVersion": 3,
   "files": {
-    "client/prebuilt/assets/index-C-stjUb3.css": "8c238a356a9a8af890dbe22363420e90cd934b89b180761b76da8906129bd580",
-    "client/prebuilt/assets/index-DoLmUk1Z.js": "fb6cb8b21818448e3bbdea18667cd7969c6771f3cf6192b76966b6555b663520",
+    "client/prebuilt/assets/index-4LERcO_i.css": "d425dd38e8e9f935cbef63ee07ebaf179187304e9e263315b476a0b3462f17da",
+    "client/prebuilt/assets/index-BHA7OnEp.js": "0cecb50e9192ccc26fe1c3005e1b35f6e25b4e40f065c27bb7700e0eff411967",
     "client/prebuilt/assets/phaser-DFK5Ua9d.js": "f9025c1a29bc3ae097dd886ce07717b297466da1ce8f032c8294252ce6cf5cdb",
-    "client/prebuilt/client-version.json": "a69790acb22d114cbb6b06bc1225154f30071d488cfdfb92cc0a90547fce1a69",
-    "client/prebuilt/index.html": "3fd883be00766c41f66182f394b4c325307dbbb0818e885b65d7dca9684db370",
+    "client/prebuilt/client-version.json": "cdd8f4186e646f9f23851fb0e5f7c866763b90162c533956836d112763209368",
+    "client/prebuilt/index.html": "72f10e93abd7f2ecc5220b3463243de9164ce210d92eb25d8e0261b8262aa6e2",
     "client/desktop/assets/magic-throne.ico": "89421e37f5316235335323773072230a353bffa115ff2d21827b8b1486b1b921",
     "client/desktop/assets/magic-throne.svg": "05364641cdcc968fd02dd591fc3dc10a160528ed0aeebef16ef154b649e12e1e",
     "client/desktop/config.mjs": "af3a2c715c7ea9d1af042edd7f12e4dc04cbcca1579801499c5ed02b4b4a27ef",
@@ -19,7 +19,7 @@
     "魔法王座.exe": "1142a1c9b7ad159691d7fbb5c25c4ecd6b9ff6fb1ccbd4f4d6d01d5bf944c179",
     "client/launcher.mjs": "c2923024bfbf7051368f9ef51a6c608c01dfe3b0f219cbbd2f62033bf28e38b9",
     "client/client-config.json": "6b27adca4af8dbc3bd561c1af85471d8561026bd3c449b26a3d60d6f071937c5",
-    "shared/protocol.js": "cd6f1048dc80f5e2dc3d801dcd46610a93bcfcab541f0d5014baeaf71438ea5a"
+    "shared/protocol.js": "27ec6cf945ed2e5d7f134d02ab0987252f8ad28bfa1571b00f93580492c0e2a5"
   },
   "runtime": {
     "version": "45.1.0-win32-x64",
