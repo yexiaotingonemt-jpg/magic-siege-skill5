@@ -9,7 +9,18 @@ const actorSnapshot=u=>u?{id:u.id,side:u.side,classId:u.classId,type:u.type,towe
 export class Room{
  constructor(config=liveConfig(),npcPolicy=DEFAULT_NPC_POLICY){this.config=clone(config);this.sim=new Simulation(this.config);this.sim.player.retired=true;this.sim.player.name='战场';this.players=new Map();this.clients=new Set();this.sequence=0;this.configVersion=0;this.matchId=crypto.randomUUID();this.paused=false;this.speed=1;this.stageEnd=this.config.world.stageDuration;this.stageNumber=1;this.stageResetAt=0;this.stageWins=[0,0];this.stageReports=[];this.commandHistory=new Map();this.last=performance.now();this.acc=0;this.broadcastAt=0;this.online=new Map();this.sim.npcPolicy=validateNpcPolicy(npcPolicy);balanceNpcHeroes(this.sim);}
  player(account){let p=this.players.get(account.id);if(!p){p=this.sim.makePlayer(account.side,false);p.name=account.name;p.classId=availableClasses(account.side,this.config)[0];p.accountId=account.id;this.players.set(account.id,p);}p.retired=false;return p;}
- step(){const now=performance.now(),delta=Math.min(1,(now-this.last)/1000);this.last=now;if(this.clients.size&&!this.paused){this.acc+=delta*this.speed;while(this.acc>=.05){this.sim.tick(.05);this.acc-=.05;this.sequence++;this.checkStage();}}if(this.clients.size&&this.paused&&now-this.broadcastAt>=2000){this.heartbeat();this.broadcastAt=now;}else if(!this.paused&&this.clients.size&&now-this.broadcastAt>=200){this.broadcast();this.broadcastAt=now;}}
+ step(){
+  const now=performance.now(),delta=Math.max(0,(now-this.last)/1000);this.last=now;
+  if(this.clients.size&&!this.paused){
+   this.acc+=delta*this.speed;
+   // 卡顿时间不能丢弃；每轮最多追赶20步，余量留到后续轮次，给请求和SSE让出执行机会。
+   for(let steps=0;steps<20&&this.acc>=.05-1e-9;steps++){
+    this.sim.tick(.05);this.acc=Math.max(0,this.acc-.05);this.sequence++;this.checkStage();
+   }
+  }
+  if(this.clients.size&&this.paused&&now-this.broadcastAt>=2000){this.heartbeat();this.broadcastAt=now;}
+  else if(!this.paused&&this.clients.size&&now-this.broadcastAt>=200){this.broadcast();this.broadcastAt=now;}
+ }
  checkStage(){const broken=this.sim.metrics.resets>this.stageResetAt||this.sim.layer>=this.config.world.stageRequiredLayers;if(!broken&&this.sim.time<this.stageEnd)return;const winner=broken?0:1;this.stageWins[winner]++;this.stageReports.unshift({stage:this.stageNumber,winner,time:this.sim.time,reward:0});this.stageReports.length=Math.min(30,this.stageReports.length);this.stageNumber++;this.stageEnd=this.sim.time+this.config.world.stageDuration;this.sim.resetMap();this.stageResetAt=this.sim.metrics.resets;}
  snapshot(includeConfig=true){const s=this.sim;const metrics={...s.metrics};delete metrics.lifetimes;const snapshot={matchId:this.matchId,sequence:this.sequence,paused:this.paused,speed:this.speed,stage:{number:this.stageNumber,end:this.stageEnd,wins:this.stageWins,reports:this.stageReports},time:s.time,seed:s.seed,nextId:s.nextId,units:s.units.map(u=>u.shieldSource?{...u,shieldSource:actorSnapshot(u.shieldSource)}:u),towers:s.towers.map(u=>u.shieldSource?{...u,shieldSource:actorSnapshot(u.shieldSource)}:u),projectiles:s.projectiles.map(b=>({...b,source:actorSnapshot(b.source)})),fields:s.fields.map(f=>({...f,owner:actorSnapshot(f.owner)})),effects:s.effects,animations:s.animations,visualId:s.visualId,players:s.players.map(p=>({...p,...s.contribution(p),...(p.lastContractResult?{lastContractResult:latestContractResult(s,p)}:{}),online:(this.online.get(p.accountId)||0)>0})),metrics,battleEvents:s.battleEvents,logs:s.logs,reports:s.reports.slice(0,15),layer:s.layer,waveAt:s.waveAt,configVersion:this.configVersion,npcBalance:npcBalanceStatus(s)};if(includeConfig)snapshot.config=s.config;return clientSnapshot(snapshot,s.time);}
  broadcast(only=null){
