@@ -19,7 +19,7 @@ export function recordContractReport(sim,hero,report){
  rows.push(report);store.set(hero.playerId,rows);
 }
 function summary(sim,report,number,current=false){
- const parts=report.parts.map(p=>({...p})),evaluation=contractEvaluation(sim.config,parts),modern=!!sim.config.design?.enabled;
+ const parts=report.parts.map(p=>({...p})),evaluation=contractEvaluation(sim.config,parts,{level:report.level}),modern=!!sim.config.design?.enabled;
  return {id:report.contractId,number,numberKnown:!sim.contractHistoryPartial,classId:report.classId,level:report.level??null,start:report.contractAt??null,end:current?null:report.time,duration:report.contractAt==null?null:Math.max(0,report.time-report.contractAt),reason:current?'进行中':report.reason,current,...evaluation,rating:current?null:evaluation.rating,kdaMode:modern?'battle':'legacy',parts};
 }
 export function contractHistoryPage(sim,player,{before=null,limit=20}={}){
