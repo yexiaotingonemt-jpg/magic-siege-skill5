@@ -1,5 +1,6 @@
 import { CURRENT_DESIGN } from './current-design-data.js';
 import { validateExperienceRules } from './experience.js';
+import { RARITIES, UPGRADE_POOLS } from './upgrade-quality.js';
 
 export const isCurrentDesign = config => config?.design?.enabled === true;
 export const designHeroIds = [0, 4, 5, 2, 3];
@@ -69,7 +70,7 @@ export function validateCurrentDesign(d) {
   if (!Array.isArray(d.affixes)) throw Error('新版词条配置不完整');
   for (const a of d.affixes) {
     if (seen.has(a.id) || !designHeroIds.includes(a.classId) || !/^N\d{3}_[02345]$/.test(a.id) ||
-        Number(a.id.split('_')[1]) !== a.classId || !['blue','purple','gold'].includes(a.rarity) ||
+        Number(a.id.split('_')[1]) !== a.classId || !Object.hasOwn(RARITIES,a.rarity) ||
         !Number.isInteger(a.max) || a.max < 1 || a.max > 40 || a.values?.length !== a.max ||
         !Array.isArray(a.keys) || !a.keys.length || a.baseline?.length !== a.keys.length ||
         a.keys.some(k => ['__proto__','constructor','prototype'].includes(k)) ||
@@ -84,11 +85,17 @@ export function validateCurrentDesign(d) {
   }
   for (const id of designHeroIds) if (d.affixes.filter(a => a.classId === id).reduce((n,a) => n+a.max,0) < 40)
     throw Error('新版词条不足40次合法升级');
-  if (!['blue','purple','gold'].every(k => positive(d.qualityWeights?.[k]))) throw Error('品质权重必须大于0');
+  if (!Object.keys(RARITIES).every(k => positive(d.qualityWeights?.[k]))) throw Error('品质权重必须大于0');
+  for (const id of designHeroIds) for (const [type, qualities] of Object.entries(UPGRADE_POOLS)) {
+    const needed = type === 'advanced' ? Math.floor(d.rules.maxLevel/5) : d.rules.maxLevel-Math.floor(d.rules.maxLevel/5);
+    if (d.affixes.filter(t => t.classId===id && qualities.includes(t.rarity)).reduce((n,t)=>n+t.max,0)<needed)
+      throw Error('升级池词条档位不足：'+id+'/'+type);
+  }
   return d;
 }
 export function inverseQualityWeights(means) {
-  if (!['blue','purple','gold'].every(k => Number.isFinite(means[k]) && means[k] > 0)) throw Error('品质平均收益必须大于0');
+  if (!['blue','purple','gold'].every(k => Object.hasOwn(means,k)) ||
+    !Object.entries(means).every(([k,v])=>Object.hasOwn(RARITIES,k)&&Number.isFinite(v)&&v>0)) throw Error('品质平均收益必须大于0');
   return Object.fromEntries(Object.entries(means).map(([key,value]) => [key,1/value]));
 }
 export function currentTraits(config, classId) {
@@ -122,9 +129,21 @@ export function currentTraitRank(p,id) {
   const classId = Number(id.split('_')[1]);
   return p?.progress?.[classId]?.traits?.[id] || 0;
 }
-export function drawCurrentQuality(sim, progress, classId) {
-  const pool = currentTraits(sim.config,classId).filter(t => (progress.traits[t.id] || 0) < t.max);
-  const qualities = ['blue','purple','gold'].filter(q => pool.some(t => t.rarity === q));
+export function currentUpgradeCandidates(sim, progress, classId, upgradeType, level) {
+  const all=currentTraits(sim.config,classId).filter(t=>(progress.traits?.[t.id]||0)<t.max);
+  const other=upgradeType==='normal'?'advanced':'normal', max=sim.config.world.maxLevel;
+  const futureAdvanced=Math.floor(max/5)-Math.floor(level/5);
+  const needed=other==='advanced'?futureAdvanced:max-level-futureAdvanced;
+  const otherStock=all.filter(t=>UPGRADE_POOLS[other].includes(t.rarity)).reduce((n,t)=>n+t.max-(progress.traits?.[t.id]||0),0);
+  // Purple is shared. Do not spend the last ranks required by future upgrades
+  // of the other type; gold never enters the normal pool as a fallback.
+  return all.filter(t=>UPGRADE_POOLS[upgradeType].includes(t.rarity) &&
+    !(t.rarity==='purple' && needed>0 && otherStock<=needed));
+}
+export function drawCurrentQuality(sim, progress, classId, upgradeType = 'normal', excluded = []) {
+  const level=progress.choices?.[0]?.level??progress.level;
+  const pool = currentUpgradeCandidates(sim,progress,classId,upgradeType,level).filter(t=>!excluded.includes(t.id));
+  const qualities = UPGRADE_POOLS[upgradeType].filter(q => pool.some(t => t.rarity === q));
   const total = qualities.reduce((sum,q) => sum+sim.config.design.qualityWeights[q],0);
   let n = sim.random()*total;
   return qualities.find(q => (n-=sim.config.design.qualityWeights[q]) < 0) || qualities.at(-1);
@@ -164,7 +183,6 @@ export function describeAffix(t,design=null) {
     const replace=(token,values,ratio)=>{const rendered=values.map(v=>f(ratio?v*100:v));text=text.replace(token,token.endsWith('个百分点')?rendered.join('/')+'个百分点':ratio?rendered.map(v=>v+'%').join('/'):rendered.join('/'));};
     if(boolean.has(t.keys[0]))return text;
     if(t.sourceId===51){replace(percents[0],[t.values[0][0]],true);replace(percents[1],t.values.map(v=>v[1]),true);}
-    else if(t.sourceId===52){replace(percents[0],t.values.map(v=>v[0]-t.baseline[0]),true);replace(percents[1],t.values.map(v=>v[1]-t.baseline[1]),true);}
     else if(t.sourceId===67){replace(percents[0],[t.values[0][0]],true);replace(numbers[1],[t.values[0][1]],false);}
     else if(t.sourceId===77)text=text.replace(/最多同时存在\d+名/,`最多同时存在${t.values[0][0]}名`);
     else if(t.sourceId===88||t.sourceId===91){replace(percents[1],[t.values[0][0]/100],true);replace(percents.at(-1),[t.values[0][0]],true);}
@@ -183,17 +201,17 @@ export function describeCurrentSkill(s,rules={}) {
     `自身及附近${T}名友军减伤${pct(s.reduction)}，持续${D}秒。`,
     `与友军换位，按其缺失生命比例×${pct(s.reduction_per_lost)}获得减伤，最高${pct(s.reduction_cap)}，持续${D}秒。`,
     `记录${D}秒内实际承伤，结束按${f(s.store_gain)}倍转成${s.shield_duration}秒护盾。`],
-    4:[`造成${P}攻击伤害，获得1层炙热。`, `标记${D}秒，每次攻击命中附加${pct(s.per_hit)}攻击伤害，有${pct(s.heat_chance)}概率获得炙热。`,
+    4:[`造成${P}攻击伤害，获得1层炙热。`, `标记${D}秒，自身每次普攻命中被标记敌人时附加${pct(s.per_hit)}攻击伤害，有${pct(s.heat_chance)}概率获得炙热。`,
     `最多${T}名敌人各受${P}攻击伤害；每击杀1名获得${s.kill_heat}层炙热。`,
     `消耗全部炙热，造成${P}攻击伤害，每层使本次伤害提高${pct(s.heat_damage)}，最多${T}名目标。`],
     5:[`恢复${pct(s.heal)}攻击力的生命，并按有效治疗触发职业转伤。`, `链接${T}名友军${D}秒，共享${pct(s.share)}有效治疗。`,
     `净化${s.range}格内${T}名友军，每移除1个负面恢复${pct(s.heal_per_cleanse)}攻击力的生命。`,
     `自身和${T}名友军每次恢复${pct(s.heal)}攻击力生命，共${s.pulses}次，持续吟唱${D}秒。`],
-    2:[`命中最多${T}人，分担前伤害为目标生命${pct(s.hp_ratio)}，上限${pct(s.cap)}自身攻击。`,
+    2:[`命中最多${T}人，分担前伤害为主目标最大生命${pct(s.hp_ratio)}。`,
     `命中最多${T}人，分担前${P}攻击伤害、降低${pct(s.attack_slow)}攻速${D}秒。`,
     `命中最多${T}人，分担前${P}攻击伤害、击退${s.knock}格。`,
     `固定落点半径${s.radius}格内炮击${s.shots}次，间隔${s.gap}秒，每炮${P}攻击伤害并使移速降低${pct(s.slow_per)}，最多${s.slow_cap}层。`],
-    3:[`震荡${s.unlimited_targets?'命中前方范围内所有敌人，无数量上限':`最多${T}名敌人`}，各受${P}攻击伤害、降攻${pct(s.attack_down)}，持续${D}秒。`,
+    3:[`震荡命中前方${f(s.range)}格扇形范围内最多${T}名敌人，各受${P}攻击伤害、降攻${pct(s.attack_down)}，持续${D}秒。`,
     `尖刺外壳${D}秒，受到普通攻击或技能攻击时向攻击者反弹其攻击力${pct(s.thorn)}的伤害。`,
     `向目标冲锋，晕眩${s.stun}秒，沿途最多${T}人各受${P}攻击伤害。`,
     `君临${D}秒，${s.damage_immune?'免疫任何伤害及负面效果':'免疫负面'}；普攻对主目标周围最多${T}名敌人造成${P}攻击伤害。`]}[s.classId]?.[s.skill] || '';

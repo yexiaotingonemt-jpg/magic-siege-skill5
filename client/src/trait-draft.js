@@ -1,5 +1,6 @@
 import {isCurrentDesign,currentTraits} from '../../shared/current-design.js';
 import { RARITIES, TRAIT_BY_ID, traitRank } from "../../shared/traits.js";
+import { UPGRADE_POOLS, upgradeTypeAt } from '../../shared/upgrade-quality.js';
 import { names } from "../../shared/config.js";
 import { HERO_ART, ART_ROOT, heroPortrait, skillArtIndex } from "./art-catalog.js";
 import { describeAbilities } from "./ability-descriptions.js";
@@ -33,6 +34,7 @@ export function createTraitDraft(getSim, send) {
   }
 
   badge.onclick = () => {
+    if (badge.disabled) return;
     priorFocus = document.activeElement;
     openedClass = getSim().player.classId;
     panel.hidden = false;
@@ -44,7 +46,7 @@ export function createTraitDraft(getSim, send) {
   async function select(id) {
     const sim = getSim(),
       choice = sim.player.progress[sim.player.classId].choices?.[0];
-    if (!choice || busy || submittedKey === key || detailId) return;
+    if (!choice || sim.hero() || choice.available === false || busy || submittedKey === key || detailId) return;
     const attemptKey = key;
     busy = true;
     render();
@@ -144,29 +146,37 @@ export function createTraitDraft(getSim, send) {
       choice = progress?.choices?.[0],
       total = progress?.choices?.length || 0;
     badge.hidden = !choice;
+    const lockedByContract = !!sim?.hero() || choice?.available === false;
+    badge.disabled = lockedByContract;
+    badge.querySelector('.trait-pending-label').textContent = lockedByContract ? '阵亡后强化' : '技能强化';
+    badge.title = lockedByContract ? '次数已累计，本次阵亡后、下次契约前可选择强化' : '可连续选择累计的强化次数';
     count.textContent = String(total);
-    badge.setAttribute("aria-label", "技能强化，当前可选择 " + total + " 次");
-    if (!choice || (!panel.hidden && openedClass !== p.classId)) {
+    badge.setAttribute("aria-label", lockedByContract ? "已累计强化 " + total + " 次，阵亡后可选择" : "技能强化，当前可选择 " + total + " 次");
+    if (!choice || lockedByContract || (!panel.hidden && openedClass !== p.classId)) {
       hide();
       submittedKey = "";
       return;
     }
     // Receiving an upgrade or reconnecting only updates the badge. Opening is manual.
     if (panel.hidden) return;
-    const next = p.classId + ":" + choice.level + ":" + choice.options?.join(",");
+    const current = isCurrentDesign(sim.config),
+      upgradeType = choice.upgradeType || upgradeTypeAt(choice.level);
+    const next = p.classId + ":" + choice.level + ":" + upgradeType + ":" + choice.options?.map(id=>id+':'+traitById(id)?.rarity).join(",");
     if (submittedKey && submittedKey !== next) submittedKey = "";
     if (next !== key) {
       key = next;
       detailId = null;
-      const rarity = RARITIES[choice.rarity];
+      const rarity = current ? RARITIES[upgradeType === 'advanced' ? 'gold' : 'white'] : RARITIES[choice.rarity];
       panel.setAttribute("aria-labelledby", "draftTitle");
       panel.style.setProperty("--trait-color", rarity.color);
       panel.innerHTML =
         '<section class="draft-panel"><div class="draft-heading"><span>英雄成长 · Lv.' +
         choice.level +
         '</span><button type="button" data-defer aria-label="稍后选择强化">稍后选择 ×</button></div><h2 id="draftTitle">' +
-        rarity.name +
-        '技能强化</h2><p class="draft-intro">选择一项，形成你的战斗构筑 · 待选 ' +
+        (current ? (upgradeType === 'advanced' ? '高级升级' : '普通升级') : rarity.name + '技能强化') +
+        '</h2>' +
+        (current ? '<p class="draft-pool">抽取范围：' + UPGRADE_POOLS[upgradeType].map(q=>'<span style="--trait-color:'+RARITIES[q].color+'">'+RARITIES[q].name+'</span>').join(' · ') + '</p>' : '') +
+        '<p class="draft-intro">选择一项，形成你的战斗构筑 · 待选 ' +
         total +
         ' 次</p><div class="draft-cards">' +
         // Candidates are shuffled when drawn. A stable sort keeps that random
@@ -182,15 +192,15 @@ export function createTraitDraft(getSim, send) {
                 ? "background-image:url('" + heroPortrait(p.classId) + "');background-size:cover;background-position:center 18%"
                 : "background-image:url('" + ART_ROOT + "/skill-icons.webp');background-size:400% 500%;background-position:" + (skillArtIndex(p.classId,t.skill) / 3) * 100 + "% " + (art.row / 4) * 100 + "%";
             return (
-              '<article class="trait-card"><div class="trait-card-heading"><span class="trait-category">' +
+              '<article class="trait-card" data-rarity="' + t.rarity + '" style="--trait-color:' + RARITIES[t.rarity].color + '"><div class="trait-card-heading"><span class="trait-category">' +
               (t.skill == null
                 ? '<span class="trait-skill-number">职业强化</span><span class="trait-skill-name">通用强化</span>'
                 : '<span class="trait-skill-number">技能' + (t.skill + 1) + '：</span><span class="trait-skill-name">' + sim.configSkillName(p.classId,t.skill) + '</span>') +
-              '</span><button type="button" class="trait-info" data-trait-info="' +
+              '</span><span class="trait-quality">' + RARITIES[t.rarity].name + '品质</span><button type="button" class="trait-info" data-trait-info="' +
               id +
               '" aria-label="查看' + skillName + '的效果和已选强化">!</button></div><button type="button" class="trait-select" data-trait="' +
               id +
-              '" aria-label="选择强化：' + t.name + '"><span class="trait-symbol has-icon" style="' +
+              '" aria-label="选择强化：' + t.name + '，' + RARITIES[t.rarity].name + '品质"><span class="trait-symbol has-icon" style="' +
               icon +
               '" aria-hidden="true"></span><strong>' +
               t.name +
@@ -208,7 +218,7 @@ export function createTraitDraft(getSim, send) {
           .join("") +
         '</div><p class="draft-note">' +
         (choice.options.length < 3 ? "剩余可选 " + choice.options.length + " 项。" : "") +
-        '强化随职业保留，阵亡不会丢失。战场仍在继续。</p><p data-draft-error role="alert"></p></section>' +
+        '次数可累积，强化随职业保留；重新契约后须等本次阵亡才能继续选择。</p><p data-draft-error role="alert"></p></section>' +
         '<section class="draft-skill-view" hidden><div class="draft-heading"><span>技能详情</span><button type="button" data-detail-back>返回强化选择 ×</button></div><h2 id="draftSkillTitle"></h2><div data-skill-detail-body></div></section>';
       panel.querySelector("[data-defer]").onclick = hide;
       panel.querySelector("[data-detail-back]").onclick = closeDetails;

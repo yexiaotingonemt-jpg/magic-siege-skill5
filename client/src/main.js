@@ -95,9 +95,11 @@ function update(){if(!ready||!sim?.player)return;const hudStart=performanceMonit
  $('#onlinePlayers').innerHTML=active.filter(p=>!p.bot).map(p=>`<div class="online-player"><i class="${p.online?'online':''}"></i><span>${esc(p.name)}</span><small>${p.side?'防守':'进攻'} · ${classes[p.classId]}</small></div>`).join('');
  $('#roomInfo').innerHTML=`<p>同局 ${sim.matchId.slice(0,8)} · 已同步 ${active.filter(p=>p.online).length} 人</p><p>阶段 ${sim.stage.number} · <span class="countdown">${Math.max(0,sim.stage.end-sim.time).toFixed(0)}秒</span> · 胜场 攻${sim.stage.wins[0]} / 守${sim.stage.wins[1]}</p>`;
  const units=sim.units.filter(u=>u.hp>0);$('#stats').textContent=`战斗${sim.time.toFixed(1)}秒 · 进攻${units.filter(u=>u.side===0).length}单位 / 防守${units.filter(u=>u.side===1).length}单位`;
+ const result=p.lastContractResult,summary=$('#contractResult');summary.hidden=!!h||result?.reason!=='阵亡';if(!summary.hidden)summary.textContent=`本次阵亡 · ${classes[result.classId]} · KDA ${Number.isFinite(result.kda)?result.kda.toFixed(2):'—'} · ${result.rating?.referenceKda?`Lv.${result.rating.level} · ${result.rating.grade} ${result.rating.label} · 同级达成 ${(result.rating.ratio*100).toFixed(0)}%`:'暂无等级评价'}`;
  $('#feed').innerHTML=sim.logs.slice(0,4).map(t=>`<p>${esc(t)}</p>`).join('');const rankingHTML=contributionRanking(active,p.id);renderContributionRanking($('#ranking'),rankingHTML);renderContributionRanking($('#battleRanking'),rankingHTML);contractHistory?.update();const rule=contributionRankingRule(sim.config);if($('.ranking-rule').innerHTML!==rule)$('.ranking-rule').innerHTML=rule;
  performanceMonitor?.stage('hud',performance.now()-hudStart);
  $('#configReadout').textContent='可契约职业：'+[...availableClasses(0),...availableClasses(1)].map(id=>classes[id]).join('、');
 }
-function frame(){selection?.position();requestAnimationFrame(frame);}requestAnimationFrame(frame);
+let lastSkillTimingAt=0;
+function frame(at){selection?.position();if(ready&&at-lastSkillTimingAt>=50){skillHud?.updateTiming(sim);lastSkillTimingAt=at;}requestAnimationFrame(frame);}requestAnimationFrame(frame);
 try{await checkServerVersion();const me=await request('/api/me');account=me.account;await boot();}catch(error){if(isUpdateRequired(error))showUpdateRequired(error);else login(error.message==='请先登录账号'?'':error.message);}

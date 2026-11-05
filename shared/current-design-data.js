@@ -1,5 +1,6 @@
 // 钉钉当前技能与词条，2026-11-02逐项核对；平衡状态独立记录。
 import { LEVEL_UP_STAMINA } from './experience.js';
+import { AFFIX_QUALITY_OVERRIDES } from './upgrade-quality.js';
 export const CURRENT_DESIGN = {
   "enabled": true,
   "revision": "dingtalk-20261102-fire-path-150",
@@ -96,7 +97,7 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "焚魂标记",
-        "description": "标记1名敌人，持续5秒。攻击命中被标记敌人时，附加相当于攻击力100%的伤害，并有30%的概率获得1层炙热。",
+        "description": "标记1名敌人，持续5秒。自身普攻命中被标记敌人时，附加相当于攻击力100%的伤害，并有30%的概率获得1层炙热。",
         "cost": 1,
         "cd": 10.0,
         "cast": 0.25,
@@ -164,7 +165,7 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "共生链接",
-        "description": "与1名友军建立共生链接，持续6秒。链接期间，彼此共享所受有效治疗的42%。",
+        "description": "与1名友军建立共生链接，持续8秒。链接期间，彼此共享所受有效治疗的42%；任一方每次受到有效治疗，链接剩余时间延长3秒，最多8秒，共享治疗不重复续时。",
         "cost": 1,
         "cd": 10.0,
         "cast": 0.25,
@@ -172,7 +173,8 @@ export const CURRENT_DESIGN = {
         "radius": 3.0,
         "targets": 1,
         "power": 0.0,
-        "duration": 6.0,
+        "duration": 8.0,
+        "heal_extension": 3,
         "share": 0.42,
         "reduction": 0.0,
         "haste": 0,
@@ -219,7 +221,7 @@ export const CURRENT_DESIGN = {
     "2": [
       {
         "name": "腐蚀炮弹",
-        "description": "向当前目标投掷腐蚀炮弹，命中其周围最多6名敌人。未分担时造成目标最大生命6%的伤害，最多为自身攻击力的200%。",
+        "description": "向当前目标投掷腐蚀炮弹，命中其周围最多6名敌人。分担前伤害为主目标最大生命的6%。",
         "cost": 1,
         "cd": 6.0,
         "cast": 0.25,
@@ -229,7 +231,6 @@ export const CURRENT_DESIGN = {
         "power": 0.0,
         "duration": 3.0,
         "hp_ratio": 0.06,
-        "cap": 2.0,
         "extra_chance": 0,
         "heal_down": 0,
         "debuff_duration": 5.0,
@@ -289,14 +290,13 @@ export const CURRENT_DESIGN = {
     "3": [
       {
         "name": "裂地震荡",
-        "description": "向前释放震荡波，命中前方范围内所有敌人，无数量上限，各造成相当于攻击力380%的伤害，并使攻击力降低16%，持续2秒。",
+        "description": "向前释放震荡波，命中前方8格扇形范围内最多5名敌人，各造成相当于攻击力380%的伤害，并使攻击力降低16%，持续2秒。",
         "cost": 1,
         "cd": 6.0,
         "cast": 0.25,
-        "range": 10.0,
+        "range": 8.0,
         "radius": 7.0,
-        "targets": 3,
-        "unlimited_targets": true,
+        "targets": 5,
         "power": 3.8,
         "duration": 2.0,
         "attack_down": 0.16,
@@ -1737,31 +1737,26 @@ export const CURRENT_DESIGN = {
       "classId": 2,
       "skill": 0,
       "name": "技能伤害提升",
-      "description": "腐蚀伤害增加目标最大生命的1%/2%/3%，单次伤害上限增加自身攻击力的50%/100%/150%（上限3档）。",
+      "description": "腐蚀伤害增加目标最大生命的1%/2%/3%（上限3档）。",
       "max": 3,
       "rarity": "blue",
       "common": false,
       "keys": [
-        "hp_ratio",
-        "cap"
+        "hp_ratio"
       ],
       "values": [
         [
-          0.06999999999999999,
-          2.5
+          0.06999999999999999
         ],
         [
-          0.08,
-          3.0
+          0.08
         ],
         [
-          0.09,
-          3.5
+          0.09
         ]
       ],
       "baseline": [
-        0.06,
-        2.0
+        0.06
       ]
     },
     {
@@ -2063,6 +2058,20 @@ export const CURRENT_DESIGN = {
       "baseline": [
         0
       ]
+    },
+    {
+      "id": "N105_3",
+      "sourceId": 105,
+      "classId": 3,
+      "skill": 0,
+      "name": "目标增加",
+      "description": "震荡波额外命中1/2名敌人（上限2档）。",
+      "max": 2,
+      "rarity": "purple",
+      "common": false,
+      "keys": ["targets"],
+      "values": [[6], [7]],
+      "baseline": [5]
     },
     {
       "id": "N066_3",
@@ -4049,6 +4058,8 @@ export const CURRENT_DESIGN = {
     }
   ],
   "qualityWeights": {
+    "white": 1,
+    "green": 1,
     "blue": 1,
     "purple": 1,
     "gold": 1
@@ -4128,3 +4139,7 @@ export const CURRENT_DESIGN = {
     }
   }
 };
+
+for (const affix of CURRENT_DESIGN.affixes) {
+  affix.rarity = AFFIX_QUALITY_OVERRIDES[affix.sourceId] ?? affix.rarity;
+}

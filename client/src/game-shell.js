@@ -17,6 +17,7 @@ export const gameShell=`
    <div class="battle-info"><b id="front"></b><span id="wave"></span><button id="locate" aria-label="定位英雄">${uiIcon('locate')} 定位</button></div>
    <div class="battle-wrap">
     <div id="battle"></div>
+    <div id="contractResult" class="contract-result" role="status" hidden></div>
     <button id="traitPending" class="trait-pending" type="button" aria-haspopup="dialog" aria-controls="traitDraft" aria-expanded="false" aria-label="技能强化，当前可选择 0 次" hidden><span class="trait-pending-icon" aria-hidden="true">${uiIcon('enhance')}</span><span class="trait-pending-label">技能强化</span><span class="trait-pending-count" data-trait-count aria-hidden="true">0</span></button>
     <div class="map-rail"><span id="mapTop">王城</span><div class="map-track"><i id="mapWindow"></i></div><span id="mapBottom">营地</span></div>
     <div class="map-jumps" aria-label="战场视角"><button id="viewDefense">王城</button><button id="viewFront">交锋</button><button id="viewCamp">营地</button></div>

@@ -13,7 +13,7 @@ const pass=(sim,h)=>currentValues(sim,h);
 const live=(sim,ids)=>ids.map(id=>sim.get(id)).filter(Boolean);
 const area=(sim,h,at,radius,limit,t=null)=>first(t,nearest(at,sim.enemies({...at,side:h.side},radius))).slice(0,limit);
 const emit=(sim,h,s,at,targets,kind='release')=>sim.visual(kind,h,at,{skill:s.skill,targets:targets.map(u=>({id:u.id,x:u.x,y:u.y})),haloTargets:targets.map(u=>({id:u.id})),until:sim.time+1});
-const hurt=(sim,h,s,t,power=s.power/100,scale=1,meta={})=>sim.damage(h,t,s.value.attack*power*scale*(1+(s.bonusDamage||0)),false,false,{value:s.value,area:!!s.unlimited_targets||(s.targets||1)>1,...meta});
+const hurt=(sim,h,s,t,power=s.power/100,scale=1,meta={})=>sim.damage(h,t,s.value.attack*power*scale*(1+(s.bonusDamage||0)),false,false,{value:s.value,area:(s.targets||1)>1,...meta});
 const knock=(sim,h,t,n)=>{
   if (!n || t.tower || t.immuneUntil>sim.time || t.hp<=0) return 0;
   const d=distance(h,t)||1, before={x:t.x,y:t.y};sim.interrupt(t);
@@ -54,7 +54,7 @@ export function selectCurrentSkill(h,i,s) {
   } else if (h.classId===5 && i===3) targets=[h,...this.allies(h,s.range).filter(u=>u.id!==h.id).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp||distance(h,a)-distance(h,b)).slice(0,s.targets)];
   else if (h.classId===3 && i===0) targets=first(t,nearest(h,this.enemies(h,s.range).filter(u=>{
     const len=distance(h,t)*distance(h,u);return !len || ((t.x-h.x)*(u.x-h.x)+(t.y-h.y)*(u.y-h.y))/len>=.35;
-  }))).slice(0,s.unlimited_targets?undefined:s.targets);
+  }))).slice(0,s.targets);
   else if (h.classId===4 && i===2) targets=first(t,nearest(h,this.enemies(h,s.range))).slice(0,s.targets);
   else if (h.classId===4 && i===3) targets=first(t,nearest(h,this.enemies(h,s.range))).slice(0,s.targets);
   else targets=[t];
@@ -209,7 +209,7 @@ function runeImpact(sim,h,s,at,multiplier=1,repeat=false,primaryId=null) {
   const targets=area(sim,h,at,s.radius,s.targets), n=targets.length;
   if (!n) return;
   const primary=targets.find(u=>u.id===primaryId)||targets[0];
-  const cannonPool=Math.min(primary.maxHp*s.hp_ratio,s.value.attack*s.cap);
+  const cannonPool=primary.maxHp*s.hp_ratio;
   const relief=currentValues(sim,h,null,s.value?.ranks).share_relief||0;
   const share=(n===1?1:Math.min(1,(rules(sim).shareTotals[Math.min(6,n)]||0)+relief))/n;
   emit(sim,h,s,at,targets,'impact');
@@ -339,7 +339,7 @@ export function refreshCurrentStats(sim,h) {
   h.attack=c.attack*(1+c.attackGrowth*level);h.range=c.range+(v.range_bonus||0);h.speed=c.speed*(1+(v.move_bonus||0));
   h.aggro=Math.max(sim.config.heroes[h.classId].aggro||c.range,h.range);
 }
-export function currentHeal(t,n,u,value=null,derived=false) {
+export function currentHeal(t,n,u,value=null,derived=false,linkShared=false) {
   if (!t||t.hp<=0||t.tower||!Number.isFinite(n)||n<=0) return 0;
   const r=rules(this),v=pass(this,t),heat=t.classId===4?Math.max(0,1-(t.heat||0)*r.heatHealPenalty):1;
   let down=Math.max(0,...this.activeDebuffs(t,'healingDown').map(d=>d.ratio));
@@ -348,13 +348,19 @@ export function currentHeal(t,n,u,value=null,derived=false) {
   t.hp+=actual;spend(value,actual,'治疗');this.stat(u,'healing',actual);
   if (actual>0) this.healthVisual('heal',u,t,{amount:actual});
   if (actual>0&&u?.hero) {recordEffectiveHeal(u,t,this.time);this.visual('healing',u,t,{skill:value?.skill??0,until:this.time+.55});}
-  if (!derived) {
+  if (!linkShared) {
     for (const f of [...this.fields]) if (actual>0&&f.kind==='link'&&f.until>this.time&&f.owner.hp>0) {
-      const host=this.get(f.host);if (!host||distance(f.owner,host)>f.breakRange) continue;
-      if (t.id===f.owner.id||t.id===host.id) this.heal(t.id===host.id?f.owner:host,actual*f.shareRatio,f.owner,f.value,true);
+      const host=this.get(f.host);if (!host||host.hp<=0||distance(f.owner,host)>f.breakRange) continue;
+      if (t.id===f.owner.id||t.id===host.id) {
+        const skill=this.config.design.skills[5][1];
+        f.until=Math.min(f.until+(skill.heal_extension||0),this.time+skill.duration);
+        for (const guard of host.guards||[]) if (guard.kind==='elfLink'&&guard.ownerId===f.owner.id) guard.until=f.until;
+        if (host.hastes?.elfLink) host.hastes.elfLink.until=f.until;
+        if (!derived) currentHeal.call(this,t.id===host.id?f.owner:host,actual*f.shareRatio,f.owner,f.value,true,true);
+      }
     }
-    this.afterHeal?.(u,t,actual,Math.max(0,wanted-actual),value);
   }
+  if (!derived) this.afterHeal?.(u,t,actual,Math.max(0,wanted-actual),value);
   return actual;
 }
 export function reflectCurrentShell(sim,a,t,reflected=false) {
@@ -403,7 +409,7 @@ export const currentTraitEffects={
     const ult=a.currentUlt;
     if (ult?.until>this.time&&!reflected&&!basic&&!a.summoned&&a.hp>0&&ult.s.lifesteal) this.heal(a,sum*ult.s.lifesteal,a,ult.s.value,true);
     if (basic && !reflected) {
-      for (const mark of [...(t.soulMarks||[])]) if (mark.current&&mark.until>this.time&&t.hp>0) {
+      for (const mark of [...(t.soulMarks||[])]) if (mark.current&&mark.ownerId===a.id&&mark.until>this.time&&t.hp>0) {
         const owner=this.get(mark.ownerId);if (!owner) continue;
         hurt(this,owner,mark.s,t,mark.s.per_hit,1,{derived:true});if (this.random()<mark.s.heat_chance) this.addHeat(owner,1);
       }
