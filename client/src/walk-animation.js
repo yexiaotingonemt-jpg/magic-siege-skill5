@@ -3,7 +3,7 @@ export const WALK_FRAMES=8;
 export const HERO_WALK_ART={
   0:{texture:'kc-orc-walk',file:'orc-walk.png'},
   2:{texture:'kc-chariot-walk',file:'chariot-walk.png'},
-  3:{texture:'kc-lord-walk',file:'lord-walk.png'},
+  3:{texture:'kc-lord-walk',file:'lord-walk-grounded.png'},
   4:{texture:'kc-mage-walk',file:'mage-walk.png'},
   5:{texture:'kc-elf-walk',file:'elf-walk.png'},
 };

@@ -54,3 +54,25 @@ test('每个英雄图集均为实际RGBA、64格，并在资源清单登记',()=
     assert.equal(png[25],6);assert.ok(manifest.heroWalk.files.includes(file));
   }
 });
+
+test('黑暗领主步态随实际路程推进：慢行不原地踏步，停步和冻结不续播',()=>{
+  const run=(distance,steps,pointScale=18)=>{
+    const u={id:7,hero:true,classId:3,x:0,y:0,hp:100,speed:4,side:0};
+    const s={time:1,matchId:'walk',player:{side:0},get:()=>null},model=createUnitMotionModel();
+    model.begin(s);model.pose(s,u,{x:0,y:0});let pose;
+    for(let i=1;i<=steps;i++){
+      s.time=1+i/steps;u.x=distance*i/steps;
+      pose=model.pose(s,u,{x:u.x*pointScale,y:0});
+    }
+    return {u,s,model,pose};
+  };
+  const slow=run(.6,60),fast=run(1.2,60),coarse=run(1.2,20);
+  assert.ok(Math.abs(fast.pose.phase-slow.pose.phase*2)<1e-8,'步频跟随实际移动距离');
+  assert.ok(Math.abs(fast.pose.phase-coarse.pose.phase)<1e-8,'不同渲染帧率走过相同距离时步态一致');
+  const phase=slow.pose.phase;
+  slow.s.time+=.1;
+  assert.equal(slow.model.pose(slow.s,slow.u,{x:10.8,y:0}).phase,phase,'停止后不继续踩空');
+  assert.equal(slow.model.pose(slow.s,slow.u,{x:10.8,y:0}).phase,phase,'重复渲染不推进');
+  slow.s.time+=.5;slow.u.x=20;
+  assert.equal(slow.model.pose(slow.s,slow.u,{x:360,y:0}).phase,phase,'瞬移不计为步行距离');
+});

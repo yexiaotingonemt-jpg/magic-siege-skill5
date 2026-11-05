@@ -67,7 +67,7 @@ test('五种契约英雄：双方视角的八向八帧、冻结、停步和战�
       const samples=[];
       for(let step=0;step<18;step++){
         s.time+=.065;
-        for(const u of heroes){u.x+=dx*.075;u.y-=dy*.075;}
+        for(const u of heroes){u.x+=dx*.16;u.y-=dy*.16;}
         await sync();
         const both=await reports();
         for(const [viewer,rows] of both.entries())for(const u of heroes){
@@ -81,6 +81,15 @@ test('五种契约英雄：双方视角的八向八帧、冻结、停步和战�
       }
     }
     for(const value of seen.values())expect([...value.frames].sort()).toEqual([0,1,2,3,4,5,6,7]);
+    const lord=heroes[2],phaseBefore=(await reports())[0].find(r=>r.unitId===lord.id).phase;
+    for(let step=0;step<10;step++){
+      s.time+=.05;lord.x+=.03;await sync();
+    }
+    const phaseAfter=(await reports())[0].find(r=>r.unitId===lord.id).phase;
+    expect(phaseAfter-phaseBefore).toBeCloseTo(.3/2.4*Math.PI*2,6);
+    const stopped=(await reports()).map(rows=>rows.find(r=>r.unitId===lord.id).artFrame);
+    s.time+=.1;await sync();
+    expect((await reports()).map(rows=>rows.find(r=>r.unitId===lord.id).artFrame)).toEqual(stopped);
     for(const [viewer,{page}] of actors.entries())await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`hero-walk-view-${viewer}.png`)});
     const frozen=await reports();await actors[0].page.waitForTimeout(220);
     expect(await reports()).toEqual(frozen);
@@ -98,12 +107,14 @@ test('五种契约英雄：双方视角的八向八帧、冻结、停步和战�
     // Exercise the real confirmation flow for each class against the server.
     for(const classId of [0,2,3,4,5]){
       s.time+=2;const a=actors[classId===3?1:0];a.p.heroId=null;a.p.stamina=100;
-      for(const u of heroes)u.hp=0;
+      for(const u of s.units)if(u.hero)u.hp=0;
       const u=s.spawn(a.p.side,contractType(classId),0,1,0);Object.assign(u,{x:0,y:0,speed:0,cd:1e9});
       await sync();await a.page.evaluate(id=>{__game.renderer.focusUnit(id);__game.selection.select(id);},u.id);
       await expect(a.page.locator('#contractPopover')).toBeVisible();
       if([4,5].includes(classId))await a.page.locator(`[data-contract-role="${classId}"]`).click();
-      await a.page.locator('#confirmContract').click();await a.page.waitForFunction(id=>__game.sim.hero()?.classId===id,classId);
+      // 等待实际确认处理器完成，避免上一轮异步 clear 清掉下一轮选择。
+      await a.page.locator('#confirmContract').evaluate(button=>button.onclick());
+      await expect.poll(()=>a.page.evaluate(()=>({classId:__game.sim.hero()?.classId,notice:__game.sim.notice})),{message:`契约职业 ${classId}`,timeout:5000}).toMatchObject({classId});
       expect(s.hero(a.p).classId).toBe(classId);
     }
     await actors[0].page.setViewportSize({width:390,height:844});
