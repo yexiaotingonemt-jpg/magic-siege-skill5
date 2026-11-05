@@ -11,6 +11,8 @@ const first=(t,units)=>t?[t,...units.filter(u=>u.id!==t.id)]:units;
 const rules=sim=>sim.config.design.rules;
 const pass=(sim,h)=>currentValues(sim,h);
 const live=(sim,ids)=>ids.map(id=>sim.get(id)).filter(Boolean);
+const elfLinkTargets=(sim,h,s)=>sim.allies(h,s.range).filter(u=>u.id!==h.id&&!u.tower)
+  .sort((a,b)=>a.hp-b.hp||distance(h,a)-distance(h,b)||a.id-b.id).slice(0,s.targets);
 const area=(sim,h,at,radius,limit,t=null)=>first(t,nearest(at,sim.enemies({...at,side:h.side},radius))).slice(0,limit);
 const emit=(sim,h,s,at,targets,kind='release')=>sim.visual(kind,h,at,{skill:s.skill,targets:targets.map(u=>({id:u.id,x:u.x,y:u.y})),haloTargets:targets.map(u=>({id:u.id})),until:sim.time+1});
 const hurt=(sim,h,s,t,power=s.power/100,scale=1,meta={})=>sim.damage(h,t,s.value.attack*power*scale*(1+(s.bonusDamage||0)),false,false,{value:s.value,area:(s.targets||1)>1,...meta});
@@ -21,6 +23,7 @@ const knock=(sim,h,t,n)=>{
   return distance(t,before);
 };
 function currentTarget(sim,h,i,s){
+  if(h.classId===5&&i===1)return elfLinkTargets(sim,h,s)[0]||null;
   const friendly=h.classId===5||h.classId===0&&i===2,side=friendly?h.side:1-h.side;
   const chosen=targetForSide(sim,h,side);
   if(chosen&&(!friendly||!chosen.tower&&!((h.classId===5&&i===1||h.classId===0&&i===2)&&chosen.id===h.id)))return chosen;
@@ -47,6 +50,7 @@ export function selectCurrentSkill(h,i,s) {
   if (!t) return {ok:false,code:'target',reason:'范围内没有有效目标'};
   if (h.classId===0 && i===0) targets=area(this,h,t,s.radius,s.targets,t);
   else if (h.classId===0 && i===1) targets=[h,...nearest(h,this.allies(h,s.radius).filter(u=>u.id!==h.id)).slice(0,s.targets)];
+  else if (h.classId===5 && i===1) targets=elfLinkTargets(this,h,s);
   else if (h.classId===5 && i===2) {
     const candidates=nearest(h,this.allies(h,s.range).filter(u=>this.hasNegative(u)));
     targets=first(candidates.find(u=>u.id===t.id),candidates).slice(0,s.targets);
@@ -147,8 +151,7 @@ export function resolveCurrentSkill(h,i,s,locked,ids=[],extra={}) {
       }
     }
     if (i===1 && t) {
-      this.fields=this.fields.filter(f=>!(f.kind==='link'&&f.owner.id===h.id));
-      for (const u of first(t,nearest(h,this.allies(h,s.range).filter(u=>u.id!==h.id))).slice(0,s.targets)) {
+      for (const u of targets.filter(u=>u.id!==h.id&&!u.tower&&distance(h,u)<=s.range)) {
         this.fields.push({kind:'link',owner:h,host:u.id,until:this.time+s.duration,breakRange:s.range,shareRatio:s.share,shareDamage:!!s.split,value:s.value});
         this.guard(u,h,'elfLink',s.reduction,s.duration);this.haste(u,'elfLink',s.haste,s.duration);
       }

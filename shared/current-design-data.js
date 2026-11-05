@@ -165,7 +165,7 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "共生链接",
-        "description": "与1名友军建立共生链接，持续8秒。链接期间，彼此共享所受有效治疗的42%；任一方每次受到有效治疗，链接剩余时间延长3秒，最多8秒，共享治疗不重复续时。",
+        "description": "链接范围内当前生命值最低的1名友军，每条持续8秒。再次施放保留已有链接，可重复链接同一友军，各条独立计时。链接双方共享所受有效治疗的42%；任一方每次受到有效治疗，对应链接剩余时间延长3秒，最多8秒，共享治疗不重复续时。",
         "cost": 1,
         "cd": 10.0,
         "cast": 0.25,
@@ -1381,8 +1381,8 @@ export const CURRENT_DESIGN = {
       "classId": 5,
       "skill": 1,
       "name": "链接目标增加",
-      "description": "共生链接额外连接1/2名友军（上限2档）。",
-      "max": 2,
+      "description": "每次施放共生链接额外连接1名友军，选择当前生命值最低的2名友军（上限1档）。",
+      "max": 1,
       "rarity": "blue",
       "common": false,
       "keys": [
@@ -1391,9 +1391,6 @@ export const CURRENT_DESIGN = {
       "values": [
         [
           2.0
-        ],
-        [
-          3.0
         ]
       ],
       "baseline": [

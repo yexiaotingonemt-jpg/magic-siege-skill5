@@ -1,15 +1,15 @@
 // One shared curve for every class. Equal-weight samples of all five classes,
 // current rules, 60 seconds, 18 casting stamina + 3 contract stamina.
 // Reproduction and scope: docs/rules/12-ratings-and-scores.md.
-export const LEVEL_RATING_REVISION='equal-level-stamina-double-20261105';
-export const LEVEL_RATING_CONFIG_SHA256='e2a97db6c16fee074458332e7effd10f4172c0188672cc129601bc99eaed42f9';
+export const LEVEL_RATING_REVISION='equal-level-elf-link-stacking-20261105';
+export const LEVEL_RATING_CONFIG_SHA256='211856b8725544da511c8231a1af7b8f123accbb77c7378cd5d0624c24739e1a';
 export const LEVEL_KDA_REFERENCE=Object.freeze([
-  {level:0,kda:139.83976673911258},
-  {level:5,kda:172.61401368774213},
-  {level:10,kda:193.18016052149082},
-  {level:20,kda:262.4479157067604},
-  {level:30,kda:366.5033754377846},
-  {level:40,kda:507.28016783917815},
+  {level:0,kda:138.88864044663256},
+  {level:5,kda:171.5510486814083},
+  {level:10,kda:191.84152413754194},
+  {level:20,kda:260.5725322990422},
+  {level:30,kda:360.0329717840447},
+  {level:40,kda:502.66397287809565},
 ]);
 
 export function levelKdaReference(level){
