@@ -7,6 +7,7 @@ import {Room} from '../server/room.mjs';
 import {near} from './current-design-fixture.mjs';
 import {visualEvent,skillLabel} from '../client/src/current-skill-visuals.js';
 import {unitMotionPose} from '../client/src/unit-motion.js';
+import {AFFIX_QUALITY_OVERRIDES} from '../shared/upgrade-quality.js';
 const source=JSON.parse(readFileSync(new URL('../docs/source/当前技能设计-20261102.json',import.meta.url),'utf8'));
 const clean=s=>s.replace(/\s+/g,'').replaceAll('个百分点','%');
 // 2026-11-03窗口分支的已确认调整；原始钉钉快照保持不变。
@@ -53,7 +54,7 @@ const groups=(text,percent=false)=>[...text.split('（')[0].matchAll(/\d+(?:\.\d
 for(const a of design.affixes)test(`${classes[a.classId]}词条${a.sourceId}：全部档位、上限、品质对应当前源表`,()=>{
  const original=a.sourceId===105?['黑暗领主','裂地震荡','目标增加','震荡波额外命中1/2名敌人（上限2档）。',2,'紫']:source.affixes.find(r=>r[2]===(a.sourceId===65?'目标增加':a.name)&&(a.common?r[1]==='通用词条':r[0]===classes[a.classId]&&r[1]===(a.skill==null?'职业被动':design.skills[a.classId][a.skill].name)));
  const row=original&&[...original];if(row&&windowAffixDescriptions[a.sourceId])row[3]=windowAffixDescriptions[a.sourceId];
- assert.ok(row,a.id);assert.equal(clean(a.description),clean(row[3]));assert.equal(a.max,Number(row[4]));assert.equal(a.rarity,{'蓝':'blue','紫':'purple','金':'gold'}[row[5]]);
+ assert.ok(row,a.id);assert.equal(clean(a.description),clean(row[3]));assert.equal(a.max,Number(row[4]));assert.equal(a.rarity,AFFIX_QUALITY_OVERRIDES[a.sourceId]??{'蓝':'blue','紫':'purple','金':'gold'}[row[5]]);
  const key=a.keys[0],id=a.sourceId,ps=groups(row[3],true),ns=groups(row[3]);let expected;
  if(id===51)expected=ps[1].map(n=>[.3,n/100]);
  else if(id===52)expected=ps[0].map(n=>[.06+n/100]);

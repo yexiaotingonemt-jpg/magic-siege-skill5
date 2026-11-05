@@ -1,5 +1,6 @@
 // 钉钉当前技能与词条，2026-11-02逐项核对；平衡状态独立记录。
 import { LEVEL_UP_STAMINA } from './experience.js';
+import { AFFIX_QUALITY_OVERRIDES } from './upgrade-quality.js';
 export const CURRENT_DESIGN = {
   "enabled": true,
   "revision": "dingtalk-20261102-fire-path-150",
@@ -4056,6 +4057,8 @@ export const CURRENT_DESIGN = {
     }
   ],
   "qualityWeights": {
+    "white": 1,
+    "green": 1,
     "blue": 1,
     "purple": 1,
     "gold": 1
@@ -4135,3 +4138,7 @@ export const CURRENT_DESIGN = {
     }
   }
 };
+
+for (const affix of CURRENT_DESIGN.affixes) {
+  affix.rarity = AFFIX_QUALITY_OVERRIDES[affix.sourceId] ?? affix.rarity;
+}

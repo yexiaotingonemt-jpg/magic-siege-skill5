@@ -57,6 +57,6 @@ test('保留战局快照立即按原结算等级更新旧评价，不修改玩�
  s.stat(h,'heroDamage',200*21/s.config.design.scoreCoefficients[p.classId].a);h.hp=0;s.die(h);
  p.lastContractResult.rating={grade:'S',label:'卓越'};const saved=structuredClone(p.lastContractResult),points=p.totalPoints;
  const snapshot=room.snapshot().players.find(row=>row.id===p.id).lastContractResult;
- assert.equal(snapshot.rating.grade,'D');assert.equal(snapshot.rating.level,40);assert.ok(snapshot.rating.referenceKda>600);
+ assert.equal(snapshot.rating.grade,'D');assert.equal(snapshot.rating.level,40);assert.equal(snapshot.rating.referenceKda,levelKdaReference(40));
  assert.deepEqual(p.lastContractResult,saved);assert.equal(p.totalPoints,points);
 });
