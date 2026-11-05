@@ -28,7 +28,7 @@ test('0.7.5经验热更保留战局、等级、词条、待选和体力，仅换
   assert.equal(candidate.runtime.room,room);assert.equal(room.matchId,matchId);assert.equal(p.progress,progress);
   assert.equal(p.level,8);assert.equal(p.xp,200);assert.equal(p.progress[4].xp,100);assert.equal(p.progress[5].xp,0);
   assert.equal(p.progress[0].choices,choices);assert.equal(p.progress[0].traits,traits);assert.equal(p.stamina,stamina);
-  assert.equal(room.sim.config.world.expPerStamina,100);assert.equal(room.sim.expNeeded(p),600);
+  assert.equal(room.sim.config.world.expPerStamina,100);assert.equal(room.sim.expNeeded(p),1200);
   const next=prepareGameRuntime(options,candidate.runtime);next.commit();
   assert.equal(p.xp,200);assert.equal(p.progress[4].xp,100);
   candidate.rollback();

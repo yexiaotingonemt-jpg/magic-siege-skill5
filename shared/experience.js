@@ -1,11 +1,11 @@
 // Index 0 is the cost of level 0 → 1. Costs are integer stamina amounts.
 export const LEVEL_UP_STAMINA = Object.freeze([
-  ...Array(7).fill(5),
-  ...Array(7).fill(6),
-  ...Array(6).fill(7),
-  ...Array(6).fill(8),
-  ...Array(7).fill(9),
   ...Array(7).fill(10),
+  ...Array(7).fill(12),
+  ...Array(6).fill(14),
+  ...Array(6).fill(16),
+  ...Array(7).fill(18),
+  ...Array(7).fill(20),
 ]);
 
 export function validateExperienceRules(rules) {

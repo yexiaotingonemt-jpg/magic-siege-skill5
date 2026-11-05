@@ -83,7 +83,7 @@ test("145类词条覆盖五职业，库存78蓝14紫8金且ID唯一", () => {
 for (const id of [0, 2, 3, 4, 5])
   test("职业" + id + "完整1→40级：31蓝4紫4金、上限及扩展金色池三选一", () => {
     const { s, p } = arena(id, 1);
-    s.addXp(p, 30000);
+    s.addXp(p, 60000);
     const counts = { blue: 0, purple: 0, gold: 0 },
       gold = [];
     while (p.progress[id].choices.length) {
@@ -445,7 +445,7 @@ test("高等级完整构筑长战斗无递归爆炸、非法坐标或不受控�
   const s = new Simulation(c);
   s.player.retired = true;
   for (const p of s.players.filter((p) => p.bot)) {
-    s.addXp(p, 30000);
+    s.addXp(p, 60000);
     while (p.progress[p.classId].choices.length) {
       const choice = p.progress[p.classId].choices[0];
       s.chooseTrait(choice.options[0], choice.level, p);
