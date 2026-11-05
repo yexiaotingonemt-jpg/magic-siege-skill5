@@ -88,7 +88,7 @@ export function createTraitDraft(getSim, send) {
               '</b><span class="draft-owned-rank">' +
               RARITIES[t.rarity].name +
               " · " +
-              t.rank +
+              Math.min(t.rank, t.max) +
               "/" +
               t.max +
               " 次</span><small>" +

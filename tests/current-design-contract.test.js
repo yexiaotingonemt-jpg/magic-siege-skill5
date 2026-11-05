@@ -13,7 +13,7 @@ const clean=s=>s.replace(/\s+/g,'').replaceAll('个百分点','%');
 // 2026-11-03窗口分支的已确认调整；原始钉钉快照保持不变。
 // 对照 docs/新版技能开发配置.md，未列出的内容仍逐项核对原始源表。
 const windowSkillDescriptions={
- '5:1':'与1名友军建立共生链接，持续8秒。链接期间，彼此共享所受有效治疗的42%；任一方每次受到有效治疗，链接剩余时间延长3秒，最多8秒，共享治疗不重复续时。',
+ '5:1':'链接范围内当前生命值最低的1名友军，每条持续8秒。再次施放保留已有链接，可重复链接同一友军，各条独立计时。链接双方共享所受有效治疗的42%；任一方每次受到有效治疗，对应链接剩余时间延长3秒，最多8秒，共享治疗不重复续时。',
  '2:0':'向当前目标投掷腐蚀炮弹，命中其周围最多6名敌人。分担前伤害为主目标最大生命的6%。',
  '0:0':'持续汲取目标生命3秒，每秒造成相当于攻击力150%的伤害，并恢复等量生命；连接距离超过10格时中断。',
  '0:2':'与1名友军交换位置。该友军每损失1%生命，自身获得0.5%减伤，持续4秒。',
@@ -25,6 +25,7 @@ const windowSkillDescriptions={
  '3:3':'进入君临状态，持续5秒。期间免疫任何伤害及负面效果，每次普通攻击还会对主目标周围最多2名敌人造成相当于攻击力400%的伤害。',
 };
 const windowAffixDescriptions={
+ 38:'每次施放共生链接额外连接1名友军，选择当前生命值最低的2名友军（上限1档）。',
  52:'腐蚀伤害增加目标最大生命的1%/2%/3%（上限3档）。',
  65:'被震荡波命中敌人受到的治疗效果降低50%，持续3秒（上限1档）。',
  55:'自身攻击速度提高200%除以分担目标数，持续10秒（上限1档）。',
@@ -54,7 +55,7 @@ const boolean=new Set(['immortal','pierce','split','drag','passive_dr']);
 const groups=(text,percent=false)=>[...text.split('（')[0].matchAll(/\d+(?:\.\d+)?(?:%?\/\d+(?:\.\d+)?)*%?(?:个百分点)?/g)].map(m=>m[0]).filter(t=>!percent||t.includes('%')||t.includes('个百分点')).map(t=>t.match(/\d+(?:\.\d+)?/g).map(Number));
 for(const a of design.affixes)test(`${classes[a.classId]}词条${a.sourceId}：全部档位、上限、品质对应当前源表`,()=>{
  const original=a.sourceId===105?['黑暗领主','裂地震荡','目标增加','震荡波额外命中1/2名敌人（上限2档）。',2,'紫']:source.affixes.find(r=>r[2]===(a.sourceId===65?'目标增加':a.name)&&(a.common?r[1]==='通用词条':r[0]===classes[a.classId]&&r[1]===(a.skill==null?'职业被动':design.skills[a.classId][a.skill].name)));
- const row=original&&[...original];if(row&&windowAffixDescriptions[a.sourceId])row[3]=windowAffixDescriptions[a.sourceId];
+ const row=original&&[...original];if(row&&windowAffixDescriptions[a.sourceId])row[3]=windowAffixDescriptions[a.sourceId];if(row&&a.sourceId===38)row[4]=1;
  assert.ok(row,a.id);assert.equal(clean(a.description),clean(row[3]));assert.equal(a.max,Number(row[4]));assert.equal(a.rarity,AFFIX_QUALITY_OVERRIDES[a.sourceId]??{'蓝':'blue','紫':'purple','金':'gold'}[row[5]]);
  const key=a.keys[0],id=a.sourceId,ps=groups(row[3],true),ns=groups(row[3]);let expected;
  if(id===51)expected=ps[1].map(n=>[.3,n/100]);
