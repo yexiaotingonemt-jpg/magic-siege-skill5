@@ -1,11 +1,8 @@
 import { COMMON_TRAITS, commonId, commonRank } from "./common-traits.js";
-import { isCurrentDesign, currentTraits, currentTraitRank, currentSkill, drawCurrentQuality } from './current-design.js';
+import { isCurrentDesign, currentTraits, currentTraitRank, currentSkill, drawCurrentQuality, currentUpgradeCandidates } from './current-design.js';
+import { upgradeTypeAt } from './upgrade-quality.js';
+export { RARITIES } from './upgrade-quality.js';
 // Authoritative trait catalogue. Counts are selection caps, never lottery weights.
-export const RARITIES = {
-  blue: { name: "蓝色", color: "#78bdff" },
-  purple: { name: "紫色", color: "#c79aff" },
-  gold: { name: "金色", color: "#f4ce77" },
-};
 const groups = {
   3: [
     "L",
@@ -216,14 +213,26 @@ export function traitCandidates(progress, classId, rarity, level) {
 export function prepareChoice(sim, p, classId = p.classId) {
   const progress = p.progress[classId],
     choice = progress.choices?.[0];
-  if (!choice || choice.options) return choice;
+  if (!choice) return choice;
   if (isCurrentDesign(sim.config)) {
-    const catalogue=currentTraits(sim.config,classId), available=catalogue.filter(t=>(progress.traits[t.id]||0)<t.max);
-    if (!available.some(t=>t.rarity===choice.rarity)) choice.rarity=drawCurrentQuality(sim,progress,classId);
-    const pool=available.filter(t=>t.rarity===choice.rarity).map(t=>t.id);
-    for(let j=pool.length-1;j>0;j--){const k=Math.floor(sim.random()*(j+1));[pool[j],pool[k]]=[pool[k],pool[j]];}
-    choice.options=pool.slice(0,3);return choice;
+    const type=upgradeTypeAt(choice.level);
+    const available=currentUpgradeCandidates(sim,progress,classId,type,choice.level);
+    if(choice.upgradeType===type && choice.options?.length && new Set(choice.options).size===choice.options.length &&
+      choice.options.length<=3 && choice.options.every(id=>available.some(t=>t.id===id)))return choice;
+    choice.upgradeType=type;
+    delete choice.rarity;
+    choice.options=[];
+    // Each card draws a quality first, then an unused affix of that quality.
+    // Exhaustion never permits an out-of-pool quality or duplicate candidate.
+    while(choice.options.length<3){
+      const rarity=drawCurrentQuality(sim,progress,classId,type,choice.options);
+      if(!rarity)break;
+      const pool=available.filter(t=>t.rarity===rarity&&!choice.options.includes(t.id));
+      choice.options.push(pool[Math.floor(sim.random()*pool.length)].id);
+    }
+    return choice;
   }
+  if (choice.options) return choice;
   const pool = traitCandidates(
     progress,
     classId,

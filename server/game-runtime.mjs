@@ -10,6 +10,7 @@ import {liveConfig,clone,validateConfig} from '../shared/config.js';
 import {isCurrentDesign} from '../shared/current-design.js';
 import {planExperienceMigration} from '../shared/experience.js';
 import {contractHistoryPage} from '../shared/contract-history.js';
+import {prepareChoice} from '../shared/traits.js';
 const defaults=liveConfig();
 import {createEventStream,acceptsGzip} from './event-stream.mjs';
 import {SERVER_VERSION,CLIENT_VERSION,GAME_VERSION,PROTOCOL_VERSION,RULESET_REVISION,UPDATE_REQUIRED_CODE} from '../shared/protocol.js';
@@ -93,6 +94,18 @@ export function prepareGameRuntime(options,previous,{restartBattle=false}={}){
  if(!restartBattle&&isCurrentDesign(previous.room.sim.config)!==isCurrentDesign(defaults))throw Error('技能规则改变，请明确选择重开战局');
  const nextConfig=validateConfig(restartBattle?clone(defaults):applyOverrides(previous.defaults,previous.room.sim.config,defaults));
  const experienceMigration=restartBattle?[]:planExperienceMigration(previous.room.sim.players,previous.room.sim.config.world,nextConfig.world);
+ // Stage pending choices against the new pools before switching any live object.
+ // Keep queue/choice identities and provide exact rollback of candidates and RNG.
+ const choiceMigration=[],seedBefore=previous.room.sim.seed;
+ const lottery={config:nextConfig,seed:seedBefore,random:Simulation.prototype.random};
+ if(!restartBattle&&isCurrentDesign(nextConfig))for(const p of previous.room.sim.players){
+  for(const [classId,progress] of p.progress.entries()){
+   const choice=progress.choices?.[0];if(!choice)continue;
+   const staged=structuredClone(progress),player={classId,progress:[]};player.progress[classId]=staged;
+   prepareChoice(lottery,player,classId);
+   choiceMigration.push({choice,before:{...choice},after:staged.choices[0]});
+  }
+ }
  const probe=new Room(nextConfig);probe.sim.tick(.05);JSON.stringify(probe.snapshot());
  const room=restartBattle?new Room(nextConfig):previous.room;
  const runtime=createGameRuntime({...options,gameVersion:GAME_VERSION,clientVersion:CLIENT_VERSION,room,accounts:previous.accounts,limits:previous.limits});
@@ -103,10 +116,14 @@ export function prepareGameRuntime(options,previous,{restartBattle=false}={}){
   Object.setPrototypeOf(room,Room.prototype);Object.setPrototypeOf(room.sim,Simulation.prototype);
   room.config=clone(nextConfig);room.sim.config=clone(nextConfig);room.sim.npcPolicy??={...DEFAULT_NPC_POLICY};room.configVersion++;room.last=performance.now();
   for(const change of experienceMigration)change.progress.xp=change.after;
+  for(const change of choiceMigration){for(const key of Object.keys(change.choice))delete change.choice[key];Object.assign(change.choice,change.after);}
+  if(!restartBattle)room.sim.seed=lottery.seed;
  },rollback(){
   Object.setPrototypeOf(previous.accounts,saved.accountsPrototype);
   Object.setPrototypeOf(room,saved.roomPrototype);Object.setPrototypeOf(room.sim,saved.simPrototype);
   room.config=saved.config;room.sim.config=saved.simConfig;room.sim.npcPolicy=saved.npcPolicy;room.configVersion=saved.configVersion;room.last=saved.last;
   for(const change of experienceMigration)change.progress.xp=change.before;
+  for(const change of choiceMigration){for(const key of Object.keys(change.choice))delete change.choice[key];Object.assign(change.choice,change.before);}
+  if(!restartBattle)room.sim.seed=seedBefore;
  }};
 }

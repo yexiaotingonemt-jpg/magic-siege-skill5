@@ -1,5 +1,6 @@
 import { CURRENT_DESIGN } from './current-design-data.js';
 import { validateExperienceRules } from './experience.js';
+import { RARITIES, UPGRADE_POOLS } from './upgrade-quality.js';
 
 export const isCurrentDesign = config => config?.design?.enabled === true;
 export const designHeroIds = [0, 4, 5, 2, 3];
@@ -69,7 +70,7 @@ export function validateCurrentDesign(d) {
   if (!Array.isArray(d.affixes)) throw Error('新版词条配置不完整');
   for (const a of d.affixes) {
     if (seen.has(a.id) || !designHeroIds.includes(a.classId) || !/^N\d{3}_[02345]$/.test(a.id) ||
-        Number(a.id.split('_')[1]) !== a.classId || !['blue','purple','gold'].includes(a.rarity) ||
+        Number(a.id.split('_')[1]) !== a.classId || !Object.hasOwn(RARITIES,a.rarity) ||
         !Number.isInteger(a.max) || a.max < 1 || a.max > 40 || a.values?.length !== a.max ||
         !Array.isArray(a.keys) || !a.keys.length || a.baseline?.length !== a.keys.length ||
         a.keys.some(k => ['__proto__','constructor','prototype'].includes(k)) ||
@@ -84,11 +85,17 @@ export function validateCurrentDesign(d) {
   }
   for (const id of designHeroIds) if (d.affixes.filter(a => a.classId === id).reduce((n,a) => n+a.max,0) < 40)
     throw Error('新版词条不足40次合法升级');
-  if (!['blue','purple','gold'].every(k => positive(d.qualityWeights?.[k]))) throw Error('品质权重必须大于0');
+  if (!Object.keys(RARITIES).every(k => positive(d.qualityWeights?.[k]))) throw Error('品质权重必须大于0');
+  for (const id of designHeroIds) for (const [type, qualities] of Object.entries(UPGRADE_POOLS)) {
+    const needed = type === 'advanced' ? Math.floor(d.rules.maxLevel/5) : d.rules.maxLevel-Math.floor(d.rules.maxLevel/5);
+    if (d.affixes.filter(t => t.classId===id && qualities.includes(t.rarity)).reduce((n,t)=>n+t.max,0)<needed)
+      throw Error('升级池词条档位不足：'+id+'/'+type);
+  }
   return d;
 }
 export function inverseQualityWeights(means) {
-  if (!['blue','purple','gold'].every(k => Number.isFinite(means[k]) && means[k] > 0)) throw Error('品质平均收益必须大于0');
+  if (!['blue','purple','gold'].every(k => Object.hasOwn(means,k)) ||
+    !Object.entries(means).every(([k,v])=>Object.hasOwn(RARITIES,k)&&Number.isFinite(v)&&v>0)) throw Error('品质平均收益必须大于0');
   return Object.fromEntries(Object.entries(means).map(([key,value]) => [key,1/value]));
 }
 export function currentTraits(config, classId) {
@@ -122,9 +129,21 @@ export function currentTraitRank(p,id) {
   const classId = Number(id.split('_')[1]);
   return p?.progress?.[classId]?.traits?.[id] || 0;
 }
-export function drawCurrentQuality(sim, progress, classId) {
-  const pool = currentTraits(sim.config,classId).filter(t => (progress.traits[t.id] || 0) < t.max);
-  const qualities = ['blue','purple','gold'].filter(q => pool.some(t => t.rarity === q));
+export function currentUpgradeCandidates(sim, progress, classId, upgradeType, level) {
+  const all=currentTraits(sim.config,classId).filter(t=>(progress.traits?.[t.id]||0)<t.max);
+  const other=upgradeType==='normal'?'advanced':'normal', max=sim.config.world.maxLevel;
+  const futureAdvanced=Math.floor(max/5)-Math.floor(level/5);
+  const needed=other==='advanced'?futureAdvanced:max-level-futureAdvanced;
+  const otherStock=all.filter(t=>UPGRADE_POOLS[other].includes(t.rarity)).reduce((n,t)=>n+t.max-(progress.traits?.[t.id]||0),0);
+  // Purple is shared. Do not spend the last ranks required by future upgrades
+  // of the other type; gold never enters the normal pool as a fallback.
+  return all.filter(t=>UPGRADE_POOLS[upgradeType].includes(t.rarity) &&
+    !(t.rarity==='purple' && needed>0 && otherStock<=needed));
+}
+export function drawCurrentQuality(sim, progress, classId, upgradeType = 'normal', excluded = []) {
+  const level=progress.choices?.[0]?.level??progress.level;
+  const pool = currentUpgradeCandidates(sim,progress,classId,upgradeType,level).filter(t=>!excluded.includes(t.id));
+  const qualities = UPGRADE_POOLS[upgradeType].filter(q => pool.some(t => t.rarity === q));
   const total = qualities.reduce((sum,q) => sum+sim.config.design.qualityWeights[q],0);
   let n = sim.random()*total;
   return qualities.find(q => (n-=sim.config.design.qualityWeights[q]) < 0) || qualities.at(-1);
