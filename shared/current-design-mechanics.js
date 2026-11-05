@@ -339,7 +339,7 @@ export function refreshCurrentStats(sim,h) {
   h.attack=c.attack*(1+c.attackGrowth*level);h.range=c.range+(v.range_bonus||0);h.speed=c.speed*(1+(v.move_bonus||0));
   h.aggro=Math.max(sim.config.heroes[h.classId].aggro||c.range,h.range);
 }
-export function currentHeal(t,n,u,value=null,derived=false) {
+export function currentHeal(t,n,u,value=null,derived=false,linkShared=false) {
   if (!t||t.hp<=0||t.tower||!Number.isFinite(n)||n<=0) return 0;
   const r=rules(this),v=pass(this,t),heat=t.classId===4?Math.max(0,1-(t.heat||0)*r.heatHealPenalty):1;
   let down=Math.max(0,...this.activeDebuffs(t,'healingDown').map(d=>d.ratio));
@@ -348,13 +348,19 @@ export function currentHeal(t,n,u,value=null,derived=false) {
   t.hp+=actual;spend(value,actual,'治疗');this.stat(u,'healing',actual);
   if (actual>0) this.healthVisual('heal',u,t,{amount:actual});
   if (actual>0&&u?.hero) {recordEffectiveHeal(u,t,this.time);this.visual('healing',u,t,{skill:value?.skill??0,until:this.time+.55});}
-  if (!derived) {
+  if (!linkShared) {
     for (const f of [...this.fields]) if (actual>0&&f.kind==='link'&&f.until>this.time&&f.owner.hp>0) {
-      const host=this.get(f.host);if (!host||distance(f.owner,host)>f.breakRange) continue;
-      if (t.id===f.owner.id||t.id===host.id) this.heal(t.id===host.id?f.owner:host,actual*f.shareRatio,f.owner,f.value,true);
+      const host=this.get(f.host);if (!host||host.hp<=0||distance(f.owner,host)>f.breakRange) continue;
+      if (t.id===f.owner.id||t.id===host.id) {
+        const skill=this.config.design.skills[5][1];
+        f.until=Math.min(f.until+(skill.heal_extension||0),this.time+skill.duration);
+        for (const guard of host.guards||[]) if (guard.kind==='elfLink'&&guard.ownerId===f.owner.id) guard.until=f.until;
+        if (host.hastes?.elfLink) host.hastes.elfLink.until=f.until;
+        if (!derived) currentHeal.call(this,t.id===host.id?f.owner:host,actual*f.shareRatio,f.owner,f.value,true,true);
+      }
     }
-    this.afterHeal?.(u,t,actual,Math.max(0,wanted-actual),value);
   }
+  if (!derived) this.afterHeal?.(u,t,actual,Math.max(0,wanted-actual),value);
   return actual;
 }
 export function reflectCurrentShell(sim,a,t,reflected=false) {

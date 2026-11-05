@@ -164,7 +164,7 @@ export const CURRENT_DESIGN = {
       },
       {
         "name": "共生链接",
-        "description": "与1名友军建立共生链接，持续6秒。链接期间，彼此共享所受有效治疗的42%。",
+        "description": "与1名友军建立共生链接，持续8秒。链接期间，彼此共享所受有效治疗的42%；任一方每次受到有效治疗，链接剩余时间延长3秒，最多8秒，共享治疗不重复续时。",
         "cost": 1,
         "cd": 10.0,
         "cast": 0.25,
@@ -172,7 +172,8 @@ export const CURRENT_DESIGN = {
         "radius": 3.0,
         "targets": 1,
         "power": 0.0,
-        "duration": 6.0,
+        "duration": 8.0,
+        "heal_extension": 3,
         "share": 0.42,
         "reduction": 0.0,
         "haste": 0,
