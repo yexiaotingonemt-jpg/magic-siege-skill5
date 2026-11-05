@@ -1,4 +1,5 @@
-import {isCurrentDesign,currentStatPoints,currentContributionParts,currentValues,drawCurrentQuality} from './current-design.js';
+import {isCurrentDesign,currentStatPoints,currentContributionParts,currentValues} from './current-design.js';
+import {upgradeTypeAt} from './upgrade-quality.js';
 import {eligibleAssists} from './assist-rules.js';
 import {recordContractReport} from './contract-history.js';
 import {updateContractEvaluation} from './contract-evaluation.js';
@@ -69,7 +70,7 @@ export class Simulation extends HeroRules {
  addXp(p,n,classId=p?.classId){
   const progress=p?.progress[classId];if(!progress||!Number.isFinite(n)||n<=0)return;
   if(progress.level>=this.config.world.maxLevel){progress.xp=0;return;}const before=progress.level;progress.xp+=n;
-  while(progress.xp>=this.expNeeded(p,classId)&&progress.level<this.config.world.maxLevel){progress.xp-=this.expNeeded(p,classId);progress.level++;progress.points=0;progress.traits??={};progress.choices??=[];progress.choices.push({level:progress.level,available:this.hero(p)?.classId!==classId,rarity:isCurrentDesign(this.config)?drawCurrentQuality(this,progress,classId):rarityAt(progress.level)});p.builds[classId]=isCurrentDesign(this.config)?[1,1,1,1]:skillRanks(progress.level);prepareChoice(this,p,classId);this.log(p.name+' 的'+classes[classId]+' 升到 Lv.'+progress.level);}
+  while(progress.xp>=this.expNeeded(p,classId)&&progress.level<this.config.world.maxLevel){progress.xp-=this.expNeeded(p,classId);progress.level++;progress.points=0;progress.traits??={};progress.choices??=[];progress.choices.push({level:progress.level,available:this.hero(p)?.classId!==classId,...(isCurrentDesign(this.config)?{upgradeType:upgradeTypeAt(progress.level)}:{rarity:rarityAt(progress.level)})});p.builds[classId]=isCurrentDesign(this.config)?[1,1,1,1]:skillRanks(progress.level);prepareChoice(this,p,classId);this.log(p.name+' 的'+classes[classId]+' 升到 Lv.'+progress.level);}
   if(progress.level>=this.config.world.maxLevel)progress.xp=0;
   const h=this.hero(p);if(h?.classId===classId&&progress.level!==before){const ratio=h.hp/h.maxHp;h.maxHp=h.baseMaxHp*(1+this.config.world.heroHpGrowth*Math.max(0,progress.level-1));h.hp=h.maxHp*ratio;h.attack=h.baseAttack*(1+this.config.world.heroAttackGrowth*Math.max(0,progress.level-1));refreshCommonStats(this,h);}
  }

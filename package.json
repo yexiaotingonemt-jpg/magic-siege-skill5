@@ -1,7 +1,7 @@
 {
   "name": "magic-siege-skill5",
   "private": true,
-  "version": "0.7.26",
+  "version": "0.7.27",
   "scripts": {
     "dev": "vite --config client/vite.config.js",
     "build": "vite build --config client/vite.config.js",

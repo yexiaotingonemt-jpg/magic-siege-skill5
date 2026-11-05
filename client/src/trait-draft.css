@@ -58,16 +58,18 @@
 }
 .draft-intro,.draft-note {text-align:center;color:var(--ui-muted);font-size:18px;line-height:1.7}
 .draft-intro {margin:0}
+.draft-pool {margin:0 0 6px;text-align:center;color:var(--ui-muted);font-size:17px;line-height:1.6}
+.draft-pool span {color:var(--trait-color);white-space:nowrap}
 .draft-cards {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:24px 0}
 .trait-card {
   display:flex;flex-direction:column;align-items:stretch;min-width:0;min-height:300px;padding:0;
-  border:1px solid #657053;border-top:2px solid color-mix(in srgb,var(--trait-color) 60%,#657053);
-  border-radius:var(--ui-radius);background:linear-gradient(155deg,#294032b3,#10231bcc);
+  border:1px solid color-mix(in srgb,var(--trait-color) 65%,#657053);border-top:3px solid var(--trait-color);
+  border-radius:var(--ui-radius);background:linear-gradient(155deg,color-mix(in srgb,var(--trait-color) 12%,#20362b),#10231bcc);
   color:var(--ui-text);text-align:left;box-shadow:inset 0 1px #ffffff06;
   transition:border-color .16s,background-color .16s;
 }
-.trait-card:hover,.trait-card:focus-within {border-color:#98ac88;background-color:#304c37}
-.trait-card:has(.trait-select:focus-visible) {outline:2px solid var(--ui-accent);outline-offset:3px}
+.trait-card:hover,.trait-card:focus-within {border-color:var(--trait-color);background-color:#304c37}
+.trait-card:has(.trait-select:focus-visible) {outline:2px solid var(--trait-color);outline-offset:3px}
 .trait-card-heading {
   position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;
   padding:14px 10px 12px;border-bottom:1px solid #53634688;margin:0 4px;
@@ -75,6 +77,7 @@
 .trait-category {display:contents;min-width:0;color:var(--ui-text);font-size:25px;font-weight:600;line-height:1.4;overflow-wrap:anywhere}
 .trait-skill-number {display:block;grid-column:1;grid-row:1;font-size:17px;font-weight:400;line-height:1.4;color:var(--ui-muted)}
 .trait-skill-name {display:block;grid-column:1/-1;grid-row:2}
+.trait-quality {grid-column:1/-1;grid-row:3;justify-self:start;padding:1px 7px;border:1px solid color-mix(in srgb,var(--trait-color) 55%,transparent);border-radius:4px;color:var(--trait-color);font-size:16px;line-height:1.5}
 .trait-info {
   flex:none;grid-column:2;grid-row:1;display:grid;place-items:center;width:max(34px,var(--touch-size));height:max(34px,var(--touch-size));
   padding:0;border:1px solid #72816c;border-radius:var(--ui-radius);background:#172b25;color:var(--ui-muted);
@@ -92,8 +95,8 @@
   display:block;width:64px;height:64px;margin:18px auto;border:1px solid var(--kc-bronze);
   border-radius:6px;box-shadow:0 0 0 3px #0c1c16,0 3px 8px #0004;background-repeat:no-repeat;
 }
-.trait-card strong {font-size:25px;font-weight:600;line-height:1.4;margin-bottom:10px;color:#ecdfbb}
-.trait-description {flex:1;font-size:max(19px,calc(13px / var(--game-scale,1)));line-height:1.75;color:#dce2d3}
+.trait-card strong {font-size:25px;font-weight:600;line-height:1.4;margin-bottom:10px;color:var(--trait-color)}
+.trait-description {flex:1;overflow-wrap:anywhere;font-size:max(19px,calc(13px / var(--game-scale,1)));line-height:1.75;color:#dce2d3}
 .trait-footer {
   display:flex;justify-content:space-between;align-items:center;gap:6px;
   border-top:1px solid #53634688;margin-top:18px;padding-top:12px;
@@ -141,7 +144,10 @@
   .draft-panel h2,.draft-skill-view h2 {font-size:32px;margin-top:20px}
   .draft-cards {grid-template-columns:1fr;gap:10px;margin:16px 0}
   .trait-card {min-height:0}
-  .trait-card-heading {display:flex;align-items:center;justify-content:space-between;padding:7px 12px;gap:12px}
+  .trait-card-heading {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;padding:7px 12px;gap:8px}
+  .trait-category {grid-column:1;grid-row:1}
+  .trait-quality {grid-column:1;grid-row:2;font-size:18px}
+  .trait-info {grid-column:2;grid-row:1/3}
   .trait-category {display:flex;align-items:baseline;gap:8px;font-size:27px;flex-wrap:wrap}
   .trait-skill-number {margin:0;font-size:22px}
   .trait-select,.trait-select:hover {display:grid;grid-template-columns:64px minmax(0,1fr);column-gap:16px;padding:12px 16px}
