@@ -29,7 +29,9 @@ for(const width of [1440,390])test(`契约和施法共计10点体力升级并获
     for(let i=0;i<5;i++){s.time+=10;expect(s.cast(0,p)).toBe(true);}broadcast();
     await expect(page.locator('#heroName')).toContainText('Lv.1');await expect(page.locator('#xpLabel')).toContainText('EXP 0 / 1000');
     await expect(page.locator('[data-trait-count]')).toHaveText('1');await expect(page.locator('#traitDraft')).toBeHidden();
-    await page.locator('#traitPending').click();await expect(page.locator('.trait-card')).toHaveCount(3);
+    await expect(page.locator('#traitPending')).toBeDisabled();
+    unit.hp=0;s.die(unit);broadcast();
+    await expect(page.locator('#traitPending')).toBeEnabled();await page.locator('#traitPending').click();await expect(page.locator('.trait-card')).toHaveCount(3);
     const level=p.level,xp=p.xp;expect(s.cast(0,p)).toBe(false);expect(p.level).toBe(level);expect(p.xp).toBe(xp);
   }finally{
     await page.close();for(const client of [...room.clients])client.res.end();

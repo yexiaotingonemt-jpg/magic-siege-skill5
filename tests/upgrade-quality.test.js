@@ -71,7 +71,7 @@ test('旧队列按原升级等级迁入新池，保留可用状态与已选词�
 test('五职业多种选法均可花完40次预算，品质与次数不受积攒等级影响',()=>{
   for(const id of [0,4,5,2,3])for(const seed of [1,2,3,4,42,123,456]){
     const s=new Simulation(liveConfig(),seed),p=s.player;p.classId=id;p.side=id===3?1:0;
-    const all=currentTraits(s.config,id),progress=p.progress[id];s.addXp(p,30000);
+    const all=currentTraits(s.config,id),progress=p.progress[id];s.addXp(p,60000);
     assert.equal(progress.choices.length,40);
     while(progress.choices.length){
       const c=prepareChoice(s,p);assert.ok(c.options.length,`${id}/${seed}/${c.level}`);
