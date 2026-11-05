@@ -2823,7 +2823,7 @@
     "files": [
       "orc-walk.png",
       "chariot-walk.png",
-      "lord-walk.png",
+      "lord-walk-grounded.png",
       "mage-walk.png",
       "elf-walk.png"
     ],
@@ -2842,6 +2842,6 @@
       "SW"
     ],
     "timeColumns": 8,
-    "method": "Generated whole-cycle sheets; one shared scale per hero; shipped idle registration; five drawn views plus three mirrored views. Simulation clock only during movement; no extra mesh deformation or global bob."
+    "method": "Generated whole-cycle sheets; one shared scale per hero; shipped idle registration; five drawn views plus three mirrored views. Lord uses a corrected chronological grounded two-step cycle driven by rendered distance (2.4 world grids per cycle); other heroes use simulation time during movement. No extra mesh deformation or global bob."
   }
 }

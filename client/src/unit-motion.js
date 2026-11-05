@@ -1,5 +1,6 @@
 import {inAttackRange} from '../../shared/attack-range.js';
 import {HERO_WALK_ART} from './walk-animation.js';
+import {VIEW} from './battlefield.js';
 const tau=Math.PI*2,clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 export const motionStyle=u=>u.tower?'tower':u.hero?({0:'orc',1:'storm',2:'rune',3:'lord',4:'flame',5:'forest',6:'assassin'}[u.classId]||'orc'):({melee:'golem',ranged:'arbalest',siege:'cannon'}[u.type]||'golem');
 const floating=style=>['rune','cannon','forest'].includes(style);
@@ -79,10 +80,18 @@ export function createUnitMotionModel(){
   const pixelDelta=point&&old?.point?Math.hypot(point.x-old.point.x,point.y-old.point.y):0;
   let renderChangedAt=old?.renderChangedAt??changedAt;
   if(pixelDelta>1e-4&&pixelDelta<27)renderChangedAt=sim.time;
-  tracks.set(u.id,{x:u.x,y:u.y,stamp,changedAt,renderChangedAt,point:point?{x:point.x,y:point.y}:null});
   const target=sim.get(u.targetId),targetInRange=inAttackRange(u,target);
   const moving=point&&old?.point?sim.time-renderChangedAt<=.32:sim.time-changedAt<=.32;
   const pose=unitMotionPose(u,sim.time,{moving:!targetInRange&&(u.speed||0)>0&&moving,targetInRange,side:sim.player.side});
+  // 领主每个完整双步周期走2.4格；显示插值减速或停止时脚步也同步减速或停止。
+  // 只累加本帧实际显示路程，暂停、瞬移、战斗动作和重复渲染都不补播步态。
+  let walkPhase=old?.walkPhase??0;
+  if(u.hero&&u.classId===3){
+   const distance=point&&old?.point?pixelDelta/VIEW.pixelsPerGrid:delta,dt=sim.time-(old?.time??sim.time);
+   if(pose.action==='move'&&dt>0&&dt<=.5&&distance>1e-7&&distance<=Math.max(.15,(u.speed||0)*dt*2.5))walkPhase+=distance/2.4*tau;
+   pose.phase=walkPhase;
+  }
+  tracks.set(u.id,{x:u.x,y:u.y,stamp,changedAt,renderChangedAt,time:sim.time,walkPhase,point:point?{x:point.x,y:point.y}:null});
   return pose;
  },end(live){for(const id of tracks.keys())if(!live.has(id))tracks.delete(id);},get tracked(){return tracks.size;}};
 }
