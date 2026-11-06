@@ -9,6 +9,7 @@ import {
 } from "../shared/config.js";
 import { TRAITS, traitSkill } from "../shared/traits.js";
 import { Room } from "../server/room.mjs";
+import { grantEliteScore } from "../shared/elite-score.js";
 import { describeAbilities } from "../client/src/ability-descriptions.js";
 const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-5, `${a} != ${b}`);
 const advance = (s, n) => {
@@ -201,15 +202,20 @@ for (const [i, buff] of ["score"].entries())
     s.time = 60.1;
     assert.ok(!(h.eliteBuffs[buff] > s.time));
   });
-test("无英雄记录的小兵击杀及阵亡英雄的延迟击杀不领取精英Buff", () => {
-  for (const kind of ["minion", "dead"]) {
+test("无英雄补刀、阵亡击杀不领精英奖励，友方英雄不继承积分增益", () => {
+  for (const kind of ["minion", "friendly", "dead"]) {
     const { s, h, enemy, friends } = arena();
-    enemy.elite = true;
-    enemy.hero = false;
+    enemy.elite = kind !== "friendly";
+    enemy.hero = kind === "friendly";
     if (kind === "dead") h.hp = 0;
-    if (kind === "friendly") enemy.side = h.side;
+    if (kind === "friendly") {
+      enemy.side = h.side;
+      grantEliteScore(s, enemy);
+    }
+    const eventsBefore = s.battleEvents.length;
     s.damage(kind === "minion" ? friends[0] : h, enemy, 1e9);
-    assert.equal(s.battleEvents.length, 0);
+    assert.equal(s.battleEvents.length, eventsBefore);
+    assert.equal(h.eliteBuffs?.score, undefined);
   }
 });
 test("移除统一额度：领主多目标震荡完整超过2000%攻击", () => {

@@ -16,7 +16,6 @@ export function heroNameData(sim,u){
  return {unitId:u.id,playerId:player.id,name:name.full,fullName:name.full,text:(self?'我 · ':'')+name.text,truncated:name.truncated,self,team,color:HERO_NAME_COLORS[team]};
 }
 
-const overlaps=(a,b,gap=2)=>a.left<b.right+gap&&a.right>b.left-gap&&a.top<b.bottom+gap&&a.bottom>b.top-gap;
 export function createHeroNames(scene){
  const labels=[],tops=new Map();let report=[],hovered=null,pinnedUntil=0;
  const tip=scene.add.text(0,0,'',{fontFamily:'Microsoft YaHei, sans-serif',fontSize:'14px',fontStyle:'bold',color:'#eee9d9',stroke:'#101b18',strokeThickness:3,backgroundColor:'#14211feb',padding:{x:6,y:3}}).setOrigin(.5,1).setDepth(13010).setVisible(false);
@@ -24,7 +23,6 @@ export function createHeroNames(scene){
  return {get report(){return report;},top:id=>tops.get(id),hover(point){const hit=pick(point);if(hit){hovered=hit.unitId;pinnedUntil=0;}else if(!pinnedUntil)hovered=null;},tap(point){const hit=pick(point);if(!hit){hovered=null;pinnedUntil=0;return false;}hovered=hit.unitId;pinnedUntil=performance.now()+2500;return true;},draw(sim,map,camera){
   report=[];tops.clear();let used=0;
   const css=scene.game.canvas.getBoundingClientRect(),scale=Math.max(.2,Math.min(css.width/500,css.height/500)),fontSize=Math.ceil(Math.max(14,12/scale));
-  const statusRects=(scene.statusIcons?.report||[]).map(r=>({left:r.x,right:r.x+r.size,top:r.y,bottom:r.y+r.size}));
   const heroes=sim.units.filter(u=>u.hero&&u.hp>0).sort((a,b)=>Number(b.id===sim.player.heroId)-Number(a.id===sim.player.heroId)||map.point(a).y-map.point(b).y||a.id-b.id);
   for(const u of heroes){
    const data=heroNameData(sim,u);if(!data)continue;
@@ -34,9 +32,11 @@ export function createHeroNames(scene){
    if(label._nameFont!==fontSize){label.setFontSize(fontSize);label._nameFont=fontSize;}
    if(label.text!==data.text)label.setText(data.text);
    if(label._nameColor!==data.color){label.setColor(data.color);label._nameColor=data.color;}
-   const width=label.width,height=label.height,x=clamp(p.x,width/2+4,496-width/2),candidates=[];
-   for(const dy of [0,-height-2,-2*(height+2),-3*(height+2)]){const y=ceiling+dy;candidates.push({left:x-width/2,right:x+width/2,top:y-height,bottom:y,x,y});}
-   const box=candidates.find(b=>b.top>=camera.scrollY+3&&!statusRects.some(r=>overlaps(b,r))&&!report.some(r=>overlaps(b,r)))||candidates[0];
+   // 密集重叠时优先看清自己的名字，不通过抬高其他名字来避让。
+   label.setDepth(data.self?12320:12310);
+   // 名字只跟随自己的血条与状态，避免密集战斗中被其他单位逐行挤高。
+   const width=label.width,height=label.height,x=clamp(p.x,width/2+4,496-width/2),y=ceiling;
+   const box={left:x-width/2,right:x+width/2,top:y-height,bottom:y,x,y};
    used++;label.setVisible(true).setPosition(box.x,box.y);tops.set(u.id,box.top);
    report.push({...data,...box,bbox:{left:box.left,right:box.right,top:box.top,bottom:box.bottom},fontSize,cssFontSize:fontSize*scale});
   }
