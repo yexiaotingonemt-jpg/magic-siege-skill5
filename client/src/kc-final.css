@@ -91,6 +91,8 @@ input::placeholder {color:#81958a;opacity:1}
 .game .target-health i {display:block;height:100%;background:#da8178}
 .game .target-info[data-side="ally"] .target-health i {background:#88bba0}
 .game .skill em {bottom:5px;background:#0e1b15ef;border:1px solid #b3a78350;border-radius:4px;color:#fff4d9;font-variant-numeric:tabular-nums}
+.game .skill-link-count {position:absolute;z-index:4;top:0;right:0;padding:2px 6px;border:1px solid #91b398;border-radius:5px;background:#173c2ff2;color:#d3f1d4;font-size:max(17px,calc(12px / var(--game-scale,1)));font-weight:700;line-height:1.35;font-variant-numeric:tabular-nums;white-space:nowrap;pointer-events:none;box-shadow:0 2px 5px #0006}
+.game .skill-link-count[hidden] {display:none}
 .game .skill-info {color:var(--ui-text);border-radius:5px;gap:6px}
 .game .skill-info:hover {background:#5d81551c}
 .game .skill-info b {font-weight:500;font-size:max(20px,calc(12px / var(--game-scale,1)))}
