@@ -1,6 +1,6 @@
 import { currentValues, currentSkill, currentName } from './current-design.js';
 import { recordEffectiveHeal } from './assist-rules.js';
-import { targetForSide } from './manual-target.js';
+import { manualTarget, targetForSide } from './manual-target.js';
 import { segmentDistance } from './lord-flame-shield.js';
 import { spend } from './skill-value.js';
 
@@ -24,7 +24,8 @@ const knock=(sim,h,t,n)=>{
 function currentTarget(sim,h,i,s){
   if(h.classId===5&&i===1)return elfLinkTargets(sim,h,s)[0]||null;
   const friendly=h.classId===5||h.classId===0&&i===2,side=friendly?h.side:1-h.side;
-  const chosen=targetForSide(sim,h,side);
+  // 灵息的自动治疗独立选择缺血友军；只有手选敌人时才转向其攻击对象。
+  const chosen=h.classId===5&&i===0&&!manualTarget(sim,h)?null:targetForSide(sim,h,side);
   if(chosen&&(!friendly||!chosen.tower&&!((h.classId===5&&i===1||h.classId===0&&i===2)&&chosen.id===h.id)))return chosen;
   if(friendly)return sim.allies(h,s.range).filter(u=>!u.tower&&!((h.classId===5&&i===1||h.classId===0&&i===2)&&u.id===h.id))
     .sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp||distance(h,a)-distance(h,b)||a.id-b.id)[0]||null;
