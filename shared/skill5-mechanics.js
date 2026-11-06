@@ -321,7 +321,7 @@ export function resolveSkill5(h, i, s, locked, ids = [], extra = {}) {
         guard(u, "orcWarcry", s.damageReduction, s.duration, {
           reflect: r("O08") ? 0.2 : 0,
         });
-        if (r("O07")) this.haste(u, "orcWarcry", r("O07") * 0.12, s.duration);
+        if (r("O07")) this.haste(u, "orcWarcry", r("O07") * 0.12, s.duration, h);
       }
     if (i === 2 && t && !t.tower && t.side === h.side) {
       const old = { x: h.x, y: h.y };
@@ -649,7 +649,7 @@ export function resolveSkill5(h, i, s, locked, ids = [], extra = {}) {
           shareDamage: !!r("E08"),
         });
         if (r("E05")) guard(u, "elfLink", r("E05") * 0.03, s.duration);
-        if (r("E07")) this.haste(u, "elfLink", r("E07") * 0.12, s.duration);
+        if (r("E07")) this.haste(u, "elfLink", r("E07") * 0.12, s.duration, h);
       });
       h.linkId = t.id;
       h.linkUntil = this.time + s.duration;
@@ -664,6 +664,7 @@ export function resolveSkill5(h, i, s, locked, ids = [], extra = {}) {
           Object.assign(u, {
             healingBoost: 0.2,
             healingBoostUntil: this.time + 8,
+            healingBoostOwner: h.id,
           });
       }
       if (count && r("E11")) {

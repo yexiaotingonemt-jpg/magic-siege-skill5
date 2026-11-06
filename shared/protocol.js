@@ -6,9 +6,9 @@ export const PROTOCOL_VERSION=3;
 // documentation-only changes keep this version; builds/packages never bump it.
 export const GAME_VERSION='0.7.0';
 // Server and desktop releases share one version; publish both together.
-export const SERVER_VERSION='0.7.31';
+export const SERVER_VERSION='0.7.32';
 // Desktop release version must match SERVER_VERSION.
-export const CLIENT_VERSION='0.7.31';
+export const CLIENT_VERSION='0.7.32';
 // Diagnostic ruleset label; changing this alone does not require a client update.
-export const RULESET_REVISION='elite-score-600s-50pct-20261106';
+export const RULESET_REVISION='personal-status-frames-20261106';
 export const UPDATE_REQUIRED_CODE='CLIENT_UPDATE_REQUIRED';

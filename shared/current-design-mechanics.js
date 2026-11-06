@@ -78,7 +78,7 @@ export function resolveCurrentSkill(h,i,s,locked,ids=[],extra={}) {
     }
     if (i===1) for (const u of targets) {
       this.guard(u,h,'orcWarcry',s.reduction,s.duration,{reflect:s.reflect});
-      this.haste(u,'orcWarcry',s.haste,s.duration);
+      this.haste(u,'orcWarcry',s.haste,s.duration,h);
     }
     if (i===2 && t) {
       const old={x:h.x,y:h.y}, lost=1-t.hp/t.maxHp;
@@ -152,7 +152,7 @@ export function resolveCurrentSkill(h,i,s,locked,ids=[],extra={}) {
     if (i===1 && t) {
       for (const u of targets.filter(u=>u.id!==h.id&&!u.tower&&distance(h,u)<=s.range)) {
         this.fields.push({kind:'link',owner:h,host:u.id,until:this.time+s.duration,breakRange:s.range,shareRatio:s.share,shareDamage:!!s.split,value:s.value});
-        this.guard(u,h,'elfLink',s.reduction,s.duration);this.haste(u,'elfLink',s.haste,s.duration);
+        this.guard(u,h,'elfLink',s.reduction,s.duration);this.haste(u,'elfLink',s.haste,s.duration,h);
       }
     }
     if (i===2) for (const u of targets) {
@@ -160,7 +160,7 @@ export function resolveCurrentSkill(h,i,s,locked,ids=[],extra={}) {
       if (!n) continue;
       this.heal(u,A*s.heal_per_cleanse*n,h,s.value);
       h.attackBoost=(h.boostUntil>this.time?h.attackBoost||0:0)+s.attack_per_cleanse*n;h.boostUntil=this.time+s.boost_duration;
-      if (s.healing_boost) {u.healingBoost=s.healing_boost;u.healingBoostUntil=this.time+s.bless_duration;}
+      if (s.healing_boost) {u.healingBoost=s.healing_boost;u.healingBoostUntil=this.time+s.bless_duration;u.healingBoostOwner=h.id;}
     }
     if (i===3) {
       h.channelUntil=this.time+s.duration;
@@ -218,7 +218,7 @@ function runeImpact(sim,h,s,at,multiplier=1,repeat=false,primaryId=null) {
   for (const u of targets) {
     if (s.skill===0) {
       sim.damage(h,u,cannonPool*share*multiplier*(1+(s.bonusDamage||0)),false,false,{value:s.value});
-      if (s.heal_down && !(u.immuneUntil>sim.time)) u.currentNextHealDown={ratio:s.heal_down*share,until:sim.time+s.debuff_duration};
+      if (s.heal_down && !(u.immuneUntil>sim.time)) u.currentNextHealDown={ratio:s.heal_down*share,until:sim.time+s.debuff_duration,ownerId:h.id};
       if (s.dot_chance && sim.random()<s.dot_chance && !(u.immuneUntil>sim.time)) {
         sim.fields=sim.fields.filter(f=>!(f.kind==='currentCorrosion'&&f.host===u.id&&f.owner.id===h.id));
         sim.fields.push({kind:'currentCorrosion',owner:h,host:u.id,s,share,power:primary.maxHp*s.dot_hp*share,tick:sim.time+1,until:sim.time+s.duration});

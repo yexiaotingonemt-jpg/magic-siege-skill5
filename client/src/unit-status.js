@@ -2,6 +2,8 @@ import {ELITE_BUFFS} from '../../shared/trait-effects.js';
 import {eliteScoreDuration} from '../../shared/elite-score.js';
 import {available} from '../../shared/skill-value.js';
 import {towerGuardActive,towerAllyProtection} from '../../shared/tower-guard.js';
+import {isCurrentDesign} from '../../shared/current-design.js';
+import {innateRules} from '../../shared/innate-passives.js';
 
 const usable=v=>available(v)>1e-7;
 const percent=n=>Math.round(n*100)+'%';
@@ -18,47 +20,59 @@ export function indexStatusFields(sim){
  }
  return index;
 }
-export function unitStatuses(sim,u,fields=indexStatusFields(sim)){
+// 红色表示对当前玩家不利，蓝色表示对当前玩家有利；标记按减益处理。
+export function statusFrame(u,status,viewer){
+ return (u.side===viewer.side)===(status.tone==='positive')?'blue':'red';
+}
+export function canDispelEnemyBuffs(sim,viewer){
+ return viewer?.classId===3&&(isCurrentDesign(sim.config)||!!innateRules(sim));
+}
+export function unitStatuses(sim,u,fields=indexStatusFields(sim),viewer=null){
  if(u.hp<=0)return [];
- const now=sim.time,out=[],add=(id,name,tone,until,detail,stacks=0,priority=5)=>{if(until>now)out.push({id,name,tone,until,detail,stacks,priority});};
+ const now=sim.time,out=[];
+ const own=sourceId=>sourceId!=null&&(sourceId===viewer?.heroId||sim.get(sourceId)?.playerId===viewer?.id);
+ const visible=(tone,sourceId)=>!viewer||(tone==='positive'&&u.side!==viewer.side?canDispelEnemyBuffs(sim,viewer):own(sourceId)||tone!=='positive'&&u.id===viewer.heroId);
+ const add=(id,name,tone,until,detail,stacks=0,priority=5,sourceId=u.id)=>{if(until>now&&visible(tone,sourceId))out.push({id,name,tone,until,detail,stacks,priority});};
  const debuffNames={moveSlow:['减速','移动速度降低'],attackSpeedDown:['迟缓','攻击速度降低'],vulnerable:['易伤','受到伤害提高'],attackDown:['虚弱','攻击力降低'],healingDown:['减疗','受到治疗降低']};
  for(const [kind,[name,effect]]of Object.entries(debuffNames)){
-  const best=sim.activeDebuffs(u,kind).sort((a,b)=>b.ratio-a.ratio||b.until-a.until)[0];
-  if(best)add(kind,name,'negative',best.until,effect+percent(best.ratio),best.stacks||0,kind==='moveSlow'?1:3);
+  const best=Object.entries(u.debuffs||{}).filter(([key,d])=>d.kind===kind&&d.until>now&&(d.prepaid||usable(d.value))&&visible('negative',Number(key.split(':')[0]))).map(([,d])=>d).sort((a,b)=>b.ratio-a.ratio||b.until-a.until)[0];
+  if(best)add(kind,name,'negative',best.until,effect+percent(best.ratio),best.stacks||0,kind==='moveSlow'?1:3,viewer?.heroId);
  }
- add('stun','眩晕','negative',u.stunUntil,'无法移动、普通攻击和释放技能',0,0);
- if(sim.get(u.tauntId))add('taunt','嘲讽','negative',u.tauntUntil,'被迫攻击嘲讽来源',0,0);
- const scars=Object.values(u.scars||{}).flat().filter(t=>t>now);if(scars.length)add('scar','伤痕','negative',Math.max(...scars),'伤痕标记',sim.scarCount(u),4);
- add('conduct','导电','negative',u.conductUntil,'处于导电状态',0,4);
- if(u.slowUntil>now&&!out.some(x=>x.id==='moveSlow'))add('moveSlow','减速','negative',u.slowUntil,'移动速度降低'+percent(1-u.slowRatio),0,1);
- const guards=(u.guards||[]).filter(g=>g.until>now&&usable(g.value));
+ const stuns=Object.entries(u.stunSources||{}).filter(([id])=>visible('negative',Number(id))).map(([,until])=>until);
+ const stunUntil=viewer&&u.id!==viewer.heroId?Math.min(u.stunUntil,Math.max(0,...stuns)):u.stunUntil;
+ add('stun','眩晕','negative',stunUntil,'无法移动、普通攻击和释放技能',0,0,viewer?.heroId);
+ if(sim.get(u.tauntId))add('taunt','嘲讽','negative',u.tauntUntil,'被迫攻击嘲讽来源',0,0,u.tauntId);
+ const scars=Object.entries(u.scars||{}).filter(([id])=>visible('negative',Number(id))).flatMap(([,times])=>times).filter(t=>t>now);if(scars.length)add('scar','伤痕','negative',Math.max(...scars),'伤痕标记',Math.min(3,scars.length),4,viewer?.heroId);
+ add('conduct','导电','negative',u.conductUntil,'处于导电状态',0,4,u.conductOwner);
+ if(u.slowUntil>now&&!out.some(x=>x.id==='moveSlow'))add('moveSlow','减速','negative',u.slowUntil,'移动速度降低'+percent(1-u.slowRatio),0,1,u.slowOwner);
+ const guards=(u.guards||[]).filter(g=>g.until>now&&usable(g.value)&&visible('positive',g.ownerId));
  const groupedGuards=new Map();for(const g of guards)groupedGuards.set(g.kind||'guard',Math.max(groupedGuards.get(g.kind||'guard')||0,g.ratio));
- if(guards.length)add('guard','减伤','positive',Math.max(...guards.map(g=>g.until)),'技能合计减伤'+percent(Math.min(.8,1-[...groupedGuards.values()].reduce((n,r)=>n*(1-r),1))),0,1);
- if(u.shield>0&&usable(u.shieldValue))add('shield','护盾','positive',u.shieldUntil,'剩余护盾 '+Math.ceil(Math.min(u.shield,available(u.shieldValue))),0,1);
+ if(guards.length)add('guard','减伤','positive',Math.max(...guards.map(g=>g.until)),'技能合计减伤'+percent(Math.min(.8,1-[...groupedGuards.values()].reduce((n,r)=>n*(1-r),1))),0,1,viewer?.heroId);
+ if(u.shield>0&&usable(u.shieldValue))add('shield','护盾','positive',u.shieldUntil,'剩余护盾 '+Math.ceil(Math.min(u.shield,available(u.shieldValue))),0,1,u.shieldOwner);
  if(u.damageStore&&usable(u.damageStore.value))add('damageStore','蓄伤成盾','positive',u.damageStore.until,'已累计 '+Math.floor(u.damageStore.total)+' 伤害，结束按'+percent(u.damageStore.conversionRatio??1)+'转为护盾',0,2);
  add('immune','负面免疫','positive',u.immuneUntil,'免疫新的负面状态',0,0);
  if(u.lordUlt&&usable(u.lordUlt.s.value))add('lordUlt','灭军君临','positive',u.lordUlt.until,'普通攻击附带范围溅射',0,2);
  if(u.currentUlt)add('lordUlt','灭军君临','positive',u.currentUlt.until,(u.currentUlt.s.damage_immune?'免疫任何伤害及负面效果；':'')+'普通攻击附带范围伤害',0,2);
  if(u.currentShell)add('reflect','尖刺外壳','positive',u.currentShell.until,'受到普通攻击或技能攻击时按攻击者攻击力反伤',0,1);
- if(u.currentNextHealDown)add('healingDown','单次减疗','negative',u.currentNextHealDown.until,'下一次受到治疗降低'+percent(u.currentNextHealDown.ratio),0,2);
+ if(u.currentNextHealDown)add('healingDown','单次减疗','negative',u.currentNextHealDown.until,'下一次受到治疗降低'+percent(u.currentNextHealDown.ratio),0,2,u.currentNextHealDown.ownerId);
  for(const [key,until]of Object.entries(u.eliteBuffs||{})){
   const chain=u.eliteScore,next=chain?eliteScoreDuration(chain.baseDuration,chain.generation+1):null;
   const detail=key==='score'&&next!=null?`获得的积分提高50%；本次初始${chain.duration}秒；下次传递${next>0?next+'秒':'改为一次性200积分'}`:ELITE_BUFFS[key]?.description;
   if(ELITE_BUFFS[key])add('elite-'+key,ELITE_BUFFS[key].name,'positive',until,detail,0,0);
  }
  add('immortal','不屈','positive',u.immortalUntil,'生命最低保留1',0,0);
- for(const f of Object.values(u.hastes||{}))add('haste','攻速提升','positive',f.until,'普通攻击速度提高'+percent(f.ratio),0,2);
+ for(const f of Object.values(u.hastes||{}))add('haste','攻速提升','positive',f.until,'普通攻击速度提高'+percent(f.ratio),0,2,f.ownerId);
  if(u.heat>0)add('heat','炙热','positive',u.heatUntil,'火焰技能联动资源',u.heat,3);
- const unitFields=fields.get(u.id)||[],links=unitFields.filter(f=>f.kind==='link');
+ const unitFields=(fields.get(u.id)||[]).filter(f=>visible(['link','lordBurn'].includes(f.kind)?'positive':'negative',f.owner.id)),links=unitFields.filter(f=>f.kind==='link');
  if(links.length)add('link','共生链接','positive',Math.max(...links.map(f=>f.until)),
-  '共'+links.length+'条链接，各条独立计时；'+links.map(f=>'剩余'+Math.max(0,f.until-now).toFixed(1)+'秒，共享'+percent(f.shareRatio??1)+'有效治疗'+(f.shareDamage?'，组内平摊伤害':'')).join('；'),links.length>1?links.length:0,2);
+  '共'+links.length+'条链接，各条独立计时；'+links.map(f=>'剩余'+Math.max(0,f.until-now).toFixed(1)+'秒，共享'+percent(f.shareRatio??1)+'有效治疗'+(f.shareDamage?'，组内平摊伤害':'')).join('；'),links.length>1?links.length:0,2,viewer?.heroId);
  for(const f of unitFields){
   if(f.kind==='lordBurn')add('burnAura','火焰盾','positive',f.until,'向周围目标附加灼烧，移动与突进期间持续生效',0,2);
-  if(f.kind==='dot')add('dot',f.type==='lordScorch'?'灼烧':f.type==='corrosion'?'腐蚀':f.type==='orcDrain'?'汲血链接':f.type==='parasite'?'寄生':'持续伤害','negative',f.until,f.type==='lordScorch'?`每秒受到${Number(f.s.power.toFixed(1))}%施法攻击力伤害，离开火焰盾范围后继续生效`:'持续承受伤害',0,2);
-  if(['currentDrain','currentCorrosion'].includes(f.kind))add('dot',f.kind==='currentDrain'?'汲血连接':'腐蚀','negative',f.until,'持续承受伤害，可被净化',0,2);
+  if(f.kind==='dot')add('dot',f.type==='lordScorch'?'灼烧':f.type==='corrosion'?'腐蚀':f.type==='orcDrain'?'汲血链接':f.type==='parasite'?'寄生':'持续伤害','negative',f.until,f.type==='lordScorch'?`每秒受到${Number(f.s.power.toFixed(1))}%施法攻击力伤害，离开火焰盾范围后继续生效`:'持续承受伤害',0,2,f.owner.id);
+  if(['currentDrain','currentCorrosion'].includes(f.kind))add('dot',f.kind==='currentDrain'?'汲血连接':'腐蚀','negative',f.until,'持续承受伤害，可被净化',0,2,f.owner.id);
  }
- const marks=(u.soulMarks||[]).filter(m=>m.until>=now&&sim.get(m.ownerId));
- if(marks.length)add('soulMark',marks.some(m=>m.current)?'焚魂标记':'焚魂烙印','mark',Math.max(...marks.map(m=>m.until)),marks.some(m=>m.current)?'攻击命中时触发附伤与炙热；可净化':'阵亡时为标记者提供炙热；此击杀记录不受净化影响',0,4);
+ const marks=(u.soulMarks||[]).filter(m=>m.until>=now&&sim.get(m.ownerId)&&visible('mark',m.ownerId));
+ if(marks.length)add('soulMark',marks.some(m=>m.current)?'焚魂标记':'焚魂烙印','mark',Math.max(...marks.map(m=>m.until)),marks.some(m=>m.current)?'攻击命中时触发附伤与炙热；可净化':'阵亡时为标记者提供炙热；此击杀记录不受净化影响',0,4,viewer?.heroId);
  if(towerGuardActive(u,now))add('towerGuard','三重守护','positive',u.towerGuardUntil,'攻击3个目标，受到伤害降低50%',0,0);
  if(u.tower){const protection=towerAllyProtection(u,sim.units);if(protection.count)add('towerAllies','友军护塔','positive',Infinity,`${u.range}格内${protection.count}名友军，最终受到伤害降低${percent(protection.reduction)}`,protection.count,1);}
  for(const [id,name,until,value,detail]of [
@@ -68,7 +82,7 @@ export function unitStatuses(sim,u,fields=indexStatusFields(sim)){
   ['boost','攻击提升',u.boostUntil,u.boostValue,'攻击力提高'+percent(u.attackBoost||0)],
   ['healingBoost','受疗提升',u.healingBoostUntil,u.healingBoostValue,'受到治疗提高'+percent(u.healingBoost||0)],
   ['haste','攻速提升',u.haste?.until,u.haste?.value,'普通攻击速度提高']
- ])if(usable(value))add(id,name,'positive',until,detail);
+ ])if(usable(value))add(id,name,'positive',until,detail,0,5,id==='healingBoost'?u.healingBoostOwner:u.id);
  // Multiple sources of the same effect occupy one slot, using its latest expiry.
  const merged=new Map();for(const status of out){const old=merged.get(status.id);if(!old||status.until>old.until)merged.set(status.id,status);}
  return [...merged.values()].sort((a,b)=>(a.tone==='negative'?0:a.tone==='positive'?1:2)-(b.tone==='negative'?0:b.tone==='positive'?1:2)||a.priority-b.priority||a.id.localeCompare(b.id));

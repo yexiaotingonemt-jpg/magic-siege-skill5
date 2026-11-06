@@ -112,8 +112,10 @@ export class HeroRules {
     u.scars[source.id].push(this.time + duration);
   }
   conduct(u, source, duration) {
-    if (u.hp > 0 && !u.tower && !(u.immuneUntil > this.time))
+    if (u.hp > 0 && !u.tower && !(u.immuneUntil > this.time)) {
       u.conductUntil = this.time + duration;
+      u.conductOwner = source.id;
+    }
   }
   addHeat(h, n) {
     if(isCurrentDesign(this.config))return addCurrentHeat.call(this,h,n);
@@ -241,6 +243,9 @@ export class HeroRules {
   stun(u, source, duration) {
     if (u.tower || u.hp <= 0 || u.immuneUntil > this.time) return false;
     this.interrupt(u);
+    if (!(u.stunUntil > this.time)) u.stunSources = {};
+    u.stunSources ??= {};
+    u.stunSources[source.id] = Math.max(u.stunSources[source.id] || 0, this.time + duration);
     u.stunUntil = Math.max(u.stunUntil || 0, this.time + duration);
     return true;
   }
@@ -269,9 +274,9 @@ export class HeroRules {
       ...extra,
     });
   }
-  haste(u, kind, ratio, duration) {
+  haste(u, kind, ratio, duration, owner = u) {
     u.hastes ??= {};
-    u.hastes[kind] = { ratio, until: this.time + duration };
+    u.hastes[kind] = { ratio, until: this.time + duration, ownerId: owner.id };
   }
   attackRate(u) {
     if(isCurrentDesign(this.config))return currentAttackRate.call(this,u);
