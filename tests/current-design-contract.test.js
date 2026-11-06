@@ -72,7 +72,7 @@ test('完整覆盖五职业20技能、5被动和105种词条，通用项展开14
  assert.equal(source.skills.length-1,25);assert.equal(source.affixes.length-1,104);assert.equal(new Set(design.affixes.map(a=>a.sourceId)).size,105);assert.equal(design.affixes.length,144);
  assert.ok(!design.affixes.some(a=>a.sourceId===63),'已移除的范围连轰不能重新混入');
 });
-test('计分系数来自当前源表，固定B、P与KDA口径',()=>{
- for(const id of [0,4,5,2,3]){const row=source.scores.find(r=>r[0]===classes[id]+'系数');const numbers=[...row[1].matchAll(/[abc]＝(\d+\.\d+)/g)].map(m=>Number(m[1]));assert.deepEqual(['a','b','c'].map(k=>design.scoreCoefficients[id][k]),numbers);}
+test('计分系数对应源表及精灵治疗权重校准，固定B、P与KDA口径',()=>{
+ for(const id of [0,4,5,2,3]){const row=source.scores.find(r=>r[0]===classes[id]+'系数');const numbers=[...row[1].matchAll(/[abc]＝(\d+\.\d+)/g)].map(m=>Number(m[1]));if(id===5)numbers[2]=.15;assert.deepEqual(['a','b','c'].map(k=>design.scoreCoefficients[id][k]),numbers);}
  assert.equal(design.rules.heroKillPoints,200);assert.equal(design.rules.heroAssistPoints,100);assert.equal(design.rules.staminaPoints,100);assert.equal(design.rules.standardStamina,21);
 });
