@@ -1,5 +1,5 @@
 // 只裁剪发给客户端的副本；权威战斗对象、账本和已排队技能保持原样。
-const serverFields=new Set(['settledReport','innateScoreBase','contributors','support','attackerMemory','stats','deathDone']);
+const serverFields=new Set(['settledReport','innateScoreBase','currentScoreBase','contributors','support','attackerMemory','stats','deathDone']);
 const coordinateFields=new Set(['x','y','tx','ty']);
 
 export function clientSnapshot(value,time){
