@@ -24,7 +24,7 @@ const name=`magic-siege-desktop-v${CLIENT_VERSION}-win-${process.arch}-${stamp}`
 const output=path.join(process.env.MAGIC_RELEASE_DIR?path.resolve(process.env.MAGIC_RELEASE_DIR):path.join(root,'release'),name),staging=await mkdtemp(path.join(tmpdir(),'magic-desktop-package-'));
 try{
  const source=path.join(staging,'app');await mkdir(source);
- const copy=(from,to=from)=>cp(path.join(root,from),path.join(source,to),{recursive:true});
+ const copy=(from,to=from)=>cp(path.join(root,from),path.join(source,to),{recursive:true,dereference:true});
  for(const file of ['client/dist','client/desktop','client/launcher.mjs','shared/protocol.js','shared/performance-permission.js'])await copy(file);
  await mkdir(path.join(source,'client'),{recursive:true});
  await writeFile(path.join(source,'client/client-config.json'),JSON.stringify(settings,null,2)+'\n');
