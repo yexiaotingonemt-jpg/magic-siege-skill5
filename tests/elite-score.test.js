@@ -7,6 +7,10 @@ import {statPoints} from '../shared/contribution-score.js';
 import {grantEliteScore,eliteScoreActive} from '../shared/elite-score.js';
 import {unitStatuses} from '../client/src/unit-status.js';
 import {Room} from '../server/room.mjs';
+import {createGameRuntime,prepareGameRuntime} from '../server/game-runtime.mjs';
+import {mkdtempSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
 function arena(config) {
   const s=new Simulation(config);s.units=[];s.waveAt=1e9;s.player.retired=true;
@@ -16,6 +20,28 @@ function arena(config) {
   const elite=()=>Object.assign(s.spawn(1,'melee',0,1),{elite:true});
   return {s,hero,kill,elite};
 }
+test('保留战局热更：旧刷新周期及四棒BUFF迁移可回滚，不回算历史积分',()=>{
+  const previous=createGameRuntime({dataDir:mkdtempSync(path.join(tmpdir(),'elite-migration-'))}),s=previous.room.sim;
+  s.units=[];s.time=777;delete s.eliteAt;
+  const carriers=[];
+  for(let generation=0;generation<4;generation++){
+    const p=s.makePlayer(0,false);p.classId=0;
+    const h=s.spawn(0,'melee',0,1);assert.ok(s.contract(p,h.id));
+    const duration=30*(4-generation)/4;
+    h.eliteScore={baseDuration:30,generation,duration};h.eliteBuffs={score:s.time+duration/2};
+    carriers.push({h,p,chain:h.eliteScore,until:h.eliteBuffs.score,points:p.totalPoints});
+  }
+  const prepared=prepareGameRuntime({dataDir:previous.accounts.dataDir},previous);
+  assert.equal(s.eliteAt,undefined);for(const row of carriers)assert.equal(row.h.eliteScore,row.chain);
+  prepared.commit();assert.equal(s.eliteAt,1200);
+  for(const [generation,row] of carriers.entries()){
+    assert.equal(row.h.eliteScore.duration,60-generation*15);
+    near(row.h.eliteBuffs.score-s.time,(60-generation*15)/2);
+    assert.equal(row.p.totalPoints,row.points);
+  }
+  prepared.rollback();assert.equal(Object.hasOwn(s,'eliteAt'),false);
+  for(const row of carriers){assert.equal(row.h.eliteScore,row.chain);assert.equal(row.h.eliteBuffs.score,row.until);assert.equal(row.p.totalPoints,row.points);}
+});
 for(const [mode,config] of [['经典',defaults],['当前稿',createCurrentDesignConfig(defaults)]]) {
   test(`${mode}：特殊怪物授予60秒积分增益，每棒扣15秒，末棒一次性200分`,()=>{
     const {s,hero,kill,elite}=arena(config);let carrier=hero(0);kill(carrier,elite());
