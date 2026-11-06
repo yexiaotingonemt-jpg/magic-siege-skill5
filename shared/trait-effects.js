@@ -2,10 +2,9 @@ import { commonRank } from "./common-traits.js";
 import {innateOnKill} from './innate-passives.js';
 import { isCurrentDesign } from './current-design.js';
 import { currentTraitEffects } from './current-design-mechanics.js';
-import {grantEliteScore,transferEliteScore} from './elite-score.js';
 const near = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 export const ELITE_BUFFS = {
-  score: {name:'积分 +20%',description:'获得的积分提高20%；被敌方英雄击杀后传递，每次减少初始时长的1/4，不足1/4时改为一次性200积分'},
+  score: {name:'积分 +50%',description:'获得的积分提高50%；初始60秒，经击杀传递给敌方英雄，每次减少15秒，第五位获得一次性200积分并结束传递；普通单位补刀时追溯目标最后记录的有效英雄'},
   hunt: { name: "狩猎恢复", description: "击杀非召唤单位恢复2%最大生命" },
   assault: { name: "强袭", description: "攻击力提高20%" },
   arcane: {
@@ -169,8 +168,6 @@ export const traitEffects = {
         deploying: false,
       });
     }
-    if (t.elite) this.eliteReward(h,p);
-    else if (t.hero) transferEliteScore(this,h,t);
   },
   onUnitDeath(t) {
     const killed = t.lethalSkill;
@@ -267,7 +264,6 @@ export const traitEffects = {
     }
   },
 };
-traitEffects.eliteReward=function(h){grantEliteScore(this,h);};
 
 for(const [key,fn] of Object.entries(currentTraitEffects)){
   const legacy=traitEffects[key];

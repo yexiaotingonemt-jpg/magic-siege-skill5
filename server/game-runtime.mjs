@@ -10,6 +10,7 @@ import {liveConfig,clone,validateConfig} from '../shared/config.js';
 import {isCurrentDesign} from '../shared/current-design.js';
 import {planExperienceMigration} from '../shared/experience.js';
 import {planScoreMigration} from '../shared/score-migration.js';
+import {ELITE_SCORE,eliteScoreDuration} from '../shared/elite-score.js';
 import {contractHistoryPage} from '../shared/contract-history.js';
 import {prepareChoice} from '../shared/traits.js';
 const defaults=liveConfig();
@@ -95,6 +96,18 @@ export function prepareGameRuntime(options,previous,{restartBattle=false}={}){
  if(!restartBattle&&isCurrentDesign(previous.room.sim.config)!==isCurrentDesign(defaults))throw Error('技能规则改变，请明确选择重开战局');
  const nextConfig=validateConfig(restartBattle?clone(defaults):applyOverrides(previous.defaults,previous.room.sim.config,defaults));
  const experienceMigration=restartBattle?[]:planExperienceMigration(previous.room.sim.players,previous.room.sim.config.world,nextConfig.world);
+ // Older live battles have no independent elite clock. Keep the opening-time
+ // cadence and convert active old chains at the same remaining-time ratio.
+ const eliteClockBefore=previous.room.sim.eliteAt;
+ const eliteClockAfter=eliteClockBefore??(Math.floor(previous.room.sim.time/ELITE_SCORE.spawnInterval)+1)*ELITE_SCORE.spawnInterval;
+ const eliteMigration=[];
+ if(!restartBattle)for(const hero of previous.room.sim.units){
+  const chain=hero.eliteScore,until=hero.eliteBuffs?.score;
+  if(!hero.hero||hero.hp<=0||!(until>previous.room.sim.time)||chain?.baseDuration===ELITE_SCORE.duration)continue;
+  const generation=chain?.generation??0,duration=eliteScoreDuration(ELITE_SCORE.duration,generation);
+  const priorDuration=chain?.duration??30*(4-generation)/4;
+  eliteMigration.push({hero,before:chain,until,after:{baseDuration:ELITE_SCORE.duration,generation,duration},nextUntil:previous.room.sim.time+duration*Math.min(1,(until-previous.room.sim.time)/priorDuration)});
+ }
  const scoreMigration=restartBattle?[]:planScoreMigration(previous.room.sim,nextConfig);
  // Stage pending choices against the new pools before switching any live object.
  // Keep queue/choice identities and provide exact rollback of candidates and RNG.
@@ -117,6 +130,7 @@ export function prepareGameRuntime(options,previous,{restartBattle=false}={}){
   Object.setPrototypeOf(previous.accounts,Accounts.prototype);
   Object.setPrototypeOf(room,Room.prototype);Object.setPrototypeOf(room.sim,Simulation.prototype);
   room.config=clone(nextConfig);room.sim.config=clone(nextConfig);room.sim.npcPolicy??={...DEFAULT_NPC_POLICY};room.configVersion++;room.last=performance.now();
+  if(!restartBattle){room.sim.eliteAt=eliteClockAfter;for(const change of eliteMigration){change.hero.eliteScore=change.after;change.hero.eliteBuffs.score=change.nextUntil;}}
   for(const change of experienceMigration)change.progress.xp=change.after;
   for(const change of scoreMigration)change.actor.currentScoreBase=change.after;
   for(const change of choiceMigration){for(const key of Object.keys(change.choice))delete change.choice[key];Object.assign(change.choice,change.after);}
@@ -125,6 +139,7 @@ export function prepareGameRuntime(options,previous,{restartBattle=false}={}){
   Object.setPrototypeOf(previous.accounts,saved.accountsPrototype);
   Object.setPrototypeOf(room,saved.roomPrototype);Object.setPrototypeOf(room.sim,saved.simPrototype);
   room.config=saved.config;room.sim.config=saved.simConfig;room.sim.npcPolicy=saved.npcPolicy;room.configVersion=saved.configVersion;room.last=saved.last;
+  if(!restartBattle){if(eliteClockBefore===undefined)delete room.sim.eliteAt;else room.sim.eliteAt=eliteClockBefore;for(const change of eliteMigration){if(change.before===undefined)delete change.hero.eliteScore;else change.hero.eliteScore=change.before;change.hero.eliteBuffs.score=change.until;}}
   for(const change of experienceMigration)change.progress.xp=change.before;
   for(const change of scoreMigration){if(change.hadBase)change.actor.currentScoreBase=change.before;else delete change.actor.currentScoreBase;}
   for(const change of choiceMigration){for(const key of Object.keys(change.choice))delete change.choice[key];Object.assign(change.choice,change.before);}
