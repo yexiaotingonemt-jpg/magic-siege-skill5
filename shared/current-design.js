@@ -161,7 +161,10 @@ export function currentContributionParts(config,h) {
     ['minionKillHealth',s.minionKillHealth||0,c.a],['heroKills',s.heroKills||0,r.heroKillPoints],
     ['heroAssists',s.heroAssists||0,r.heroAssistPoints],['staminaSpent',s.staminaSpent||0,r.staminaPoints],
     ['eliteScoreBonus',s.eliteScoreBonus||0,1],['eliteScoreBounty',s.eliteScoreBounty||0,1],
-  ].map(([key,value,coefficient]) => ({key,value,coefficient,points:value*coefficient}));
+  ].map(([key,value,coefficient]) => {
+    const base=h.currentScoreBase?.[key];
+    return {key,value,coefficient,points:base?base.points+(value-base.value)*coefficient:value*coefficient};
+  });
 }
 const f=n=>String(Number(Number(n).toPrecision(3))), pct=n=>f(n*100)+'%';
 const units={power:'伤害／攻击力',path_damage:'沿途伤害／攻击力',heal:'治疗／攻击力',per_hit:'每次攻击附伤／攻击力',duration:'持续秒',targets:'目标数',range:'范围格',shots:'炮数',knock:'击退格',gap:'间隔秒',
