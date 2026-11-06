@@ -1,4 +1,5 @@
 import {ELITE_BUFFS} from '../../shared/trait-effects.js';
+import {eliteScoreDuration} from '../../shared/elite-score.js';
 import {available} from '../../shared/skill-value.js';
 import {towerGuardActive,towerAllyProtection} from '../../shared/tower-guard.js';
 
@@ -41,8 +42,8 @@ export function unitStatuses(sim,u,fields=indexStatusFields(sim)){
  if(u.currentShell)add('reflect','尖刺外壳','positive',u.currentShell.until,'受到普通攻击或技能攻击时按攻击者攻击力反伤',0,1);
  if(u.currentNextHealDown)add('healingDown','单次减疗','negative',u.currentNextHealDown.until,'下一次受到治疗降低'+percent(u.currentNextHealDown.ratio),0,2);
  for(const [key,until]of Object.entries(u.eliteBuffs||{})){
-  const chain=u.eliteScore,next=chain?chain.baseDuration*(3-chain.generation)/4:null;
-  const detail=key==='score'&&next!=null?`获得的积分提高20%；本次初始${chain.duration}秒；下次传递${next>0?next+'秒':'改为一次性200积分'}`:ELITE_BUFFS[key]?.description;
+  const chain=u.eliteScore,next=chain?eliteScoreDuration(chain.baseDuration,chain.generation+1):null;
+  const detail=key==='score'&&next!=null?`获得的积分提高50%；本次初始${chain.duration}秒；下次传递${next>0?next+'秒':'改为一次性200积分'}`:ELITE_BUFFS[key]?.description;
   if(ELITE_BUFFS[key])add('elite-'+key,ELITE_BUFFS[key].name,'positive',until,detail,0,0);
  }
  add('immortal','不屈','positive',u.immortalUntil,'生命最低保留1',0,0);

@@ -1,4 +1,5 @@
 import {recordEffectiveHeal,recordEffectiveHit} from './assist-rules.js';
+import {recordEliteScoreHit} from './elite-score.js';
 import {innateRules,innateAfterDamage,innateAfterHeal} from './innate-passives.js';
 import {
   triggerTowerGuard,
@@ -469,6 +470,7 @@ export class HeroRules {
       );
       if (!t.tower) this.stat(credit, "unitDamage", sum);
       recordEffectiveHit(a,t,credit,this.time,this.config.world.assistWindow);
+      recordEliteScoreHit(t,credit);
       if (credit?.hero) {
         t.contributors ??= {};
         t.contributors[credit.playerId] = this.time;

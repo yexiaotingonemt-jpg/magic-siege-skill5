@@ -30,7 +30,7 @@ for(const width of [1440,390])test(`特殊怪物与积分英雄闪光、继承�
     await expect.poll(async()=> (await flashReport()).some(r=>r.unitId===elite.id)).toBe(true);
     await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`flash-monster-${width}.png`)});
     s.damage(h,elite,1e9);broadcast();
-    await expect(page.locator('#eliteBuffs')).toContainText('积分 +20% 30s');
+    await expect(page.locator('#eliteBuffs')).toContainText('积分 +50% 60s');
     const buffBox=await page.locator('#eliteBuffs').boundingBox(),hpBox=await page.locator('#hpLabel').boundingBox();
     expect(buffBox.y).toBeGreaterThanOrEqual(hpBox.y+hpBox.height);
     await expect.poll(async()=> (await flashReport()).some(r=>r.unitId===h.id&&!r.elite)).toBe(true);
@@ -39,13 +39,13 @@ for(const width of [1440,390])test(`特殊怪物与积分英雄闪光、继承�
     const status=(await statuses()).find(r=>r.id==='elite-score');
     const canvas=page.locator('#battle canvas'),box=await canvas.boundingBox(),camera=await page.evaluate(()=>window.__game.renderer.getCamera());
     await page.mouse.click(box.x+(status.x+status.size/2)*box.width/500,box.y+(status.y+status.size/2-camera.scrollY)*box.height/500);
-    await expect.poll(()=>page.evaluate(()=>window.__game.renderer.game.scene.getScenes(true)[0].children.getByName('unit-status-tooltip').text)).toContain('下次传递22.5秒');
+    await expect.poll(()=>page.evaluate(()=>window.__game.renderer.game.scene.getScenes(true)[0].children.getByName('unit-status-tooltip').text)).toContain('下次传递45秒');
     await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`flash-hero-${width}.png`)});
-    await page.reload();await expect(page.locator('#eliteBuffs')).toContainText('积分 +20% 30s');
+    await page.reload();await expect(page.locator('#eliteBuffs')).toContainText('积分 +50% 60s');
     await page.waitForFunction(()=>window.__game?.renderer.getCamera());
     const enemyPlayer=s.makePlayer(1,false);s.contract(enemyPlayer,s.spawn(1,'melee',0,1).id);const next=s.hero(enemyPlayer);next.x=h.x;next.y=h.y+1;
-    s.time=29.9;s.damage(next,h,1e9);broadcast();
-    await expect(page.locator('#eliteBroadcast')).toContainText('22.5秒');
+    s.time=59.9;s.damage(next,h,1e9);broadcast();
+    await expect(page.locator('#eliteBroadcast')).toContainText('45秒');
     await expect.poll(async()=> (await flashReport()).some(r=>r.unitId===next.id)).toBe(true);
     s.time=next.eliteBuffs.score;broadcast();
     await expect.poll(async()=> (await flashReport()).length).toBe(0);

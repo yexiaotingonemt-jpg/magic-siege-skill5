@@ -122,8 +122,8 @@ test("精英特殊外观、在线广播及本人Buff倒计时", async ({
     u = s.units.find((u) => u.side === 0 && !u.hero && u.type === "melee");
   s.contract(p, u.id);
   const h = s.hero(p);
-  s.waveNumber = 2;
-  s.spawnWave();
+  s.time = 600;
+  s.spawnElitesIfDue();
   const elite = s.units.find((u) => u.elite && u.side === 1);
   elite.x = h.x;
   elite.y = h.y + 2;
@@ -144,8 +144,8 @@ test("精英特殊外观、在线广播及本人Buff倒计时", async ({
     game.room.sequence++;
     game.room.broadcast();
     for (const target of [page, other])
-      await expect(target.locator("#eliteBroadcast")).toContainText("积分 +20%");
-    await expect(page.locator("#eliteBuffs")).toContainText("30s");
+      await expect(target.locator("#eliteBroadcast")).toContainText("积分 +50%");
+    await expect(page.locator("#eliteBuffs")).toContainText("60s");
     await expect(page.locator('[data-nav="reports"], #reports')).toHaveCount(0);
     expect(errors).toEqual([]);
   } finally {

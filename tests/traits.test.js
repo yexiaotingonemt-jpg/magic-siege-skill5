@@ -163,12 +163,12 @@ test("服务端选择指令幂等，伪造来源无法替他人选择", () => {
   assert.equal(p.progress[0].traits[choice.options[0]], 1);
   assert.doesNotThrow(() => JSON.stringify(room.snapshot()));
 });
-test("每三波双方各加一名精英，重建后重新计波，精英不可契约", () => {
+test("每600秒双方各加一名精英，首次600秒且精英不可契约", () => {
   const s = new Simulation();
+  for (let wave = 0; wave < 30; wave++) s.spawnWave();
   assert.equal(s.units.filter((u) => u.elite).length, 0);
-  s.spawnWave();
-  assert.equal(s.units.filter((u) => u.elite).length, 0);
-  s.spawnWave();
+  s.time = 600;
+  s.spawnElitesIfDue();
   const elites = s.units.filter((u) => u.elite);
   assert.deepEqual(elites.map((u) => u.side).sort(), [0, 1]);
   for (const u of elites) {
@@ -178,29 +178,31 @@ test("每三波双方各加一名精英，重建后重新计波，精英不可�
   }
   s.resetMap();
   assert.equal(s.units.filter((u) => u.elite).length, 0);
-  s.spawnWave();
-  s.spawnWave();
+  s.spawnElitesIfDue();
+  assert.equal(s.units.filter((u) => u.elite).length, 0);
+  s.time = 1200;
+  s.spawnElitesIfDue();
   assert.equal(s.units.filter((u) => u.elite).length, 2);
 });
 for (const [i, buff] of ["score"].entries())
-  test("精英积分奖励" + buff + "广播及战报可序列化，30秒到期", () => {
+  test("精英积分奖励" + buff + "广播及战报可序列化，60秒到期", () => {
     const { s, p, h, enemy } = arena();
     enemy.elite = true;
     enemy.hero = false;
     s.random = () => i / 4 + 0.01;
     s.damage(h, enemy, 1e9);
-    assert.equal(h.eliteBuffs[buff], 30);
+    assert.equal(h.eliteBuffs[buff], 60);
     assert.match(s.battleEvents[0].text, /特殊怪物/);
     assert.equal(s.battleEvents[0].buff, buff);
     assert.equal(s.battleEvents.length, 1);
     s.die(enemy, h);
     assert.equal(s.battleEvents.length, 1);
     assert.doesNotThrow(() => JSON.stringify(s.battleEvents));
-    s.time = 30.1;
+    s.time = 60.1;
     assert.ok(!(h.eliteBuffs[buff] > s.time));
   });
-test("小兵击杀、友方击杀、阵亡英雄的延迟击杀不领取精英Buff", () => {
-  for (const kind of ["minion", "friendly", "dead"]) {
+test("无英雄记录的小兵击杀及阵亡英雄的延迟击杀不领取精英Buff", () => {
+  for (const kind of ["minion", "dead"]) {
     const { s, h, enemy, friends } = arena();
     enemy.elite = true;
     enemy.hero = false;
