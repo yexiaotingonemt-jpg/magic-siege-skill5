@@ -8,6 +8,8 @@ import {planScoreMigration} from '../shared/score-migration.js';
 import {createGameRuntime,prepareGameRuntime} from '../server/game-runtime.mjs';
 import {clone} from '../shared/config.js';
 import {clientSnapshot} from '../server/client-snapshot.mjs';
+import {Room} from '../server/room.mjs';
+import {liveConfig} from '../shared/config.js';
 
 test('精灵每100点有效治疗记15分，满血和溢出部分不计；其他系数保持',()=>{
  const {s,p,h,friend}=arena(5);assert.deepEqual(s.config.design.scoreCoefficients[5],{a:.085337,b:.001707,c:.15});
@@ -66,4 +68,20 @@ test('仅被迟到助攻引用的已结算英雄，首次追加贡献时沿用�
  const next=clone(s.config);next.design.scoreCoefficients[5].c=.15;assert.equal(planScoreMigration(s,next).length,0);s.config=next;
  s.stat(h,'heroAssists',1);near(p.totalPoints-before,100);near(h.settledReport.points,p.totalPoints);
  near(h.settledReport.parts.find(p=>p.key==='healing').points,parts.find(p=>p.key==='healing').points);
+});
+
+test('系数迁移后清榜只清累计，新治疗与迟到助攻不重复计入旧分',()=>{
+ const room=new Room(liveConfig()),admin={id:'elf-admin',name:'测试',side:0,isSuperAdmin:true};
+ const s=room.sim,p=room.player(admin);p.classId=5;p.stamina=100;
+ const h=s.spawn(0,'ranged',0,1);assert.ok(s.contract(p,h.id));
+ s.config.design.scoreCoefficients[5].c=.060041;s.stat(h,'healing',100);
+ const next=clone(s.config);next.design.scoreCoefficients[5].c=.15;
+ for(const c of planScoreMigration(s,next))c.actor.currentScoreBase=c.after;s.config=next;
+ const lifetime=s.ratingParts(h).reduce((n,p)=>n+p.points,0),baseline=structuredClone(h.currentScoreBase);
+ assert.equal(room.command(admin,{type:'clearRanking',id:'clear'}).ok,true);near(p.totalPoints,0);
+ assert.deepEqual(h.currentScoreBase,baseline);near(h.stats.healing,100);
+ s.stat(h,'healing',100);near(p.totalPoints,15);
+ near(s.ratingParts(h).reduce((n,p)=>n+p.points,0),lifetime+15);
+ s.settle(h,'清榜后结算');near(p.totalPoints,15);near(h.settledReport.points,lifetime+15);
+ s.stat(h,'heroAssists',1);near(p.totalPoints,115);near(h.settledReport.points,lifetime+115);
 });
