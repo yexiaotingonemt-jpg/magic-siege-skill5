@@ -59,3 +59,11 @@ test('系数未变化的其他职业不迁移',()=>{
  const {s,h}=arena(4),next=clone(s.config);next.design.scoreCoefficients[5].c=.2;
  assert.equal(planScoreMigration(s,next).some(c=>c.actor===h),false);
 });
+
+test('仅被迟到助攻引用的已结算英雄，首次追加贡献时沿用冻结账本',()=>{
+ const {s,p,h}=arena(5);s.config.design.scoreCoefficients[5].c=.060041;s.stat(h,'healing',100);s.settle(h,'阵亡');h.hp=0;
+ s.units=s.units.filter(u=>u!==h);const before=p.totalPoints,parts=structuredClone(h.settledReport.parts);
+ const next=clone(s.config);next.design.scoreCoefficients[5].c=.15;assert.equal(planScoreMigration(s,next).length,0);s.config=next;
+ s.stat(h,'heroAssists',1);near(p.totalPoints-before,100);near(h.settledReport.points,p.totalPoints);
+ near(h.settledReport.parts.find(p=>p.key==='healing').points,parts.find(p=>p.key==='healing').points);
+});
