@@ -3,25 +3,29 @@ import {names} from '../../shared/config.js';
 import {describeAbilities} from './ability-descriptions.js';
 import {SKILL_PROGRESSION} from '../../shared/skill-progression.js';
 import {traitSkill} from '../../shared/traits.js';
+import {elfLinkCount} from './elf-link-count.js';
 
 const frames=[[0,3,2,3],[1,6,1,1],[5,7,2,3],[3,3,0,3],[4,4,4,4],[5,2,5,5],[0,0,2,3]];
 const shortStatus={range:'目标太远',target:'缺少目标',conduct:'缺少导电目标',healing:'友军满血',stamina:'体力不足',stunned:'眩晕中',channel:'炮击引导中',cleanse:'无负面可净化',casting:'施法中',cooldown:'冷却中','no-hero':'请先契约'};
 export function createSkillHud(container){
  // Keep the actual buttons alive across updates, including pointer down/up.
- container.innerHTML=Array.from({length:4},(_,i)=>`<div><button data-cast="${i}" class="skill s${i}"><span class="skill-art"></span><span class="skill-lock" aria-hidden="true" hidden></span><em></em></button><div class="skill-caption"><button class="skill-info" data-info="${i}" aria-label="查看技能${i+1}说明"><b></b><span aria-hidden="true">i</span></button></div><small class="skill-cost"></small><button class="upgrade" data-up="${i}" hidden>＋</button></div>`).join('');
- const slots=[...container.children].map(slot=>({button:slot.querySelector('[data-cast]'),art:slot.querySelector('.skill-art'),lock:slot.querySelector('.skill-lock'),count:slot.querySelector('em'),name:slot.querySelector('b'),cost:slot.querySelector('.skill-cost'),upgrade:slot.querySelector('.upgrade')}));
+ container.innerHTML=Array.from({length:4},(_,i)=>`<div><button data-cast="${i}" class="skill s${i}"><span class="skill-art"></span><span class="skill-lock" aria-hidden="true" hidden></span><em></em></button><span class="skill-link-count" aria-hidden="true" hidden></span><div class="skill-caption"><button class="skill-info" data-info="${i}" aria-label="查看技能${i+1}说明"><b></b><span aria-hidden="true">i</span></button></div><small class="skill-cost"></small><button class="upgrade" data-up="${i}" hidden>＋</button></div>`).join('');
+ const slots=[...container.children].map(slot=>({button:slot.querySelector('[data-cast]'),art:slot.querySelector('.skill-art'),lock:slot.querySelector('.skill-lock'),count:slot.querySelector('em'),links:slot.querySelector('.skill-link-count'),name:slot.querySelector('b'),cost:slot.querySelector('.skill-cost'),upgrade:slot.querySelector('.upgrade')}));
  let guide;
  const updateTiming=sim=>{
   if(!guide)return;
   const p=sim.player,h=sim.hero(),b=p.builds[p.classId],now=sim.time;
+  const linkCount=elfLinkCount(sim,h);
   slots.forEach((slot,i)=>{
    const plan=sim.castPlan(i),cd=Math.max(0,p.cd[i]-now),unlock=SKILL_PROGRESSION[i].unlock;
    const casting=(h?.castUntil>now||h?.channelUntil>now)&&h.skillAnimation?.skill===i;
    const status=casting?'施法中':plan.ok?'可释放':plan.code==='locked'?(p.level<unlock?`Lv.${unlock}解锁`:'已解锁'):shortStatus[plan.code]||plan.reason;
    slot.button.classList.toggle('unready',!plan.ok);slot.button.classList.toggle('ready',plan.ok);slot.button.classList.toggle('casting',!!casting);slot.button.dataset.state=casting?'casting':plan.code;
    slot.button.classList.toggle('out-of-range',plan.code==='range'||plan.code==='wrong-target');
-   slot.button.setAttribute('aria-label',guide.skills[i].name+' · '+status);
-   slot.button.title=`${guide.skills[i].summary}\n${guide.skills[i].compactMeta}\n${casting?'正在施法':plan.reason}${cd?` · 剩余${cd.toFixed(1)}秒`:''}`;
+   const showLinks=h?.classId===5&&i===1,linkText=showLinks?` · 当前链接${linkCount}条`:'';
+   slot.links.hidden=!showLinks;slot.links.textContent=showLinks?`链接 ${linkCount}`:'';
+   slot.button.setAttribute('aria-label',guide.skills[i].name+' · '+status+linkText);
+   slot.button.title=`${guide.skills[i].summary}\n${guide.skills[i].compactMeta}\n${casting?'正在施法':plan.reason}${cd?` · 剩余${cd.toFixed(1)}秒`:''}${linkText}${showLinks?'（同一友军的多条链接分别计数）':''}`;
    slot.count.className=casting?'casting-count':cd?'cooldown-count':!b[i]?'locked-count':'';
    slot.count.textContent=casting?'◌':!b[i]?'':cd?Math.max(.1,Math.ceil(cd*10-1e-9)/10).toFixed(1)+'s':'';
   });
