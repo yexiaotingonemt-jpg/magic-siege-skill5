@@ -65,7 +65,7 @@ export function unitStatuses(sim,u,fields=indexStatusFields(sim),viewer=null){
  if(u.heat>0)add('heat','炙热','positive',u.heatUntil,'火焰技能联动资源',u.heat,3);
  const unitFields=(fields.get(u.id)||[]).filter(f=>visible(['link','lordBurn'].includes(f.kind)?'positive':'negative',f.owner.id)),links=unitFields.filter(f=>f.kind==='link');
  if(links.length)add('link','共生链接','positive',Math.max(...links.map(f=>f.until)),
-  '共'+links.length+'条链接，各条独立计时；'+links.map(f=>'剩余'+Math.max(0,f.until-now).toFixed(1)+'秒，共享'+percent(f.shareRatio??1)+'有效治疗'+(f.shareDamage?'，组内平摊伤害':'')).join('；'),links.length>1?links.length:0,2,viewer?.heroId);
+  '共'+links.length+'条链接，各条独立计时；'+links.map(f=>'剩余'+Math.max(0,f.until-now).toFixed(1)+'秒，共享'+percent(f.shareRatio??1)+'有效治疗'+(f.shareDamage?'，组内平摊伤害':'')).join('；'),links.length,2,viewer?.heroId);
  for(const f of unitFields){
   if(f.kind==='lordBurn')add('burnAura','火焰盾','positive',f.until,'向周围目标附加灼烧，移动与突进期间持续生效',0,2);
   if(f.kind==='dot')add('dot',f.type==='lordScorch'?'灼烧':f.type==='corrosion'?'腐蚀':f.type==='orcDrain'?'汲血链接':f.type==='parasite'?'寄生':'持续伤害','negative',f.until,f.type==='lordScorch'?`每秒受到${Number(f.s.power.toFixed(1))}%施法攻击力伤害，离开火焰盾范围后继续生效`:'持续承受伤害',0,2,f.owner.id);

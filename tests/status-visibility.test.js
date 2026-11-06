@@ -71,6 +71,6 @@ test('叠加链接先筛选施加者，再统计自己的链接数量和独立�
   {kind:'link',owner:other,host:friend.id,until:20,shareRatio:.8});
  const own=shown(s,friend).find(x=>x.id==='link');assert.equal(own.stacks,2);assert.equal(own.until,8);
  assert.equal((own.detail.match(/剩余/g)||[]).length,2);assert.ok(!own.detail.includes('80%'));
- const foreign=shown(s,friend,s.players[other.playerId]).find(x=>x.id==='link');assert.equal(foreign.until,20);assert.equal(foreign.stacks,0);
+ const foreign=shown(s,friend,s.players[other.playerId]).find(x=>x.id==='link');assert.equal(foreign.until,20);assert.equal(foreign.stacks,1);
  assert.equal(unitStatuses(s,friend).find(x=>x.id==='link').stacks,3);
 });
