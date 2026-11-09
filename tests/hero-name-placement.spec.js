@@ -27,7 +27,7 @@ for(const width of [1440,390])test(`密集战斗中名字保持自身锚点并�
   }
   await sync();await expect.poll(async()=>(await report())?.bottom).toBe(initial.bottom);
   const r=await report();expect(r.truncated).toBe(true);expect(r.cssFontSize).toBeGreaterThanOrEqual(11.9);
-  const point=await page.evaluate(r=>{const canvas=__game.renderer.game.canvas.getBoundingClientRect(),camera=__game.renderer.getCamera();return {x:canvas.x+(r.left+r.right)/2/500*canvas.width,y:canvas.y+((r.top+r.bottom)/2-camera.scrollY)/500*canvas.height};},r);
+  const point=await page.evaluate(r=>{const canvas=__game.renderer.game.canvas.getBoundingClientRect(),camera=__game.renderer.getCamera();return {x:canvas.x+(r.left+r.right)/2/500*canvas.width,y:canvas.y+((r.top+r.bottom)/2-camera.scrollY)/__game.renderer.game.scale.gameSize.height*canvas.height};},r);
   await page.mouse.move(point.x,point.y);await expect.poll(()=>page.evaluate(name=>__game.renderer.game.scene.scenes[0].children.list.some(o=>o.visible&&o.text===name),account.name)).toBe(true);
   await page.locator('#battle').screenshot({path:path.join(process.env.MAGIC_QA_DIR,`hero-name-placement-${width}.png`)});
   s.shield(h,100,h,20);h.eliteBuffs={score:20,hunt:20,fortitude:20,assault:20};await sync();await expect.poll(async()=>(await report())?.bottom).toBeLessThan(initial.bottom);

@@ -38,7 +38,7 @@ for(const width of [1440,390])test(`特殊怪物与积分英雄闪光、继承�
     await expect.poll(async()=> (await statuses()).some(r=>r.id==='elite-score')).toBe(true);
     const status=(await statuses()).find(r=>r.id==='elite-score');
     const canvas=page.locator('#battle canvas'),box=await canvas.boundingBox(),camera=await page.evaluate(()=>window.__game.renderer.getCamera());
-    await page.mouse.click(box.x+(status.x+status.size/2)*box.width/500,box.y+(status.y+status.size/2-camera.scrollY)*box.height/500);
+    await page.mouse.click(box.x+(status.x+status.size/2)*box.width/500,box.y+(status.y+status.size/2-camera.scrollY)*box.height/camera.viewportHeight);
     await expect.poll(()=>page.evaluate(()=>window.__game.renderer.game.scene.getScenes(true)[0].children.getByName('unit-status-tooltip').text)).toContain('下次传递45秒');
     await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`flash-hero-${width}.png`)});
     await page.reload();await expect(page.locator('#eliteBuffs')).toContainText('积分 +50% 60s');

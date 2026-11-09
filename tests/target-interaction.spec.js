@@ -17,7 +17,8 @@ for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`ç›
   errors.push(msg.text());});
  const sync=async()=>{room.sequence++;room.broadcast();await page.waitForFunction(n=>window.__game?.sim.sequence>=n,room.sequence);};
  async function clickUnit(u){
-  const point=await page.evaluate(({id,offset})=>{const p=__game.renderer.screenPoint(__game.sim.get(id)),r=__game.renderer.game.canvas.getBoundingClientRect();return {x:r.left+p.x/500*r.width,y:r.top+(p.y-offset+2)/500*r.height};},{id:u.id,offset:unitBarOffset(u)});
+  await page.evaluate(id=>__game.renderer.focusUnit(id),u.id);await page.waitForTimeout(350);
+  const point=await page.evaluate(({id,offset})=>{const p=__game.renderer.screenPoint(__game.sim.get(id)),r=__game.renderer.game.canvas.getBoundingClientRect();return {x:r.left+p.x/500*r.width,y:r.top+(p.y-offset+2)/__game.renderer.game.scale.gameSize.height*r.height};},{id:u.id,offset:unitBarOffset(u)});
   await page.mouse.click(point.x,point.y);
  }
  try{

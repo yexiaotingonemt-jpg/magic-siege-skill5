@@ -30,7 +30,7 @@ for(const width of [1440,390])test(`状态图标按当前玩家筛选、红蓝�
   const expected=()=>[{unitId:h.id,id:'attackDown',frame:'red'},{unitId:h.id,id:'shield',frame:'blue'},{unitId:enemy.id,id:'moveSlow',frame:'blue'}];
   await expect.poll(async()=>(await records()).map(({unitId,id,frame})=>({unitId,id,frame}))).toEqual(expected());
   const r=(await records()).find(x=>x.id==='shield');
-  const point=await page.evaluate(r=>{const g=__game.renderer,c=g.game.canvas.getBoundingClientRect();return {x:c.x+(r.x+r.size/2)/500*c.width,y:c.y+(r.y+r.size/2-g.getCamera().scrollY)/500*c.height};},r);
+  const point=await page.evaluate(r=>{const g=__game.renderer,c=g.game.canvas.getBoundingClientRect();return {x:c.x+(r.x+r.size/2)/500*c.width,y:c.y+(r.y+r.size/2-g.getCamera().scrollY)/__game.renderer.game.scale.gameSize.height*c.height};},r);
   await page.mouse.click(point.x,point.y);
   await expect.poll(()=>page.evaluate(()=>__game.renderer.game.scene.scenes[0].children.getByName('unit-status-tooltip').text)).toContain('护盾');
   await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`status-visibility-${width}.png`)});
