@@ -12,7 +12,9 @@ for(const width of [1440,390])test(`状态图标按当前玩家筛选、红蓝�
  const s=room.sim,p=room.player(account);s.units=[];s.waveAt=1e9;
  for(const t of s.towers){t.x=100;t.cd=1e9;}
  p.classId=0;const h=s.spawn(0,contractType(0),0,1);expect(s.contract(p,h.id)).toBe(true);
- const friend=s.spawn(0,'melee',0,1),enemy=s.spawn(1,'melee',0,1);
+ const hero=(side,classId)=>{const owner=s.makePlayer(side,false);owner.classId=classId;const u=s.spawn(side,contractType(classId),0,1);expect(s.contract(owner,u.id)).toBe(true);return u;};
+ const friend=hero(0,0),enemy=hero(1,3);
+ for(const u of [h,friend,enemy])for(const t of s.config.design.affixes.filter(t=>t.classId===u.classId&&t.skill==null))s.players[u.playerId].progress[u.classId].traits[t.id]=t.max;
  for(const [i,u]of [h,friend,enemy].entries())Object.assign(u,{x:(i-1)*4,y:2,cd:1e9,speed:0});
  s.shield(h,100,h,20);s.shield(friend,100,friend,20);s.shield(enemy,100,enemy,20);
  s.debuff(h,enemy,'attackDown',.2,20);s.debuff(friend,enemy,'attackDown',.2,20);
@@ -27,6 +29,10 @@ for(const width of [1440,390])test(`状态图标按当前玩家筛选、红蓝�
   await page.setViewportSize({width,height:width===390?844:1100});await page.goto(`http://127.0.0.1:${server.address().port}`);
   await expect(page).toHaveTitle(/魔法王座/);await page.locator('#accountName').fill(account.name);await page.locator('#accountPassword').fill('status-visibility-test');await page.locator('#authSubmit').click();
   await page.waitForFunction(()=>window.__game?.renderer.getCamera());await page.locator('#locate').click();
+  const ownPassiveCount=s.config.design.affixes.filter(t=>t.classId===h.classId&&t.skill==null).length+1;
+  const passives=()=>page.evaluate(()=>__game.renderer.game.scene.scenes[0].statusIcons.report.filter(r=>r.permanent));
+  await expect.poll(async()=>(await passives()).length).toBe(ownPassiveCount);
+  expect((await passives()).every(r=>r.unitId===h.id&&r.frame==='blue')).toBe(true);
   const expected=()=>[{unitId:h.id,id:'attackDown',frame:'red'},{unitId:h.id,id:'shield',frame:'blue'},{unitId:enemy.id,id:'moveSlow',frame:'blue'}];
   await expect.poll(async()=>(await records()).map(({unitId,id,frame})=>({unitId,id,frame}))).toEqual(expected());
   const r=(await records()).find(x=>x.id==='shield');
@@ -36,6 +42,7 @@ for(const width of [1440,390])test(`状态图标按当前玩家筛选、红蓝�
   await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`status-visibility-${width}.png`)});
   // 同一客户端切换职业，纹理必须随权限与阵营关系更新，不能复用旧颜色。
   p.classId=3;await sync();await expect.poll(async()=>(await records()).some(x=>x.unitId===enemy.id&&x.id==='shield'&&x.frame==='red')).toBe(true);
+  expect((await passives()).every(r=>r.unitId===h.id)).toBe(true);
   await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`status-dispel-${width}.png`)});
   h.immortalUntil=20;h.eliteBuffs={score:20,hunt:20,assault:20,arcane:20,fortitude:20};await sync();
   await expect.poll(async()=>(await records()).filter(x=>x.unitId===h.id).length).toBe(8);

@@ -27,11 +27,17 @@ export function statusFrame(u,status,viewer){
 export function canDispelEnemyBuffs(sim,viewer){
  return viewer?.classId===3&&(isCurrentDesign(sim.config)||!!innateRules(sim));
 }
+// Permanent passives obey the same personal scope, but cannot be dispel targets.
+export function statusVisible(sim,u,viewer,tone,sourceId,dispellable=true){
+ if(!viewer)return true;
+ if(tone==='positive'&&u.side!==viewer.side)return dispellable&&canDispelEnemyBuffs(sim,viewer);
+ const own=sourceId!=null&&(sourceId===viewer.heroId||sim.get(sourceId)?.playerId===viewer.id);
+ return own||tone!=='positive'&&u.id===viewer.heroId;
+}
 export function unitStatuses(sim,u,fields=indexStatusFields(sim),viewer=null){
  if(u.hp<=0)return [];
  const now=sim.time,out=[];
- const own=sourceId=>sourceId!=null&&(sourceId===viewer?.heroId||sim.get(sourceId)?.playerId===viewer?.id);
- const visible=(tone,sourceId)=>!viewer||(tone==='positive'&&u.side!==viewer.side?canDispelEnemyBuffs(sim,viewer):own(sourceId)||tone!=='positive'&&u.id===viewer.heroId);
+ const visible=(tone,sourceId)=>statusVisible(sim,u,viewer,tone,sourceId);
  const add=(id,name,tone,until,detail,stacks=0,priority=5,sourceId=u.id)=>{if(until>now&&visible(tone,sourceId))out.push({id,name,tone,until,detail,stacks,priority});};
  const debuffNames={moveSlow:['减速','移动速度降低'],attackSpeedDown:['迟缓','攻击速度降低'],vulnerable:['易伤','受到伤害提高'],attackDown:['虚弱','攻击力降低'],healingDown:['减疗','受到治疗降低']};
  for(const [kind,[name,effect]]of Object.entries(debuffNames)){

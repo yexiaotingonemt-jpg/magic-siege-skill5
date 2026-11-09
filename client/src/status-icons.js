@@ -41,7 +41,7 @@ export function createStatusIcons(scene){
   const cssScale=scene.game.canvas.getBoundingClientRect().width/500,size=Math.min(30,Math.max(20,20/Math.max(.2,cssScale))),gap=3,fields=indexStatusFields(sim),active=new Set();let used=0;records=[];tops.clear();bars.clear();reservoirs.begin(sim.matchId);
   for(const u of [...sim.units,...sim.towers]){
    if(u.hp<=0)continue;const p=map.point(u),barY=p.y-unitBarOffset(u);if(barY<camera.scrollY-80||barY>camera.scrollY+camera.height+100)continue;
-   const statuses=[...unitStatuses(sim,u,fields,sim.player),...passiveBuffs(sim,u)];if(!statuses.length)continue;const columns=Math.min(3,statuses.length),rows=Math.ceil(statuses.length/3),left=Math.max(2,Math.min(498-columns*(size+gap)+gap,p.x-(columns*(size+gap)-gap)/2));
+   const statuses=[...unitStatuses(sim,u,fields,sim.player),...passiveBuffs(sim,u,sim.player)];if(!statuses.length)continue;const columns=Math.min(3,statuses.length),rows=Math.ceil(statuses.length/3),left=Math.max(2,Math.min(498-columns*(size+gap)+gap,p.x-(columns*(size+gap)-gap)/2));
    tops.set(u.id,barY-5-rows*(size+gap)+gap);
    statuses.forEach((status,i)=>{
     const row=Math.floor(i/3),rowCount=Math.min(3,statuses.length-row*3),x=left+(columns-rowCount)*(size+gap)/2+(i%3)*(size+gap),y=barY-5-size-row*(size+gap),key=u.id+':'+status.id;active.add(key);
