@@ -15,9 +15,9 @@ function arena(id){
 test('五职业被动说明渲染独立面板，旧规则不冒充新版被动已生效',()=>{
  for(const id of [0,4,5,2,3]){
   const {s}=arena(id),g=describeAbilities(s),html=abilityGuideHTML(g);
-  assert.ok(g.innatePassive);assert.ok(html.includes('data-ability-view="passive"'));assert.ok(html.includes(g.innatePassive));assert.ok(html.includes('契约后自动生效'));
+  assert.ok(g.innatePassive);assert.ok(html.includes('data-ability-view="passive"'));assert.ok(html.includes(g.innatePassive));assert.ok(html.includes('常驻 Buff'));assert.ok(html.includes('无法净化或驱散'));
  }
- const g=describeAbilities(new Simulation()),html=abilityGuideHTML(g);assert.equal(g.innatePassive,undefined);assert.ok(html.includes('当前战局未启用新版职业被动'));assert.ok(!html.includes('契约后自动生效'));
+ const g=describeAbilities(new Simulation()),html=abilityGuideHTML(g);assert.equal(g.innatePassive,undefined);assert.ok(html.includes('当前战局未启用新版职业被动'));assert.ok(!html.includes('常驻 Buff'));
 });
 test('兽人被动随缺血连续减伤，显示数值读取同一配置',()=>{
  const {s,h}=arena(0);h.armor=0;h.hp=h.maxHp/2;const before=h.hp;
