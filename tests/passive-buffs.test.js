@@ -18,6 +18,24 @@ for(const id of [0,2,3,4,5])test(`职业${id}的被动和被动强化常驻，�
  h.hp=0;assert.deepEqual(passiveBuffs(s,h),[]);
 });
 
+test('常驻被动只显示自己的，友军和敌军被动均隐藏，驱散职业也不例外',()=>{
+ const {s,p,h,enemy,friend}=arena(0);
+ for(const u of [h,enemy,friend]){
+  const owner=s.players[u.playerId];
+  for(const t of currentTraits(s.config,u.classId).filter(t=>t.skill==null))owner.progress[u.classId].traits[t.id]=1;
+ }
+ const ownIds=passiveBuffs(s,h).map(b=>b.id);assert.ok(ownIds.length>10);
+ assert.deepEqual(passiveBuffs(s,friend),[]);assert.deepEqual(passiveBuffs(s,enemy),[]);
+ assert.deepEqual(passiveBuffs(s,clientSnapshot(friend,s.time)),[]);
+ p.classId=3;
+ assert.deepEqual(passiveBuffs(s,enemy,p),[]);assert.deepEqual(passiveBuffs(s,friend,p),[]);
+ assert.deepEqual(passiveBuffs(s,h,p).map(b=>b.id),ownIds);
+ s.localPlayerId=enemy.playerId;
+ assert.ok(passiveBuffs(s,enemy).length>10);assert.deepEqual(passiveBuffs(s,h),[]);
+ s.localPlayerId=s.makePlayer(0,false).id;
+ assert.deepEqual(passiveBuffs(s,h),[]);assert.deepEqual(passiveBuffs(s,enemy),[]);
+});
+
 test('蓄水池按战斗时钟下降，暂停保持、刷新回满、消失后重获与换局重置，常驻满池',()=>{
  const r=createStatusReservoirs();r.begin('one');
  assert.equal(r.sample('buff',10,0),1);assert.equal(r.sample('buff',10,5),.5);assert.equal(r.sample('buff',10,5),.5);

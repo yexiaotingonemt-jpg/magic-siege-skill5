@@ -2,6 +2,7 @@ import {classes} from '../../shared/config.js';
 import {isCurrentDesign,currentTraits,currentValues} from '../../shared/current-design.js';
 import {describeInnate} from '../../shared/innate-passives.js';
 import {TRAITS,traitRank} from '../../shared/traits.js';
+import {statusVisible} from './unit-status.js';
 
 const f=n=>String(Number(Number(n||0).toPrecision(3)));
 export function describeClassPassive(sim,h){
@@ -23,8 +24,9 @@ export function describeClassPassive(sim,h){
 }
 
 // Derived from the hero's class/build, never stored in cleansable temporary state.
-export function passiveBuffs(sim,h){
+export function passiveBuffs(sim,h,viewer=sim.player){
  if(!h?.hero||h.hp<=0)return [];
+ if(!statusVisible(sim,h,viewer,'positive',h.id,false))return [];
  const p=sim.players[h.playerId];if(!p)return [];
  const innate=describeClassPassive(sim,h),out=[];
  const add=(id,name,detail,stacks=0)=>out.push({id,name,detail:detail+' 常驻生效，无法净化或驱散。',stacks,tone:'positive',until:Infinity,priority:6,permanent:true,dispellable:false,cleansable:false,textureId:'passive'});
