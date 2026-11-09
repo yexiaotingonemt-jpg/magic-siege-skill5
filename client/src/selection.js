@@ -83,7 +83,8 @@ export function createSelection({getSim,getRenderer,onChanged}){
   if(s.player.stamina<s.config.world.contractCost){s.notice='契约体力不足';onChanged();return;}
   const candidates=s.units.filter(u=>u.hp>0&&!u.hero&&!u.tower&&u.side===s.player.side&&contractClasses(u,s.config).length);
   if(!candidates.length){s.notice='暂无可契约的己方普通士兵，请等待出兵';onChanged();return;}
-  const u=candidates[Math.floor(Math.random()*candidates.length)],roles=contractClasses(u,s.config),oldClass=s.player.classId;
+  const highestRatio=candidates.reduce((ratio,u)=>Math.max(ratio,u.hp/u.maxHp),0),healthiest=candidates.filter(u=>u.hp/u.maxHp===highestRatio);
+  const u=healthiest[Math.floor(Math.random()*healthiest.length)],roles=contractClasses(u,s.config),oldClass=s.player.classId;
   clear();s.setClass(roles[Math.floor(Math.random()*roles.length)]);
   if(await s.contract(s.player,u.id)){s.notice='';getRenderer()?.focusUnit(u.id);}else s.setClass(oldClass);
   onChanged();

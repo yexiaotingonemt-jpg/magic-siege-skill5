@@ -27,7 +27,7 @@ export const gameShell=`
     <button type="button" class="portrait" id="portrait" data-hero-open="details" aria-label="点击角色头像查看详情" aria-haspopup="dialog" aria-controls="gameSheet"></button>
     <div class="hero-copy"><b id="heroName"></b><span id="hpLabel"></span><div class="bar"><i id="hpbar"></i></div><div class="xp"><i id="xpbar"></i></div><small id="xpLabel"></small><div class="hero-inspect-row"><small id="attackLabel" class="hero-attack" hidden></small></div><span id="eliteBuffs" class="elite-buffs"></span></div>
     <button type="button" id="heroInfo" class="hero-info-button" data-hero-open="details" aria-label="查看角色详情" aria-haspopup="dialog" aria-controls="gameSheet"><span aria-hidden="true">!</span></button>
-    <button id="randomContract" class="random-contract" type="button" title="随机选择一名己方普通士兵及其可契约职业，立即契约">随机契约</button>
+    <button id="randomContract" class="random-contract" type="button" title="选择剩余血量百分比最高的己方普通士兵，并列时随机选择，再随机选择可契约职业，立即契约">随机契约</button>
    </section>
    <div id="skills" class="skills" aria-label="英雄技能" hidden></div>
    <div id="notice" role="status"></div><div id="eliteBroadcast" class="elite-broadcast" role="status" aria-live="polite" hidden></div><div id="traitDraft" class="trait-draft" role="dialog" aria-modal="true" aria-labelledby="draftTitle" hidden></div>

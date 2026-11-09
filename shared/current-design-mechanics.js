@@ -3,6 +3,7 @@ import { recordEffectiveHeal } from './assist-rules.js';
 import { manualTarget, targetForSide } from './manual-target.js';
 import { segmentDistance } from './lord-flame-shield.js';
 import { spend } from './skill-value.js';
+import { inAttackRange } from './attack-range.js';
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const nearest=(at,units)=>units.sort((a,b)=>distance(at,a)-distance(at,b)||a.id-b.id);
@@ -428,7 +429,7 @@ export const currentTraitEffects={
       h.minionKills=(h.minionKills||0)+(t.hero?0:1);
       if (t.hero||h.minionKills>=r.lordMinionKills) {
         if (!t.hero) h.minionKills-=r.lordMinionKills;
-        this.cleanseOne(h);for(const enemy of nearest(h,this.enemies(h)))if(this.dispelOne(enemy))break;
+        this.cleanseOne(h);for(const enemy of nearest(h,this.enemies(h).filter(u=>inAttackRange(h,u))))if(this.dispelOne(enemy))break;
         this.heal(h,h.maxHp*r.lordKillHeal,h,null,true);
       }
       const ult=h.currentUlt;
