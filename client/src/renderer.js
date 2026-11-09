@@ -8,7 +8,7 @@ import {unitBarOffset} from './art-catalog.js';
 import {heroActionLayout,heroActionFrames} from './hero-action-layout.js';
 import {createSkillAnimation,actionPose} from './premium-vfx.js';
 import {pickRenderedUnits} from './unit-hit.js';
-import {geometry,VIEW} from './battlefield.js';
+import {geometry,battlefieldViewport} from './battlefield.js';
 import {createTargetHalos} from './target-halos.js';
 import {createTowerGuardVisual} from './tower-guard-visual.js';
 import {createStatusIcons} from './status-icons.js';
@@ -21,6 +21,7 @@ const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const ownSpawn=s=>s.player.side?s.layer*s.config.tower.layerSpacing+s.config.world.defenseSpawnOffset:s.config.world.attackSpawnY;
 export function createRenderer(sim,onSelect,performanceMonitor){
  let performanceLoad=null;
+ const parent=document.querySelector('#battle'),bounds=parent.getBoundingClientRect(),view=battlefieldViewport(bounds.width,bounds.height);
  const sprites=new Map(),masks=new Map(),facing=createUnitFacing();let scene,seenSim,layoutKey='',map,focus=null;const scenery=[];
  class Battle extends Phaser.Scene{
  preload(){for(const art of Object.values(HERO_WALK_ART))this.load.spritesheet(art.texture,ART_ROOT+'/'+art.file,{frameWidth:HERO_CELL.width,frameHeight:HERO_CELL.height});WALK_FILES.forEach((file,i)=>this.load.spritesheet(WALK_TEXTURES[i],ART_ROOT+'/'+file,{frameWidth:MINION_CELL.width,frameHeight:MINION_CELL.height}));MINION_FILES.forEach((file,i)=>this.load.spritesheet(MINION_TEXTURES[i],ART_ROOT+'/'+file,{frameWidth:MINION_CELL.width,frameHeight:MINION_CELL.height}));for(const art of Object.values(HERO_ART))this.load.spritesheet('kc-'+art.key,ART_ROOT+'/'+art.key+'.png',{frameWidth:HERO_CELL.width,frameHeight:HERO_CELL.height});this.load.image('hero-vfx-v20','/art/skill-fx-v20/hero-spells-clean.png');this.load.spritesheet('assassin-actions','/art/skill5/assassin-actions.png',{frameWidth:512,frameHeight:512});this.load.image('hero-actions','/art/magic-v15/hero-actions.png');this.load.spritesheet('minions','/art/magic-v15/minions.png',{frameWidth:384,frameHeight:512});this.load.image('ground',ART_ROOT+'/ground.webp');this.load.spritesheet('towers','/art/magic-v13/towers.png',{frameWidth:384,frameHeight:512});this.load.spritesheet('atlas','/art/magic-v15/heroes.png',{frameWidth:384,frameHeight:512});}
@@ -32,7 +33,7 @@ export function createRenderer(sim,onSelect,performanceMonitor){
   this.input.on('wheel',(_p,_objects,_dx,dy)=>{if(!document.querySelector('#gameSheet').hidden)return;this.cameras.main.panEffect.reset();this.cameras.main.scrollY=clamp(this.cameras.main.scrollY+dy*.75,0,map.maxScroll);});
   this.input.on('gameout',()=>{this.statusIcons?.hover({x:-1,y:-1});this.heroNames?.hover({x:-1,y:-1});});
  }
- rebuild(s){map=geometry(s.config.world,s.player.side);this.cameras.main.panEffect.reset();this.drag=null;for(const o of scenery)o.destroy();scenery.length=0;this.cameras.main.setBounds(0,0,500,map.height);const img=this.textures.get('ground').getSourceImage(),tileHeight=img.height*500/img.width,joinHeight=64*500/img.width,step=tileHeight-joinHeight;for(let i=0;i<Math.ceil(map.height/step);i++){scenery.push(this.add.image(250,i*step+tileHeight/2,'ground','road').setDisplaySize(500,tileHeight).setDepth(-100));if(i>0)scenery.push(this.add.image(250,i*step+joinHeight/2,'ground','road-join').setDisplaySize(500,joinHeight).setAlpha(1,1,0,0).setDepth(-99));}
+ rebuild(s){map=geometry(s.config.world,s.player.side,view);this.cameras.main.panEffect.reset();this.drag=null;for(const o of scenery)o.destroy();scenery.length=0;this.cameras.main.setBounds(0,0,500,map.height);const img=this.textures.get('ground').getSourceImage(),tileHeight=img.height*500/img.width,joinHeight=64*500/img.width,step=tileHeight-joinHeight;for(let i=0;i<Math.ceil(map.height/step);i++){scenery.push(this.add.image(250,i*step+tileHeight/2,'ground','road').setDisplaySize(500,tileHeight).setDepth(-100));if(i>0)scenery.push(this.add.image(250,i*step+joinHeight/2,'ground','road-join').setDisplaySize(500,joinHeight).setAlpha(1,1,0,0).setDepth(-99));}
   const tag=(text,y,color='#decba0')=>{const p=map.point({x:0,y});scenery.push(this.add.text(250,p.y,text,{fontFamily:'SimSun',fontSize:'18px',fontStyle:'bold',color,stroke:'#18201b',strokeThickness:5,backgroundColor:'#14201bbb',padding:{x:15,y:7}}).setOrigin(.5).setDepth(20));};
   tag('紫晶王庭 · 召唤殿',s.config.world.defenseSpawnOffset+2*s.config.tower.layerSpacing+4,'#dac1e6');tag('魔契军团 · 符门',s.config.world.attackSpawnY-4,'#c5dbea');for(let l=0;l<3;l++)tag(['悬晶前哨','奥术王庭','魔法王座'][l],l*s.config.tower.layerSpacing+4);
  }
@@ -58,15 +59,26 @@ export function createRenderer(sim,onSelect,performanceMonitor){
   this.targetHalos??=createTargetHalos(this);this.targetHalos.draw(s,map);
   this.towerGuardFX??=createTowerGuardVisual(this);this.towerGuardFX.draw(s,map,this.cameras.main);
   this.combatNumbers??=createCombatNumbers(this);this.combatNumbers.draw(s,map,this.cameras.main);
-  if(focus!==null){this.cameras.main.pan(250,map.scrollFor(focus)+VIEW.height/2,250,'Sine.easeInOut',true);focus=null;}
+  if(focus!==null){this.cameras.main.pan(250,map.scrollFor(focus)+view.height/2,250,'Sine.easeInOut',true);focus=null;}
   if(performanceMonitor){const fx=this.skillFX.report;performanceLoad={...counts,matchId:s.matchId,sequence:s.sequence,battleTime:sim().time,visualTime:s.time,renderedUnits:this.unitMotion.report.length,meshObjects:this.unitMotion.meshCount,paused:s.paused,speed:s.speed,projectiles:s.projectiles.length,effects:s.effects.length,fields:s.fields.length,skillEffects:this.visibleSkillEffects,vfxSprites:fx.spriteCount,vfxEvents:fx.events.length,persistentVfx:fx.persistent,vfxCrowded:fx.crowded,statusIcons:this.statusIcons.report.length,combatNumbers:this.combatNumbers.report.length,displayObjects:this.children.length,scrollY:this.cameras.main.scrollY};}
   performanceMonitor?.stage('overlays',performance.now()-overlaysStart);
-  const rail=document.querySelector('#mapWindow');if(rail){rail.style.top=100*this.cameras.main.scrollY/map.height+'%';rail.style.height=100*VIEW.height/map.height+'%';}const label=document.querySelector('#cameraPosition');if(label){const a=map.world(0,this.cameras.main.scrollY).y,b=map.world(0,this.cameras.main.scrollY+VIEW.height).y;label.textContent=`视野 ${Math.min(a,b).toFixed(0)} ~ ${Math.max(a,b).toFixed(0)} 格`;}
+  const rail=document.querySelector('#mapWindow');if(rail){rail.style.top=100*this.cameras.main.scrollY/map.height+'%';rail.style.height=100*view.height/map.height+'%';}const label=document.querySelector('#cameraPosition');if(label){const a=map.world(0,this.cameras.main.scrollY).y,b=map.world(0,this.cameras.main.scrollY+view.height).y;label.textContent=`视野 ${Math.min(a,b).toFixed(0)} ~ ${Math.max(a,b).toFixed(0)} 格`;}
   performanceMonitor?.stage('sceneUpdate',performance.now()-frameStart);
  }
  }
  // The KC frame owns visual scaling; Phaser only maps the final canvas bounds to input.
- const game=new Phaser.Game({type:Phaser.AUTO,parent:'battle',width:VIEW.width,height:VIEW.height,resolution:Math.min(window.devicePixelRatio||1,2),backgroundColor:'#313b2b',scene:Battle,render:{antialias:true},input:{touch:{capture:true}},scale:{mode:Phaser.Scale.NONE,autoCenter:Phaser.Scale.NO_CENTER}});
- window.addEventListener('game-layout-resize',()=>game.scale.refresh());
- return {game,get performanceLoad(){return performanceLoad;},focusUnit(id){const u=sim().get(id);if(u)focus=u.y;},locate(){const s=sim(),h=s.hero();focus=h?h.y:ownSpawn(s);},camp(){focus=sim().config.world.attackSpawnY;},front(){const s=sim();focus=s.layer*s.config.tower.layerSpacing+s.config.world.defenseRallyOffset;},defense(){focus=sim().layer*sim().config.tower.layerSpacing+8;},getCamera(){return scene&&map?{scrollY:scene.cameras.main.scrollY,maxScroll:map.maxScroll,height:map.height,side:map.side}:null;},screenPoint(u){if(!scene||!map)return null;const p=map.point(u);return {x:p.x,y:p.y-scene.cameras.main.scrollY};}};
+ const game=new Phaser.Game({type:Phaser.AUTO,parent:'battle',width:view.width,height:view.height,resolution:Math.min(window.devicePixelRatio||1,2),backgroundColor:'#313b2b',scene:Battle,render:{antialias:true},input:{touch:{capture:true}},scale:{mode:Phaser.Scale.NONE,autoCenter:Phaser.Scale.NO_CENTER}});
+ const resize=()=>{
+  if(!game.isBooted||game.pendingDestroy)return;
+  const bounds=parent.getBoundingClientRect(),next=battlefieldViewport(bounds.width,bounds.height);
+  if(next.height!==view.height){
+   const camera=scene?.cameras.main,center=camera?camera.scrollY+view.height/2:0;
+   view.height=next.height;game.scale.resize(view.width,view.height);
+   if(camera&&map){camera.panEffect.reset();scene.drag=null;camera.scrollY=clamp(center-view.height/2,0,map.maxScroll);}
+  }else game.scale.refresh();
+ };
+ const observer=new ResizeObserver(resize);observer.observe(parent);
+ window.addEventListener('game-layout-resize',resize);game.events.once('ready',resize);
+ game.events.once('destroy',()=>{observer.disconnect();window.removeEventListener('game-layout-resize',resize);});
+ return {game,get performanceLoad(){return performanceLoad;},focusUnit(id){const u=sim().get(id);if(u)focus=u.y;},locate(){const s=sim(),h=s.hero();focus=h?h.y:ownSpawn(s);},camp(){focus=sim().config.world.attackSpawnY;},front(){const s=sim();focus=s.layer*s.config.tower.layerSpacing+s.config.world.defenseRallyOffset;},defense(){focus=sim().layer*sim().config.tower.layerSpacing+8;},getCamera(){return scene&&map?{scrollY:scene.cameras.main.scrollY,maxScroll:map.maxScroll,height:map.height,viewportHeight:view.height,viewportWidth:view.width,side:map.side}:null;},screenPoint(u){if(!scene||!map)return null;const p=map.point(u);return {x:p.x,y:p.y-scene.cameras.main.scrollY};}};
 }

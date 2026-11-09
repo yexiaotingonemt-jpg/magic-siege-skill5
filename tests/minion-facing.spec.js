@@ -41,7 +41,7 @@ test('普通兵真实渲染：双方视角均为己方背向前进、敌方正�
     const page=pages[0];await page.evaluate(()=>{const u=__game.sim.units.find(u=>u.side===0&&!u.hero&&u.type==='melee');__game.renderer.focusUnit(u.id);});await page.waitForTimeout(300);
     const hit=await page.evaluate(()=>{
       const u=__game.sim.units.find(u=>u.side===0&&!u.hero&&u.type==='melee'),p=__game.renderer.screenPoint(u),canvas=__game.renderer.game.canvas,r=canvas.getBoundingClientRect();
-      return {x:r.left+p.x/500*r.width,y:r.top+(p.y-8)/__game.renderer.game.config.height*r.height};
+      return {x:r.left+p.x/500*r.width,y:r.top+(p.y-8)/__game.renderer.game.scale.gameSize.height*r.height};
     });
     await page.mouse.click(hit.x,hit.y);await expect(page.locator('#contractPopover')).toBeVisible();
     await page.locator('#confirmContract').click();await page.waitForFunction(()=>__game.sim.hero()?.classId===0);

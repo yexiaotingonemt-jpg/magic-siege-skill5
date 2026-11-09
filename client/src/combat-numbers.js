@@ -48,7 +48,7 @@ export function createCombatNumbers(scene){
  const model=createCombatNumberModel(),labels=[];let report=[];
  const overlap=(a,b)=>a.left<b.right+3&&a.right>b.left-3&&a.top<b.bottom+3&&a.bottom>b.top-3;
  return {model,get report(){return report;},draw(sim,map,camera){
-  const now=performance.now(),entries=model.update(sim,now),rect=scene.game.canvas.getBoundingClientRect(),sx=rect.width/500,sy=rect.height/500,scale=Math.max(.15,Math.min(sx,sy)),placed=[];
+  const now=performance.now(),entries=model.update(sim,now),rect=scene.game.canvas.getBoundingClientRect(),sx=rect.width/500,sy=rect.height/camera.height,scale=Math.max(.15,Math.min(sx,sy)),placed=[];
   const controls=[...(scene.game.canvas.closest('.battle-wrap')?.querySelectorAll('.map-jumps button,.trait-pending:not([hidden])')||[])].map(node=>node.getBoundingClientRect()).filter(box=>box.width&&box.height).map(box=>({left:(box.left-rect.left)/sx,right:(box.right-rect.left)/sx,top:(box.top-rect.top)/sy+camera.scrollY,bottom:(box.bottom-rect.top)/sy+camera.scrollY}));
   report=[];let used=0;
   for(const entry of [...entries].sort((a,b)=>b.priority-a.priority||a.bornAt-b.bornAt)){

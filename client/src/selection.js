@@ -38,14 +38,14 @@ export function createSelection({getSim,getRenderer,onChanged}){
  }
  function position(){
   if(!selectedId)return;
-  const u=unit(),r=getRenderer(),p=u&&r.screenPoint(u);
+  const u=unit(),r=getRenderer(),p=u&&r.screenPoint(u),viewHeight=r?.getCamera()?.viewportHeight||VIEW.height;
   if(!p||!document.querySelector('#gameSheet').hidden){popup.hidden=true;return;}
-  if(p.y< -25||p.y>VIEW.height+25){popup.hidden=true;anchor=null;return;}
+  if(p.y< -25||p.y>viewHeight+25){popup.hidden=true;anchor=null;return;}
   popup.hidden=false;
-  const canvas=r.game.canvas.getBoundingClientRect(),parent=popup.parentElement,wrap=parent.getBoundingClientRect(),nativeScale=wrap.width/parent.offsetWidth,width=popup.offsetWidth,scale=canvas.height/VIEW.height/nativeScale;
+  const canvas=r.game.canvas.getBoundingClientRect(),parent=popup.parentElement,wrap=parent.getBoundingClientRect(),nativeScale=wrap.width/parent.offsetWidth,width=popup.offsetWidth,scale=canvas.height/viewHeight/nativeScale;
   const info=el('targetInfo'),infoRect=info.getBoundingClientRect(),scroll=r.getCamera().scrollY,key=[wrap.width,canvas.width,canvas.height,canvas.left-wrap.left,canvas.top-wrap.top,infoRect.bottom,info.hidden,el('traitPending').hidden].join(':');
   if(anchor&&Math.abs(anchor.scroll-scroll)<.5&&anchor.key===key&&anchor.height===popup.offsetHeight)return;
-  const x=(canvas.left-wrap.left+p.x/VIEW.width*canvas.width)/nativeScale,y=(canvas.top-wrap.top+p.y/VIEW.height*canvas.height)/nativeScale,left=Math.max(8,Math.min(parent.clientWidth-width-8,x-width/2));
+  const x=(canvas.left-wrap.left+p.x/VIEW.width*canvas.width)/nativeScale,y=(canvas.top-wrap.top+p.y/viewHeight*canvas.height)/nativeScale,left=Math.max(8,Math.min(parent.clientWidth-width-8,x-width/2));
   const overlaps=!info.hidden&&left+width>(infoRect.left-wrap.left)/nativeScale&&left<(infoRect.right-wrap.left)/nativeScale,minTop=overlaps?(infoRect.bottom-wrap.top)/nativeScale+10:24;
   const pending=el('traitPending'),pendingRect=pending.getBoundingClientRect();
   const pendingOverlaps=!pending.hidden&&left+width>(pendingRect.left-wrap.left)/nativeScale&&left<(pendingRect.right-wrap.left)/nativeScale;

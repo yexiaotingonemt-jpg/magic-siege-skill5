@@ -11,7 +11,7 @@ for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`�
  const context=await browser.newContext({viewport}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error'&&!(m.location().url.endsWith('/api/me')&&m.text().includes('401')))errors.push(m.text());});
  const sync=async()=>{room.sequence++;room.broadcast();await page.waitForFunction(n=>window.__game?.sim.sequence>=n,room.sequence);};
- const clickUnit=async u=>{const point=await page.evaluate(({id,offset})=>{const p=__game.renderer.screenPoint(__game.sim.get(id)),r=__game.renderer.game.canvas.getBoundingClientRect();return {x:r.left+p.x/500*r.width,y:r.top+(p.y-offset+2)/500*r.height};},{id:u.id,offset:unitBarOffset(u)});await page.mouse.click(point.x,point.y);};
+ const clickUnit=async u=>{const point=await page.evaluate(({id,offset})=>{const p=__game.renderer.screenPoint(__game.sim.get(id)),r=__game.renderer.game.canvas.getBoundingClientRect();return {x:r.left+p.x/500*r.width,y:r.top+(p.y-offset+2)/__game.renderer.game.scale.gameSize.height*r.height};},{id:u.id,offset:unitBarOffset(u)});await page.mouse.click(point.x,point.y);};
  const tab=id=>page.locator(`[data-inspect-unit="${id}"]`);
  try{
   const url=`http://127.0.0.1:${server.address().port}`;await page.goto(url);expect(page.url()).toBe(url+'/');await expect(page).toHaveTitle(/魔法王座/);

@@ -16,7 +16,7 @@ body{min-width:280px;background:#111916}
 .game #wave{color:var(--countdown);white-space:nowrap;font-size:18px}
 .game #locate{font-size:18px;padding:2px 9px;min-height:30px}
 .game .battle-wrap{min-height:0;border-inline:0;overflow:hidden}
-.game #battle{width:100%;height:100%;aspect-ratio:1}
+.game #battle{width:100%;height:100%;aspect-ratio:auto}
 .game #battle canvas{width:100%!important;height:100%!important;margin:0!important}
 .game .map-jumps{left:10px;top:14px;gap:9px}
 .game .map-jumps button{font-size:18px;padding:7px 10px;min-height:40px;background:#1b2923d9;border-color:#8f825f}

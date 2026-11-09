@@ -18,7 +18,7 @@ for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`�
   const spawn=(type,x)=>{const u=s.spawn(0,type,0,1,x);Object.assign(u,{x,y:0,cd:1e9,speed:0});return u;};
   const ranged=spawn('ranged',0),other=spawn('ranged',2),siege=spawn('siege',-2);
   await sync();await page.evaluate(id=>__game.renderer.focusUnit(id),ranged.id);await page.waitForTimeout(350);
-  const point=await page.evaluate(({id,offset})=>{const p=__game.renderer.screenPoint(__game.sim.get(id)),r=__game.renderer.game.canvas.getBoundingClientRect();return {x:r.left+p.x/500*r.width,y:r.top+(p.y-offset+2)/500*r.height};},{id:ranged.id,offset:unitBarOffset(ranged)});await page.mouse.click(point.x,point.y);
+  const point=await page.evaluate(({id,offset})=>{const p=__game.renderer.screenPoint(__game.sim.get(id)),r=__game.renderer.game.canvas.getBoundingClientRect();return {x:r.left+p.x/500*r.width,y:r.top+(p.y-offset+2)/__game.renderer.game.scale.gameSize.height*r.height};},{id:ranged.id,offset:unitBarOffset(ranged)});await page.mouse.click(point.x,point.y);
   await expect(page.locator('#contractPopover')).toBeVisible();
   const elf=page.getByRole('button',{name:'森林精灵',exact:true}),mage=page.getByRole('button',{name:'火焰法师',exact:true});
   // Hold the pointer through real server snapshots, reproducing a normal slower click.

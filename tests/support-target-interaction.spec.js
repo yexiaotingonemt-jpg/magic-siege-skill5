@@ -3,11 +3,13 @@ import {mkdtempSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {createBrowserGame} from '../scripts/browser-game-server.mjs';
+import {Room} from '../server/room.mjs';
+import {legacyLiveConfig} from '../shared/config.js';
 import {unitBarOffset} from '../client/src/art-catalog.js';
 
 // Login -> select an enemy or ally -> support HUD and recipient follow that selection.
 for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`精灵支援目标与描述 ${viewport.width}`,async({browser})=>{
- const game=await createBrowserGame({dataDir:mkdtempSync(path.join(tmpdir(),'kc-support-ui-'))}),{room,server}=game,s=room.sim;
+ const game=await createBrowserGame({room:new Room(legacyLiveConfig()),dataDir:mkdtempSync(path.join(tmpdir(),'kc-support-ui-'))}),{room,server}=game,s=room.sim;
  room.step=()=>{};room.paused=true;
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  const context=await browser.newContext({viewport}),page=await context.newPage(),errors=[];
@@ -15,7 +17,7 @@ for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`�
  page.on('console',msg=>{if(msg.type()==='error'&&!(msg.location().url.endsWith('/api/me')&&msg.text().includes('401')))errors.push(msg.text());});
  const sync=async()=>{room.sequence++;room.broadcast();await page.waitForFunction(n=>window.__game?.sim.sequence>=n,room.sequence);};
  const clickUnit=async u=>{
-  const point=await page.evaluate(({id,offset})=>{const p=__game.renderer.screenPoint(__game.sim.get(id)),r=__game.renderer.game.canvas.getBoundingClientRect();return {x:r.left+p.x/500*r.width,y:r.top+(p.y-offset+2)/500*r.height};},{id:u.id,offset:unitBarOffset(u)});
+  const point=await page.evaluate(({id,offset})=>{const p=__game.renderer.screenPoint(__game.sim.get(id)),r=__game.renderer.game.canvas.getBoundingClientRect();return {x:r.left+p.x/500*r.width,y:r.top+(p.y-offset+2)/__game.renderer.game.scale.gameSize.height*r.height};},{id:u.id,offset:unitBarOffset(u)});
   await page.mouse.click(point.x,point.y);
   await page.waitForFunction(id=>__game.sim.hero().manualTargetId===id,u.id);
  };
@@ -35,8 +37,8 @@ for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`�
   await clickUnit(low);await clickUnit(enemy);
   await expect(page.locator('[data-cast="1"]')).toHaveClass(/ready/);
   await page.locator('[data-cast="1"]').click();await page.waitForFunction(()=>__game.sim.metrics.casts>0);
-  for(let n=0;n<8;n++)s.tick(.05);expect(h.linkId).toBe(victim.id);await sync();
-  await page.waitForFunction(id=>__game.sim.hero().linkId===id,victim.id);
+  for(let n=0;n<8;n++)s.tick(.05);expect(s.fields.some(f=>f.kind==='link'&&f.owner.id===h.id&&f.host===victim.id)).toBe(true);await sync();
+  await page.waitForFunction(id=>__game.sim.fields.some(f=>f.kind==='link'&&f.owner.id===__game.sim.hero().id&&f.host===id),victim.id);
   // Invalid target of target is rejected visibly without spending or cooldown.
   p.cd[1]=0;enemy.targetId=null;await sync();
   await expect(page.locator('[data-cast="1"]')).toHaveClass(/out-of-range/);

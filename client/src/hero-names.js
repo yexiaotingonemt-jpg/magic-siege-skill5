@@ -22,7 +22,7 @@ export function createHeroNames(scene){
  const pick=p=>report.find(r=>r.truncated&&p.x>=r.left&&p.x<=r.right&&p.y>=r.top&&p.y<=r.bottom);
  return {get report(){return report;},top:id=>tops.get(id),hover(point){const hit=pick(point);if(hit){hovered=hit.unitId;pinnedUntil=0;}else if(!pinnedUntil)hovered=null;},tap(point){const hit=pick(point);if(!hit){hovered=null;pinnedUntil=0;return false;}hovered=hit.unitId;pinnedUntil=performance.now()+2500;return true;},draw(sim,map,camera){
   report=[];tops.clear();let used=0;
-  const css=scene.game.canvas.getBoundingClientRect(),scale=Math.max(.2,Math.min(css.width/500,css.height/500)),fontSize=Math.ceil(Math.max(14,12/scale));
+  const css=scene.game.canvas.getBoundingClientRect(),scale=Math.max(.2,Math.min(css.width/500,css.height/camera.height)),fontSize=Math.ceil(Math.max(14,12/scale));
   const heroes=sim.units.filter(u=>u.hero&&u.hp>0).sort((a,b)=>Number(b.id===sim.player.heroId)-Number(a.id===sim.player.heroId)||map.point(a).y-map.point(b).y||a.id-b.id);
   for(const u of heroes){
    const data=heroNameData(sim,u);if(!data)continue;

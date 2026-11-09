@@ -45,7 +45,7 @@ test('重甲兵实机步态：八帧换脚时网格和体型稳定，暂停与�
     const frozen=await page.evaluate(()=>__game.renderer.game.scene.scenes[0].unitMotion.report.filter(r=>r.walkFrame!=null).map(r=>[r.unitId,r.artFrame]));
     await page.waitForTimeout(250);expect(await page.evaluate(()=>__game.renderer.game.scene.scenes[0].unitMotion.report.filter(r=>r.walkFrame!=null).map(r=>[r.unitId,r.artFrame]))).toEqual(frozen);
     await page.screenshot({path:`${process.env.MAGIC_QA_DIR}/infantry-walking.png`,fullPage:true});
-    const hit=await page.evaluate(()=>{const u=__game.sim.units.find(u=>u.side===0&&!u.hero&&u.type==='melee'),p=__game.renderer.screenPoint(u),r=__game.renderer.game.canvas.getBoundingClientRect();return {x:r.left+p.x/500*r.width,y:r.top+(p.y-8)/__game.renderer.game.config.height*r.height};});
+    const hit=await page.evaluate(()=>{const u=__game.sim.units.find(u=>u.side===0&&!u.hero&&u.type==='melee'),p=__game.renderer.screenPoint(u),r=__game.renderer.game.canvas.getBoundingClientRect();return {x:r.left+p.x/500*r.width,y:r.top+(p.y-8)/__game.renderer.game.scale.gameSize.height*r.height};});
     await page.mouse.click(hit.x,hit.y);await expect(page.locator('#contractPopover')).toBeVisible();await page.locator('#confirmContract').click();await page.waitForFunction(()=>__game.sim.hero()?.classId===0);
     expect(errors).toEqual([]);
   }finally{await context.close();await new Promise(resolve=>server.close(resolve));}
