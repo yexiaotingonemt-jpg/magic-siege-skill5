@@ -31,8 +31,8 @@ for(const width of [1440,390])test(`特殊怪物与积分英雄闪光、继承�
     await page.screenshot({path:path.join(process.env.MAGIC_QA_DIR,`flash-monster-${width}.png`)});
     s.damage(h,elite,1e9);broadcast();
     await expect(page.locator('#eliteBuffs')).toContainText('积分 +50% 60s');
-    const buffBox=await page.locator('#eliteBuffs').boundingBox(),hpBox=await page.locator('#hpLabel').boundingBox();
-    expect(buffBox.y).toBeGreaterThanOrEqual(hpBox.y+hpBox.height);
+    const buffBox=await page.locator('#heroEffects [data-effect="elite-score"]').boundingBox(),hpBox=await page.locator('#hpLabel').boundingBox();
+    expect(buffBox.y+buffBox.height).toBeLessThan(hpBox.y);
     await expect.poll(async()=> (await flashReport()).some(r=>r.unitId===h.id&&!r.elite)).toBe(true);
     const statuses=()=>page.evaluate(()=>window.__game.renderer.game.scene.getScenes(true)[0].statusIcons.report);
     await expect.poll(async()=> (await statuses()).some(r=>r.id==='elite-score')).toBe(true);

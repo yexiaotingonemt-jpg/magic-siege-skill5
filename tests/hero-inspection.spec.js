@@ -32,7 +32,7 @@ for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`�
   for(let i=0;i<4;i++){
    await page.locator(`[data-info="${i}"]`).click();
    await expect(page.locator('#sheetTitle')).toHaveText(names[4][i]);
-   await expect(page.locator('.hero-detail-tabs,[data-hero-view]')).toHaveCount(0);
+   await expect(page.locator('#heroDetailTabs')).toBeHidden();
    await expect(body.locator('[data-hero-panel]:visible')).toHaveCount(1);
    await expect(body.locator('[data-skill-detail]:visible')).toHaveCount(1);
    const card=body.locator(`[data-skill-detail="${i}"]`);
@@ -50,12 +50,12 @@ for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`�
    }
    await page.keyboard.press('Escape');await expect(page.locator(`[data-info="${i}"]`)).toBeFocused();
   }
-  await page.locator('[data-hero-open="stats"]').click();
-  await expect(page.locator('#sheetTitle')).toHaveText('基础属性');await expect(body.locator('.hero-stat-list>div')).toHaveCount(7);
+  await page.locator('#heroInfo').click();
+  await expect(page.locator('#sheetTitle')).toHaveText('角色详情');await expect(body.locator('.hero-stat-list>div')).toHaveCount(7);
   const hero=s.hero(p);await expect(body.locator('.hero-stat-list')).toContainText(String(s.attackPower(hero)));
   await page.locator('.sheet-panel').screenshot({path:path.join(out,`stats-${viewport.width}.png`)});
-  await page.keyboard.press('Escape');await expect(page.locator('[data-hero-open="stats"]')).toBeFocused();
-  await page.locator('[data-hero-open="common"]').click();
+  await page.keyboard.press('Escape');await expect(page.locator('#heroInfo')).toBeFocused();
+  await page.locator('#heroInfo').click();await page.locator('[data-detail-view="common"]').click();
   await expect(body.locator('[data-ability-view="common"]')).toBeVisible();
   await expect(body.locator('[data-ability-view="common"] [data-upgrade-id]')).toHaveCount(13);
   await expect(body.locator('[data-upgrade-id="F17"]')).toContainText('已获得 1/5');
@@ -63,14 +63,14 @@ for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`�
   await expect(body.locator('[data-upgrade-id="FG02"] p')).toHaveCSS('color','rgb(137, 148, 142)');
   await expect(body.locator('[data-skill-detail]:visible')).toHaveCount(0);
   await page.locator('.sheet-panel').screenshot({path:path.join(out,`common-${viewport.width}.png`)});
-  await page.keyboard.press('Escape');await expect(page.locator('[data-hero-open="common"]')).toBeFocused();
+  await page.keyboard.press('Escape');await expect(page.locator('#heroInfo')).toBeFocused();
   await page.locator('[data-nav="hero"]').click();await expect(body.locator('[data-skill-detail]:visible')).toHaveCount(4);
   // 每个入口只显示对应内容，详情滚动不影响外层，实时刷新保留当前位置。
   const skills=body.locator('[data-hero-panel="skills"]');
   await skills.evaluate(panel=>{panel.scrollTop=240;});expect(await skills.evaluate(panel=>panel.scrollTop)).toBeGreaterThan(0);
   expect(await page.locator('#sheetScroll').evaluate(el=>el.scrollTop)).toBe(0);
   for(const view of ['passive','stats','common']){
-   await page.keyboard.press('Escape');await page.locator(`[data-hero-open="${view}"]`).click();
+   await page.keyboard.press('Escape');await page.locator('#heroInfo').click();await page.locator(`[data-detail-view="${view}"]`).click();
    await expect(body.locator('[data-hero-panel]:visible')).toHaveCount(1);
    await expect(body.locator(`[data-hero-panel="${view}"]`)).toBeVisible();
    await expect(body.locator('[data-ability-view]:visible')).toHaveCount(1);

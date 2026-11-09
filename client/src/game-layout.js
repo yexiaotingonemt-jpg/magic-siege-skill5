@@ -16,25 +16,31 @@ export function mountGameLayout(){
 
 export function createGameSheets(){
  const sheet=document.querySelector('#gameSheet'),sections=[...document.querySelectorAll('[data-sheet-section]')];let previous=null;
- const navigation=[...document.querySelectorAll('[data-nav]')];let heroView='skills',skillIndex=null;
+ const navigation=[...document.querySelectorAll('[data-nav]')];let heroView='skills',skillIndex=null,detailsMode=false;
+ const tabs=document.querySelector('#heroDetailTabs'),detailTabs=[...tabs.querySelectorAll('[data-detail-view]')];
  const scrollPositions=new Map();
  function captureScroll(){const panel=document.querySelector('[data-hero-panel]:not([hidden])');if(panel)scrollPositions.set(panel.dataset.heroPanel,panel.scrollTop);}
  function refresh(){
+  tabs.hidden=!detailsMode;document.querySelector('#heroDetailLevel').hidden=!detailsMode;
+  for(const tab of detailTabs){const selected=tab.dataset.detailView===heroView;tab.id='detail-tab-'+tab.dataset.detailView;tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1;}
   document.querySelectorAll('[data-hero-panel]').forEach(panel=>panel.hidden=panel.dataset.heroPanel!==heroView);
+  document.querySelectorAll('[data-hero-panel]').forEach(panel=>{if(detailsMode){panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby','detail-tab-'+panel.dataset.heroPanel);}else{panel.removeAttribute('role');panel.setAttribute('aria-labelledby','sheetTitle');}});
   document.querySelectorAll('[data-ability-view]').forEach(card=>card.hidden=card.dataset.abilityView!==heroView||(heroView==='skills'&&skillIndex!=null&&Number(card.dataset.skillDetail)!==skillIndex));
   const panel=document.querySelector('[data-hero-panel]:not([hidden])');if(panel)panel.scrollTop=scrollPositions.get(heroView)||0;
   if(!sections.find(section=>section.dataset.sheetSection==='hero')?.hidden){
-   document.querySelector('#sheetTitle').textContent=heroView==='passive'?'职业被动':heroView==='stats'?'基础属性':heroView==='common'?'通用效果':skillIndex==null?'职业技能':document.querySelector(`[data-skill-detail="${skillIndex}"] h3`)?.childNodes[0]?.textContent||'技能说明';
+   document.querySelector('#sheetTitle').textContent=detailsMode?'角色详情':heroView==='passive'?'职业被动':heroView==='stats'?'基础属性':heroView==='common'?'通用效果':skillIndex==null?'职业技能':document.querySelector(`[data-skill-detail="${skillIndex}"] h3`)?.childNodes[0]?.textContent||'技能说明';
   }
  }
  function markActive(name){navigation.forEach(button=>{if(button.dataset.nav===name)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});}
  function close(){sheet.hidden=true;markActive('battle');if(previous?.isConnected&&previous.getClientRects().length)previous.focus({preventScroll:true});else if(previous?.dataset.rankingPlayer)document.querySelector(`#battleRanking [data-ranking-player="${previous.dataset.rankingPlayer}"]`)?.focus({preventScroll:true});}
  function open(name,index=null){
   scrollPositions.clear();
-  heroView=['passive','stats','common'].includes(name)?name:'skills';skillIndex=index;
-  if(['passive','stats','common'].includes(name))name='hero';
+  detailsMode=['details','passive','stats','common'].includes(name);
+  heroView=name==='details'?'stats':['passive','stats','common'].includes(name)?name:'skills';skillIndex=index;
+  if(detailsMode)name='hero';
   if(sheet.hidden)previous=document.activeElement;sheet.hidden=false;markActive(name);sections.forEach(e=>e.hidden=e.dataset.sheetSection!==name);
   sheet.classList.toggle('is-hero-sheet',name==='hero');
+  sheet.classList.toggle('is-hero-details',name==='hero'&&detailsMode);
   document.querySelector('#gameViewport').scrollIntoView({block:'start'});
   document.querySelector('#sheetTitle').textContent={hero:'职业技能',ranking:'功勋排行',contracts:'契约记录'}[name];
   document.querySelector('#sheetClose').focus({preventScroll:true});
@@ -42,6 +48,9 @@ export function createGameSheets(){
   refresh();
  }
  document.querySelectorAll('[data-hero-open]').forEach(button=>button.onclick=()=>open(button.dataset.heroOpen));
+ function selectDetail(view){captureScroll();heroView=view;skillIndex=null;refresh();}
+ tabs.onclick=e=>{const tab=e.target.closest('[data-detail-view]');if(tab)selectDetail(tab.dataset.detailView);};
+ tabs.onkeydown=e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const index=detailTabs.findIndex(tab=>tab.dataset.detailView===heroView),next=e.key==='Home'?0:e.key==='End'?detailTabs.length-1:(index+(e.key==='ArrowRight'?1:-1)+detailTabs.length)%detailTabs.length;selectDetail(detailTabs[next].dataset.detailView);detailTabs[next].focus();};
  document.querySelector('#sheetClose').onclick=close;
  sheet.addEventListener('click',e=>{if(e.target===sheet)close();});
  window.addEventListener('keydown',e=>{if(sheet.hidden)return;if(e.key==='Escape'){e.preventDefault();close();}if(e.key==='Tab'){const nodes=[...sheet.querySelectorAll('button,summary,select,input,[tabindex="0"]')].filter(n=>n.getClientRects().length&&!n.disabled),first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}});

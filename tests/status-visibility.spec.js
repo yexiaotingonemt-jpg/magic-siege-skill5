@@ -21,7 +21,7 @@ for(const width of [1440,390])test(`状态图标按当前玩家筛选、红蓝�
  const errors=[],unauthorized=[];page.on('pageerror',e=>errors.push(e.message));
  page.on('response',r=>{if(r.status()===401)unauthorized.push(new URL(r.url()).pathname);});
  page.on('console',m=>{if(m.type()==='error'&&!(m.text().includes('401')&&new URL(m.location().url).pathname==='/api/me'))errors.push(m.text());});
- const records=()=>page.evaluate(()=>__game.renderer.game.scene.scenes[0].statusIcons.report);
+ const records=()=>page.evaluate(()=>__game.renderer.game.scene.scenes[0].statusIcons.report.filter(r=>!r.permanent));
  const sync=async()=>{room.sequence++;room.broadcast();await page.waitForFunction(n=>__game.sim.sequence>=n,room.sequence);};
  try{
   await page.setViewportSize({width,height:width===390?844:1100});await page.goto(`http://127.0.0.1:${server.address().port}`);
@@ -41,7 +41,7 @@ for(const width of [1440,390])test(`状态图标按当前玩家筛选、红蓝�
   await expect.poll(async()=>(await records()).filter(x=>x.unitId===h.id).length).toBe(8);
   expect(await page.evaluate(()=>{
    const scene=__game.renderer.game.scene.scenes[0];
-   return scene.statusIcons.report.every(r=>scene.textures.exists(`unit-status-${r.id}-${r.frame}`));
+   return scene.statusIcons.report.every(r=>scene.textures.exists(`unit-status-${r.textureId||r.id}-${r.frame}`));
   })).toBe(true);
   h.immortalUntil=0;h.eliteBuffs={};
   s.cleanse(h);s.cleanse(enemy);h.shield=0;enemy.shield=0;await sync();await expect.poll(records).toEqual([]);

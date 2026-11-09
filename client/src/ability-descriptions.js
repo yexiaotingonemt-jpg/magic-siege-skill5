@@ -191,7 +191,7 @@ export function upgradeEffectsHTML(traits) {
 }
 export function abilityGuideHTML(g) {
   const passive = '<article class="ability-entry" data-ability-view="passive" hidden><h3>职业自带被动</h3><small class="ability-meta">' +
-    (g.innatePassive ? '契约后自动生效，无需施放，不消耗体力' : '当前战局未启用新版职业被动') + '</small><p class="ability-brief">' +
+    (g.innatePassive ? '常驻 Buff · 无需施放 · 无法净化或驱散' : '当前战局未启用新版职业被动') + '</small><p class="ability-brief">' +
     escapeHTML(g.innatePassive || '当前战局使用旧版规则，未启用新版职业自带被动。') + '</p>' +
     (g.passiveStatus ? '<p class="passive-status">' + escapeHTML(g.passiveStatus) + '</p>' : '') + '</article>';
   const skills = g.skills.map((s, i) =>

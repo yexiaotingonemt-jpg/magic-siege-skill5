@@ -78,10 +78,21 @@ export function createSelection({getSim,getRenderer,onChanged}){
  }
  async function confirm(){const s=getSim(),u=unit();if(!u){sync();onChanged();return;}if(s.player.stamina<s.config.world.contractCost){s.notice='契约体力不足';onChanged();return;}const oldClass=s.player.classId;s.setClass(chosenClass);if(await s.contract(s.player,u.id)){clear();}else s.setClass(oldClass);onChanged();}
 
+ async function randomContract(){
+  const s=getSim();if(s.hero())return;
+  if(s.player.stamina<s.config.world.contractCost){s.notice='契约体力不足';onChanged();return;}
+  const candidates=s.units.filter(u=>u.hp>0&&!u.hero&&!u.tower&&u.side===s.player.side&&contractClasses(u,s.config).length);
+  if(!candidates.length){s.notice='暂无可契约的己方普通士兵，请等待出兵';onChanged();return;}
+  const u=candidates[Math.floor(Math.random()*candidates.length)],roles=contractClasses(u,s.config),oldClass=s.player.classId;
+  clear();s.setClass(roles[Math.floor(Math.random()*roles.length)]);
+  if(await s.contract(s.player,u.id)){s.notice='';getRenderer()?.focusUnit(u.id);}else s.setClass(oldClass);
+  onChanged();
+ }
+
  el('contractRoles').onclick=e=>{const b=e.target.closest('[data-contract-role]');if(b){chosenClass=Number(b.dataset.contractRole);getSim().setClass(chosenClass);onChanged();}};
  async function switchTab(id){await select(id,inspectionIds);const b=el('targetTabs').querySelector(`[data-inspect-unit="${id}"]`);if(!b)return;b.focus({preventScroll:true});const tabs=el('targetTabs');if(b.offsetLeft<tabs.scrollLeft)tabs.scrollLeft=b.offsetLeft;else if(b.offsetLeft+b.offsetWidth>tabs.scrollLeft+tabs.clientWidth)tabs.scrollLeft=b.offsetLeft+b.offsetWidth-tabs.clientWidth;}
  el('targetTabs').onclick=e=>{const b=e.target.closest('[data-inspect-unit]');if(b)switchTab(Number(b.dataset.inspectUnit));};
  el('targetTabs').onkeydown=e=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;e.preventDefault();const i=inspectionIds.indexOf(inspectedId),n=inspectionIds.length;if(n)switchTab(inspectionIds[e.key==='Home'?0:e.key==='End'?n-1:(i+(e.key==='ArrowRight'?1:-1)+n)%n]);};
  el('confirmContract').onclick=confirm;for(const id of ['cancelSelection','dismissSelection'])el(id).onclick=()=>{clear();onChanged();};window.addEventListener('keydown',e=>{if(e.key==='Escape'){clear();onChanged();}});
- return {select,clear,sync,position,confirm,get unit(){return unit();},get id(){return selectedId;}};
+ return {select,clear,sync,position,confirm,randomContract,get unit(){return unit();},get id(){return selectedId;}};
 }
