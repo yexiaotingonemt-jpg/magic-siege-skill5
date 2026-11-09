@@ -27,8 +27,12 @@ for(const {viewport,side} of [{viewport:{width:1266,height:936},side:0},{viewpor
   const button=page.locator('#randomContract');await button.click();await expect(page.locator('#notice')).toContainText('暂无可契约');expect(p.stamina).toBe(100);
   const excluded=[s.spawn(1-side,'melee',0,1),s.spawn(side,'melee',0,1),s.spawn(side,'ranged',0,1)];excluded[1].elite=true;excluded[2].summoned=true;
   for(const u of excluded)u.x=100;
+  for(const u of excluded)Object.assign(u,{hp:10000,maxHp:10000});
   await sync();await button.click();await expect(page.locator('#notice')).toContainText('暂无可契约');expect(s.hero(p)).toBeFalsy();
-  const unit=s.spawn(side,side?'melee':'siege',0,1);Object.assign(unit,{x:0,y:-8});await sync();await page.evaluate(()=>__game.selection.select(null));
+  const unit=s.spawn(side,side?'melee':'siege',0,1);Object.assign(unit,{x:0,y:-8,hp:200,maxHp:250});
+  const lowerHp=[s.spawn(side,side?'melee':'ranged',0,1),s.spawn(side,'melee',0,1)];
+  Object.assign(lowerHp[0],{x:100,hp:500,maxHp:1000});Object.assign(lowerHp[1],{x:100,hp:1500,maxHp:5000});
+  await sync();await page.evaluate(()=>__game.selection.select(null));
   const lower=await page.evaluate(()=>{const s=__game.sim,c=__game.renderer.getCamera(),y=c.scrollY+c.viewportHeight*.86;return {worldY:s.player.side?s.config.world.mapMinY+y/18:s.config.world.mapMaxY-y/18,pixelY:c.viewportHeight*.86};});
   expect(lower.pixelY).toBeGreaterThan(500);unit.y=lower.worldY;await sync();await page.waitForTimeout(350);
   const target=await page.evaluate(id=>{const g=__game.renderer,p=g.screenPoint(__game.sim.get(id)),r=g.game.canvas.getBoundingClientRect();return {x:r.x+p.x/500*r.width,y:r.y+(p.y-8)/g.game.scale.gameSize.height*r.height};},unit.id);
@@ -39,6 +43,7 @@ for(const {viewport,side} of [{viewport:{width:1266,height:936},side:0},{viewpor
   await button.click();await expect(button).toBeDisabled();await expect(button).toHaveAttribute('aria-busy','true');release();
   await page.waitForFunction(id=>__game.sim.hero()?.id===id,unit.id);
   expect(p.heroId).toBe(unit.id);expect(p.stamina).toBe(97);expect(unit.classId).toBe(classId);expect(excluded.every(u=>!u.hero)).toBe(true);
+  expect(lowerHp.every(u=>!u.hero)).toBe(true);expect(unit.hp/unit.maxHp).toBeCloseTo(.8,8);
   await expect(button).toBeHidden();await expect(button).toHaveAttribute('aria-busy','false');await expect(page.locator('#notice')).toHaveText('');await expect(page.locator('#skills')).toBeVisible();await expect(page.locator('#heroName')).toHaveText((side?'黑暗领主':'符文战车')+' Lv.5');
   await checkAspect();expect(await page.evaluate(()=>__game.renderer.getCamera().viewportHeight)).toBeLessThan(awaitingHeight);
   const ratio=await measure();expect(ratio).toBeGreaterThan(.27);expect(ratio).toBeLessThan(.33);
@@ -64,7 +69,7 @@ for(const {viewport,side} of [{viewport:{width:1266,height:936},side:0},{viewpor
   await page.locator('[data-info="0"]').click();await expect(page.locator('#sheetTitle')).toHaveText(side?'裂地震荡':'腐蚀炮弹');await page.keyboard.press('Escape');
   await page.locator('#heroInfo').click();await expect(page.locator('#sheetTitle')).toHaveText('角色详情');await expect(page.locator('.hero-stat-list')).toContainText('攻击力');await expect(page.locator('.hero-stat-list')).toContainText('护甲');
   await page.locator('#gameViewport').screenshot({path:path.join(process.env.MAGIC_QA_DIR,`details-stats-${viewport.width}-${side}.png`)});
-  await page.locator('[data-detail-view="passive"]').click();await expect(page.locator('[data-ability-view="passive"]')).toContainText('无法净化或驱散');
+  await page.locator('[data-detail-view="passive"]').click();await expect(page.locator('[data-ability-view="passive"]')).toContainText('无法净化或驱散');if(side)await expect(page.locator('[data-ability-view="passive"]')).toContainText('普攻范围内最近一名有可驱散增益敌人的1个增益');
   await page.locator('#gameViewport').screenshot({path:path.join(process.env.MAGIC_QA_DIR,`details-passive-${viewport.width}-${side}.png`)});
   await page.locator('[data-detail-view="common"]').click();await expect(page.locator('[data-ability-view="common"]')).toContainText(passive.name);
   await page.locator('[data-detail-view="skills"]').click();await expect(page.locator('[data-skill-detail]:visible')).toHaveCount(4);
@@ -80,6 +85,19 @@ for(const {viewport,side} of [{viewport:{width:1266,height:936},side:0},{viewpor
   s.die(unit,null);await sync();await expect(button).toBeVisible();await expect(page.locator('#skills')).toBeHidden();
   await checkAspect();
   await expect(page.locator('#heroExtras')).toBeHidden();
+  // Both ends of the random range must select among tied highest-HP-ratio units,
+  // while keeping the existing random choice of legal class.
+  for(const roll of [0,.999999]){
+   const tied=[s.spawn(side,side?'melee':'ranged',0,1),s.spawn(side,side?'melee':'ranged',0,1)];
+   Object.assign(tied[0],{x:100,hp:900,maxHp:1000});Object.assign(tied[1],{x:100,hp:450,maxHp:500});
+   await sync();const expected=tied[roll===0?0:1],stamina=p.stamina;
+   await page.evaluate(async value=>{const random=Math.random;Math.random=()=>value;try{await __game.selection.randomContract();}finally{Math.random=random;}},roll);
+   await page.waitForFunction(id=>__game.sim.hero()?.id===id,expected.id);
+   expect(p.heroId).toBe(expected.id);expect(expected.classId).toBe(side?3:roll===0?4:5);expect(p.stamina).toBe(stamina-3);
+   expect(expected.hp/expected.maxHp).toBeCloseTo(.9,8);
+   for(const u of tied){u.hp=0;s.die(u,null);}
+   await sync();await expect(button).toBeVisible();
+  }
   p.stamina=0;await sync();await expect(button).toBeDisabled();
   await expect(page.locator('vite-error-overlay')).toHaveCount(0);expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);expect(errors).toEqual([]);
   console.log(JSON.stringify({viewport,bottomRatio:ratio}));
