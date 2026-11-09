@@ -34,7 +34,7 @@ export function createStatusIcons(scene){
  for(const id of types)for(const [frame,colors]of Object.entries(frames)){const key='unit-status-'+id+'-'+frame;if(scene.textures.exists(key))continue;const g=scene.add.graphics();
   g.lineStyle(1.3,colors.line,1);g.strokeCircle(12,12,11);glyph(g,id);g.generateTexture(key,24,24);g.destroy();
  }
- const bars=scene.add.graphics().setDepth(12009),sprites=[],counts=[],reservoirs=createStatusReservoirs(),tops=new Map();let records=[],detailKey=null,pinnedUntil=0;
+ const bars=scene.add.graphics().setDepth(12009),sprites=[],reservoirs=createStatusReservoirs(),tops=new Map();let records=[],detailKey=null,pinnedUntil=0;
  const tip=scene.add.text(0,0,'',{fontFamily:'Microsoft YaHei',fontSize:'12px',color:'#eee9d9',backgroundColor:'#13211ff2',padding:{x:8,y:6},stroke:'#10201b',strokeThickness:1,wordWrap:{width:260,useAdvancedWrap:true}}).setOrigin(.5,1).setDepth(13000).setVisible(false).setName('unit-status-tooltip');
  const pick=(point,padding=0)=>records.filter(r=>point.x>=r.x-padding&&point.x<=r.x+r.size+padding&&point.y>=r.y-padding&&point.y<=r.y+r.size+padding).sort((a,b)=>Math.hypot(point.x-a.x-a.size/2,point.y-a.y-a.size/2)-Math.hypot(point.x-b.x-b.size/2,point.y-b.y-b.size/2))[0];
  return {get report(){return records;},top(id){return tops.get(id);},hover(point){const hit=pick(point);if(hit){detailKey=hit.key;pinnedUntil=0;}else if(!pinnedUntil)detailKey=null;},tap(point){const hit=pick(point,2);if(!hit){detailKey=null;pinnedUntil=0;return false;}detailKey=hit.key;pinnedUntil=performance.now()+3500;return true;},draw(sim,map,camera){
@@ -46,15 +46,15 @@ export function createStatusIcons(scene){
    statuses.forEach((status,i)=>{
     const row=Math.floor(i/3),rowCount=Math.min(3,statuses.length-row*3),x=left+(columns-rowCount)*(size+gap)/2+(i%3)*(size+gap),y=barY-5-size-row*(size+gap),key=u.id+':'+status.id;active.add(key);
     const frame=statusFrame(u,status,sim.player),texture='unit-status-'+(status.textureId||status.id)+'-'+frame;
-    let sp=sprites[used],count=counts[used];if(!sp){sp=scene.add.image(0,0,texture).setOrigin(0).setDepth(12010);sprites.push(sp);count=scene.add.text(0,0,'',{fontFamily:'Arial',fontSize:'11px',fontStyle:'bold',color:'#fff6de',backgroundColor:'#18201ff2',padding:{x:1,y:0},stroke:'#101917',strokeThickness:2}).setOrigin(1,1).setDepth(12020);counts.push(count);}used++;
-    sp.setVisible(true).setTexture(texture).setPosition(x,y).setDisplaySize(size,size);count.setVisible(status.stacks>0||status.permanent);if(status.stacks>0||status.permanent)count.setFontSize(Math.max(11,9/cssScale)).setText(status.permanent&&!status.stacks?'∞':String(status.stacks)).setPosition(x+size+1,y+size-1);
+    let sp=sprites[used];if(!sp){sp=scene.add.image(0,0,texture).setOrigin(0).setDepth(12010);sprites.push(sp);}used++;
+    sp.setVisible(true).setTexture(texture).setPosition(x,y).setDisplaySize(size,size);
     const remaining=status.until-sim.time,fillRatio=reservoirs.sample(key,status.until,sim.time);drawStatusReservoir(bars,x,y,size,fillRatio,frames[frame]);
     records.push({unitId:u.id,key,...status,frame,remaining,fillRatio,x,y,size});
    });
   }
-  for(let i=used;i<sprites.length;i++){sprites[i].setVisible(false);counts[i].setVisible(false);}reservoirs.prune(active);
+  for(let i=used;i<sprites.length;i++)sprites[i].setVisible(false);reservoirs.prune(active);
   if(pinnedUntil&&performance.now()>pinnedUntil){detailKey=null;pinnedUntil=0;}const selected=records.find(r=>r.key===detailKey);tip.setVisible(!!selected);
   if(selected){const duration=selected.permanent?'常驻 · 无法净化或驱散':Number.isFinite(selected.remaining)?'效果生效中':'友军在范围内时生效';tip.setFontSize(Math.max(12,12/cssScale)).setText(`${selected.name}${selected.stacks>0?' ×'+selected.stacks:''} · ${duration}\n${statusDetail(selected)}`);const x=Math.max(tip.width/2+6,Math.min(494-tip.width/2,selected.x+selected.size/2)),y=Math.max(camera.scrollY+tip.height+6,(tops.get(selected.unitId)||selected.y)-5);tip.setPosition(x,y);}
   return records;
- },destroy(){bars.destroy();tip.destroy();sprites.forEach(s=>s.destroy());counts.forEach(t=>t.destroy());}};
+ },destroy(){bars.destroy();tip.destroy();sprites.forEach(s=>s.destroy());}};
 }
