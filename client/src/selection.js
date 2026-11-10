@@ -63,7 +63,7 @@ export function createSelection({getSim,getRenderer,onChanged}){
  function sync(){const current=getSim().matchId;if(matchId&&matchId!==current)clear();matchId=current;syncInfo();const s=getSim(),u=unit();if(selectedId&&!u){clear();s.notice='所选单位已离场或被契约，请重新选择';return;}if(!u){popup.hidden=true;return;}syncRoles(s,u);el('selectedName').textContent=troopTitle(u)+' #'+u.id;el('selectedDetail').textContent=`可契约为 ${classes[chosenClass]} · 生命 ${Math.ceil(u.hp)} / ${Math.ceil(u.maxHp)} · 攻击 ${Number(s.attackPower(u).toFixed(2))}`;el('selectedHpBar').style.width=100*u.hp/u.maxHp+'%';el('confirmContract').textContent=`${s.player.stamina<s.config.world.contractCost?'体力不足':'契约'+classes[chosenClass]} · ϟ ${s.config.world.contractCost}`;el('confirmContract').disabled=s.player.stamina<s.config.world.contractCost;position();}
  async function select(id,ids){
   const s=getSim(),hero=s.hero();
-  if(id==null){clear();s.notice='';onChanged();return;}
+  if(id==null){clear();s.notice='';if(hero)await s.clearManualTarget();onChanged();return;}
   const u=s.get(id),group=u?(ids||collectTargets(s,u)):[];inspectedId=u?.id??null;inspectionIds=group;
   if(hero){
    clear();inspectedId=u?.id??null;inspectionIds=group;

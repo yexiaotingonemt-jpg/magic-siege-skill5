@@ -58,6 +58,7 @@ export function connectRoom({onState,onStatus,onIdentity,onUpdateRequired,onSnap
  sim.setClass=id=>{if(sim.hero())return false;previewClass=id;sim.player.classId=id;return true;};
  sim.contract=async(_p,unitId)=>{const ok=await send('contract',{unitId,classId:previewClass??sim.player.classId});if(ok&&!closed){previewClass=null;sim.notice='';try{const data=await request('/api/state');if(!closed)apply(data);}catch(error){if(isUpdateRequired(error))stopForUpdate(error);else throw error;}}return ok;};
  sim.setManualTarget=unitId=>send('target',{unitId});
+ sim.clearManualTarget=()=>send('clearTarget');
  sim.cast=skill=>send('cast',{skill});sim.upgrade=skill=>send('upgrade',{skill});sim.respec=()=>send('respec');
  return {sim,send,reserve(id){reserved=id;},get connected(){return connected;},close:dispose,get identity(){return identity;}};
 }
