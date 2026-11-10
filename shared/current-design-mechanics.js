@@ -11,8 +11,13 @@ const first=(t,units)=>t?[t,...units.filter(u=>u.id!==t.id)]:units;
 const rules=sim=>sim.config.design.rules;
 const pass=(sim,h)=>currentValues(sim,h);
 const live=(sim,ids)=>ids.map(id=>sim.get(id)).filter(Boolean);
-const elfLinkTargets=(sim,h,s)=>sim.allies(h,s.range).filter(u=>u.id!==h.id&&!u.tower)
-  .sort((a,b)=>a.hp-b.hp||distance(h,a)-distance(h,b)||a.id-b.id).slice(0,s.targets);
+const elfTargets=(sim,h,at,range,excludeSelf=false)=>{
+  const candidates=sim.allies({...at,side:h.side},range).filter(u=>!u.tower&&(!excludeSelf||u.id!==h.id));
+  const selected=manualTarget(sim,h),chosen=candidates.find(u=>u.id===selected?.id);
+  const linked=new Set(sim.fields.filter(f=>f.kind==='link'&&f.owner.id===h.id&&f.until>sim.time&&f.owner.hp>0&&sim.get(f.host)?.hp>0&&distance(h,sim.get(f.host))<=f.breakRange).map(f=>f.host));
+  candidates.sort((a,b)=>(linked.has(b.id)?1:0)-(linked.has(a.id)?1:0)||a.hp/a.maxHp-b.hp/b.maxHp||distance(at,a)-distance(at,b)||a.id-b.id);
+  return first(chosen,candidates);
+};
 const area=(sim,h,at,radius,limit,t=null)=>first(t,nearest(at,sim.enemies({...at,side:h.side},radius))).slice(0,limit);
 const emit=(sim,h,s,at,targets,kind='release')=>sim.visual(kind,h,at,{skill:s.skill,targets:targets.map(u=>({id:u.id,x:u.x,y:u.y})),haloTargets:targets.map(u=>({id:u.id})),until:sim.time+1});
 const hurt=(sim,h,s,t,power=s.power/100,scale=1,meta={})=>sim.damage(h,t,s.value.attack*power*scale*(1+(s.bonusDamage||0)),false,false,{value:s.value,area:(s.targets||1)>1,...meta});
@@ -23,7 +28,7 @@ const knock=(sim,h,t,n)=>{
   return distance(t,before);
 };
 function currentTarget(sim,h,i,s){
-  if(h.classId===5&&i===1)return elfLinkTargets(sim,h,s)[0]||null;
+  if(h.classId===5&&(i===0||i===1))return elfTargets(sim,h,h,s.range,i===1)[0]||null;
   const friendly=h.classId===5||h.classId===0&&i===2,side=friendly?h.side:1-h.side;
   // 灵息的自动治疗独立选择缺血友军；只有手选敌人时才转向其攻击对象。
   const chosen=h.classId===5&&i===0&&!manualTarget(sim,h)?null:targetForSide(sim,h,side);
@@ -51,7 +56,7 @@ export function selectCurrentSkill(h,i,s) {
   if (!t) return {ok:false,code:'target',reason:'范围内没有有效目标'};
   if (h.classId===0 && i===0) targets=area(this,h,t,s.radius,s.targets,t);
   else if (h.classId===0 && i===1) targets=[h,...nearest(h,this.allies(h,s.radius).filter(u=>u.id!==h.id)).slice(0,s.targets)];
-  else if (h.classId===5 && i===1) targets=elfLinkTargets(this,h,s);
+  else if (h.classId===5 && i===1) targets=elfTargets(this,h,h,s.range,true).slice(0,s.targets);
   else if (h.classId===5 && i===2) {
     const candidates=nearest(h,this.allies(h,s.range).filter(u=>this.hasNegative(u)));
     targets=first(candidates.find(u=>u.id===t.id),candidates).slice(0,s.targets);
@@ -410,7 +415,7 @@ export const currentTraitEffects={
     }
     if (!a||a.side===t.side) return;
     if (!meta.derived && a.classId===5 && a.hp>0) {
-      const friend=this.allies({...t,side:a.side},r.elfConvertRadius).sort((a,b)=>a.hp/a.maxHp-b.hp/b.maxHp)[0];
+      const friend=elfTargets(this,a,t,r.elfConvertRadius)[0];
       if (friend) this.heal(friend,sum*r.elfDamageHeal,a,meta.value,true);
     }
     if (basic&&a.classId===0&&a.hp>0) this.heal(a,sum*(pass(this,a).missing_lifesteal||0)*(1-a.hp/a.maxHp),a,null,true);
