@@ -1445,6 +1445,34 @@ export const CURRENT_DESIGN = {
       ]
     },
     {
+      "id": "N106_5",
+      "sourceId": 106,
+      "classId": 5,
+      "skill": 1,
+      "name": "链接持续时间延长",
+      "description": "共生链接的持续时间及续时上限延长2/4秒（上限2档）。",
+      "max": 2,
+      "rarity": "blue",
+      "common": false,
+      "keys": ["duration"],
+      "values": [[10], [12]],
+      "baseline": [8]
+    },
+    {
+      "id": "N107_5",
+      "sourceId": 107,
+      "classId": 5,
+      "skill": 1,
+      "name": "治疗续时提升",
+      "description": "有效治疗使共生链接延长的时间增加1/2秒（上限2档）。",
+      "max": 2,
+      "rarity": "blue",
+      "common": false,
+      "keys": ["heal_extension"],
+      "values": [[4], [5]],
+      "baseline": [3]
+    },
+    {
       "id": "N041_5",
       "sourceId": 41,
       "classId": 5,

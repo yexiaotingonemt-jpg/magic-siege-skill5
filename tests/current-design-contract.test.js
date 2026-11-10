@@ -50,11 +50,12 @@ for(const [id,skills] of Object.entries(design.skills))for(const [i,skill] of sk
  const row=source.skills.find(r=>r[1]===classes[id]&&r[2]===skill.name);assert.ok(row);
  assert.equal(clean(skill.description),clean(windowSkillDescriptions[`${id}:${i}`]??row[3]));assert.deepEqual([skill.cost,skill.cd,skill.cast],row.slice(4,7).map(Number));
 });
-const whole=new Set(['duration','targets','range','bounces','taunt','knock','shots','initial_heat','heat_duration_extra','heat_cap_extra','range_bonus','elf_extra_targets','damage_targets']);
+const whole=new Set(['duration','heal_extension','targets','range','bounces','taunt','knock','shots','initial_heat','heat_duration_extra','heat_cap_extra','range_bonus','elf_extra_targets','damage_targets']);
 const boolean=new Set(['immortal','pierce','split','drag','passive_dr']);
 const groups=(text,percent=false)=>[...text.split('（')[0].matchAll(/\d+(?:\.\d+)?(?:%?\/\d+(?:\.\d+)?)*%?(?:个百分点)?/g)].map(m=>m[0]).filter(t=>!percent||t.includes('%')||t.includes('个百分点')).map(t=>t.match(/\d+(?:\.\d+)?/g).map(Number));
 for(const a of design.affixes)test(`${classes[a.classId]}词条${a.sourceId}：全部档位、上限、品质对应当前源表`,()=>{
- const original=a.sourceId===105?['黑暗领主','裂地震荡','目标增加','震荡波额外命中1/2名敌人（上限2档）。',2,'紫']:source.affixes.find(r=>r[2]===(a.sourceId===65?'目标增加':a.name)&&(a.common?r[1]==='通用词条':r[0]===classes[a.classId]&&r[1]===(a.skill==null?'职业被动':design.skills[a.classId][a.skill].name)));
+ const added={105:['黑暗领主','裂地震荡','目标增加','震荡波额外命中1/2名敌人（上限2档）。',2,'紫'],106:['森林精灵','共生链接','链接持续时间延长','共生链接的持续时间及续时上限延长2/4秒（上限2档）。',2,'蓝'],107:['森林精灵','共生链接','治疗续时提升','有效治疗使共生链接延长的时间增加1/2秒（上限2档）。',2,'蓝']};
+ const original=added[a.sourceId]??source.affixes.find(r=>r[2]===(a.sourceId===65?'目标增加':a.name)&&(a.common?r[1]==='通用词条':r[0]===classes[a.classId]&&r[1]===(a.skill==null?'职业被动':design.skills[a.classId][a.skill].name)));
  const row=original&&[...original];if(row&&windowAffixDescriptions[a.sourceId])row[3]=windowAffixDescriptions[a.sourceId];if(row&&a.sourceId===38)row[4]=1;
  assert.ok(row,a.id);assert.equal(clean(a.description),clean(row[3]));assert.equal(a.max,Number(row[4]));assert.equal(a.rarity,AFFIX_QUALITY_OVERRIDES[a.sourceId]??{'蓝':'blue','紫':'purple','金':'gold'}[row[5]]);
  const key=a.keys[0],id=a.sourceId,ps=groups(row[3],true),ns=groups(row[3]);let expected;
@@ -68,8 +69,8 @@ for(const a of design.affixes)test(`${classes[a.classId]}词条${a.sourceId}：�
  assert.equal(expected.length,a.max);for(let r=0;r<a.max;r++)for(let j=0;j<a.keys.length;j++)near(a.values[r][j],expected[r][j]);
  if(a.skill!=null)for(let j=0;j<a.keys.length;j++)near(Number(a.baseline[j]),Number(previousSkillBaselines[a.sourceId]??design.skills[a.classId][a.skill][a.keys[j]]??0));
 });
-test('完整覆盖五职业20技能、5被动和105种词条，通用项展开144个合法职业实例',()=>{
- assert.equal(source.skills.length-1,25);assert.equal(source.affixes.length-1,104);assert.equal(new Set(design.affixes.map(a=>a.sourceId)).size,105);assert.equal(design.affixes.length,144);
+test('完整覆盖五职业20技能、5被动和107种词条，通用项展开146个合法职业实例',()=>{
+ assert.equal(source.skills.length-1,25);assert.equal(source.affixes.length-1,104);assert.equal(new Set(design.affixes.map(a=>a.sourceId)).size,107);assert.equal(design.affixes.length,146);
  assert.ok(!design.affixes.some(a=>a.sourceId===63),'已移除的范围连轰不能重新混入');
 });
 test('计分系数对应源表及精灵治疗权重校准，固定B、P与KDA口径',()=>{

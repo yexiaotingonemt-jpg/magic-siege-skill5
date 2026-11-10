@@ -2,6 +2,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {arena,affix,cast,advance,near} from './current-design-fixture.mjs';
 
+test('持续时间和治疗续时词条各档组合生效，续时不超过该链接的持续时间',()=>{
+ for(const durationRank of [0,1,2]) for(const extensionRank of [0,1,2]){
+  const {s,p,h,friend}=arena(5);
+  if(durationRank)affix(s,p,106,durationRank);
+  if(extensionRank)affix(s,p,107,extensionRank);
+  cast(s,p,1,friend);const f=s.fields.find(f=>f.kind==='link'),duration=8+2*durationRank,extension=3+extensionRank,start=f.until-duration;
+  s.time=start+duration-1; s.heal(friend,100,h);near(f.until,start+duration+extension);
+  for(let i=0;i<5;i++)s.heal(friend,100,h);near(f.until,s.time+duration);
+ }
+});
+
 test('共生链接从生效时持续8秒，有效治疗加3秒且剩余不超过8秒，共享不重复续时',()=>{
  const {s,p,h,friend}=arena(5);h.hp-=3000;cast(s,p,1,friend);
  const f=s.fields.find(f=>f.kind==='link'),start=f.until-8;near(f.until,start+8);
