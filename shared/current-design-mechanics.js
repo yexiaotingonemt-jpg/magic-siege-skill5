@@ -153,7 +153,7 @@ export function resolveCurrentSkill(h,i,s,locked,ids=[],extra={}) {
     }
     if (i===1 && t) {
       for (const u of targets.filter(u=>u.id!==h.id&&!u.tower&&distance(h,u)<=s.range)) {
-        this.fields.push({kind:'link',owner:h,host:u.id,until:this.time+s.duration,duration:s.duration,healExtension:s.heal_extension,breakRange:s.range,shareRatio:s.share,shareDamage:!!s.split,value:s.value});
+        this.fields.push({kind:'link',owner:h,host:u.id,until:this.time+s.duration,duration:s.duration,healExtension:s.heal_extension,breakRange:s.range,shareRatio:s.share,shareDamage:!!s.split,transferChance:s.transfer_chance||0,linkReduction:s.reduction||0,linkHaste:s.haste||0,value:s.value});
         this.guard(u,h,'elfLink',s.reduction,s.duration);this.haste(u,'elfLink',s.haste,s.duration,h);
       }
     }
@@ -440,6 +440,14 @@ export const currentTraitEffects={
     }
   },
   onUnitDeath(t) {
+    for(const f of this.fields) if(f.kind==='link'&&f.host===t.id&&f.until>this.time&&f.owner.hp>0&&f.transferChance>0&&distance(f.owner,t)<=f.breakRange){
+      const target=nearest(t,this.allies(t,6).filter(u=>u.id!==f.owner.id&&!u.tower&&distance(f.owner,u)<=f.breakRange))[0];
+      if(!target||this.random()>=f.transferChance)continue;
+      f.host=target.id;
+      const remaining=f.until-this.time,guard=(target.guards||[]).find(g=>g.kind==='elfLink'&&g.ownerId===f.owner.id&&g.until>this.time),haste=target.hastes?.elfLink;
+      this.guard(target,f.owner,'elfLink',Math.max(f.linkReduction||0,guard?.ratio||0),Math.max(remaining,(guard?.until||0)-this.time));
+      this.haste(target,'elfLink',Math.max(f.linkHaste||0,haste?.until>this.time?haste.ratio:0),Math.max(remaining,(haste?.until||0)-this.time),f.owner);
+    }
     const killed=t.lethalSkill;
     if (killed?.currentExplosion) {const h=this.get(killed.ownerId);if (h) this.explode(h,t,killed.explosionRadius,99,killed.attack*killed.currentExplosion,killed.value);}
     for (const mark of t.soulMarks||[]) if (mark.current&&mark.until>=this.time&&mark.s.explode) {

@@ -1473,6 +1473,20 @@ export const CURRENT_DESIGN = {
       "baseline": [3]
     },
     {
+      "id": "N108_5",
+      "sourceId": 108,
+      "classId": 5,
+      "skill": 1,
+      "name": "链接转移",
+      "description": "被链接友军死亡时，有50%/100%概率将链接转移至其6格内最近的另一名友军（上限2档）。新目标须在施法者链接范围内；保留剩余时间及链接效果。",
+      "max": 2,
+      "rarity": "purple",
+      "common": false,
+      "keys": ["transfer_chance"],
+      "values": [[0.5], [1]],
+      "baseline": [0]
+    },
+    {
       "id": "N041_5",
       "sourceId": 41,
       "classId": 5,
