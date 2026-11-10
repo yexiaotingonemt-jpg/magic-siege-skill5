@@ -46,6 +46,13 @@ for(const viewport of [{width:1440,height:1100},{width:390,height:844}])test(`ç›
   const layout=await page.locator('#targetInfo').boundingBox(),battle=await page.locator('.battle-wrap').boundingBox();
   expect(layout.x).toBeGreaterThanOrEqual(battle.x);expect(layout.x+layout.width).toBeLessThanOrEqual(battle.x+battle.width+1);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(viewport.width);
+  // Clicking empty battlefield cancels the server lock, without issuing a move order.
+  const beforeClear={x:h.x,y:h.y,stamina:p.stamina,cd:h.cd};
+  const canvas=await page.locator('canvas').boundingBox();await page.mouse.click(canvas.x+canvas.width*.08,canvas.y+canvas.height*.75);
+  await expect.poll(()=>h.manualTargetId).toBeNull();await expect(page.locator('#targetInfo')).toBeHidden();
+  expect({x:h.x,y:h.y,stamina:p.stamina,cd:h.cd}).toEqual(beforeClear);
+  expect(h.manualMoveTargetId).toBeNull();expect(s.choose(h).id).toBe(closer.id);
+  await clickUnit(enemy);await expect.poll(()=>h.manualTargetId).toBe(enemy.id);
   // The real simulation advances toward the selected enemy despite a nearer one.
   const startY=h.y;s.tick(.5);expect(h.y).toBeGreaterThan(startY);expect(h.targetId).toBe(enemy.id);
   for(let i=0;i<160;i++)s.tick(.05);

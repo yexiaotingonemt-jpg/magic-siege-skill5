@@ -60,3 +60,11 @@ export function setManualTarget(sim,targetId,p=sim.player){
  h.manualAttackTargetId=attack?.id??null;h.targetId=attack?.id??null;h.retaliationTargetId=null;h.deploying=false;
  sim.notice='';return true;
 }
+
+// Cancel player selection without issuing a destination; the next navigation tick reacquires normally.
+export function clearManualTarget(sim,p=sim.player){
+ const h=sim.hero(p);
+ if(!h){sim.notice='请先契约一个单位';return false;}
+ h.manualTargetId=null;h.manualMoveTargetId=null;h.manualAttackTargetId=null;h.friendlyTargetId=null;
+ h.targetId=null;h.retaliationTargetId=null;sim.notice='';return true;
+}

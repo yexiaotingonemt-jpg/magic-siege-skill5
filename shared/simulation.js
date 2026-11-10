@@ -11,7 +11,7 @@ import {TOWER_GUARD,towerGuardActive} from './tower-guard.js';
 import {planSkillUpgrade} from './skill-progression.js';
 import {chooseTrait,prepareChoice,rarityAt,skillRanks} from './traits.js';
 import {chooseTarget,navigate} from './navigation.js';
-import {setManualTarget} from './manual-target.js';
+import {setManualTarget,clearManualTarget} from './manual-target.js';
 import {inAttackRange,ATTACK_RANGE_EPSILON} from './attack-range.js';
 import {distributeTroops,TROOP_TYPES} from './troop-population.js';
 import {balanceNpcHeroes,npcBalanceStatus} from './npc-balance.js';
@@ -29,6 +29,7 @@ export class Simulation extends HeroRules {
  setClass(id,p=this.player){if(this.hero(p)||!availableClasses(p.side,this.config).includes(id))return false;p.classId=id;p.points=0;return true;}
  hero(p=this.player){return this.units.find(u=>u.id===p.heroId&&u.hp>0);}
  setManualTarget(targetId,p=this.player){return setManualTarget(this,targetId,p);}
+ clearManualTarget(p=this.player){return clearManualTarget(this,p);}
  get(id){return this.units.find(u=>u.id===id&&u.hp>0)||this.towers.find(u=>u.id===id&&u.hp>0);}
  activeTowers(){return this.towers.filter(t=>t.hp>0);}
  resetMap(settle=true){if(settle)for(const p of this.players){const h=this.hero(p);if(h)this.settle(h,'战区攻破');p.heroId=null;}this.units=[];this.projectiles=[];this.effects=[];this.fields=[];this.jobs=[];this.animations=[];this.layer=0;this.towers=[];for(let l=0;l<3;l++)for(let j=0;j<this.config.tower.columns;j++){const c=this.config.tower,m=l===0?1:l===1?c.middleMultiplier:c.rearMultiplier;this.towers.push({id:this.nextId++,tower:true,side:1,x:(j-(c.columns-1)/2)*c.spacing,y:l*c.layerSpacing,hp:c.hp*m,maxHp:c.hp*m,attack:c.attack*m,interval:c.interval,range:c.range,armor:0,layer:l,cd:0,shield:0,towerGuardTriggers:0,towerGuardUntil:0,contributors:{}});}this.summonOwners.clear();this.waveNumber=0;this.waveAt=this.time;this.spawnWave();if(settle){this.metrics.resets++;this.log('全部防御塔全毁：结算存活贡献，战区重置，请重新契约');}}
