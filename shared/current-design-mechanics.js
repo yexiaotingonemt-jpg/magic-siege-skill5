@@ -152,9 +152,18 @@ export function resolveCurrentSkill(h,i,s,locked,ids=[],extra={}) {
       }
     }
     if (i===1 && t) {
-      for (const u of targets.filter(u=>u.id!==h.id&&!u.tower&&distance(h,u)<=s.range)) {
+      const valid=targets.filter(u=>u.hp>0&&u.id!==h.id&&!u.tower&&distance(h,u)<=s.range);
+      if(valid.length)for(const f of this.fields)if(f.kind==='link'&&f.owner.id===h.id&&f.until>this.time){
+        const host=this.get(f.host);if(!host||host.hp<=0||distance(h,host)>f.breakRange)continue;
+        f.until=this.time+(f.duration??this.config.design.skills[5][1].duration);
+        for(const guard of host.guards||[])if(guard.kind==='elfLink'&&guard.ownerId===h.id&&guard.until>this.time)guard.until=Math.max(guard.until,f.until);
+        if(host.hastes?.elfLink?.ownerId===h.id&&host.hastes.elfLink.until>this.time)host.hastes.elfLink.until=Math.max(host.hastes.elfLink.until,f.until);
+      }
+      for (const u of valid) {
         this.fields.push({kind:'link',owner:h,host:u.id,until:this.time+s.duration,duration:s.duration,healExtension:s.heal_extension,breakRange:s.range,shareRatio:s.share,shareDamage:!!s.split,transferChance:s.transfer_chance||0,linkReduction:s.reduction||0,linkHaste:s.haste||0,value:s.value});
-        this.guard(u,h,'elfLink',s.reduction,s.duration);this.haste(u,'elfLink',s.haste,s.duration,h);
+        const guard=(u.guards||[]).find(g=>g.kind==='elfLink'&&g.ownerId===h.id&&g.until>this.time),haste=u.hastes?.elfLink;
+        this.guard(u,h,'elfLink',Math.max(s.reduction||0,guard?.ratio||0),Math.max(s.duration,(guard?.until||0)-this.time));
+        this.haste(u,'elfLink',Math.max(s.haste||0,haste?.until>this.time?haste.ratio:0),Math.max(s.duration,(haste?.until||0)-this.time),h);
       }
     }
     if (i===2) for (const u of targets) {

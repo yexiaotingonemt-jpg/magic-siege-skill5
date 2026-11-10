@@ -8,13 +8,13 @@ test('精灵链接计数保留同一目标的独立链接，快照裁剪后与�
  const {s,p,h,friend}=arena(5);
  assert.equal(elfLinkCount(s),0);
  cast(s,p,1);assert.equal(elfLinkCount(s),1);
- const first=s.fields.find(f=>f.kind==='link');
+ const first=s.fields.find(f=>f.kind==='link'),originalExpiry=first.until;
  advance(s,3);p.cd[1]=s.time;cast(s,p,1);assert.equal(elfLinkCount(s),2);
  assert.ok(s.fields.filter(f=>f.kind==='link').every(f=>f.host===friend.id));
  const fields=clientSnapshot(s.fields,s.time),original=s.fields;
  s.fields=fields;assert.equal(elfLinkCount(s),2);assert.deepEqual(s.fields,fields);
- s.fields=original;advance(s,first.until-s.time+.1);assert.equal(elfLinkCount(s),1);
- advance(s,8);assert.equal(elfLinkCount(s),0);
+ s.fields=original;advance(s,originalExpiry-s.time+.1);assert.equal(elfLinkCount(s),2);
+ advance(s,first.until-s.time+.1);assert.equal(elfLinkCount(s),0);
 });
 
 test('只统计自身有效的向外链接，排除其他精灵、失效目标、超距与阵亡',()=>{
