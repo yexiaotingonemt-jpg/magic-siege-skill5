@@ -174,6 +174,7 @@ const units={power:'伤害／攻击力',path_damage:'沿途伤害／攻击力',h
   heal_down:'下次治疗降低',extra_chance:'追加攻击概率',dot_chance:'腐蚀概率',dot_hp:'每秒目标生命伤害',hp_ratio:'目标生命伤害比例',cap:'伤害上限／攻击力',attack_slow:'降低攻速',self_haste:'自身攻速增益',move_damage:'每格位移伤害／攻击力',ramp:'逐炮增伤',
   slow:'降低移速',echo:'返回波伤害比例',pull:'牵引格',death_slow:'反伤击杀降低攻速',shield:'护盾／最大生命',lifesteal:'技能吸血',summon:'护卫数量',initial_heat:'初始炙热层',heat_duration_extra:'炙热保留秒',heat_cap_extra:'炙热上限层',heat_haste_extra:'每层炙热额外攻速',heat_attack_proc:'每层获热耗热增攻',elf_damage_bonus:'治疗转伤提高',elf_extra_targets:'转伤目标数',attack_bonus:'攻击力',missing_attack:'缺血增攻',missing_lifesteal:'缺血吸血',share_relief:'减轻分担衰减',building_bonus:'对建筑伤害提高',range_bonus:'普攻距离格',hp_bonus:'最大生命',move_bonus:'移动速度',healing_received:'受到治疗提高',cdr:'冷却缩减',tower_reduction:'对塔减伤',final_reduction:'最终减伤',final_damage:'最终增伤'};
 export function describeAffix(t,design=null) {
+  if (t.sourceId===108) return `被链接友军死亡时，有${t.values.map(row=>pct(row[0]-t.baseline[0])).join('/')}概率将链接转移至其6格内最近的另一名友军（上限${t.max}档）。`;
   if (design && t.sourceId===55) return `自身攻击速度提高${t.values.map(row=>pct(row[0]-t.baseline[0])).join('/')}除以分担目标数，持续${design.skills[2][1].self_haste_duration}秒（上限${t.max}档）。`;
   if (t.sourceId===75) return `开启君临时，获得相当于最大生命${t.values.map(row=>pct(row[0]-t.baseline[0])).join('/')}的护盾，持续至君临结束（上限${t.max}档）。`;
   if (design && t.sourceId===78) return `每累计受到最大生命${pct(design.rules.lordPassiveThreshold)}的伤害，受到的伤害降低${pct(design.rules.lordPassiveReduction)}，持续${design.rules.lordPassiveDuration}秒（上限${t.max}档）。`;
@@ -207,7 +208,7 @@ export function describeCurrentSkill(s,rules={}) {
     4:[`造成${P}攻击伤害，获得1层炙热。`, `标记${D}秒，自身每次普攻命中被标记敌人时附加${pct(s.per_hit)}攻击伤害，有${pct(s.heat_chance)}概率获得炙热。`,
     `最多${T}名敌人各受${P}攻击伤害；每击杀1名获得${s.kill_heat}层炙热。`,
     `消耗全部炙热，造成${P}攻击伤害，每层使本次伤害提高${pct(s.heat_damage)}，最多${T}名目标。`],
-    5:[`恢复${pct(s.heal)}攻击力的生命，并按有效治疗触发职业转伤。优先指定友军，其次已链接友军，最后其他友军，自动目标按生命百分比选择。`, `链接最多${T}名友军，每条${D}秒；优先指定友军，其次已链接友军，再按生命百分比选择其他友军。刷新自身已有有效链接的持续时间并新增链接，可重复连接，各条独立计时。共享${pct(s.share)}有效治疗，受到有效治疗时对应链接续时${s.heal_extension}秒，剩余最多${D}秒，共享不重复续时。`,
+    5:[`为1名友军恢复相当于攻击力${pct(s.heal)}的生命。`, `与最多${T}名友军建立共生链接，持续${D}秒。链接期间，彼此共享所受有效治疗的${pct(s.share)}。再次施放时刷新已有链接并新增链接；可重复链接同一友军，各条独立计时。`,
     `净化${s.range}格内${T}名友军，每移除1个负面恢复${pct(s.heal_per_cleanse)}攻击力的生命。`,
     `自身和${T}名友军每次恢复${pct(s.heal)}攻击力生命，共${s.pulses}次，持续吟唱${D}秒。`],
     2:[`命中最多${T}人，分担前伤害为主目标最大生命${pct(s.hp_ratio)}。`,
