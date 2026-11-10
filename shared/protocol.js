@@ -6,9 +6,9 @@ export const PROTOCOL_VERSION=3;
 // documentation-only changes keep this version; builds/packages never bump it.
 export const GAME_VERSION='0.7.0';
 // Server and desktop releases share one version; publish both together.
-export const SERVER_VERSION='0.8.5';
+export const SERVER_VERSION='0.8.6';
 // Desktop release version must match SERVER_VERSION.
-export const CLIENT_VERSION='0.8.5';
+export const CLIENT_VERSION='0.8.6';
 // Diagnostic ruleset label; changing this alone does not require a client update.
-export const RULESET_REVISION='lord-dispel-range-20261109';
+export const RULESET_REVISION='elf-link-affixes-20261110';
 export const UPDATE_REQUIRED_CODE='CLIENT_UPDATE_REQUIRED';

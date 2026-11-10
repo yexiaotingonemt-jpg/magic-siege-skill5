@@ -153,7 +153,7 @@ export function resolveCurrentSkill(h,i,s,locked,ids=[],extra={}) {
     }
     if (i===1 && t) {
       for (const u of targets.filter(u=>u.id!==h.id&&!u.tower&&distance(h,u)<=s.range)) {
-        this.fields.push({kind:'link',owner:h,host:u.id,until:this.time+s.duration,breakRange:s.range,shareRatio:s.share,shareDamage:!!s.split,value:s.value});
+        this.fields.push({kind:'link',owner:h,host:u.id,until:this.time+s.duration,duration:s.duration,healExtension:s.heal_extension,breakRange:s.range,shareRatio:s.share,shareDamage:!!s.split,value:s.value});
         this.guard(u,h,'elfLink',s.reduction,s.duration);this.haste(u,'elfLink',s.haste,s.duration,h);
       }
     }
@@ -357,7 +357,7 @@ export function currentHeal(t,n,u,value=null,derived=false,linkShared=false) {
       const host=this.get(f.host);if (!host||host.hp<=0||distance(f.owner,host)>f.breakRange) continue;
       if (t.id===f.owner.id||t.id===host.id) {
         const skill=this.config.design.skills[5][1];
-        f.until=Math.min(f.until+(skill.heal_extension||0),this.time+skill.duration);
+        f.until=Math.min(f.until+(f.healExtension??skill.heal_extension??0),this.time+(f.duration??skill.duration));
         for (const guard of host.guards||[]) if (guard.kind==='elfLink'&&guard.ownerId===f.owner.id) guard.until=f.until;
         if (host.hastes?.elfLink) host.hastes.elfLink.until=f.until;
         if (!derived) currentHeal.call(this,t.id===host.id?f.owner:host,actual*f.shareRatio,f.owner,f.value,true,true);

@@ -21,9 +21,9 @@ function arena(id=0,config=createCurrentDesignConfig(defaults)) {
 }
 function advance(s,seconds){for(let t=0;t<seconds-1e-7;t+=.05)s.tick(.05);}
 function affix(s,p,sourceId,rank=1){const t=currentTraits(s.config,p.classId).find(t=>t.sourceId===sourceId);assert.ok(t);p.progress[p.classId].traits[t.id]=rank;return t;}
-test('新版当前稿完整、可序列化；105条效果及五职业40次预算',()=>{
+test('新版当前稿完整、可序列化；107条效果及五职业40次预算',()=>{
   const config=createCurrentDesignConfig(defaults);validateConfig(config);
-  assert.equal(new Set(config.design.affixes.map(t=>t.sourceId)).size,105);
+  assert.equal(new Set(config.design.affixes.map(t=>t.sourceId)).size,107);
   for(const id of [0,4,5,2,3]) {
     const {s,p,h}=arena(id,config);assert.equal(p.level,0);assert.deepEqual(p.builds[id],[1,1,1,1]);
     for(const t of currentTraits(config,id)) {p.progress[id].traits[t.id]=t.max;if(t.skill!=null){const skill=currentSkill(s,h,t.skill);assert.ok(Number.isFinite(skill.power));}}
