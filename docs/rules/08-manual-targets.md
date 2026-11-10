@@ -21,4 +21,4 @@
 代码入口：`shared/manual-target.js`、`shared/navigation.js`、`shared/skill5-mechanics.js`、`client/src/selection.js`。
 验证入口：`tests/manual-target.test.js`、`tests/ally-target.test.js`、`tests/support-target-resolution.test.js`、目标交互浏览器测试。
 
-森林精灵2技能共生链接按范围内当前生命绝对值最低的1名友军自动选择；目标数强化1档后每次选择2名不同友军，不受手选目标覆盖。再次施放刷新自身已有有效链接的持续时间并新增链接，可与旧链接对象重复；每条独立计时。
+森林精灵被动、1技能和2技能优先指定的有效友军，其次选择自身已链接友军，最后选择其他友军；自动选择时优先生命百分比最低者。目标须在对应技能范围内，2技能不能链接自身。目标数强化后选择不同友军。再次施放刷新自身已有有效链接并新增链接。

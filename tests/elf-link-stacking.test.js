@@ -8,12 +8,12 @@ import {unitStatuses} from '../client/src/unit-status.js';
 const links=s=>s.fields.filter(f=>f.kind==='link');
 const recast=(a)=>{a.p.cd[1]=a.s.time;cast(a.s,a.p,1);};
 
-test('链接按范围内当前生命绝对值选目标，忽略手选、已链接状态与生命比例',()=>{
+test('链接优先手选合法友军，跨次可重复链接',()=>{
  const a=arena(5),{s,p,h,friend,make}=a,low=make(0,4,0).h,far=make(0,30,0).h;
  friend.hp=100;friend.maxHp=10000;low.hp=50;low.maxHp=100;far.hp=1;h.hp=1;
- s.setManualTarget(friend.id,p);assert.equal(s.castPlan(1,p).t.id,low.id);cast(s,p,1);
- assert.deepEqual(links(s).map(f=>f.host),[low.id]);recast(a);
- assert.deepEqual(links(s).map(f=>f.host),[low.id,low.id]);
+ s.setManualTarget(friend.id,p);assert.equal(s.castPlan(1,p).t.id,friend.id);cast(s,p,1);
+ assert.deepEqual(links(s).map(f=>f.host),[friend.id]);recast(a);
+ assert.deepEqual(links(s).map(f=>f.host),[friend.id,friend.id]);
 });
 
 test('强化只能加1档，每次最多2个不同目标；跨次可重复并保留旧链接',()=>{
@@ -22,7 +22,7 @@ test('强化只能加1档，每次最多2个不同目标；跨次可重复并保
  const trait=currentTraits(s.config,5).find(t=>t.sourceId===38);assert.equal(trait.max,1);assert.equal(trait.values.length,1);assert.equal(currentSkill(s,h,1).targets,2);
  p.progress[5].traits[trait.id]=2;assert.equal(currentSkill(s,h,1).targets,2,'旧2档按新1档效果上限生效');
  cast(s,p,1);assert.deepEqual(links(s).map(f=>f.host),[friend.id,b.id]);
- c.hp=50;recast(a);assert.deepEqual(links(s).map(f=>f.host),[friend.id,b.id,c.id,friend.id]);
+ c.hp=50;recast(a);assert.deepEqual(links(s).map(f=>f.host),[friend.id,b.id,friend.id,b.id]);
 });
 
 test('再次施放刷新旧链接并新增链接，仍保留独立计时和状态',()=>{
